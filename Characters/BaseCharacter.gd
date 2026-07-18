@@ -465,19 +465,27 @@ func _play_attack_animation(target_path: NodePath):
 	lurch.tween_property(sprite, "offset:x", dir * 12.0, 0.04)
 	lurch.tween_property(sprite, "offset:x", 0.0, 0.06)
 
-	# 受击反馈 + 粒子
+	# 攻击者白色闪烁
+	var atk_flash = create_tween().set_parallel(true)
+	atk_flash.tween_property(sprite, "self_modulate", Color(1.6, 1.6, 1.3), 0.03)
+	atk_flash.tween_property(sprite, "self_modulate", Color.WHITE, 0.08).set_delay(0.03)
+
+	# 受击反馈
 	if target_node.hit_tween and target_node.hit_tween.is_running():
 		target_node.hit_tween.kill()
 
-	target_sprite.modulate = Color(1.5, 1.0, 1.0)
 	var target_color = Color.YELLOW if target_node.is_selected else Color.WHITE
-	target_node.hit_tween = create_tween().set_trans(Tween.TRANS_LINEAR)
-	target_node.hit_tween.tween_property(target_sprite, "modulate", target_color, 0.12)
+	target_node.hit_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_LINEAR)
+	target_node.hit_tween.tween_property(target_sprite, "modulate", Color(1.6, 1.0, 1.0), 0.04)
+	target_node.hit_tween.tween_property(target_sprite, "modulate", target_color, 0.1).set_delay(0.04)
+	# 受击缩放（弹性）
+	target_node.hit_tween.tween_property(target_sprite, "scale", Vector2(1.08, 1.08), 0.04)
+	target_node.hit_tween.tween_property(target_sprite, "scale", Vector2(0.95, 0.95), 0.06).set_delay(0.04)
 
 	if vfx_manager and vfx_manager.has_method("play"):
 		vfx_manager.play(target_node, "hit")
 
-	_shake_camera(4.0)
+	_shake_camera(5.0)
 
 func _play_vfx_preset(preset: String):
 	if vfx_manager and vfx_manager.has_method("play"):
@@ -505,6 +513,7 @@ func _spawn_float(value: int, heal: bool = false, shield: bool = false):
 	var num = FLOATING_NUM.instantiate()
 	num.show_value(value, heal, shield)
 	num.global_position = global_position + Vector2(0, -80)
+	num.z_index = 100
 	get_tree().current_scene.add_child(num)
 
 @rpc("any_peer", "call_local", "reliable")

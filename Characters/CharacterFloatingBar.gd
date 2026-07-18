@@ -17,7 +17,7 @@ func _ready():
 		return
 
 	selection_indicator.points = _hexagon(55.0)
-	selection_indicator.z_index = -1
+	selection_indicator.z_index = 2
 	selection_indicator.antialiased = true
 
 	var shield_style = StyleBoxFlat.new()
