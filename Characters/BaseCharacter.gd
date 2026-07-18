@@ -308,7 +308,7 @@ func show_attack_range():
 			rect.color = Color(1.0, 0.15, 0.15, 0.35)
 			rect.global_position = world - rect.size * 0.5
 			rect.z_index = 50
-			rect.mouse_filter = MOUSE_FILTER_IGNORE
+			rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			get_tree().current_scene.add_child(rect)
 			highlight_overlays.append(rect)
 
