@@ -22,10 +22,10 @@ color = Color(0.2, 0.8, 0.2, 1)
 [node name="ShieldOutline" type="Panel" parent="HPBar" unique_id=9876543220]
 visible = false
 layout_mode = 0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 60.0
-offset_bottom = 10.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 64.0
+offset_bottom = 14.0
 mouse_filter = 1
 z_index = 9
 
