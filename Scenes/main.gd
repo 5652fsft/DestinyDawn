@@ -322,7 +322,7 @@ func _on_target_selected(target: Node):
 		cancel_targeting()
 	elif selected_character and selected_character.has_method("use_active_skill") and selected_character.active_skill:
 		selected_character.use_active_skill(target)
-		selected_character.active_skill.cooldown = 3
+		selected_character.active_skill.current_cooldown = selected_character.active_skill.cooldown
 		skill_panel._update_cooldown()
 		cancel_targeting()
 
@@ -524,6 +524,8 @@ func reset_character_state() -> void:
 	for c in characters:
 		GlobalGameData.character_move_used[c.name] = false
 		GlobalGameData.character_attack_used[c.name] = false
+		if "active_skill" in c and c.active_skill and c.active_skill.current_cooldown > 0:
+			c.active_skill.current_cooldown -= 1
 
 @rpc("any_peer", "call_local", "reliable")
 func advance_turn_phase():

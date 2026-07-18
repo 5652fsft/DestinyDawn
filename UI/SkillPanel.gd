@@ -1,5 +1,7 @@
 extends Panel
 
+const FONT = preload("res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf")
+
 var current_character: Node = null
 var active_skill: BaseSkill = null
 
@@ -30,14 +32,17 @@ func show_for(character: Node):
 		hide()
 		return
 	skill_name_label.text = active_skill.skill_name
+	skill_name_label.add_theme_font_override("font", FONT)
 	skill_desc_label.text = active_skill.description
+	skill_desc_label.add_theme_font_override("font", FONT)
+	cooldown_label.add_theme_font_override("font", FONT)
 	_update_cooldown()
 	show()
 
 func _update_cooldown():
 	if not active_skill:
 		return
-	var cd = active_skill.cooldown
+	var cd = active_skill.current_cooldown
 	cooldown_label.text = "冷却: %d 回合" % cd if cd > 0 else "就绪"
 	use_button.disabled = cd > 0
 
