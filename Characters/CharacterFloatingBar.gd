@@ -55,10 +55,6 @@ func _ready():
 	_update_faction()
 	refresh()
 
-func _process(_delta):
-	if parent_character and is_inside_tree():
-		global_position = parent_character.global_position
-
 func _update_faction():
 	var is_host = parent_character.name.begins_with("Host")
 	var is_friendly = is_host == GlobalGameData.is_host

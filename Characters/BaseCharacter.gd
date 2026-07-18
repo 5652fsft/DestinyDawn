@@ -474,20 +474,11 @@ func _play_attack_animation(target_path: NodePath):
 	target_node.hit_tween = create_tween().set_trans(Tween.TRANS_LINEAR)
 	target_node.hit_tween.tween_property(target_sprite, "modulate", target_color, 0.12)
 
-	_hit_stop(0.03)
-
-	# 粒子 VFX
 	if vfx_manager and vfx_manager.has_method("play"):
 		vfx_manager.play(target_node, "hit")
 
 	_shake_camera(4.0)
 
-func _hit_stop(duration: float = 0.05):
-	Engine.time_scale = 0.05
-	await get_tree().create_timer(duration * 20.0).timeout
-	Engine.time_scale = 1.0
-
-@rpc("any_peer", "call_local", "reliable")
 func _play_vfx_preset(preset: String):
 	if vfx_manager and vfx_manager.has_method("play"):
 		vfx_manager.play(self, preset)
