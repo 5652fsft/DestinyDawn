@@ -2,8 +2,8 @@ extends Control
 
 var card_uis: Array[CardUI] = []
 
-const FAN_ANGLE: float = deg_to_rad(40.0)
-const FAN_RADIUS: float = 500.0
+const FAN_ANGLE: float = deg_to_rad(30.0)
+const FAN_SPREAD_X: float = 300.0
 const FAN_ARC_Y: float = 60.0
 
 @onready var card_container: Control = $CardContainer
@@ -54,14 +54,14 @@ func _layout_cards():
 	if count == 0:
 		return
 	var center_x = card_container.size.x * 0.5
-	var center_y = card_container.size.y * 0.5 + 40.0
+	var base_y = card_container.size.y * 0.3
 	for i in range(count):
 		var card = card_uis[i]
 		var t = float(i) / max(count - 1, 1) - 0.5
 		var angle = t * FAN_ANGLE
-		var target_x = center_x + sin(angle) * FAN_RADIUS
-		var target_y = center_y - cos(angle) * FAN_RADIUS + FAN_RADIUS + abs(t) * FAN_ARC_Y
-		var target_rotation = angle * 0.7
+		var target_x = center_x + t * FAN_SPREAD_X
+		var target_y = base_y + abs(t) * FAN_ARC_Y - FAN_ARC_Y * 0.5
+		var target_rotation = angle
 		var tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		tween.tween_property(card, "position", Vector2(target_x, target_y), 0.35)
 		tween.parallel().tween_property(card, "rotation", target_rotation, 0.35)

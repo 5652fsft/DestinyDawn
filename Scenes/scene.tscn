@@ -54,8 +54,6 @@ theme = ExtResource("12_p4fma")
 theme = ExtResource("12_p4fma")
 
 [node name="HandPanel" parent="UI" unique_id=992997772 instance=ExtResource("8_p4fma")]
-layout_mode = 3
-anchors_preset = 7
 theme = ExtResource("12_p4fma")
 
 [node name="SkillPanel" parent="UI" unique_id=1934206860 instance=ExtResource("10_p4fma")]
