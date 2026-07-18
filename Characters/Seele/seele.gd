@@ -7,6 +7,8 @@ var last_target_hp: int = -1
 var last_target_max_hp: int = -1
 
 func _ready():
+	max_hp = 90
+	hp = 90
 	super()
 	character_name = "希儿"
 	hp = 90
