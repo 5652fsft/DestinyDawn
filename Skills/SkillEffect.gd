@@ -35,8 +35,11 @@ static func _bronya_passive(character: Node, modifier_key: String, base_value: i
 	if modifier_key != "incoming_damage":
 		return base_value
 	var reduction = 0.2
+	var label = "铁壁[20%]"
 	if character.hp < character.max_hp * 0.5:
 		reduction = 0.35
+		label = "铁壁[35%]"
+	print("[Skill] %s [%s] 减免 %d%% 伤害" % [character.character_name, label, int(reduction * 100)])
 	return int(base_value * (1.0 - reduction))
 
 # === 布洛妮娅 主动：护卫指令 ===
@@ -46,7 +49,7 @@ static func _bronya_active(character: Node, target: Node) -> bool:
 	if not "shield" in target:
 		target.set("shield", 0)
 	target.shield += 30
-	print("[Skill] 布洛妮娅为 %s 提供了 30 点护盾" % target.name)
+	print("[Skill] %s [护卫指令] → %s 护盾 +30" % [character.character_name, target.name])
 	return true
 
 # === 希儿 被动：暗影突袭 ===
@@ -56,6 +59,7 @@ static func _seele_passive(character: Node, modifier_key: String, base_value: in
 	if not "last_target_hp" in character:
 		return base_value
 	if character.last_target_hp == null or character.last_target_hp >= character.last_target_max_hp:
+		print("[Skill] %s [暗影突袭] 攻击满血目标，伤害 +50%%" % character.character_name)
 		return int(base_value * 1.5)
 	return base_value
 
@@ -77,7 +81,7 @@ static func _seele_active(character: Node, target: Node, main: Node) -> bool:
 			best_cell = neighbor
 			break
 	if best_cell == null:
-		print("[Skill] 希儿无法找到瞬移位置")
+		print("[Warn] %s 无法找到 [相位突进] 的瞬移位置" % character.character_name)
 		return false
 	var target_local = character.grid_layer.map_to_local(best_cell)
 	character.target_world = character.grid_layer.to_global(target_local)
@@ -86,5 +90,5 @@ static func _seele_active(character: Node, target: Node, main: Node) -> bool:
 	if target.has_method("take_damage"):
 		var bonus = int(character.attack * 1.2)
 		target.rpc("take_damage", bonus)
-		print("[Skill] 希儿对 %s 造成 %d 点伤害（相位突进）" % [target.name, bonus])
+		print("[Skill] %s [相位突进] → %s 造成 %d 点伤害" % [character.character_name, target.name, bonus])
 	return true

@@ -566,7 +566,7 @@ func take_damage(damage: int):
 		hp = min(max_hp, hp - damage)
 		_spawn_float(-damage, true)
 		if multiplayer.is_server():
-			print("[Combat] %s 治疗 %d 点" % [name, -damage])
+			print("[Combat] %s 恢复 %d 点 HP [%d/%d]" % [name, -damage, hp, max_hp])
 			rpc_id(0, "_sync_hp", hp)
 		return
 	
@@ -588,7 +588,7 @@ func take_damage(damage: int):
 	_spawn_float(damage)
 	_shake_camera(3.0)
 	if multiplayer.is_server():
-		print("[Combat] %s 剩余 HP: %d" % [name, hp])
+		print("[Combat] %s 受到 %d 点伤害，剩余 HP: %d" % [name, damage, hp])
 	if hp <= 0:
 		hide()
 		collision_layer = 0
