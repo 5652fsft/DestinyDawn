@@ -301,7 +301,7 @@ func show_attack_range():
 		if cell != start_cell and enemy and is_enemy(enemy):
 			if highlight_layer:
 				highlight_layer.set_cell(cell, 0, Vector2i.ZERO)
-			# 在敌方角色身上创建六边形高亮
+			# 在敌方角色身上创建六边形高亮（偏移到角色视觉中心）
 			var hex = Polygon2D.new()
 			var r = 55.0
 			var pts: PackedVector2Array = []
@@ -311,18 +311,14 @@ func show_attack_range():
 			hex.polygon = pts
 			hex.color = Color(1.0, 0.15, 0.15, 0.5)
 			hex.z_index = 60
-			hex.global_position = enemy.global_position
-			# 外边框
-			var outline = Line2D.new()
-			outline.points = pts
-			outline.default_color = Color(1.0, 0.2, 0.2, 0.9)
-			outline.width = 4.0
-			outline.z_index = 61
-			outline.global_position = enemy.global_position
+			var sprite_h = 140
+			if enemy.has_node("Sprite2D"):
+				var s = enemy.get_node("Sprite2D")
+				if s and s.texture:
+					sprite_h = s.texture.get_height() * s.scale.y
+			hex.global_position = enemy.global_position + Vector2(0, -sprite_h * 0.5)
 			get_tree().current_scene.add_child(hex)
-			get_tree().current_scene.add_child(outline)
 			highlight_overlays.append(hex)
-			highlight_overlays.append(outline)
 
 func hide_move_range():
 	valid_move_cells.clear()
