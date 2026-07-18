@@ -1,5 +1,7 @@
 extends Panel
 
+const FONT = preload("res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf")
+
 @onready var name_label = $NameLabel
 @onready var hp_label = $HPLabel
 @onready var attack_label = $AttackLabel
@@ -16,11 +18,21 @@ func _ready():
 
 func show_for(character: Node):
 	if not character:
+		_disconnect_buffs()
 		hide()
+		current_character = null
 		return
+	if current_character:
+		_disconnect_buffs()
 	current_character = character
+	if current_character.has_signal("buffs_changed"):
+		current_character.buffs_changed.connect(refresh)
 	refresh()
 	show()
+
+func _disconnect_buffs():
+	if current_character and current_character.has_signal("buffs_changed") and current_character.buffs_changed.is_connected(refresh):
+		current_character.buffs_changed.disconnect(refresh)
 
 func refresh():
 	if not current_character:
@@ -61,6 +73,7 @@ func _update_buffs():
 		var entry = buf[key]
 		var label = Label.new()
 		label.add_theme_font_size_override("font_size", 18)
+		label.add_theme_font_override("font", FONT)
 		label.text = _buff_desc(key, entry)
 		buffs_container.add_child(label)
 
@@ -79,5 +92,6 @@ func _buff_desc(key: String, entry: Dictionary) -> String:
 	return "%s（%d回合）" % [key, dur]
 
 func _on_CloseButton_pressed():
+	_disconnect_buffs()
 	hide()
 	current_character = null

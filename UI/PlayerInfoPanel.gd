@@ -31,8 +31,8 @@ func _ready():
 	add_theme_stylebox_override("panel", bg)
 
 	var blink_tween = create_tween().set_loops()
-	blink_tween.tween_property(turn_highlight, "modulate:a", 0.0, 0.8)
-	blink_tween.tween_property(turn_highlight, "modulate:a", 1.0, 0.8)
+	blink_tween.tween_property(turn_highlight, "modulate:a", 0.0, 1.5)
+	blink_tween.tween_property(turn_highlight, "modulate:a", 1.0, 1.5)
 
 func refresh(is_my_turn: bool, energy: int = -1):
 	turn_highlight.visible = is_my_turn

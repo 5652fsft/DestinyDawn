@@ -32,6 +32,8 @@ var floating_bar: Node2D = null
 @onready var grid_layer: TileMapLayer = main.get_node("Map/Ground")
 @onready var highlight_layer: TileMapLayer = main.get_node("Map/Highlight")
 
+signal buffs_changed
+
 # === 状态变量 ===
 var target_world: Vector2 = Vector2.ZERO
 var valid_move_cells: Dictionary = {}  # key: Vector2i, value: int
@@ -518,14 +520,16 @@ var effective_move_points: int:
 		return max(1, base)
 
 func process_buffs():
-	var changed = false
 	for key in buffs.keys():
 		buffs[key].remaining -= 1
 		if buffs[key].remaining <= 0:
 			buffs.erase(key)
-			changed = true
-	if changed and multiplayer.is_server():
-		rpc_id(0, "_sync_buffs", buffs.duplicate())
+	if multiplayer.has_multiplayer_peer():
+		if multiplayer.is_server():
+			rpc_id(0, "_sync_buffs", buffs.duplicate())
+	else:
+		_sync_buffs(buffs.duplicate())
+	buffs_changed.emit()
 
 @rpc("any_peer", "call_local", "reliable")
 func _sync_shield(new_shield: int):
@@ -536,6 +540,7 @@ func _sync_shield(new_shield: int):
 @rpc("any_peer", "call_local", "reliable")
 func _sync_buffs(new_buffs: Dictionary):
 	buffs = new_buffs
+	buffs_changed.emit()
 
 func _check_hover():
 	var space = get_world_2d().direct_space_state
