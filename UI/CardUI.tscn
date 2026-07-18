@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://dhc4pen0f81bp"]
+
+[ext_resource type="Script" path="res://UI/CardUI.gd" id="1_5dp7v"]
+
+[node name="CardUI" type="Panel"]
+custom_minimum_size = Vector2(140, 200)
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_styles/panel = null
+script = ExtResource("1_5dp7v")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 0
+offset_right = 140.0
+offset_bottom = 200.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="TopRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="CostLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "费用: 0"
+
+[node name="TypeLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 8
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 14
+text = "TYPE"
+
+[node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "卡牌名"
+
+[node name="DescLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "描述"

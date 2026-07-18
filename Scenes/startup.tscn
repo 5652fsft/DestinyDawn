@@ -1,0 +1,44 @@
+[gd_scene load_steps=4 format=3 uid="uid://wos6as7v3a8"]
+
+[ext_resource type="Texture2D" uid="uid://c3sue2nobgw1l" path="res://Assets/Sprites/background.jpg" id="1_frw7t"]
+[ext_resource type="Script" uid="uid://dj10pxgshmudd" path="res://Scenes/startup.gd" id="1_tsans"]
+[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf" id="2_8q8xm"]
+
+[node name="Startup" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_tsans")
+
+[node name="Join" type="Button" parent="."]
+z_index = 1
+layout_mode = 0
+offset_left = 120.0
+offset_top = 503.0
+offset_right = 420.0
+offset_bottom = 619.0
+theme_override_fonts/font = ExtResource("2_8q8xm")
+theme_override_font_sizes/font_size = 56
+text = "加入游戏"
+
+[node name="Create" type="Button" parent="."]
+z_index = 1
+layout_mode = 0
+offset_left = 120.0
+offset_top = 352.0
+offset_right = 420.0
+offset_bottom = 468.0
+theme_override_fonts/font = ExtResource("2_8q8xm")
+theme_override_font_sizes/font_size = 56
+text = "创建游戏"
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(643.3125, 593.5533)
+scale = Vector2(1.5229561, 1.5229561)
+texture = ExtResource("1_frw7t")
+
+[connection signal="button_down" from="Join" to="." method="_on_join_button_down"]
+[connection signal="button_down" from="Create" to="." method="_on_create_button_down"]

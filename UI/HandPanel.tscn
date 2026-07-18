@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://c2g1mg0bkjl0w"]
+
+[ext_resource type="Script" path="res://UI/HandPanel.gd" id="1_p7fma"]
+
+[node name="HandPanel" type="Control"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -640.0
+offset_top = -200.0
+offset_right = 640.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("1_p7fma")
+
+[node name="CardContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1

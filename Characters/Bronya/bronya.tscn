@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://fk1ww3enxjfj"]
+
+[ext_resource type="Script" uid="uid://bk66soey1gkfx" path="res://Characters/Bronya/bronya.gd" id="1_br5t4"]
+[ext_resource type="Texture2D" uid="uid://cbwvycwpywre8" path="res://Characters/Bronya/bronya_sprite.png" id="2_br5t4"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_xa6pd"]
+radius = 59.0
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_br5t4"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+
+[node name="Bronya" type="CharacterBody2D"]
+input_pickable = true
+script = ExtResource("1_br5t4")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+shape = SubResource("CircleShape2D_xa6pd")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.95, 0.95)
+texture = ExtResource("2_br5t4")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_br5t4")

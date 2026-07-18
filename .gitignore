@@ -1,0 +1,29 @@
+# Godot 4+ specific
+.godot/
+*.translation
+*.uid
+*.bin
+*.import
+/android/
+/ios/
+/web/
+/windows/
+/linuxbsd/
+/macos/
+/export/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temp files
+*.tmp
+*.temp
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

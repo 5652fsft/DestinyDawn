@@ -1,0 +1,73 @@
+[gd_scene load_steps=3 format=3 uid="uid://brurwg5mxwbym"]
+
+[ext_resource type="Script" uid="uid://cac87jyl3bpqm" path="res://UI/CharacterInfoPanel.gd" id="1_50icj"]
+[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf" id="2_6xa78"]
+
+[node name="CharacterInfoPanel" type="Panel"]
+visible = false
+offset_right = 358.0
+offset_bottom = 720.0
+script = ExtResource("1_50icj")
+
+[node name="NameLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 50.0
+offset_right = 150.0
+offset_bottom = 80.0
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 24
+
+[node name="HPLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 100.0
+offset_right = 150.0
+offset_bottom = 130.0
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 24
+
+[node name="AttackLabel" type="RichTextLabel" parent="."]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 150.0
+offset_right = 300.0
+offset_bottom = 180.0
+bbcode_enabled = true
+theme_override_fonts/normal_font = ExtResource("2_6xa78")
+theme_override_font_sizes/normal_font_size = 24
+
+[node name="MovePointsLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 200.0
+offset_right = 150.0
+offset_bottom = 230.0
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 24
+
+[node name="ShieldLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 250.0
+offset_right = 200.0
+offset_bottom = 280.0
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 24
+
+[node name="BuffsLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 300.0
+offset_right = 150.0
+offset_bottom = 330.0
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 20
+text = "Buff:"
+
+[node name="BuffsContainer" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 330.0
+offset_right = 350.0
+offset_bottom = 600.0

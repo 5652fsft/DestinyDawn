@@ -1,0 +1,501 @@
+# res://Characters/BaseCharacter.gd
+extends CharacterBody2D
+
+# === 属性 ===
+const click_layer: int = 2
+const speed: float = 1200.0
+@export var character_name: String = "Character"
+@export var move_points: int = 6
+@export var max_hp: int = 100
+var _hp: int = 100
+var hp: int:
+	get:
+		return _hp
+	set(value):
+		_hp = value
+		if main and main.has_method("_update_character_info_panel"):
+			main._update_character_info_panel(self)
+@export var attack: int = 20
+@export var attack_range: int = 2  # 默认近战，1格
+
+# === 节点引用 ===
+@onready var sprite: Sprite2D = $Sprite2D
+
+# === 外部依赖 ===
+@onready var main: Node2D = get_tree().current_scene
+@onready var grid_layer: TileMapLayer = main.get_node("Map/Ground")
+@onready var highlight_layer: TileMapLayer = main.get_node("Map/Highlight")
+
+# === 状态变量 ===
+var target_world: Vector2 = Vector2.ZERO
+var valid_move_cells: Dictionary = {}  # key: Vector2i, value: int
+var valid_attack_cells: Dictionary = {}
+var is_moving: bool = false
+var is_attacking: bool = false
+var hit_tween: Tween = null
+var shield: int = 0
+var buffs: Dictionary = {}
+
+var is_selected: bool = false:
+	set(value):
+		is_selected = value
+		sprite.modulate = Color.WHITE if not value else Color.YELLOW
+		if value and get_current_phase() == "Move":
+			show_move_range()
+		elif not value and get_current_phase() == "Move":
+			hide_move_range()
+		elif value and get_current_phase() == "Attack":
+			show_attack_range()
+		elif not value and get_current_phase() == "Attack":
+			hide_attack_range()
+
+func _enter_tree():
+	if name.begins_with("Client"):
+		var peer_id_str = name.get_slice("Client", 1).get_slice("Character", 0)
+		set_multiplayer_authority(int(peer_id_str))
+
+func _ready():
+	_hp = max_hp
+	main.register_character(self)
+	var idx = int(name.get_slice("_", 1))
+	if name.begins_with("Host"):
+		position = GlobalGameData.host_birth_point[idx]
+	elif name.begins_with("Client"):
+		position = GlobalGameData.client_birth_point[idx]
+	
+	collision_layer = click_layer
+	collision_mask = 0
+	sprite.modulate = Color.WHITE
+	
+	# 对齐角色到格子中心
+	if grid_layer:
+		var local_pos = grid_layer.to_local(global_position)
+		var cell: Vector2i = grid_layer.local_to_map(local_pos)
+		var aligned_pos = grid_layer.to_global(grid_layer.map_to_local(cell))
+		global_position = aligned_pos
+		target_world = aligned_pos
+		velocity = Vector2.ZERO
+
+func _exit_tree():
+	if main and main.has_method("unregister_character"):
+		main.unregister_character(self)
+
+func get_current_cell() -> Vector2i:
+	if not grid_layer:
+		return Vector2i(-1, -1)
+	var local_pos = grid_layer.to_local(global_position)
+	return grid_layer.local_to_map(local_pos)
+
+func is_enemy(other: CharacterBody2D) -> bool:
+	if other == null:
+		return false
+	return name.begins_with("Host") != other.name.begins_with("Host")
+
+func get_move_cost(cell: Vector2i) -> int:
+	if not grid_layer or not grid_layer.tile_set:
+		return 1
+	
+	var source_id = grid_layer.get_cell_source_id(cell)
+	if source_id == -1:
+		return -1  # 无瓦片 = 不可通行
+	
+	var source = grid_layer.tile_set.get_source(source_id)
+	var tile_name = source.get_name() if source else ""
+	
+	match tile_name:
+		"grass", "normal": return 1
+		"water": return 2
+		"mountain": return 3
+		"wall": return -1
+		_: return 1
+
+func show_move_range():
+	valid_move_cells.clear()
+	var char_local = grid_layer.to_local(global_position)
+	var start_cell: Vector2i = grid_layer.local_to_map(char_local)
+	
+	if get_move_cost(start_cell) <= 0:
+		print("[Warning] 起始格不可通行")
+		return
+
+	valid_move_cells[start_cell] = 0
+
+	var open_list = []
+	var closed: Dictionary = {}  # 只记录已处理或已排除的格子（值为 true）
+	open_list.append({ "cell": start_cell, "cost": 0 })
+
+	# 六边形邻居方向（Odd Columns）
+	var directions = [
+		Vector2i(1, 0),
+		Vector2i(1, -1),
+		Vector2i(0, -1),
+		Vector2i(-1, 0),
+		Vector2i(-1, 1),
+		Vector2i(0, 1)
+	]
+
+	while open_list.size() > 0:
+		# 简单排序模拟优先队列（最小成本优先）
+		open_list.sort_custom(func(a, b): return a.cost < b.cost)
+		var current = open_list.pop_front()
+		var cell: Vector2i = current.cell
+		var total_cost: int = current.cost
+		
+		if closed.has(cell):
+			continue
+		closed[cell] = true
+
+		for d in directions:
+			var next_cell: Vector2i = cell + d
+			if closed.has(next_cell):
+				continue
+
+			# 检查是否被其他角色占据
+			if main.is_cell_occupied(next_cell, self):
+				closed[next_cell] = true
+				continue
+
+			var cost = get_move_cost(next_cell)
+			if cost <= 0:
+				closed[next_cell] = true
+				continue
+
+			var new_cost = total_cost + cost
+			if new_cost <= move_points:
+				# 允许更优路径更新
+				if not valid_move_cells.has(next_cell) or new_cost < valid_move_cells[next_cell]:
+					valid_move_cells[next_cell] = new_cost
+					open_list.append({ "cell": next_cell, "cost": new_cost })
+
+	# 高亮所有可达格子（跳过起始格）
+	for cell in valid_move_cells.keys():
+		if cell != start_cell:
+			#print("[Debug] 可达格子", cell)
+			highlight_layer.set_cell(cell, 0, Vector2i.ZERO)  # 假设 Highlight 层 ID=0 有瓦片
+
+	#print("[Debug] 起始格子: ", start_cell, " 可达格子数: ", valid_move_cells.size())
+
+func show_attack_range():
+	valid_attack_cells.clear()
+	var char_local = grid_layer.to_local(global_position)
+	var start_cell: Vector2i = grid_layer.local_to_map(char_local)
+	valid_attack_cells[start_cell] = 0
+
+	var open_list = []
+	var closed: Dictionary = {}  # 只记录已处理或已排除的格子（值为 true）
+	open_list.append({ "cell": start_cell, "cost": 0 })
+
+	# 六边形邻居方向（Odd Columns）
+	var directions = [
+		Vector2i(1, 0),
+		Vector2i(1, -1),
+		Vector2i(0, -1),
+		Vector2i(-1, 0),
+		Vector2i(-1, 1),
+		Vector2i(0, 1)
+	]
+
+	while open_list.size() > 0:
+		# 简单排序模拟优先队列（最小成本优先）
+		open_list.sort_custom(func(a, b): return a.cost < b.cost)
+		var current = open_list.pop_front()
+		var cell: Vector2i = current.cell
+		var total_cost: int = current.cost
+		
+		if closed.has(cell):
+			continue
+		closed[cell] = true
+
+		for d in directions:
+			var next_cell: Vector2i = cell + d
+			if closed.has(next_cell):
+				continue
+			var cost = 1
+			if cost <= 0:
+				closed[next_cell] = true
+				continue
+
+			var new_cost = total_cost + cost
+			if new_cost <= attack_range:
+				# 允许更优路径更新
+				if not valid_attack_cells.has(next_cell) or new_cost < valid_attack_cells[next_cell]:
+					valid_attack_cells[next_cell] = new_cost
+					open_list.append({ "cell": next_cell, "cost": new_cost })
+
+	# 高亮所有可攻击角色
+	for cell in valid_attack_cells.keys():
+		if cell != start_cell and is_enemy(main.find_cell_occupant(cell)):
+			#print("[Debug] 可攻击角色", cell)
+			highlight_layer.set_cell(cell, 0, Vector2i.ZERO)
+
+func hide_move_range():
+	valid_move_cells.clear()
+	if highlight_layer:
+		highlight_layer.clear()
+		
+func hide_attack_range():
+	valid_move_cells.clear()
+	if highlight_layer:
+		highlight_layer.clear()
+
+func get_current_phase() -> String:
+	var phase = GlobalGameData.current_turn_phase
+	var is_host = GlobalGameData.is_host
+	match phase:
+		GlobalGameData.TurnPhase.PLAYER_MOVE:
+			return "Move" if is_host == GlobalGameData.is_host_turn else "Wait"
+		GlobalGameData.TurnPhase.PLAYER_ATTACK:
+			return "Attack" if is_host == GlobalGameData.is_host_turn else "Wait"
+		GlobalGameData.TurnPhase.ENEMY_MOVE:
+			return "Move" if is_host != GlobalGameData.is_host_turn else "Wait"
+		GlobalGameData.TurnPhase.ENEMY_ATTACK:
+			return "Attack" if is_host != GlobalGameData.is_host_turn else "Wait"
+		_:
+			return "Invalid"
+
+func handle_move():
+	if hp <= 0:
+		return
+	if Input.is_action_just_pressed("Click"):
+		if main.is_targeting:
+			return
+		if main.is_any_character_moving:
+			return
+		
+		var mouse_pos = get_global_mouse_position()
+		
+		var space_state = get_world_2d().direct_space_state
+		var query = PhysicsPointQueryParameters2D.new()
+		query.position = mouse_pos
+		query.collision_mask = click_layer
+		
+		var results = space_state.intersect_point(query)
+		var clicked_on_self = false
+		for r in results:
+			if r.collider == self and not is_selected:
+				clicked_on_self = true
+				break
+			elif r.collider == self:
+				main.unselect_character(self)
+		
+		if clicked_on_self:
+			main.select_character(self)
+	
+		elif is_selected:
+			if GlobalGameData.character_move_used.get(name, false):
+				print("[Warning] 本回合已移动！")
+				return
+			
+			if grid_layer:
+				var local_mouse = grid_layer.to_local(mouse_pos)
+				var cell_coord: Vector2i = grid_layer.local_to_map(local_mouse)
+			
+				if not valid_move_cells.has(cell_coord):
+					print("[Warning] 目标格子超出移动范围、不可达或被阻挡")
+					return
+				
+				if main.is_cell_occupied(cell_coord, self):
+					print("[Warning] 目标格子已被占据！")
+					return
+				
+				main.start_character_move()
+				is_moving = true
+				
+				var target_local = grid_layer.map_to_local(cell_coord)
+				target_world = grid_layer.to_global(target_local)
+				print("[Info] ", name, "移动至格子: ", cell_coord, " (总消耗: ", valid_move_cells[cell_coord], ")")
+				GlobalGameData.character_move_used[name] = true
+				GlobalGameData.character_move_used_num += 1
+			main.unselect_character(self)
+			main.check_move()
+	
+func handle_attack():
+	if hp <= 0:
+		return
+	if Input.is_action_just_pressed("Click"):
+		if main.is_targeting:
+			return
+		var mouse_pos = get_global_mouse_position()
+		var space_state = get_world_2d().direct_space_state
+		var query = PhysicsPointQueryParameters2D.new()
+		query.position = mouse_pos
+		query.collision_mask = click_layer
+		
+		var results = space_state.intersect_point(query)
+		
+		# 情况1：点击自己 → 选中
+		for r in results:
+			if r.collider == self:
+				if not is_selected:
+					main.select_character(self)
+				else:
+					main.unselect_character(self)
+				return
+		
+		# 情况2：已选中，点击敌人 → 攻击
+		if is_selected:
+			for r in results:
+				var other = r.collider
+				if other is CharacterBody2D and is_enemy(other) and other.hp > 0:
+					if valid_attack_cells.has(other.grid_layer.local_to_map(other.grid_layer.to_local(other.global_position))):
+						if not GlobalGameData.character_attack_used.get(name, false):
+							rpc("perform_attack", other.get_path())
+							GlobalGameData.character_attack_used_num += 1
+							GlobalGameData.character_attack_used[name] = true
+						else:
+							print("[Info] 本回合已攻击过！")
+						main.unselect_character(self)
+						main.check_attack()
+						return
+					else:
+						print("[Info] 目标超出攻击范围！")
+						return
+			# 点击空地 → 取消选中
+			main.unselect_character(self)
+
+@rpc("any_peer", "call_local", "reliable")
+func perform_attack(target_path: NodePath):
+	#if not is_multiplayer_authority():
+		#return
+	
+	var target = get_node_or_null(target_path)
+	if not target or not target is CharacterBody2D:
+		return
+	
+	if get_current_phase() != "Attack":
+		return
+		
+	target.rpc("take_damage", effective_attack)
+	print("[Info] %s 对 %s 造成 %d 点伤害！" % [name, target.name, effective_attack])
+	
+	# 同步动画（所有客户端）
+	rpc_id(0, "_play_attack_animation", target_path)
+
+@rpc("call_local", "reliable")
+func _play_attack_animation(target_path: NodePath):
+	var target = get_node_or_null(target_path)
+	if not target or not target.has_node("Sprite2D"):
+		return
+
+	var sprite: Sprite2D = target.get_node("Sprite2D")
+	if not sprite:
+		return
+
+	# 中断之前的受击动画
+	if target.hit_tween and target.hit_tween.is_running():
+		target.hit_tween.kill()
+
+	# 立即变红
+	sprite.modulate = Color(1, 0, 0)
+
+	# 计算恢复后的颜色
+	var target_color = Color.YELLOW if target.is_selected else Color.WHITE
+
+	# 淡回原色（也可以直接跳变，用 tween_property 或 set_final_value）
+	target.hit_tween = create_tween()
+	target.hit_tween.set_trans(Tween.TRANS_LINEAR)
+	target.hit_tween.tween_property(sprite, "modulate", target_color, 0.15)
+	print("[Visual] %s 攻击了目标！" % name)
+
+@rpc("any_peer", "call_local", "reliable")
+func take_damage(damage: int):
+	if damage <= 0:
+		hp = min(max_hp, hp - damage)
+		if multiplayer.is_server():
+			print("[HP] %s 治疗 %d，当前 HP: %d" % [name, -damage, hp])
+		if multiplayer.is_server():
+			rpc_id(0, "_sync_hp", hp)
+		return
+	
+	var absorbed = min(shield, damage)
+	shield -= absorbed
+	damage -= absorbed
+	if absorbed > 0 and multiplayer.is_server():
+		print("[Shield] %s 护盾吸收 %d 点伤害，剩余护盾: %d" % [name, absorbed, shield])
+	
+	hp = max(0, hp - damage)
+	if multiplayer.is_server():
+		print("[HP] %s 剩余 HP: %d" % [name, hp])
+	if hp <= 0:
+		hide()
+		collision_layer = 0
+		main.unregister_character(self)
+	if multiplayer.is_server():
+		rpc_id(0, "_sync_hp", hp)
+		rpc_id(0, "_sync_shield", shield)
+
+@rpc("any_peer", "call_local", "reliable")
+func _sync_hp(new_hp: int):
+	hp = new_hp
+	if hp <= 0:
+		hide()
+		collision_layer = 0
+		main.unregister_character(self)
+
+var effective_attack: int:
+	get:
+		var base = attack
+		if buffs.has("attack_buff"):
+			base += buffs["attack_buff"].value
+		if buffs.has("attack_debuff"):
+			base += buffs["attack_debuff"].value
+		return max(0, base)
+
+var effective_move_points: int:
+	get:
+		var base = move_points
+		if buffs.has("move_debuff"):
+			base += buffs["move_debuff"].value
+		return max(1, base)
+
+func process_buffs():
+	var changed = false
+	for key in buffs.keys():
+		buffs[key].remaining -= 1
+		if buffs[key].remaining <= 0:
+			buffs.erase(key)
+			changed = true
+	if changed and multiplayer.is_server():
+		rpc_id(0, "_sync_buffs", buffs.duplicate())
+
+@rpc("any_peer", "call_local", "reliable")
+func _sync_shield(new_shield: int):
+	shield = new_shield
+
+@rpc("any_peer", "call_local", "reliable")
+func _sync_buffs(new_buffs: Dictionary):
+	buffs = new_buffs
+
+func _process(delta):
+	if not multiplayer or not multiplayer.has_multiplayer_peer():
+		move_toward_target()
+		return
+	if not is_multiplayer_authority():
+		return
+	if name.begins_with("Host") != GlobalGameData.is_host:
+		return
+	
+	if get_current_phase() == "Move":
+		handle_move()
+	elif get_current_phase() == "Attack":
+		handle_attack()
+
+	move_toward_target()
+
+func move_toward_target():
+	var dist = global_position.distance_to(target_world)
+	if dist > 5:
+		velocity = global_position.direction_to(target_world) * speed
+	else:
+		global_position = target_world
+		velocity = Vector2.ZERO
+		is_moving = false
+		if is_multiplayer_authority() and multiplayer.has_multiplayer_peer():
+			rpc("_sync_position", global_position)
+		main.end_character_move()
+	move_and_slide()
+
+@rpc("call_local", "reliable")
+func _sync_position(pos: Vector2):
+	target_world = pos
+	global_position = pos
