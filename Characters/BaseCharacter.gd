@@ -311,10 +311,6 @@ func show_attack_range():
 			hex.polygon = pts
 			hex.color = Color(1.0, 0.15, 0.15, 0.5)
 			hex.z_index = 50
-			# 偏移到角色视觉中心（角色本地坐标）
-			var spr = enemy.get_node_or_null("Sprite2D")
-			var cy = (spr.texture.get_height() * spr.scale.y * 0.5) if spr and spr.texture else 70.0
-			hex.position = Vector2(0, -cy)
 			hex.name = "AttackRangeHighlight"
 			enemy.add_child(hex)
 			highlight_overlays.append(hex)
