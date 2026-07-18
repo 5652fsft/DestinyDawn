@@ -219,6 +219,44 @@ func highlight_targets(card_data: CardData):
 				if cell != null:
 					highlight_layer.set_cell(cell, 0, Vector2i.ZERO)
 
+func on_card_dropped(card_data: CardData):
+	on_card_played(card_data)
+	if is_targeting:
+		var mouse_pos = get_global_mouse_position()
+		var space_state = get_world_2d().direct_space_state
+		var query = PhysicsPointQueryParameters2D.new()
+		query.position = mouse_pos
+		query.collision_mask = 2
+		var results = space_state.intersect_point(query)
+		for r in results:
+			var hit = r.collider
+			if hit is CharacterBody2D and hit.hp > 0:
+				var card = pending_card_data
+				if card:
+					var target_type = card.target_type
+					var is_ally = _is_ally(hit)
+					if _is_valid_target(target_type, is_ally):
+						_on_target_selected(hit)
+						return
+		cancel_targeting()
+
+func _is_ally(chara: CharacterBody2D) -> bool:
+	var is_host = chara.name.begins_with("Host")
+	return is_host == GlobalGameData.is_host
+
+func _is_valid_target(target_type: int, is_ally: bool) -> bool:
+	match target_type:
+		CardData.TargetType.SELF:
+			return selected_character != null
+		CardData.TargetType.ALLY_SINGLE, CardData.TargetType.ALLY_ALL:
+			return is_ally
+		CardData.TargetType.ENEMY_SINGLE, CardData.TargetType.ENEMY_ALL:
+			return not is_ally
+		CardData.TargetType.ALL_CHARACTERS:
+			return true
+		_:
+			return false
+
 func cancel_targeting():
 	pending_card_data = null
 	is_targeting = false
