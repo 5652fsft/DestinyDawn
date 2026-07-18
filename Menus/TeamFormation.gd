@@ -36,10 +36,20 @@ func _on_character_selected(cid: String):
 	slots.append(cid)
 	_update_slots()
 
+var _slot_labels: Array = []
+var _slot_buttons: Array = []
+
+func _ready():
+	for i in range(1, 4):
+		_slot_labels.append(get_node("Slot%d/NameLabel" % i))
+		_slot_buttons.append(get_node("Slot%d/RemoveButton" % i))
+	if _slot_labels.is_empty() or not _slot_labels[0]:
+		push_error("TeamFormation: Slot nodes not found — check Slot1/2/3 NameLabel/RemoveButton")
+	_build_roster()
+
 func _clear_team():
 	slots.clear()
-	for i in range(1, 4):
-		var label = get_node("Slot%d/NameLabel" % i)
+	for label in _slot_labels:
 		if label:
 			label.text = "空"
 
@@ -52,8 +62,10 @@ func _update_slots():
 	for cid in cards:
 		cards[cid].set_team_status(cid in slots)
 	for i in range(3):
-		var label = get_node("Slot%d/NameLabel" % (i + 1))
-		var remove_btn = get_node("Slot%d/RemoveButton" % (i + 1))
+		if i >= _slot_labels.size():
+			continue
+		var label = _slot_labels[i]
+		var remove_btn = _slot_buttons[i]
 		if i < slots.size():
 			var cid = slots[i]
 			label.text = CHARACTERS[cid]["name"]
