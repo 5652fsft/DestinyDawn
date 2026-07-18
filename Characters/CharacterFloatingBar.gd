@@ -30,8 +30,8 @@ func _ready():
 		queue_free()
 		return
 
-	faction_ring.points = make_hexagon_points(66.0)
-	faction_ring.z_index = -1
+	faction_ring.points = make_hexagon_points(72.0)
+	faction_ring.z_index = 1
 	faction_ring.antialiased = true
 	faction_ring.width = 6
 
@@ -54,6 +54,10 @@ func _ready():
 
 	_update_faction()
 	refresh()
+
+func _process(_delta):
+	if parent_character and is_inside_tree():
+		global_position = parent_character.global_position
 
 func _update_faction():
 	var is_host = parent_character.name.begins_with("Host")
