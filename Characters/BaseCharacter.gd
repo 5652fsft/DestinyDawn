@@ -575,11 +575,11 @@ func _spawn_float(value: int, heal: bool = false, shield: bool = false):
 
 @rpc("any_peer", "call_local", "reliable")
 func take_damage(damage: int):
+	var is_host = name.begins_with("Host")
 	if damage <= 0:
 		hp = min(max_hp, hp - damage)
 		_spawn_float(-damage, true)
 		if multiplayer.is_server():
-			var is_host = name.begins_with("Host")
 			var key = "host_healing_done" if is_host else "client_healing_done"
 			GlobalGameData.battle_stats[key] += -damage
 			print("[Combat] %s 恢复 %d 点 HP [%d/%d]" % [name, -damage, hp, max_hp])
@@ -604,7 +604,6 @@ func take_damage(damage: int):
 	_spawn_float(damage)
 	_shake_camera(3.0)
 	if multiplayer.is_server():
-		var is_host = name.begins_with("Host")
 		var key = "host_damage_dealt" if not is_host else "client_damage_dealt"
 		GlobalGameData.battle_stats[key] += damage
 		print("[Combat] %s 受到 %d 点伤害，剩余 HP: %d" % [name, damage, hp])
@@ -613,7 +612,7 @@ func take_damage(damage: int):
 		collision_layer = 0
 		main.unregister_character(self)
 		if multiplayer.is_server():
-			var killer_key = "host_kills" if not is_host else "client_kills"
+			var killer_key = "client_kills" if is_host else "host_kills"
 			GlobalGameData.battle_stats[killer_key] += 1
 	if multiplayer.is_server():
 		rpc_id(0, "_sync_hp", hp)
