@@ -107,11 +107,15 @@ func _drop_card():
 			if main.on_card_dropped(card_data):
 				if _ghost:
 					_ghost.z_index = 100
-					var tween = create_tween().set_parallel(true)
+					var tween = get_tree().create_tween().set_parallel(true)
 					tween.tween_property(_ghost, "scale", _ghost.scale * 0.3, 0.25)
 					tween.tween_property(_ghost, "modulate:a", 0.0, 0.25)
 					tween.tween_property(_ghost, "rotation", 0.5, 0.25)
-					tween.finished.connect(_cleanup_ghost)
+					tween.finished.connect(func():
+						if _ghost:
+							_ghost.queue_free()
+							_ghost = null
+					)
 				queue_free()
 				return
 	if _ghost:
