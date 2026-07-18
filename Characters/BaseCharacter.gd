@@ -328,7 +328,7 @@ func show_attack_range():
 			if highlight_layer:
 				highlight_layer.set_cell(cell, 0, Vector2i.ZERO)
 			var hex = Polygon2D.new()
-			var r = 85.0
+			var r = 45.0
 			var pts: PackedVector2Array = []
 			for k in range(6):
 				var a = deg_to_rad(60 * k - 30)
