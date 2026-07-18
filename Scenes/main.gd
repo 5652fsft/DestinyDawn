@@ -64,8 +64,20 @@ func _ready():
 		
 		_init_player_card_systems()
 		multiplayer.peer_connected.connect(_on_client_joined)
+		if not multiplayer.has_multiplayer_peer():
+			rpc("advance_turn_phase")
 	else:
 		pass
+
+func _spawn_character(scene_path: String, char_name: String, authority: int, pos: Vector2):
+	var scene = load(scene_path)
+	if not scene:
+		return
+	var chara = scene.instantiate()
+	chara.name = char_name
+	chara.set_multiplayer_authority(authority)
+	chara.position = pos
+	Characters.add_child(chara)
 
 func _init_buff_manager():
 	var bm = Node.new()
