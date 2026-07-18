@@ -1,13 +1,12 @@
 extends Label
 
-var float_speed: float = 40.0
-var fade_duration: float = 0.6
+var float_speed: float = 30.0
+var fade_duration: float = 0.65
 
 func _ready():
 	vertical_alignment = 1
 	horizontal_alignment = 1
 	add_theme_font_size_override("font_size", 26)
-	add_theme_color_override("font_color", Color.WHITE)
 	add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))
 	add_theme_constant_override("shadow_offset_x", 1)
 	add_theme_constant_override("shadow_offset_y", 1)
@@ -15,13 +14,13 @@ func _ready():
 func show_value(value: int, is_heal: bool = false, is_shield: bool = false):
 	if is_heal:
 		text = "+%d" % value
-		add_theme_color_override("font_color", Color(0.0, 1.0, 0.25))
+		add_theme_color_override("font_color", Color(0.0, 1.0, 0.0))
 	elif is_shield:
 		text = "+%d" % value
 		add_theme_color_override("font_color", Color(0.3, 0.6, 1.0))
 	else:
 		text = "-%d" % value
-		add_theme_color_override("font_color", Color(1.0, 0.1, 0.1))
+		add_theme_color_override("font_color", Color(1.0, 0.0, 0.0))
 	
 	var tween = create_tween()
 	tween.set_parallel(true)

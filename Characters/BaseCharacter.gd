@@ -535,10 +535,10 @@ func _shake_camera(intensity: float):
 
 func _spawn_float(value: int, heal: bool = false, shield: bool = false):
 	var num = FLOATING_NUM.instantiate()
-	num.show_value(value, heal, shield)
 	num.global_position = global_position + Vector2(0, -80)
 	num.z_index = 100
 	get_tree().current_scene.add_child(num)
+	num.show_value(value, heal, shield)
 
 @rpc("any_peer", "call_local", "reliable")
 func take_damage(damage: int):

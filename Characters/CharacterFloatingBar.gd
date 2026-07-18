@@ -25,11 +25,11 @@ func _ready():
 
 	var shield_style = StyleBoxFlat.new()
 	shield_style.draw_center = false
-	shield_style.border_width_left = 4
-	shield_style.border_width_top = 4
-	shield_style.border_width_right = 4
-	shield_style.border_width_bottom = 4
-	shield_style.border_color = Color(1, 1, 1, 0.8)
+	shield_style.border_width_left = 6
+	shield_style.border_width_top = 6
+	shield_style.border_width_right = 6
+	shield_style.border_width_bottom = 6
+	shield_style.border_color = Color(1, 1, 1, 1.0)
 	shield_style.corner_radius_top_left = 2
 	shield_style.corner_radius_top_right = 2
 	shield_style.corner_radius_bottom_left = 2
