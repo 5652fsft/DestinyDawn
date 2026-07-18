@@ -2,9 +2,9 @@ extends Control
 
 var card_uis: Array[CardUI] = []
 
-const FAN_ANGLE: float = deg_to_rad(30.0)
-const FAN_SPREAD_X: float = 300.0
-const FAN_ARC_Y: float = 60.0
+const FAN_ANGLE: float = deg_to_rad(18.0)
+const FAN_SPREAD_X: float = 160.0
+const FAN_ARC_Y: float = 40.0
 
 @onready var card_container: Control = $CardContainer
 @onready var card_scene: PackedScene = preload("res://UI/CardUI.tscn")
