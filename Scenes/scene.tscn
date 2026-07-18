@@ -36,7 +36,7 @@ tile_set = ExtResource("3_lrus4")
 [node name="Characters" type="Node2D" parent="." unique_id=1398993]
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="." unique_id=760161155]
-_spawnable_scenes = PackedStringArray("res://Characters/Bronya/Bronya.tscn", "res://Characters/Seele/Seele.tscn")
+_spawnable_scenes = PackedStringArray("uid://fk1ww3enxjfj", "uid://cj80ggih730w")
 spawn_path = NodePath("../Characters")
 
 [node name="EnergySystem" type="Node" parent="." unique_id=1029448215]

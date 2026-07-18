@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dgleh5lfnpj7g"]
 
-[ext_resource type="Script" uid="uid://cstwgo8y88w7e" path="res://Characters/FloatingBar.gd" id="1_fdngo"]
+[ext_resource type="Script" path="res://Characters/FloatingBar.gd" id="1_fdngo"]
 
 [node name="FloatingBar" type="Node2D" unique_id=462093114]
 script = ExtResource("1_fdngo")
