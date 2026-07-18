@@ -666,7 +666,10 @@ func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn)
 	GlobalGameData.current_turn_phase = phase
 	GlobalGameData.is_host_turn = host_turn
 	if selected_character:
-		unselect_character(null)
+		selected_character.is_selected = false
+		selected_character = null
+		character_info_panel.hide()
+		skill_panel.hide()
 	update_ui_turn_indicator()
 
 func update_ui_turn_indicator():

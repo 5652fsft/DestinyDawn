@@ -545,6 +545,7 @@ func _play_attack_animation(target_path: NodePath):
 
 	_shake_camera(5.0)
 
+@rpc("any_peer", "call_local", "reliable")
 func _play_vfx_preset(preset: String):
 	if vfx_manager and vfx_manager.has_method("play"):
 		vfx_manager.play(self, preset)
