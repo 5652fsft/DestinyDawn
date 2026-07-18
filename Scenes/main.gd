@@ -219,7 +219,7 @@ func highlight_targets(card_data: CardData):
 				if cell != null:
 					highlight_layer.set_cell(cell, 0, Vector2i.ZERO)
 
-func on_card_dropped(card_data: CardData):
+func on_card_dropped(card_data: CardData) -> bool:
 	on_card_played(card_data)
 	if is_targeting:
 		var mouse_pos = get_global_mouse_position()
@@ -237,8 +237,9 @@ func on_card_dropped(card_data: CardData):
 					var is_ally = _is_ally(hit)
 					if _is_valid_target(target_type, is_ally):
 						_on_target_selected(hit)
-						return
+						return true
 		cancel_targeting()
+	return false
 
 func _is_ally(chara: CharacterBody2D) -> bool:
 	var is_host = chara.name.begins_with("Host")

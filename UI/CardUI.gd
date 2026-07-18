@@ -94,15 +94,28 @@ func _create_ghost():
 		main.get_node("UI").add_child(_ghost)
 
 func _drop_card():
-	if _ghost:
-		_ghost.queue_free()
-		_ghost = null
 	_press_start_pos = Vector2.ZERO
 	if _is_dragging:
 		_is_dragging = false
 		var main = get_tree().current_scene
 		if main and main.has_method("on_card_dropped"):
-			main.on_card_dropped(card_data)
+			if main.on_card_dropped(card_data):
+				if _ghost:
+					_ghost.z_index = 100
+					var tween = create_tween().set_parallel(true)
+					tween.tween_property(_ghost, "scale", _ghost.scale * 0.3, 0.25)
+					tween.tween_property(_ghost, "modulate:a", 0.0, 0.25)
+					tween.tween_property(_ghost, "rotation", 0.5, 0.25)
+					tween.finished.connect(_cleanup_ghost)
+					return
+	if _ghost:
+		_ghost.queue_free()
+		_ghost = null
+
+func _cleanup_ghost():
+	if _ghost:
+		_ghost.queue_free()
+		_ghost = null
 
 func _on_hover_enter():
 	if _hover_tween:

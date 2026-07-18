@@ -24,6 +24,7 @@ var hp: int:
 @onready var sprite: Sprite2D = $Sprite2D
 
 const FLOATING_BAR = preload("res://Characters/CharacterFloatingBar.tscn")
+const FLOATING_NUM = preload("res://Effects/FloatingNumber.tscn")
 var floating_bar: Node2D = null
 
 # === 外部依赖 ===
@@ -426,23 +427,32 @@ func _play_attack_animation(target_path: NodePath):
 	target.hit_tween.tween_property(sprite, "modulate", target_color, 0.15)
 	print("[Visual] %s 攻击了目标！" % name)
 
+func _spawn_float(value: int, heal: bool = false, shield: bool = false):
+	var num = FLOATING_NUM.instantiate()
+	num.show_value(value, heal, shield)
+	num.global_position = global_position + Vector2(0, -80)
+	get_tree().current_scene.add_child(num)
+
 @rpc("any_peer", "call_local", "reliable")
 func take_damage(damage: int):
 	if damage <= 0:
 		hp = min(max_hp, hp - damage)
+		_spawn_float(-damage, true)
 		if multiplayer.is_server():
 			print("[HP] %s 治疗 %d，当前 HP: %d" % [name, -damage, hp])
-		if multiplayer.is_server():
 			rpc_id(0, "_sync_hp", hp)
 		return
 	
 	var absorbed = min(shield, damage)
 	shield -= absorbed
 	damage -= absorbed
-	if absorbed > 0 and multiplayer.is_server():
-		print("[Shield] %s 护盾吸收 %d 点伤害，剩余护盾: %d" % [name, absorbed, shield])
+	if absorbed > 0:
+		_spawn_float(absorbed, false, true)
+		if multiplayer.is_server():
+			print("[Shield] %s 护盾吸收 %d 点伤害，剩余护盾: %d" % [name, absorbed, shield])
 	
 	hp = max(0, hp - damage)
+	_spawn_float(damage)
 	if multiplayer.is_server():
 		print("[HP] %s 剩余 HP: %d" % [name, hp])
 	if hp <= 0:
