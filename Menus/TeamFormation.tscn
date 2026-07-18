@@ -18,35 +18,6 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 28
 text = "编队管理"
 
-[node name="BackButton" type="Button" parent="."]
-offset_left = 40.0
-offset_top = 620.0
-offset_right = 200.0
-offset_bottom = 660.0
-theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 18
-text = "← 返回主菜单"
-
-[node name="SaveButton" type="Button" parent="."]
-offset_left = 1000.0
-offset_top = 620.0
-offset_right = 1240.0
-offset_bottom = 660.0
-theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 18
-text = "✔ 保存编队"
-
-[node name="HintLabel" type="Label" parent="."]
-offset_left = 400.0
-offset_top = 60.0
-offset_right = 880.0
-offset_bottom = 90.0
-theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 18
-text = ""
-horizontal_alignment = 1
-hide()
-
 [node name="MyTeamLabel" type="Label" parent="."]
 offset_left = 800.0
 offset_top = 20.0
@@ -55,6 +26,31 @@ offset_bottom = 50.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 22
 text = "我的队伍"
+
+[node name="RosterLabel" type="Label" parent="."]
+offset_left = 40.0
+offset_top = 60.0
+offset_right = 300.0
+offset_bottom = 90.0
+theme_override_fonts/font = ExtResource("2")
+theme_override_font_sizes/font_size = 22
+text = "可选角色"
+
+[node name="RosterGrid" type="GridContainer" parent="."]
+offset_left = 40.0
+offset_top = 100.0
+offset_right = 760.0
+offset_bottom = 600.0
+columns = 4
+
+[node name="HintLabel" type="Label" parent="."]
+offset_left = 400.0
+offset_top = 60.0
+offset_right = 880.0
+offset_bottom = 90.0
+theme_override_fonts/font = ExtResource("2")
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
 
 [node name="Slot1" type="Panel" parent="."]
 offset_left = 800.0
@@ -80,7 +76,6 @@ offset_bottom = 110.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 14
 text = "移除"
-hide()
 
 [node name="Slot2" type="Panel" parent="."]
 offset_left = 800.0
@@ -106,7 +101,6 @@ offset_bottom = 110.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 14
 text = "移除"
-hide()
 
 [node name="Slot3" type="Panel" parent="."]
 offset_left = 800.0
@@ -132,26 +126,24 @@ offset_bottom = 110.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 14
 text = "移除"
-hide()
 
-[node name="RosterLabel" type="Label" parent="."]
+[node name="BackButton" type="Button" parent="."]
 offset_left = 40.0
-offset_top = 60.0
-offset_right = 300.0
-offset_bottom = 90.0
+offset_top = 620.0
+offset_right = 200.0
+offset_bottom = 660.0
 theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 22
-text = "可选角色"
+theme_override_font_sizes/font_size = 18
+text = "← 返回主菜单"
 
-[node name="RosterGrid" type="GridContainer" parent="."]
-offset_left = 40.0
-offset_top = 100.0
-offset_right = 760.0
-offset_bottom = 600.0
-columns = 4
+[node name="SaveButton" type="Button" parent="."]
+offset_left = 1000.0
+offset_top = 620.0
+offset_right = 1240.0
+offset_bottom = 660.0
+theme_override_fonts/font = ExtResource("2")
+theme_override_font_sizes/font_size = 18
+text = "✔ 保存编队"
 
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="SaveButton" to="." method="_on_save_pressed"]
-[connection signal="pressed" from="Slot1/RemoveButton" to="." method="_on_slot1_remove"]
-[connection signal="pressed" from="Slot2/RemoveButton" to="." method="_on_slot2_remove"]
-[connection signal="pressed" from="Slot3/RemoveButton" to="." method="_on_slot3_remove"]

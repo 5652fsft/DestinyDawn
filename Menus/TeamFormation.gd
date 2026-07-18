@@ -36,10 +36,16 @@ var _slot_buttons: Array = []
 
 func _ready():
 	for i in range(1, 4):
-		_slot_labels.append(get_node("Slot%d/NameLabel" % i))
-		_slot_buttons.append(get_node("Slot%d/RemoveButton" % i))
+		var lbl = get_node_or_null("Slot%d/NameLabel" % i)
+		var btn = get_node_or_null("Slot%d/RemoveButton" % i)
+		_slot_labels.append(lbl)
+		_slot_buttons.append(btn)
+		if btn:
+			btn.pressed.connect(_remove_slot.bind(i - 1))
 	if _slot_labels.is_empty() or not _slot_labels[0]:
-		push_error("TeamFormation: Slot nodes not found — check Slot1/2/3 NameLabel/RemoveButton")
+		push_error("TeamFormation: Slot1 nodes missing — check tscn")
+	else:
+		_clear_team()
 	_build_roster()
 
 func _clear_team():
@@ -61,6 +67,8 @@ func _update_slots():
 			continue
 		var label = _slot_labels[i]
 		var remove_btn = _slot_buttons[i]
+		if not label or not remove_btn:
+			continue
 		if i < slots.size():
 			var cid = slots[i]
 			label.text = CHARACTERS[cid]["name"]
@@ -78,10 +86,6 @@ func _on_save_pressed():
 		return
 	GlobalGameData.selected_team = slots.duplicate()
 	get_tree().change_scene_to_file("res://Menus/NewMainMenu.tscn")
-
-func _on_slot1_remove(): _remove_slot(0)
-func _on_slot2_remove(): _remove_slot(1)
-func _on_slot3_remove(): _remove_slot(2)
 
 func _on_back_pressed():
 	get_tree().change_scene_to_file("res://Menus/NewMainMenu.tscn")
