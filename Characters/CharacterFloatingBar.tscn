@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dgleh5lfnpj7g"]
 
 [ext_resource type="Script" uid="uid://cstwgo8y88w7e" path="res://Characters/CharacterFloatingBar.gd" id="1_fdngo"]
+
 [node name="CharacterFloatingBar" type="Node2D" unique_id=462093114]
 script = ExtResource("1_fdngo")
 
@@ -9,9 +10,10 @@ offset_left = -30.0
 offset_top = 38.0
 offset_right = 30.0
 offset_bottom = 48.0
-color = Color(0, 0, 0, 0.6)
+color = Color(0, 0, 0, 1)
 
 [node name="HPFill" type="ColorRect" parent="HPBar" unique_id=1785860220]
+z_index = 11
 layout_mode = 0
 offset_left = 1.0
 offset_top = 1.0
@@ -19,36 +21,41 @@ offset_right = 59.0
 offset_bottom = 9.0
 color = Color(0.2, 0.8, 0.2, 1)
 
-[node name="ShieldOutline" type="Panel" parent="HPBar" unique_id=9876543220]
+[node name="ShieldOutline" type="Panel" parent="HPBar" unique_id=1286608628]
 visible = false
+z_index = 9
 layout_mode = 0
 offset_left = -2.0
 offset_top = -2.0
 offset_right = 62.0
 offset_bottom = 12.0
 mouse_filter = 1
-z_index = 9
 
 [node name="HPLabel" type="Label" parent="HPBar" unique_id=547392923]
+z_index = 20
 layout_mode = 0
-offset_left = 0.0
-offset_top = 0.0
 offset_right = 60.0
 offset_bottom = 10.0
-z_index = 20
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 7
 text = "100/100"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="HPbg" type="Panel" parent="HPBar" unique_id=1838733917]
+z_index = 10
+layout_mode = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 59.0
+offset_bottom = 9.0
+
 [node name="FactionRingSprite" type="Sprite2D" parent="." unique_id=1797410036]
 z_index = 1
-scale = Vector2(1, 1)
 
 [node name="SelectionIndicator" type="Line2D" parent="." unique_id=1440890590]
 visible = false
-width = 8
+width = 8.0
 default_color = Color(1, 1, 0, 0.8)
 joint_mode = 2
 begin_cap_mode = 1

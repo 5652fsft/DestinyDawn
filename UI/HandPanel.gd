@@ -72,7 +72,10 @@ func remove_card_via_data(data: CardData) -> bool:
 			var card = card_uis[i]
 			card_uis.remove_at(i)
 			card.queue_free()
-			_justify()  # snap remaining, no tween
+			# give remaining cards entrance animation
+			for c in card_uis:
+				c.set_meta("_entrance", true)
+			_layout_cards()
 			return true
 	return false
 
