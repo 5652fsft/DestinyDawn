@@ -102,10 +102,12 @@ func _ready():
 	collision_mask = 0
 	sprite.modulate = Color.WHITE
 	
-	# 创建头顶浮动状态栏
-	floating_bar = FLOATING_BAR.instantiate()
-	floating_bar.z_index = 10
-	add_child(floating_bar)
+	# 查找场景中集成的 FloatingBar，如果没有则动态创建
+	floating_bar = get_node_or_null("FloatingBar")
+	if not floating_bar:
+		floating_bar = FLOATING_BAR.instantiate()
+		floating_bar.z_index = 10
+		add_child(floating_bar)
 	floating_bar.refresh()
 	_fb_origin_y = floating_bar.position.y
 	
@@ -458,11 +460,10 @@ func _play_attack_animation(target_path: NodePath):
 	if not target_sprite:
 		return
 
-	# 攻击者前冲（加速）
 	var dir = sign(target_node.global_position.x - global_position.x)
 	var lurch = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	lurch.tween_property(sprite, "offset:x", dir * 12.0, 0.03)
-	lurch.tween_property(sprite, "offset:x", 0.0, 0.04)
+	lurch.tween_property(sprite, "offset:x", dir * 12.0, 0.015)
+	lurch.tween_property(sprite, "offset:x", 0.0, 0.02)
 
 	# 受击反馈 + 粒子
 	if target_node.hit_tween and target_node.hit_tween.is_running():
@@ -473,8 +474,7 @@ func _play_attack_animation(target_path: NodePath):
 	target_node.hit_tween = create_tween().set_trans(Tween.TRANS_LINEAR)
 	target_node.hit_tween.tween_property(target_sprite, "modulate", target_color, 0.12)
 
-	# 命中顿帧 (hit stop)
-	_hit_stop(0.05)
+	_hit_stop(0.03)
 
 	# 粒子 VFX
 	if vfx_manager and vfx_manager.has_method("play"):
