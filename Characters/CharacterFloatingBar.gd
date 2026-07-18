@@ -16,7 +16,7 @@ func _ready():
 		queue_free()
 		return
 
-	selection_indicator.points = _hexagon(55.0)
+	selection_indicator.points = _hexagon(70.0)
 	selection_indicator.z_index = 2
 	selection_indicator.antialiased = true
 

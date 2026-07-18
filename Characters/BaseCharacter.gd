@@ -67,6 +67,8 @@ func get_buffs(buff_id: String) -> Array:
 func get_all_buffs() -> Dictionary:
 	return buffs
 
+var highlight_overlays: Array[Node] = []
+
 var is_selected: bool = false:
 	set(value):
 		is_selected = value
@@ -296,8 +298,19 @@ func show_attack_range():
 	# 高亮所有可攻击角色
 	for cell in valid_attack_cells.keys():
 		if cell != start_cell and is_enemy(main.find_cell_occupant(cell)):
-			#print("[Debug] 可攻击角色", cell)
-			highlight_layer.set_cell(cell, 0, Vector2i.ZERO)
+			if highlight_layer:
+				highlight_layer.set_cell(cell, 0, Vector2i.ZERO)
+			# 额外覆盖一个半透明红框确保可见
+			var local = grid_layer.map_to_local(cell)
+			var world = grid_layer.to_global(local)
+			var rect = ColorRect.new()
+			rect.size = Vector2(120, 140)
+			rect.color = Color(1.0, 0.15, 0.15, 0.35)
+			rect.global_position = world - rect.size * 0.5
+			rect.z_index = 50
+			rect.mouse_filter = MOUSE_FILTER_IGNORE
+			get_tree().current_scene.add_child(rect)
+			highlight_overlays.append(rect)
 
 func hide_move_range():
 	valid_move_cells.clear()
@@ -305,9 +318,13 @@ func hide_move_range():
 		highlight_layer.clear()
 		
 func hide_attack_range():
-	valid_move_cells.clear()
+	valid_attack_cells.clear()
 	if highlight_layer:
 		highlight_layer.clear()
+	for h in highlight_overlays:
+		if is_instance_valid(h):
+			h.queue_free()
+	highlight_overlays.clear()
 
 func get_current_phase() -> String:
 	var phase = GlobalGameData.current_turn_phase
