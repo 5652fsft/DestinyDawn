@@ -1,18 +1,18 @@
 extends Control
 
 var card_uis: Array[CardUI] = []
-var selected_card_ui: CardUI = null
 
-signal card_played(card_data: CardData)
+const FAN_ANGLE: float = deg_to_rad(40.0)
+const FAN_RADIUS: float = 500.0
+const FAN_ARC_Y: float = 60.0
 
-@onready var card_container: HBoxContainer = $CardContainer
+@onready var card_container: Control = $CardContainer
 @onready var card_scene: PackedScene = preload("res://UI/CardUI.tscn")
 
 func clear():
 	for child in card_container.get_children():
 		child.queue_free()
 	card_uis.clear()
-	selected_card_ui = null
 
 func set_hand(card_ids: Array[String]):
 	clear()
@@ -22,6 +22,7 @@ func set_hand(card_ids: Array[String]):
 		if not data:
 			continue
 		_add_card(data, i)
+	_layout_cards()
 
 func remove_card_via_data(data: CardData) -> bool:
 	for i in range(card_uis.size() - 1, -1, -1):
@@ -29,16 +30,15 @@ func remove_card_via_data(data: CardData) -> bool:
 			var card = card_uis[i]
 			card_uis.remove_at(i)
 			card.queue_free()
-			if selected_card_ui == card:
-				selected_card_ui = null
+			_layout_cards()
 			return true
 	return false
 
 func _add_card(data: CardData, index: int = 0):
 	var instance = card_scene.instantiate()
-	instance.card_clicked.connect(_on_card_clicked)
 	card_container.add_child(instance)
 	instance.setup(data)
+	instance.pivot_offset = instance.size * 0.5
 	card_uis.append(instance)
 
 	instance.scale = Vector2.ZERO
@@ -49,18 +49,19 @@ func _add_card(data: CardData, index: int = 0):
 	tween.tween_property(instance, "scale", Vector2.ONE, 0.25)
 	tween.parallel().tween_property(instance, "modulate:a", 1.0, 0.15)
 
-func _on_card_clicked(card_ui: CardUI):
-	if selected_card_ui == card_ui:
-		selected_card_ui = null
-		card_ui.is_card_selected = false
+func _layout_cards():
+	var count = card_uis.size()
+	if count == 0:
 		return
-	if selected_card_ui:
-		selected_card_ui.is_card_selected = false
-	selected_card_ui = card_ui
-	card_ui.is_card_selected = true
-	card_played.emit(card_ui.card_data)
-
-func clear_selection():
-	if selected_card_ui:
-		selected_card_ui.is_card_selected = false
-		selected_card_ui = null
+	var center_x = card_container.size.x * 0.5
+	var center_y = card_container.size.y * 0.5 + 40.0
+	for i in range(count):
+		var card = card_uis[i]
+		var t = float(i) / max(count - 1, 1) - 0.5
+		var angle = t * FAN_ANGLE
+		var target_x = center_x + sin(angle) * FAN_RADIUS
+		var target_y = center_y - cos(angle) * FAN_RADIUS + FAN_RADIUS + abs(t) * FAN_ARC_Y
+		var target_rotation = angle * 0.7
+		var tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tween.tween_property(card, "position", Vector2(target_x, target_y), 0.35)
+		tween.parallel().tween_property(card, "rotation", target_rotation, 0.35)

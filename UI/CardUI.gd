@@ -2,15 +2,6 @@ class_name CardUI
 extends Panel
 
 var card_data: CardData = null
-var is_card_selected: bool = false:
-	set(value):
-		is_card_selected = value
-		if value:
-			self_modulate = Color(1, 1, 0.7)
-		else:
-			self_modulate = Color.WHITE
-
-signal card_clicked(card: CardUI)
 signal card_drag_started(card: CardUI)
 
 var _hover_tween: Tween = null
@@ -20,6 +11,7 @@ var _is_dragging: bool = false
 var _drag_threshold: float = 15.0
 var _press_start_pos: Vector2 = Vector2.ZERO
 var _ghost: Panel = null
+var _restore_y: float = 0.0
 
 @onready var cost_number: Label = $CostCircle/CostNumber
 @onready var name_label: Label = $MarginContainer/VBoxContainer/NameLabel
@@ -66,7 +58,6 @@ func _gui_input(event: InputEvent):
 			accept_event()
 		else:
 			_press_start_pos = Vector2.ZERO
-			card_clicked.emit(self)
 			accept_event()
 
 func _process(delta):
@@ -130,11 +121,13 @@ func _cleanup_ghost():
 func _on_hover_enter():
 	if _hover_tween:
 		_hover_tween.kill()
+	_restore_y = position.y
 	z_index = 10
 	_hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	_hover_tween.tween_property(self, "scale", _base_scale * 1.25, 0.12)
 	_hover_tween.parallel().tween_property(self, "rotation", 0.03, 0.12)
 	_hover_tween.parallel().tween_property(self, "self_modulate", Color(1, 1, 0.85), 0.12)
+	_hover_tween.parallel().tween_property(self, "position:y", _restore_y - 80.0, 0.12)
 
 	var panel_style = StyleBoxFlat.new()
 	panel_style.bg_color = Color(0.15, 0.15, 0.25, 1.0)
@@ -154,8 +147,8 @@ func _on_hover_exit():
 	_hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	_hover_tween.tween_property(self, "scale", _base_scale, 0.12)
 	_hover_tween.parallel().tween_property(self, "rotation", 0.0, 0.12)
-	if not is_card_selected:
-		_hover_tween.parallel().tween_property(self, "self_modulate", Color.WHITE, 0.12)
+	_hover_tween.parallel().tween_property(self, "self_modulate", Color.WHITE, 0.12)
+	_hover_tween.parallel().tween_property(self, "position:y", _restore_y, 0.12)
 
 	var panel_style = StyleBoxFlat.new()
 	panel_style.bg_color = Color(0.12, 0.12, 0.2, 1.0)

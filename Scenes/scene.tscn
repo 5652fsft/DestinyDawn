@@ -81,5 +81,4 @@ offset_bottom = 80.0
 theme = ExtResource("12_p4fma")
 player_side = "Client"
 
-[connection signal="card_played" from="UI/HandPanel" to="." method="on_card_played"]
 [connection signal="skill_used" from="UI/SkillPanel" to="." method="_on_skill_used"]

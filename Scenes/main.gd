@@ -264,8 +264,6 @@ func cancel_targeting():
 	pending_card_data = null
 	is_targeting = false
 	highlight_layer.clear()
-	if hand_panel:
-		hand_panel.clear_selection()
 
 func _on_target_selected(target: Node):
 	if not is_targeting:
@@ -524,8 +522,6 @@ func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn)
 func update_ui_turn_indicator():
 	turn_indicator.update_turn_display()
 	_update_player_panels()
-	if hand_panel:
-		hand_panel.clear_selection()
 
 func _setup_player_panels():
 	var is_local_host = GlobalGameData.is_host
