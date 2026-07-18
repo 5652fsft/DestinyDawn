@@ -1,16 +1,18 @@
 [gd_scene format=3 uid="uid://cjvpkpk7s4k72"]
 
-[ext_resource type="Script" path="res://Menus/NewMainMenu.gd" id="1"]
+[ext_resource type="Script" uid="uid://dug3q744sfx6b" path="res://Menus/NewMainMenu.gd" id="1"]
 [ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf" id="2"]
-[ext_resource type="Texture2D" uid="uid://bwg46jjpaqwcq" path="res://Assets/Sprites/menubg.jpg" id="3"]
+[ext_resource type="Texture2D" uid="uid://dc37n6qm4tnj6" path="res://Assets/Sprites/menubg.jpg" id="3"]
 
-[node name="NewMainMenu" type="Control"]
+[node name="NewMainMenu" type="Control" unique_id=1647264128]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1")
 
-[node name="Title" type="Label" parent="."]
+[node name="Title" type="Label" parent="." unique_id=1547427329]
+layout_mode = 0
 offset_left = 340.0
 offset_top = 60.0
 offset_right = 940.0
@@ -20,7 +22,8 @@ theme_override_font_sizes/font_size = 56
 text = "Destiny Dawn"
 horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="."]
+[node name="Subtitle" type="Label" parent="." unique_id=1484498110]
+layout_mode = 0
 offset_left = 440.0
 offset_top = 140.0
 offset_right = 840.0
@@ -30,92 +33,98 @@ theme_override_font_sizes/font_size = 18
 text = "命运破晓"
 horizontal_alignment = 1
 
-[node name="BgSprite" type="TextureRect" parent="."]
+[node name="BgSprite" type="TextureRect" parent="." unique_id=986812814]
+z_index = -1
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = 164.41711
+offset_bottom = 3.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 texture = ExtResource("3")
 expand_mode = 1
-stretch_mode = 2
-z_index = -1
-mouse_filter = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1424407826]
+layout_mode = 0
 offset_left = 440.0
 offset_top = 210.0
 offset_right = 840.0
 offset_bottom = 560.0
 
-[node name="TeamStatus" type="Label" parent="VBoxContainer"]
+[node name="TeamStatus" type="Label" parent="VBoxContainer" unique_id=329808210]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 16
 text = "编队: 未配置"
 horizontal_alignment = 1
 
-[node name="DeckStatus" type="Label" parent="VBoxContainer"]
+[node name="DeckStatus" type="Label" parent="VBoxContainer" unique_id=1478695629]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 16
 text = "卡组: 未配置"
 horizontal_alignment = 1
 
-[node name="TeamButton" type="Button" parent="VBoxContainer"]
+[node name="TeamButton" type="Button" parent="VBoxContainer" unique_id=408953177]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
 text = "编队管理"
 
-[node name="DeckButton" type="Button" parent="VBoxContainer"]
+[node name="DeckButton" type="Button" parent="VBoxContainer" unique_id=1275202137]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
 text = "卡组构筑"
 
-[node name="HostButton" type="Button" parent="VBoxContainer"]
+[node name="HostButton" type="Button" parent="VBoxContainer" unique_id=641825417]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
 text = "LAN 创建游戏"
 
-[node name="JoinButton" type="Button" parent="VBoxContainer"]
+[node name="JoinButton" type="Button" parent="VBoxContainer" unique_id=42686337]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
 text = "LAN 加入游戏"
 
-[node name="SettingsButton" type="Button" parent="VBoxContainer"]
+[node name="SettingsButton" type="Button" parent="VBoxContainer" unique_id=976194291]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
 text = "设置"
 
-[node name="QuitButton" type="Button" parent="VBoxContainer"]
+[node name="QuitButton" type="Button" parent="VBoxContainer" unique_id=402488772]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
 text = "退出"
 
-[node name="IPDialog" type="AcceptDialog" parent="."]
-visible = false
-dialog_text = "输入服务器 IP 地址"
+[node name="IPDialog" type="AcceptDialog" parent="." unique_id=1212608991]
 size = Vector2i(300, 150)
+dialog_text = "输入服务器 IP 地址"
 
-[node name="IPLineEdit" type="LineEdit" parent="IPDialog"]
+[node name="IPLineEdit" type="LineEdit" parent="IPDialog" unique_id=612427937]
 offset_left = 20.0
 offset_top = 50.0
 offset_right = 250.0
 offset_bottom = 80.0
 text = "127.0.0.1"
 
-[node name="SettingsPanel" type="Panel" parent="."]
+[node name="SettingsPanel" type="Panel" parent="." unique_id=2136421861]
 visible = false
+layout_mode = 0
 offset_left = 340.0
 offset_top = 200.0
 offset_right = 940.0
 offset_bottom = 500.0
 
-[node name="NameLabel" type="Label" parent="SettingsPanel"]
+[node name="NameLabel" type="Label" parent="SettingsPanel" unique_id=1635883366]
+layout_mode = 0
 offset_left = 30.0
 offset_top = 30.0
 offset_right = 200.0
@@ -124,14 +133,16 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 18
 text = "玩家名称:"
 
-[node name="NameEdit" type="LineEdit" parent="SettingsPanel"]
+[node name="NameEdit" type="LineEdit" parent="SettingsPanel" unique_id=1298241716]
+layout_mode = 0
 offset_left = 160.0
 offset_top = 30.0
 offset_right = 330.0
 offset_bottom = 60.0
 text = "玩家"
 
-[node name="CloseButton" type="Button" parent="SettingsPanel"]
+[node name="CloseButton" type="Button" parent="SettingsPanel" unique_id=243541683]
+layout_mode = 0
 offset_left = 200.0
 offset_top = 220.0
 offset_right = 330.0

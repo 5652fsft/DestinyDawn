@@ -164,13 +164,15 @@ static func _execute_aoe_damage(card: CardData, target: Node, main: Node, caster
 	if not target or not main:
 		return false
 	var is_caster_host = _is_host_side(caster if caster else target)
+	var dmg = int(card.effect_value * _affinity_multiplier(caster, "attack_bonus"))
+	# 主要目标
+	if _is_host_side(target) != is_caster_host and target.has_method("take_damage"):
+		_rpc_take_damage(target, dmg)
+	# 范围内敌方
 	var targets = _get_characters_in_range(main, target, card.effect_radius)
 	for t in targets:
 		if t.has_method("take_damage") and _is_host_side(t) != is_caster_host:
-			if t.has_method("rpc"):
-				t.rpc("take_damage", card.effect_value)
-			else:
-				t.take_damage(card.effect_value)
+			_rpc_take_damage(t, dmg)
 	if caster and caster.has_method("rpc"):
 		caster.rpc("_play_vfx_preset", "explosion")
 	return true
@@ -180,14 +182,21 @@ static func _execute_aoe_heal(card: CardData, target: Node, main: Node, caster: 
 		return false
 	var val = int(card.effect_value * _affinity_multiplier(caster, "heal_bonus"))
 	var is_caster_host = _is_host_side(caster if caster else target)
+	# 主要目标
+	if _is_host_side(target) == is_caster_host and target.has_method("take_damage"):
+		_rpc_take_damage(target, -val)
+	# 范围内友方
 	var targets = _get_characters_in_range(main, target, card.effect_radius)
 	for t in targets:
 		if t.has_method("take_damage") and _is_host_side(t) == is_caster_host:
-			if t.has_method("rpc"):
-				t.rpc("take_damage", -val)
-			else:
-				t.take_damage(-val)
+			_rpc_take_damage(t, -val)
 	return true
+
+static func _rpc_take_damage(node: Node, amount: int):
+	if node.has_method("rpc"):
+		node.rpc("take_damage", amount)
+	else:
+		node.take_damage(amount)
 
 static func _execute_chain_damage(card: CardData, primary: Node, main: Node) -> bool:
 	if not primary or not main:

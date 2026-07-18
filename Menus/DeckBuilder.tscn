@@ -1,26 +1,29 @@
 [gd_scene format=3 uid="uid://ctb3of6yuq7l2"]
 
-[ext_resource type="Script" path="res://Menus/DeckBuilder.gd" id="1"]
+[ext_resource type="Script" uid="uid://cykt4isobq60q" path="res://Menus/DeckBuilder.gd" id="1"]
 [ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf" id="2"]
-[ext_resource type="Texture2D" uid="uid://bwg46jjpaqwcq" path="res://Assets/Sprites/menubg.jpg" id="3"]
+[ext_resource type="Texture2D" uid="uid://dc37n6qm4tnj6" path="res://Assets/Sprites/menubg.jpg" id="3"]
 
-[node name="DeckBuilder" type="Control"]
+[node name="DeckBuilder" type="Control" unique_id=698558712]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1")
 
-[node name="BgSprite" type="TextureRect" parent="."]
-anchors_preset = 15
+[node name="BgSprite" type="TextureRect" parent="." unique_id=1022467738]
+z_index = -1
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = 164.41699
+offset_bottom = 3.0
+mouse_filter = 2
 texture = ExtResource("3")
 expand_mode = 1
-stretch_mode = 2
-z_index = -1
-mouse_filter = 2
 
-[node name="Title" type="Label" parent="."]
+[node name="Title" type="Label" parent="." unique_id=1875071248]
+layout_mode = 0
 offset_left = 40.0
 offset_top = 20.0
 offset_right = 300.0
@@ -29,7 +32,8 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 28
 text = "卡组构筑"
 
-[node name="HintLabel" type="Label" parent="."]
+[node name="HintLabel" type="Label" parent="." unique_id=1349332180]
+layout_mode = 0
 offset_left = 400.0
 offset_top = 60.0
 offset_right = 880.0
@@ -38,18 +42,21 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1027464497]
+layout_mode = 0
 offset_left = 40.0
 offset_top = 80.0
 offset_right = 1240.0
 offset_bottom = 600.0
 
-[node name="CardPool" type="Panel" parent="HBoxContainer"]
+[node name="CardPool" type="Panel" parent="HBoxContainer" unique_id=1169714213]
 custom_minimum_size = Vector2(700, 0)
-size_flags_horizontal = 3
 clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
 
-[node name="PoolLabel" type="Label" parent="HBoxContainer/CardPool"]
+[node name="PoolLabel" type="Label" parent="HBoxContainer/CardPool" unique_id=1781867371]
+layout_mode = 0
 offset_left = 10.0
 offset_top = 8.0
 offset_right = 200.0
@@ -58,21 +65,24 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 18
 text = "卡牌池"
 
-[node name="PoolScroll" type="ScrollContainer" parent="HBoxContainer/CardPool"]
+[node name="PoolScroll" type="ScrollContainer" parent="HBoxContainer/CardPool" unique_id=927730268]
+layout_mode = 0
 offset_left = 10.0
 offset_top = 40.0
-offset_right = 690.0
+offset_right = 810.0
 offset_bottom = 500.0
 
-[node name="GridContainer" type="GridContainer" parent="HBoxContainer/CardPool/PoolScroll"]
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/CardPool/PoolScroll" unique_id=606728307]
+layout_mode = 2
 columns = 4
 
-[node name="DeckPanel" type="Panel" parent="HBoxContainer"]
+[node name="DeckPanel" type="Panel" parent="HBoxContainer" unique_id=1215139117]
 custom_minimum_size = Vector2(320, 0)
-size_flags_horizontal = 1
 clip_contents = true
+layout_mode = 2
 
-[node name="DeckLabel" type="Label" parent="HBoxContainer/DeckPanel"]
+[node name="DeckLabel" type="Label" parent="HBoxContainer/DeckPanel" unique_id=64529555]
+layout_mode = 0
 offset_left = 10.0
 offset_top = 8.0
 offset_right = 200.0
@@ -81,7 +91,8 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 18
 text = "你的卡组"
 
-[node name="CountLabel" type="Label" parent="HBoxContainer/DeckPanel"]
+[node name="CountLabel" type="Label" parent="HBoxContainer/DeckPanel" unique_id=2051806811]
+layout_mode = 0
 offset_left = 10.0
 offset_top = 36.0
 offset_right = 300.0
@@ -90,15 +101,18 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 14
 text = "0 张 (最少 8, 最多 15)"
 
-[node name="DeckScroll" type="ScrollContainer" parent="HBoxContainer/DeckPanel"]
+[node name="DeckScroll" type="ScrollContainer" parent="HBoxContainer/DeckPanel" unique_id=2065993565]
+layout_mode = 0
 offset_left = 10.0
 offset_top = 66.0
 offset_right = 310.0
 offset_bottom = 490.0
 
-[node name="DeckList" type="VBoxContainer" parent="HBoxContainer/DeckPanel/DeckScroll"]
+[node name="DeckList" type="VBoxContainer" parent="HBoxContainer/DeckPanel/DeckScroll" unique_id=1431944392]
+layout_mode = 2
 
-[node name="BackButton" type="Button" parent="."]
+[node name="BackButton" type="Button" parent="." unique_id=1018628818]
+layout_mode = 0
 offset_left = 40.0
 offset_top = 620.0
 offset_right = 200.0
@@ -107,7 +121,8 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 18
 text = "← 返回主菜单"
 
-[node name="SaveButton" type="Button" parent="."]
+[node name="SaveButton" type="Button" parent="." unique_id=1397894472]
+layout_mode = 0
 offset_left = 1000.0
 offset_top = 620.0
 offset_right = 1240.0

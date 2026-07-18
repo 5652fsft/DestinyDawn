@@ -106,10 +106,14 @@ static func _elaina_active(character: Node, target: Node, main: Node) -> bool:
 	if not target or not main:
 		return false
 	var dmg = 35
+	var is_caster_host = character.name.begins_with("Host")
+	# 主要目标
+	if target.has_method("take_damage"):
+		target.rpc("take_damage", dmg)
+	# 范围内敌方
 	for c in main.get_tree().get_nodes_in_group("characters"):
-		if c != target and c.hp > 0 and target.global_position.distance_to(c.global_position) <= 130:
+		if c != target and c.hp > 0 and c.name.begins_with("Host") != is_caster_host and target.global_position.distance_to(c.global_position) <= 130:
 			c.rpc("take_damage", dmg)
-	target.rpc("take_damage", dmg)
 	target.rpc("_play_vfx_preset", "explosion")
 	print("[Skill] %s [星尘爆裂] → %s 及周围造成 %d 点伤害" % [character.character_name, target.name, dmg])
 	return true
