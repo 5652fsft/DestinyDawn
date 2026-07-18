@@ -4,3 +4,34 @@
 
 [node name="PlayerInfoPanel" type="Panel" unique_id=1419199440]
 script = ExtResource("1_yv6cf")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=641165266]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+
+[node name="PlayerName" type="Label" parent="VBoxContainer" unique_id=1203884164]
+layout_mode = 2
+text = "玩家"
+
+[node name="FactionRow" type="HBoxContainer" parent="VBoxContainer" unique_id=1517087466]
+layout_mode = 2
+
+[node name="FactionDot" type="ColorRect" parent="VBoxContainer/FactionRow" unique_id=265754027]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+
+[node name="EnergyLabel" type="Label" parent="VBoxContainer/FactionRow" unique_id=1718437659]
+layout_mode = 2
+text = "能量: 0"
+
+[node name="TurnHighlight" type="ColorRect" parent="." unique_id=1121483491]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 1
+color = Color(1, 1, 0, 0.15)

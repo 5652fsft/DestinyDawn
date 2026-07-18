@@ -1,72 +1,72 @@
-[gd_resource type="Theme" load_steps=17 format=3 uid="uid://cychdcmr3tshb"]
+[gd_resource type="Theme" format=3 uid="uid://cychdcmr3tshb"]
 
-[sub_resource type="StyleBoxFlat" id="1"]
-bg_color = Color(0.08, 0.08, 0.15, 0.85)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_left = 8
-corner_radius_bottom_right = 8
-content_margin_left = 8
-content_margin_right = 8
-content_margin_top = 8
-content_margin_bottom = 8
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1u3yd"]
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+bg_color = Color(0.3, 0.4, 0.6, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
-[sub_resource type="StyleBoxFlat" id="2"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bf3ko"]
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
 bg_color = Color(0.2, 0.3, 0.5, 0.9)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
-corner_radius_bottom_left = 6
 corner_radius_bottom_right = 6
-content_margin_left = 12
-content_margin_right = 12
-content_margin_top = 6
-content_margin_bottom = 6
+corner_radius_bottom_left = 6
 
-[sub_resource type="StyleBoxFlat" id="3"]
-bg_color = Color(0.3, 0.4, 0.6, 1.0)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pc8b6"]
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+bg_color = Color(0.15, 0.25, 0.4, 1)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
-corner_radius_bottom_left = 6
 corner_radius_bottom_right = 6
-content_margin_left = 12
-content_margin_right = 12
-content_margin_top = 6
-content_margin_bottom = 6
-
-[sub_resource type="StyleBoxFlat" id="4"]
-bg_color = Color(0.15, 0.25, 0.4, 1.0)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
 corner_radius_bottom_left = 6
-corner_radius_bottom_right = 6
-content_margin_left = 12
-content_margin_right = 12
-content_margin_top = 6
-content_margin_bottom = 6
 
-[sub_resource type="StyleBoxFlat" id="5"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_70f4g"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.08, 0.08, 0.15, 0.85)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ld4ip"]
 bg_color = Color(0, 0, 0, 0.5)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
-corner_radius_bottom_left = 4
 corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxFlat" id="6"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bhe5t"]
 bg_color = Color(0.2, 0.8, 0.2, 0.8)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
-corner_radius_bottom_left = 4
 corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
-[node name="GameTheme" type="Theme"]
-panel/styles/panel = SubResource(1)
-button/styles/normal = SubResource(2)
-button/styles/hover = SubResource(3)
-button/styles/pressed = SubResource(4)
-button/colors/font_color = Color(1, 1, 1, 0.9)
-button/colors/font_hover_color = Color(1, 1, 1)
-button/font_sizes/font_size = 16
-label/colors/font_color = Color(1, 1, 1, 0.85)
-label/font_sizes/font_size = 16
-progress_bar/styles/background = SubResource(5)
-progress_bar/styles/fill = SubResource(6)
+[resource]
+Button/colors/font_color = Color(1, 1, 1, 0.9)
+Button/colors/font_hover_color = Color(1, 1, 1, 1)
+Button/font_sizes/font_size = 16
+Button/styles/hover = SubResource("StyleBoxFlat_1u3yd")
+Button/styles/normal = SubResource("StyleBoxFlat_bf3ko")
+Button/styles/pressed = SubResource("StyleBoxFlat_pc8b6")
+Label/colors/font_color = Color(1, 1, 1, 0.85)
+Label/font_sizes/font_size = 16
+Panel/styles/panel = SubResource("StyleBoxFlat_70f4g")
+ProgressBar/styles/background = SubResource("StyleBoxFlat_ld4ip")
+ProgressBar/styles/fill = SubResource("StyleBoxFlat_bhe5t")
