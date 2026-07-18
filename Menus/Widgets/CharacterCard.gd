@@ -17,6 +17,10 @@ func setup(id: String, data: Dictionary):
 	for c in get_children():
 		if c is Label:
 			c.add_theme_font_override("font", FONT)
+	# 加载角色图片
+	var tex = load("res://Assets/Sprites/Characters/%s_Blue.png" % id)
+	if tex and $Sprite:
+		$Sprite.texture = tex
 
 func set_team_status(in_team: bool):
 	is_in_team = in_team

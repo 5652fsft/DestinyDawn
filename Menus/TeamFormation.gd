@@ -73,9 +73,20 @@ func _update_slots():
 			var cid = slots[i]
 			label.text = CHARACTERS[cid]["name"]
 			remove_btn.show()
+			# 加载角色图片到 slot sprite
+			var slot = get_node_or_null("Slot%d" % (i + 1))
+			if slot:
+				var spr = slot.get_node_or_null("Sprite")
+				if spr:
+					var tex = load("res://Assets/Sprites/Characters/%s_Blue.png" % cid)
+					if tex: spr.texture = tex
 		else:
 			label.text = "空"
 			remove_btn.hide()
+			var slot = get_node_or_null("Slot%d" % (i + 1))
+			if slot:
+				var spr = slot.get_node_or_null("Sprite")
+				if spr: spr.texture = null
 
 func _on_save_pressed():
 	if slots.size() != 3:
