@@ -475,8 +475,8 @@ func handle_attack():
 							GlobalGameData.character_attack_used_num += 1
 							GlobalGameData.character_attack_used[name] = true
 						else:
-							main.show_toast("该角色本回合已攻击")
-							print("[Warn] %s 本回合已攻击过！" % name)
+							main.show_toast("该角色本回合已行动")
+							print("[Warn] %s 本回合已行动" % name)
 						main.unselect_character(self)
 						main.check_attack()
 						return
