@@ -16,9 +16,11 @@ func _ready():
 		queue_free()
 		return
 
-	selection_indicator.points = _hexagon(70.0)
-	selection_indicator.z_index = 2
+	selection_indicator.points = _hexagon(75.0)
+	selection_indicator.z_index = 5
 	selection_indicator.antialiased = true
+	hp_bar.z_index = 10
+	hp_fill.z_index = 11
 
 	var shield_style = StyleBoxFlat.new()
 	shield_style.draw_center = false
@@ -93,18 +95,19 @@ func _update_shield():
 func show_selected(selected: bool):
 	if selection_indicator:
 		if selected:
-			selection_indicator.default_color.a = 0.0
 			selection_indicator.visible = true
+			selection_indicator.default_color = Color(1, 1, 0, 1)
 			_start_pulse()
 		else:
 			selection_indicator.visible = false
 			if pulse_tween:
 				pulse_tween.kill()
+			selection_indicator.scale = Vector2.ONE
 
 func _start_pulse():
 	if pulse_tween:
 		pulse_tween.kill()
 	pulse_tween = create_tween()
 	pulse_tween.set_loops()
-	pulse_tween.tween_property(selection_indicator, "default_color:a", 0.6, 0.6)
-	pulse_tween.tween_property(selection_indicator, "default_color:a", 0.1, 0.6)
+	pulse_tween.tween_property(selection_indicator, "scale", Vector2(1.03, 1.03), 0.5)
+	pulse_tween.tween_property(selection_indicator, "scale", Vector2(0.98, 0.98), 0.5)

@@ -45,5 +45,6 @@ z_index = 1
 scale = Vector2(1, 1)
 
 [node name="SelectionIndicator" type="Line2D" parent="." unique_id=1440890590]
-width = 6
-default_color = Color(1, 1, 0, 0)
+width = 10
+default_color = Color(1, 1, 0, 1)
+joint_mode = 1
