@@ -14,11 +14,6 @@ const CARD_SCENE = preload("res://Menus/Widgets/CharacterCard.tscn")
 var slots: Array[String] = []
 var cards: Dictionary = {}  # char_id -> CharacterCard node
 
-func _ready():
-	_clear_team()
-	_build_roster()
-	_update_slots()
-
 func _build_roster():
 	var grid = $RosterGrid
 	for cid in CHARACTERS:
