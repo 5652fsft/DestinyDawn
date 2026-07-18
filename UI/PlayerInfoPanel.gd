@@ -24,7 +24,15 @@ func _ready():
 	var is_local = (player_side == "Host") == effective_host
 	var bg = StyleBoxFlat.new()
 	bg.bg_color = Color(0.12, 0.12, 0.2, 1.0) if is_local else Color(0.2, 0.1, 0.1, 1.0)
+	bg.corner_radius_top_left = 8
+	bg.corner_radius_top_right = 8
+	bg.corner_radius_bottom_left = 8
+	bg.corner_radius_bottom_right = 8
 	add_theme_stylebox_override("panel", bg)
+
+	var blink_tween = create_tween().set_loops()
+	blink_tween.tween_property(turn_highlight, "modulate:a", 0.0, 0.8)
+	blink_tween.tween_property(turn_highlight, "modulate:a", 1.0, 0.8)
 
 func refresh(is_my_turn: bool, energy: int = -1):
 	turn_highlight.visible = is_my_turn
