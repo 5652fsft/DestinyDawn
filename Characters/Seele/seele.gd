@@ -30,10 +30,21 @@ func _ready():
 @rpc("any_peer", "call_local", "reliable")
 func perform_attack(target_path: NodePath):
 	var target = get_node_or_null(target_path)
-	if target and target is CharacterBody2D:
-		last_target_hp = target.hp
-		last_target_max_hp = target.max_hp
-	super(target_path)
+	if not target or not target is CharacterBody2D:
+		return
+	if get_current_phase() != "Attack":
+		return
+
+	last_target_hp = target.hp
+	last_target_max_hp = target.max_hp
+
+	var dmg = effective_attack
+	if last_target_max_hp > 0 and last_target_hp >= last_target_max_hp:
+		dmg = int(dmg * 1.5)
+
+	target.rpc("take_damage", dmg)
+	print("[Info] %s 对 %s 造成 %d 点伤害！" % [name, target.name, dmg])
+	rpc_id(0, "_play_attack_animation", target_path)
 
 func use_active_skill(target: Node) -> bool:
 	return SkillEffect.execute_active(self, active_skill, target, main)
