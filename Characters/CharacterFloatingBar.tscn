@@ -53,3 +53,10 @@ offset_top = -100.0
 offset_right = 56.0
 offset_bottom = -30.0
 color = Color(1, 1, 1, 0.08)
+
+[node name="SelectionIndicator" type="ColorRect" parent="." unique_id=1440890590]
+offset_left = -56.0
+offset_top = -56.0
+offset_right = 56.0
+offset_bottom = 56.0
+color = Color(1, 1, 0, 0)

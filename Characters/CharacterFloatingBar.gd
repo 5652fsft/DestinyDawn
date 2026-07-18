@@ -2,6 +2,7 @@ extends Node2D
 
 var parent_character: CharacterBody2D
 var faction_color: Color = Color.WHITE
+var pulse_tween: Tween = null
 
 @onready var hp_bar: ColorRect = $HPBar
 @onready var hp_fill: ColorRect = $HPBar/HPFill
@@ -9,6 +10,7 @@ var faction_color: Color = Color.WHITE
 @onready var shield_icon: ColorRect = $ShieldIcon
 @onready var shield_label: Label = $ShieldLabel
 @onready var faction_ring: ColorRect = $FactionRing
+@onready var selection_indicator: ColorRect = $SelectionIndicator
 
 func _ready():
 	parent_character = get_parent() as CharacterBody2D
@@ -53,3 +55,22 @@ func _update_shield():
 	shield_label.visible = has_shield
 	if has_shield:
 		shield_label.text = str(s)
+
+func show_selected(selected: bool):
+	if selection_indicator:
+		if selected:
+			selection_indicator.color.a = 0.0
+			selection_indicator.visible = true
+			_start_pulse()
+		else:
+			selection_indicator.visible = false
+			if pulse_tween:
+				pulse_tween.kill()
+
+func _start_pulse():
+	if pulse_tween:
+		pulse_tween.kill()
+	pulse_tween = create_tween()
+	pulse_tween.set_loops()
+	pulse_tween.tween_property(selection_indicator, "color:a", 0.35, 0.6)
+	pulse_tween.tween_property(selection_indicator, "color:a", 0.05, 0.6)

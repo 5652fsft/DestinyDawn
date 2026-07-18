@@ -45,6 +45,8 @@ var is_selected: bool = false:
 	set(value):
 		is_selected = value
 		sprite.modulate = Color.WHITE if not value else Color.YELLOW
+		if floating_bar:
+			floating_bar.show_selected(value)
 		if value and get_current_phase() == "Move":
 			show_move_range()
 		elif not value and get_current_phase() == "Move":
