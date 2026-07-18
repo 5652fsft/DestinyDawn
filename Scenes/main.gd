@@ -24,8 +24,24 @@ var vfx_manager: Node = null
 @onready var client_player_panel = $UI/ClientPlayerPanel
 @onready var toast = $UI/Toast
 
-const CHARACTER_bronya = preload("res://Characters/Bronya/Bronya.tscn")
-const CHARACTER_seele = preload("res://Characters/Seele/Seele.tscn")
+const CHARACTER_BRONYA = preload("res://Characters/Bronya/Bronya.tscn")
+const CHARACTER_SEELE = preload("res://Characters/Seele/Seele.tscn")
+const CHARACTER_ELAINA = preload("res://Characters/Elaina/Elaina.tscn")
+const CHARACTER_FIREFLY = preload("res://Characters/Firefly/Firefly.tscn")
+const CHARACTER_SILVERWOLF = preload("res://Characters/SilverWolf/SilverWolf.tscn")
+
+var team_roster: Array[PackedScene] = [
+	CHARACTER_BRONYA,
+	CHARACTER_ELAINA,
+	CHARACTER_FIREFLY,
+]
+var enemy_roster: Array[PackedScene] = [
+	CHARACTER_SEELE,
+	CHARACTER_SILVERWOLF,
+	CHARACTER_FIREFLY,
+]
+
+var last_attacker: Node = null
 
 # === 默认卡组（临时：Phase 4 将改为战前选择） ===
 var default_deck: Array[String] = [
@@ -42,12 +58,8 @@ func _ready():
 		GlobalGameData.is_host = true
 	_setup_player_panels()
 	if multiplayer.is_server():
-		for i in range(3):
-			var chara = CHARACTER_bronya.instantiate()
-			chara.name = "HostCharacter_%d" % i
-			chara.set_multiplayer_authority(multiplayer.get_unique_id())
-			chara.position = GlobalGameData.host_birth_point[i]
-			Characters.add_child(chara)
+		for i in range(team_roster.size()):
+			_spawn_character(team_roster[i].resource_path, "HostCharacter_%d" % i, multiplayer.get_unique_id(), GlobalGameData.host_birth_point[i])
 		
 		_init_player_card_systems()
 		multiplayer.peer_connected.connect(_on_client_joined)
@@ -74,12 +86,8 @@ func _on_client_joined(id: int):
 	call_deferred("_deferred_spawn_client_characters", id)
 
 func _deferred_spawn_client_characters(id: int):
-	for i in range(3):
-		var chara = CHARACTER_seele.instantiate()
-		chara.name = "Client%dCharacter_%d" % [id, i]
-		chara.set_multiplayer_authority(id)
-		chara.position = GlobalGameData.client_birth_point[i]
-		Characters.add_child(chara)
+	for i in range(enemy_roster.size()):
+		_spawn_character(enemy_roster[i].resource_path, "Client%dCharacter_%d" % [id, i], id, GlobalGameData.client_birth_point[i])
 	print("[Info] 开始游戏")
 	rpc("advance_turn_phase")
 

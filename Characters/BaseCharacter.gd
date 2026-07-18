@@ -499,6 +499,8 @@ func perform_attack(target_path: NodePath):
 	if get_current_phase() != "Attack":
 		return
 		
+	if main:
+		main.last_attacker = self
 	target.rpc("take_damage", effective_attack)
 	print("[Combat] %s → %s 造成 %d 点伤害" % [name, target.name, effective_attack])
 	

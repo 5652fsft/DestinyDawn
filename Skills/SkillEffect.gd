@@ -12,6 +12,12 @@ static func execute_active(character: Node, skill: BaseSkill, target: Node, main
 			return _bronya_active(character, target)
 		"希儿":
 			return _seele_active(character, target, main)
+		"伊蕾娜":
+			return _elaina_active(character, target, main)
+		"流萤":
+			return _firefly_active(character, target, main)
+		"银狼":
+			return _silverwolf_active(character, target, main)
 		_:
 			push_warning("未知角色技能: ", char_name)
 			return false
@@ -91,4 +97,39 @@ static func _seele_active(character: Node, target: Node, main: Node) -> bool:
 		var bonus = int(character.attack * 1.2)
 		target.rpc("take_damage", bonus)
 		print("[Skill] %s [相位突进] → %s 造成 %d 点伤害" % [character.character_name, target.name, bonus])
+	return true
+
+# === 伊蕾娜 主动：星尘爆裂 ===
+static func _elaina_active(character: Node, target: Node, main: Node) -> bool:
+	if not target or not main:
+		return false
+	var dmg = 35
+	for c in main.get_tree().get_nodes_in_group("characters"):
+		if c != target and c.hp > 0 and target.global_position.distance_to(c.global_position) <= 130:
+			c.rpc("take_damage", dmg)
+	target.rpc("take_damage", dmg)
+	target.rpc("_play_vfx_preset", "explosion")
+	print("[Skill] %s [星尘爆裂] → %s 及周围造成 %d 点伤害" % [character.character_name, target.name, dmg])
+	return true
+
+# === 流萤 主动：烈焰冲锋 ===
+static func _firefly_active(character: Node, target: Node, main: Node) -> bool:
+	if not target:
+		return false
+	target.rpc("take_damage", 25)
+	var bm = main.get_node_or_null("BuffManager") if main else null
+	if bm and bm.has_method("apply_buff"):
+		bm.apply_buff(target, "burn", 5, 2, character)
+	print("[Skill] %s [烈焰冲锋] → %s 造成 25 伤害 + 灼烧" % [character.character_name, target.name])
+	return true
+
+# === 银狼 主动：系统入侵 ===
+static func _silverwolf_active(character: Node, target: Node, main: Node) -> bool:
+	if not target:
+		return false
+	var bm = main.get_node_or_null("BuffManager") if main else null
+	if bm and bm.has_method("apply_buff"):
+		bm.apply_buff(target, "attack_debuff", -8, 3, character)
+		bm.apply_buff(target, "move_debuff", -2, 3, character)
+	print("[Skill] %s [系统入侵] → %s 虚弱+迟缓 3 回合" % [character.character_name, target.name])
 	return true
