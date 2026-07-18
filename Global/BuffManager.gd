@@ -19,9 +19,9 @@ func apply_buff(target: Node, buff_id: String, value: int, duration: int, source
 		if multiplayer.has_multiplayer_peer():
 			target.rpc("_sync_buffs", _pack(target))
 
-	var vfx_color = _vfx_for(buff_id)
-	if vfx_color and target.has_method("rpc"):
-		target.rpc("_play_vfx", vfx_color, 0.25)
+	var preset = _preset_for(buff_id)
+	if preset and target.has_method("rpc"):
+		target.rpc("_play_vfx_preset", preset)
 
 	_emit(target)
 	return true
@@ -145,16 +145,14 @@ func _emit(target: Node):
 	if target.has_signal("buffs_changed"):
 		target.buffs_changed.emit()
 
-static func _vfx_for(buff_id: String) -> Color:
+static func _preset_for(buff_id: String) -> String:
 	match buff_id:
 		"attack_buff", "defense_buff", "regen":
-			return Color(1.0, 0.9, 0.2)
+			return "buff"
 		"attack_debuff", "move_debuff", "poison", "burn":
-			return Color(0.6, 0.2, 0.8)
-		"mark":
-			return Color(0.3, 0.5, 0.8)
+			return "debuff"
 		_:
-			return Color.WHITE
+			return "buff"
 
 static func _cat_str(cat: BuffData.Category) -> String:
 	match cat:

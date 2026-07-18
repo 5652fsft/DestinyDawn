@@ -39,6 +39,13 @@ var buff_manager: Node:
 		return _bm
 var _bm: Node = null
 
+var vfx_manager: Node:
+	get:
+		if _vm == null and main:
+			_vm = main.get_node_or_null("VFXManager")
+		return _vm
+var _vm: Node = null
+
 signal buffs_changed
 
 # === 状态变量 ===
@@ -440,23 +447,47 @@ func perform_attack(target_path: NodePath):
 
 @rpc("call_local", "reliable")
 func _play_attack_animation(target_path: NodePath):
-	var target = get_node_or_null(target_path)
-	if not target or not target.has_node("Sprite2D"):
+	var target_node = get_node_or_null(target_path)
+	if not target_node or not target_node.has_node("Sprite2D"):
 		return
 
-	var target_sprite: Sprite2D = target.get_node("Sprite2D")
+	var target_sprite: Sprite2D = target_node.get_node("Sprite2D")
 	if not target_sprite:
 		return
 
-	if target.hit_tween and target.hit_tween.is_running():
-		target.hit_tween.kill()
+	# 攻击者前冲
+	var dir = sign(target_node.global_position.x - global_position.x)
+	var lurch = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	lurch.tween_property(sprite, "offset:x", dir * 12.0, 0.06)
+	lurch.tween_property(sprite, "offset:x", 0.0, 0.08)
 
-	target_sprite.modulate = Color(1, 0, 0)
-	var target_color = Color.YELLOW if target.is_selected else Color.WHITE
-	target.hit_tween = create_tween()
-	target.hit_tween.set_trans(Tween.TRANS_LINEAR)
-	target.hit_tween.tween_property(target_sprite, "modulate", target_color, 0.15)
+	# 受击反馈 + 粒子
+	if target_node.hit_tween and target_node.hit_tween.is_running():
+		target_node.hit_tween.kill()
+
+	target_sprite.modulate = Color(1.5, 1.0, 1.0)
+	var target_color = Color.YELLOW if target_node.is_selected else Color.WHITE
+	target_node.hit_tween = create_tween().set_trans(Tween.TRANS_LINEAR)
+	target_node.hit_tween.tween_property(target_sprite, "modulate", target_color, 0.12)
+
+	# 命中顿帧 (hit stop)
+	_hit_stop(0.05)
+
+	# 粒子 VFX
+	if vfx_manager and vfx_manager.has_method("play"):
+		vfx_manager.play(target_node, "hit")
+
 	_shake_camera(4.0)
+
+func _hit_stop(duration: float = 0.05):
+	Engine.time_scale = 0.05
+	await get_tree().create_timer(duration * 20.0).timeout
+	Engine.time_scale = 1.0
+
+@rpc("any_peer", "call_local", "reliable")
+func _play_vfx_preset(preset: String):
+	if vfx_manager and vfx_manager.has_method("play"):
+		vfx_manager.play(self, preset)
 
 @rpc("any_peer", "call_local", "reliable")
 func _play_vfx(color: Color, duration: float = 0.2):

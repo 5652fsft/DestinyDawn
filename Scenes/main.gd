@@ -18,6 +18,7 @@ var is_targeting: bool = false
 @onready var energy_system = $EnergySystem
 @onready var deck_manager = $DeckManager
 var buff_manager: Node = null
+var vfx_manager: Node = null
 @onready var skill_panel = $UI/SkillPanel
 @onready var host_player_panel = $UI/HostPlayerPanel
 @onready var client_player_panel = $UI/ClientPlayerPanel
@@ -35,6 +36,7 @@ var default_deck: Array[String] = [
 
 func _ready():
 	_init_buff_manager()
+	_init_vfx_manager()
 	if not multiplayer.has_multiplayer_peer():
 		GlobalGameData.is_host = true
 	_setup_player_panels()
@@ -57,6 +59,13 @@ func _init_buff_manager():
 	bm.set_script(load("res://Global/BuffManager.gd"))
 	add_child(bm)
 	buff_manager = bm
+
+func _init_vfx_manager():
+	var vm = Node.new()
+	vm.name = "VFXManager"
+	vm.set_script(load("res://Global/VFXManager.gd"))
+	add_child(vm)
+	vfx_manager = vm
 
 func _on_client_joined(id: int):
 	print("[Info] 客户端 %d 加入，为其创建角色" % id)
