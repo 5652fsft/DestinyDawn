@@ -341,6 +341,8 @@ func _on_target_selected(target: Node):
 	elif selected_character and selected_character.has_method("use_active_skill") and selected_character.active_skill:
 		selected_character.use_active_skill(target)
 		selected_character.active_skill.current_cooldown = selected_character.active_skill.cooldown
+		GlobalGameData.character_attack_used[selected_character.name] = true
+		GlobalGameData.character_attack_used_num += 1
 		skill_panel._update_cooldown()
 		cancel_targeting()
 

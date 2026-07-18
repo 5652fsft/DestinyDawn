@@ -5,16 +5,18 @@
 
 [node name="SkillPanel" type="Panel"]
 visible = false
-offset_left = 30.0
-offset_top = 500.0
-offset_right = 330.0
-offset_bottom = 640.0
+offset_left = 20.0
+offset_top = 480.0
+offset_right = 340.0
+offset_bottom = 660.0
 script = ExtResource("1_af7tq")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 0
-offset_right = 300.0
-offset_bottom = 140.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 308.0
+offset_bottom = 168.0
 
 [node name="SkillNameLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2
