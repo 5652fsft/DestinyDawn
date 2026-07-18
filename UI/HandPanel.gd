@@ -99,6 +99,10 @@ func _compute(i: int, n: int) -> Dictionary:
 		angle = angle
 	}
 
+func _z(i: int, n: int) -> int:
+	var center = float(n - 1) * 0.5
+	return int(n - abs(float(i) - center))
+
 func _justify():
 	var n = card_uis.size()
 	if n == 0:
@@ -110,6 +114,7 @@ func _justify():
 		var p = _compute(i, n)
 		card.position = Vector2(p.x, p.y)
 		card.rotation = p.r
+		card.z_index = _z(i, n)
 
 func _layout_cards():
 	var n = card_uis.size()
@@ -134,6 +139,8 @@ func _layout_cards():
 		var p = _compute(i, n)
 		var target_pos = Vector2(p.x, p.y)
 		var target_rot = p.r
+
+		card.z_index = _z(i, n)
 
 		if card.has_meta("_entrance"):
 			card.remove_meta("_entrance")
