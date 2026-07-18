@@ -1,12 +1,12 @@
 extends Control
 
 const FONT = preload("res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf")
-const CHARACTERS = {
-	"bronya":    {name:"布洛妮娅", hp:120, move:6, atk:20, skill:"护卫指令"},
-	"seele":     {name:"希儿",    hp:90,  move:5, atk:20, skill:"相位突进"},
-	"elaina":    {name:"伊蕾娜",  hp:85,  move:5, atk:22, skill:"星尘爆裂"},
-	"firefly":   {name:"流萤",    hp:130, move:5, atk:18, skill:"烈焰冲锋"},
-	"silverwolf":{name:"银狼",    hp:90,  move:6, atk:20, skill:"系统入侵"},
+var CHARACTERS = {
+	"bronya":    {"name":"布洛妮娅", "hp":120, "move":6, "atk":20, "skill":"护卫指令"},
+	"seele":     {"name":"希儿",    "hp":90,  "move":5, "atk":20, "skill":"相位突进"},
+	"elaina":    {"name":"伊蕾娜",  "hp":85,  "move":5, "atk":22, "skill":"星尘爆裂"},
+	"firefly":   {"name":"流萤",    "hp":130, "move":5, "atk":18, "skill":"烈焰冲锋"},
+	"silverwolf":{"name":"银狼",    "hp":90,  "move":6, "atk":20, "skill":"系统入侵"},
 }
 
 const CARD_SCENE = preload("res://Menus/Widgets/CharacterCard.tscn")
@@ -56,7 +56,7 @@ func _update_slots():
 		var remove_btn = get_node("Slot%d/RemoveButton" % (i + 1))
 		if i < slots.size():
 			var cid = slots[i]
-			label.text = CHARACTERS[cid].name
+			label.text = CHARACTERS[cid]["name"]
 			remove_btn.show()
 		else:
 			label.text = "空"
