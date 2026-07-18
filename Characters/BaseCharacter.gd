@@ -406,6 +406,7 @@ func handle_move():
 	
 		elif is_selected:
 			if GlobalGameData.character_move_used.get(name, false):
+				main.show_toast("该角色本回合已移动")
 				print("[Warn] 本回合已移动！")
 				return
 			
@@ -414,10 +415,12 @@ func handle_move():
 				var cell_coord: Vector2i = grid_layer.local_to_map(local_mouse)
 			
 				if not valid_move_cells.has(cell_coord):
+					main.show_toast("超出移动范围")
 					print("[Warn] 目标格子超出移动范围、不可达或被阻挡")
 					return
 				
 				if main.is_cell_occupied(cell_coord, self):
+					main.show_toast("该格子已被占据")
 					print("[Warn] 目标格子已被占据！")
 					return
 				
@@ -466,11 +469,13 @@ func handle_attack():
 							GlobalGameData.character_attack_used_num += 1
 							GlobalGameData.character_attack_used[name] = true
 						else:
+							main.show_toast("该角色本回合已攻击")
 							print("[Warn] %s 本回合已攻击过！" % name)
 						main.unselect_character(self)
 						main.check_attack()
 						return
 					else:
+						main.show_toast("超出攻击范围")
 						print("[Warn] %s 目标超出攻击范围！" % name)
 						return
 			# 点击空地 → 取消选中

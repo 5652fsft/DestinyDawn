@@ -22,6 +22,7 @@ var vfx_manager: Node = null
 @onready var skill_panel = $UI/SkillPanel
 @onready var host_player_panel = $UI/HostPlayerPanel
 @onready var client_player_panel = $UI/ClientPlayerPanel
+@onready var toast = $UI/Toast
 
 const CHARACTER_bronya = preload("res://Characters/Bronya/Bronya.tscn")
 const CHARACTER_seele = preload("res://Characters/Seele/Seele.tscn")
@@ -146,6 +147,10 @@ func is_cell_occupied(cell: Vector2i, except_chara = null) -> bool:
 			return true
 	return false
 	
+func show_toast(msg: String, duration: float = 1.5):
+	if toast and toast.has_method("show_message"):
+		toast.show_message(msg, duration)
+
 func find_cell_occupant(cell: Vector2i, except_chara = null) -> CharacterBody2D:
 	cell_occupancy.clear()
 	for chara in characters:
@@ -205,6 +210,7 @@ func on_card_played(card_data: CardData):
 	if get_current_player_id() != my_pid:
 		return
 	if not energy_system.can_afford(my_pid, card_data.cost):
+		show_toast("能量不足！需要 %d 能量" % card_data.cost)
 		print("[Warn] %s 能量不足，无法使用 %s" % [who, card_data.card_name])
 		return
 	print("[Card] %s 选中卡牌 [%s]" % [who, card_data.card_name])

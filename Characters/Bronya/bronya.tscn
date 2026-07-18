@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://dyy6a6vi33m7s"]
+[gd_scene format=3 uid="uid://c3kpktof2qixl"]
 
 [ext_resource type="Script" uid="uid://bk66soey1gkfx" path="res://Characters/Bronya/Bronya.gd" id="1_br5t4"]
 [ext_resource type="PackedScene" uid="uid://dgleh5lfnpj7g" path="res://Characters/FloatingBar.tscn" id="3_br5t4"]

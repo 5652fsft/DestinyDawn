@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://d3h4tqsh6j7ek"]
+
+[ext_resource type="Script" path="res://UI/Toast.gd" id="1"]
+
+[node name="Toast" type="Label"]
+anchors_preset = 13
+anchor_top = 0.1
+anchor_bottom = 0.1
+offset_left = -300.0
+offset_right = 300.0
+grow_horizontal = 2
+mouse_filter = 2
+script = ExtResource("1")

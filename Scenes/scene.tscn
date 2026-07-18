@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://b4hqxvb38t0ya" path="res://UI/SkillPanel.tscn" id="10_p4fma"]
 [ext_resource type="PackedScene" uid="uid://crt0kt1u5eftp" path="res://UI/PlayerInfoPanel.tscn" id="11_p4fma"]
 [ext_resource type="Theme" uid="uid://cychdcmr3tshb" path="res://UI/Theme/GameTheme.tres" id="12_p4fma"]
+[ext_resource type="PackedScene" uid="uid://d3h4tqsh6j7ek" path="res://UI/Toast.tscn" id="13_p4fma"]
 
 [node name="Main" type="Node2D" unique_id=1808279475]
 position = Vector2(-109, 45)
@@ -78,5 +79,7 @@ offset_right = 1270.0
 offset_bottom = 80.0
 theme = ExtResource("12_p4fma")
 player_side = "Client"
+
+[node name="Toast" parent="UI" instance=ExtResource("13_p4fma")]
 
 [connection signal="skill_used" from="UI/SkillPanel" to="." method="_on_skill_used"]
