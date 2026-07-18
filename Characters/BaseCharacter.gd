@@ -23,7 +23,7 @@ var hp: int:
 # === 节点引用 ===
 @onready var sprite: Sprite2D = $Sprite2D
 
-const FLOATING_BAR = preload("res://Characters/CharacterFloatingBar.tscn")
+const FLOATING_BAR = preload("res://Characters/FloatingBar.tscn")
 const FLOATING_NUM = preload("res://Effects/FloatingNumber.tscn")
 var floating_bar: Node2D = null
 
@@ -169,7 +169,7 @@ func _update_sprite_texture():
 	var is_host_side = name.begins_with("Host")
 	var is_friendly = is_host_side == GlobalGameData.is_host
 	var suffix = "_blue.png" if is_friendly else "_red.png"
-	var tex = load("res://Assets/Sprites/Rings/%s%s" % [char_id, suffix])
+	var tex = load("res://Assets/Sprites/Characters/%s%s" % [char_id, suffix])
 	if tex:
 		sprite.texture = tex
 	if not grid_layer:

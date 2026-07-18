@@ -23,8 +23,8 @@ var vfx_manager: Node = null
 @onready var host_player_panel = $UI/HostPlayerPanel
 @onready var client_player_panel = $UI/ClientPlayerPanel
 
-const CHARACTER_bronya = preload("res://Characters/Bronya/bronya.tscn")
-const CHARACTER_seele = preload("res://Characters/Seele/seele.tscn")
+const CHARACTER_bronya = preload("res://Characters/Bronya/Bronya.tscn")
+const CHARACTER_seele = preload("res://Characters/Seele/Seele.tscn")
 
 # === 默认卡组（临时：Phase 4 将改为战前选择） ===
 var default_deck: Array[String] = [
