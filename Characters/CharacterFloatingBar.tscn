@@ -27,6 +27,7 @@ offset_top = 0.0
 offset_right = 60.0
 offset_bottom = 10.0
 mouse_filter = 1
+z_index = 12
 
 [node name="HPLabel" type="Label" parent="HPBar" unique_id=547392923]
 layout_mode = 0
@@ -35,7 +36,10 @@ offset_top = 0.0
 offset_right = 60.0
 offset_bottom = 10.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 8
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
 text = "100/100"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -45,6 +49,9 @@ z_index = 1
 scale = Vector2(1, 1)
 
 [node name="SelectionIndicator" type="Line2D" parent="." unique_id=1440890590]
-width = 10
-default_color = Color(1, 1, 0, 1)
-joint_mode = 1
+visible = false
+width = 8
+default_color = Color(1, 1, 0, 0.8)
+joint_mode = 2
+begin_cap_mode = 1
+end_cap_mode = 1

@@ -17,6 +17,7 @@ func _ready():
 		return
 
 	selection_indicator.points = _hexagon(75.0)
+	selection_indicator.closed = true
 	selection_indicator.z_index = 5
 	selection_indicator.antialiased = true
 	hp_bar.z_index = 10
@@ -24,10 +25,10 @@ func _ready():
 
 	var shield_style = StyleBoxFlat.new()
 	shield_style.draw_center = false
-	shield_style.border_width_left = 2
-	shield_style.border_width_top = 2
-	shield_style.border_width_right = 2
-	shield_style.border_width_bottom = 2
+	shield_style.border_width_left = 4
+	shield_style.border_width_top = 4
+	shield_style.border_width_right = 4
+	shield_style.border_width_bottom = 4
 	shield_style.border_color = Color(1, 1, 1, 0.8)
 	shield_style.corner_radius_top_left = 2
 	shield_style.corner_radius_top_right = 2
@@ -48,7 +49,6 @@ func _hexagon(radius: float) -> PackedVector2Array:
 		Vector2(0, h),
 		Vector2(-w, h / 2.0),
 		Vector2(-w, -h / 2.0),
-		Vector2(0, -h)
 	])
 
 func _update_ring_texture():
@@ -96,18 +96,18 @@ func show_selected(selected: bool):
 	if selection_indicator:
 		if selected:
 			selection_indicator.visible = true
-			selection_indicator.default_color = Color(1, 1, 0, 1)
+			selection_indicator.default_color = Color(1, 1, 0, 0.8)
 			_start_pulse()
 		else:
 			selection_indicator.visible = false
 			if pulse_tween:
 				pulse_tween.kill()
-			selection_indicator.scale = Vector2.ONE
+			selection_indicator.default_color.a = 0.8
 
 func _start_pulse():
 	if pulse_tween:
 		pulse_tween.kill()
 	pulse_tween = create_tween()
 	pulse_tween.set_loops()
-	pulse_tween.tween_property(selection_indicator, "scale", Vector2(1.03, 1.03), 0.5)
-	pulse_tween.tween_property(selection_indicator, "scale", Vector2(0.98, 0.98), 0.5)
+	pulse_tween.tween_property(selection_indicator, "default_color:a", 0.8, 0.5)
+	pulse_tween.tween_property(selection_indicator, "default_color:a", 0.5, 0.5)
