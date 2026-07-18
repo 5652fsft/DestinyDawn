@@ -21,9 +21,9 @@ func _ready():
 	var is_local = (player_side == "Host") == GlobalGameData.is_host
 	var bg = StyleBoxFlat.new()
 	if is_local:
-		bg.bg_color = Color(0.12, 0.12, 0.2, 0.95)
+		bg.bg_color = Color(0.12, 0.12, 0.2, 1.0)
 	else:
-		bg.bg_color = Color(0.2, 0.1, 0.1, 0.95)
+		bg.bg_color = Color(0.2, 0.1, 0.1, 1.0)
 	bg.corner_radius_top_left = 8
 	bg.corner_radius_top_right = 8
 	bg.corner_radius_bottom_left = 8
