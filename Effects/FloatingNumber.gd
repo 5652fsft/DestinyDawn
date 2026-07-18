@@ -12,13 +12,13 @@ func _ready():
 func show_value(value: int, is_heal: bool = false, is_shield: bool = false):
 	if is_heal:
 		text = "+%d" % value
-		add_theme_color_override("font_color", Color(0.2, 1.0, 0.2))
+		add_theme_color_override("font_color", Color(0.0, 1.0, 0.2))
 	elif is_shield:
 		text = "+%d" % value
 		add_theme_color_override("font_color", Color(0.3, 0.6, 1.0))
 	else:
 		text = "-%d" % value
-		add_theme_color_override("font_color", Color(1.0, 0.3, 0.2))
+		add_theme_color_override("font_color", Color(1.0, 0.15, 0.15))
 	
 	var tween = create_tween()
 	tween.set_parallel(true)

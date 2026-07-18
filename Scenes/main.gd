@@ -350,7 +350,7 @@ func _sync_hand(player_id: int, hand: Array):
 	if player_id == my_pid:
 		var typed: Array[String] = []
 		typed.assign(hand)
-		hand_panel.set_hand(typed)
+		hand_panel.play_draw_animation(typed)
 
 func _on_skill_used(skill: BaseSkill, target_type: int):
 	if not selected_character or not skill:

@@ -44,7 +44,7 @@ func draw_cards(player_id: int, count: int) -> Array[String]:
 
 @rpc("authority", "call_local", "reliable")
 func play_card(player_id: int, card_id: String) -> bool:
-	if not player_hands.has(player_id) or not player_discards.has(player_id):
+	if not player_hands.has(player_id) or not player_decks.has(player_id):
 		return false
 	var hand: Array[String] = []
 	hand.assign(player_hands[player_id])
@@ -52,10 +52,10 @@ func play_card(player_id: int, card_id: String) -> bool:
 		return false
 	hand.erase(card_id)
 	player_hands[player_id] = hand
-	var discard: Array[String] = []
-	discard.assign(player_discards[player_id])
-	discard.append(card_id)
-	player_discards[player_id] = discard
+	var deck: Array[String] = []
+	deck.assign(player_decks[player_id])
+	deck.append(card_id)
+	player_decks[player_id] = deck
 	return true
 
 func get_hand(player_id: int) -> Array[String]:
