@@ -47,6 +47,7 @@ static func _execute_heal(card: CardData, target: Node) -> bool:
 		return false
 	if target.has_method("rpc"):
 		target.rpc("take_damage", -heal_amount)
+		target.rpc("_play_vfx", Color(0.2, 1.0, 0.2), 0.25)
 	else:
 		target.hp = min(target.max_hp, target.hp + heal_amount)
 	return true
@@ -59,6 +60,7 @@ static func _execute_shield(card: CardData, target: Node) -> bool:
 	target.shield = target.shield + card.effect_value
 	if target.has_method("rpc"):
 		target.rpc("_sync_shield", target.shield)
+		target.rpc("_play_vfx", Color(0.3, 0.5, 1.0), 0.3)
 	return true
 
 static func _execute_buff_attack(card: CardData, target: Node) -> bool:
@@ -81,6 +83,8 @@ static func _apply_temp_buff(target: Node, buff_key: String, value: int, duratio
 	target.buffs[buff_key] = { "value": value, "remaining": duration }
 	if target.has_method("rpc"):
 		target.rpc("_sync_buffs", target.buffs.duplicate())
+		var vfx_color = Color(1.0, 0.9, 0.2) if value > 0 else Color(0.6, 0.2, 0.8)
+		target.rpc("_play_vfx", vfx_color, 0.25)
 	return true
 
 static func _execute_teleport(card: CardData, target: Node, main: Node) -> bool:

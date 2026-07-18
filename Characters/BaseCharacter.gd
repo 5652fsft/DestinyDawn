@@ -407,25 +407,37 @@ func _play_attack_animation(target_path: NodePath):
 	if not target or not target.has_node("Sprite2D"):
 		return
 
-	var sprite: Sprite2D = target.get_node("Sprite2D")
-	if not sprite:
+	var target_sprite: Sprite2D = target.get_node("Sprite2D")
+	if not target_sprite:
 		return
 
-	# 中断之前的受击动画
 	if target.hit_tween and target.hit_tween.is_running():
 		target.hit_tween.kill()
 
-	# 立即变红
-	sprite.modulate = Color(1, 0, 0)
-
-	# 计算恢复后的颜色
+	target_sprite.modulate = Color(1, 0, 0)
 	var target_color = Color.YELLOW if target.is_selected else Color.WHITE
-
-	# 淡回原色（也可以直接跳变，用 tween_property 或 set_final_value）
 	target.hit_tween = create_tween()
 	target.hit_tween.set_trans(Tween.TRANS_LINEAR)
-	target.hit_tween.tween_property(sprite, "modulate", target_color, 0.15)
-	print("[Visual] %s 攻击了目标！" % name)
+	target.hit_tween.tween_property(target_sprite, "modulate", target_color, 0.15)
+	_shake_camera(4.0)
+
+@rpc("call_local", "reliable")
+func _play_vfx(color: Color, duration: float = 0.2):
+	if not sprite:
+		return
+	if hit_tween and hit_tween.is_running():
+		hit_tween.kill()
+	var orig = sprite.modulate
+	sprite.modulate = color
+	hit_tween = create_tween()
+	hit_tween.set_trans(Tween.TRANS_LINEAR)
+	var restore = Color.YELLOW if is_selected else Color.WHITE
+	hit_tween.tween_property(sprite, "modulate", restore, duration)
+
+func _shake_camera(intensity: float):
+	var cam = get_tree().current_scene.find_child("Camera", true, false)
+	if cam and cam.has_method("shake"):
+		cam.shake(intensity)
 
 func _spawn_float(value: int, heal: bool = false, shield: bool = false):
 	var num = FLOATING_NUM.instantiate()
@@ -453,6 +465,7 @@ func take_damage(damage: int):
 	
 	hp = max(0, hp - damage)
 	_spawn_float(damage)
+	_shake_camera(3.0)
 	if multiplayer.is_server():
 		print("[HP] %s 剩余 HP: %d" % [name, hp])
 	if hp <= 0:
