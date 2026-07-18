@@ -297,20 +297,32 @@ func show_attack_range():
 
 	# 高亮所有可攻击角色
 	for cell in valid_attack_cells.keys():
-		if cell != start_cell and is_enemy(main.find_cell_occupant(cell)):
+		var enemy = main.find_cell_occupant(cell)
+		if cell != start_cell and enemy and is_enemy(enemy):
 			if highlight_layer:
 				highlight_layer.set_cell(cell, 0, Vector2i.ZERO)
-			# 额外覆盖一个半透明红框确保可见
-			var local = grid_layer.map_to_local(cell)
-			var world = grid_layer.to_global(local)
-			var rect = ColorRect.new()
-			rect.size = Vector2(120, 140)
-			rect.color = Color(1.0, 0.15, 0.15, 0.35)
-			rect.global_position = world - rect.size * 0.5
-			rect.z_index = 50
-			rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			get_tree().current_scene.add_child(rect)
-			highlight_overlays.append(rect)
+			# 在敌方角色身上创建六边形高亮
+			var hex = Polygon2D.new()
+			var r = 55.0
+			var pts: PackedVector2Array = []
+			for k in range(6):
+				var a = deg_to_rad(60 * k - 30)
+				pts.append(Vector2(cos(a) * r, sin(a) * r))
+			hex.polygon = pts
+			hex.color = Color(1.0, 0.15, 0.15, 0.5)
+			hex.z_index = 60
+			hex.global_position = enemy.global_position
+			# 外边框
+			var outline = Line2D.new()
+			outline.points = pts
+			outline.default_color = Color(1.0, 0.2, 0.2, 0.9)
+			outline.width = 4.0
+			outline.z_index = 61
+			outline.global_position = enemy.global_position
+			get_tree().current_scene.add_child(hex)
+			get_tree().current_scene.add_child(outline)
+			highlight_overlays.append(hex)
+			highlight_overlays.append(outline)
 
 func hide_move_range():
 	valid_move_cells.clear()
@@ -319,12 +331,12 @@ func hide_move_range():
 		
 func hide_attack_range():
 	valid_attack_cells.clear()
-	if highlight_layer:
-		highlight_layer.clear()
 	for h in highlight_overlays:
 		if is_instance_valid(h):
 			h.queue_free()
 	highlight_overlays.clear()
+	if highlight_layer:
+		highlight_layer.clear()
 
 func get_current_phase() -> String:
 	var phase = GlobalGameData.current_turn_phase
