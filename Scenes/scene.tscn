@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://crt0kt1u5eftp" path="res://UI/PlayerInfoPanel.tscn" id="11_p4fma"]
 [ext_resource type="Theme" uid="uid://cychdcmr3tshb" path="res://UI/Theme/GameTheme.tres" id="12_p4fma"]
 [ext_resource type="PackedScene" uid="uid://d3h4tqsh6j7ek" path="res://UI/Toast.tscn" id="13_p4fma"]
+[ext_resource type="PackedScene" uid="uid://i3ka4v2gb3yh" path="res://UI/BattleResult.tscn" id="14_p4fma"]
 
 [node name="Main" type="Node2D" unique_id=1808279475]
 position = Vector2(-109, 45)
@@ -83,5 +84,7 @@ player_side = "Client"
 
 [node name="Toast" parent="UI" unique_id=132693243 instance=ExtResource("13_p4fma")]
 anchors_preset = -1
+
+[node name="BattleResult" parent="UI" instance=ExtResource("14_p4fma")]
 
 [connection signal="skill_used" from="UI/SkillPanel" to="." method="_on_skill_used"]

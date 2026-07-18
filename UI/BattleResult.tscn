@@ -1,0 +1,121 @@
+[gd_scene format=3 uid="uid://i3ka4v2gb3yh"]
+
+[ext_resource type="Script" path="res://UI/BattleResult.gd" id="1"]
+[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf" id="2"]
+
+[node name="BattleResult" type="Panel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("1")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+offset_left = 240.0
+offset_top = 100.0
+offset_right = 1040.0
+offset_bottom = 620.0
+
+[node name="TitleLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "胜 利"
+horizontal_alignment = 1
+
+[node name="StatsContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="MyPanel" type="Panel" parent="VBoxContainer/StatsContainer"]
+custom_minimum_size = Vector2(350, 300)
+size_flags_horizontal = 1
+
+[node name="MyLabel" type="Label" parent="VBoxContainer/StatsContainer/MyPanel"]
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 330.0
+offset_bottom = 50.0
+theme_override_font_sizes/font_size = 22
+text = "你"
+
+[node name="MyDamage" type="Label" parent="VBoxContainer/StatsContainer/MyPanel"]
+offset_left = 20.0
+offset_top = 60.0
+offset_right = 330.0
+offset_bottom = 90.0
+theme_override_font_sizes/font_size = 18
+text = "造成伤害: 0"
+
+[node name="MyHeal" type="Label" parent="VBoxContainer/StatsContainer/MyPanel"]
+offset_left = 20.0
+offset_top = 100.0
+offset_right = 330.0
+offset_bottom = 130.0
+theme_override_font_sizes/font_size = 18
+text = "治疗量: 0"
+
+[node name="MyCards" type="Label" parent="VBoxContainer/StatsContainer/MyPanel"]
+offset_left = 20.0
+offset_top = 140.0
+offset_right = 330.0
+offset_bottom = 170.0
+theme_override_font_sizes/font_size = 18
+text = "使用卡牌: 0"
+
+[node name="MyKills" type="Label" parent="VBoxContainer/StatsContainer/MyPanel"]
+offset_left = 20.0
+offset_top = 180.0
+offset_right = 330.0
+offset_bottom = 210.0
+theme_override_font_sizes/font_size = 18
+text = "击杀: 0"
+
+[node name="EnemyPanel" type="Panel" parent="VBoxContainer/StatsContainer"]
+custom_minimum_size = Vector2(350, 300)
+size_flags_horizontal = 1
+
+[node name="EnLabel" type="Label" parent="VBoxContainer/StatsContainer/EnemyPanel"]
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 330.0
+offset_bottom = 50.0
+theme_override_font_sizes/font_size = 22
+text = "对手"
+
+[node name="EnDamage" type="Label" parent="VBoxContainer/StatsContainer/EnemyPanel"]
+offset_left = 20.0
+offset_top = 60.0
+offset_right = 330.0
+offset_bottom = 90.0
+theme_override_font_sizes/font_size = 18
+text = "造成伤害: 0"
+
+[node name="EnHeal" type="Label" parent="VBoxContainer/StatsContainer/EnemyPanel"]
+offset_left = 20.0
+offset_top = 100.0
+offset_right = 330.0
+offset_bottom = 130.0
+theme_override_font_sizes/font_size = 18
+text = "治疗量: 0"
+
+[node name="EnCards" type="Label" parent="VBoxContainer/StatsContainer/EnemyPanel"]
+offset_left = 20.0
+offset_top = 140.0
+offset_right = 330.0
+offset_bottom = 170.0
+theme_override_font_sizes/font_size = 18
+text = "使用卡牌: 0"
+
+[node name="EnKills" type="Label" parent="VBoxContainer/StatsContainer/EnemyPanel"]
+offset_left = 20.0
+offset_top = 180.0
+offset_right = 330.0
+offset_bottom = 210.0
+theme_override_font_sizes/font_size = 18
+text = "击杀: 0"
+
+[node name="ReturnButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "返回主菜单"
+
+[connection signal="pressed" from="VBoxContainer/ReturnButton" to="." method="_on_return_pressed"]
