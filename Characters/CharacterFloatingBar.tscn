@@ -27,7 +27,7 @@ offset_top = 0.0
 offset_right = 60.0
 offset_bottom = 10.0
 mouse_filter = 1
-z_index = 12
+z_index = 9
 
 [node name="HPLabel" type="Label" parent="HPBar" unique_id=547392923]
 layout_mode = 0

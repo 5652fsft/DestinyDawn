@@ -1,7 +1,7 @@
 extends Label
 
-var float_speed: float = 60.0
-var fade_duration: float = 0.55
+var float_speed: float = 40.0
+var fade_duration: float = 0.6
 
 func _ready():
 	vertical_alignment = 1
