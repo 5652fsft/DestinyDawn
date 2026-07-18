@@ -8,6 +8,7 @@ const FONT = preload("res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf")
 @onready var move_label = $MovePointsLabel
 @onready var shield_label = $ShieldLabel
 @onready var passive_label = $PassiveLabel
+@onready var passive_desc_container = $PassiveDescContainer
 @onready var buffs_container = $BuffsContainer
 
 var current_character: Node = null
@@ -67,9 +68,25 @@ func _update_passive():
 	if "passive_skill" in current_character and current_character.passive_skill:
 		var ps = current_character.passive_skill
 		passive_label.show()
-		passive_label.text = "[b]被动: %s[/b]\n%s" % [ps.skill_name, ps.description]
+		passive_label.text = "天赋: %s" % ps.skill_name
+		_update_passive_desc(ps.description)
 	else:
 		passive_label.hide()
+		_passive_desc_queue_free()
+
+func _passive_desc_queue_free():
+	for c in passive_desc_container.get_children():
+		c.queue_free()
+
+func _update_passive_desc(desc: String):
+	_passive_desc_queue_free()
+	var label = Label.new()
+	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_font_override("font", FONT)
+	label.text = desc
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.mouse_filter = 1
+	passive_desc_container.add_child(label)
 
 func _update_buffs():
 	for child in buffs_container.get_children():

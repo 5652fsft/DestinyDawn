@@ -12,6 +12,13 @@ signal skill_used(skill: BaseSkill, target_type: int)
 
 func _ready():
 	use_button.pressed.connect(_on_use_button_pressed)
+	var bg = StyleBoxFlat.new()
+	bg.bg_color = Color(0.08, 0.08, 0.15, 0.85)
+	bg.content_margin_left = 20
+	bg.content_margin_top = 16
+	bg.content_margin_right = 20
+	bg.content_margin_bottom = 16
+	add_theme_stylebox_override("panel", bg)
 
 func show_for(character: Node):
 	current_character = character

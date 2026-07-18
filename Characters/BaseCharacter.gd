@@ -300,8 +300,7 @@ func get_current_phase() -> String:
 			return "Invalid"
 
 func _is_mouse_over_ui() -> bool:
-	var ctrl = get_viewport().gui_get_hovered_control()
-	return ctrl != null and (ctrl is BaseButton or ctrl is LineEdit)
+	return get_viewport().gui_get_hovered_control() != null
 
 func handle_move():
 	if hp <= 0:
