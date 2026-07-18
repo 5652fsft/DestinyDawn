@@ -41,6 +41,7 @@ var is_attacking: bool = false
 var hit_tween: Tween = null
 var hover_tween: Tween = null
 var _is_hovered: bool = false
+var _fb_origin_y: float = 0.0
 var shield: int = 0
 var buffs: Dictionary = {}
 
@@ -83,6 +84,7 @@ func _ready():
 	floating_bar.z_index = 10
 	add_child(floating_bar)
 	floating_bar.refresh()
+	_fb_origin_y = floating_bar.position.y
 	
 	# 对齐角色到格子中心
 	if grid_layer:
@@ -101,6 +103,9 @@ func _on_hover_enter():
 	hover_tween.tween_property(sprite, "scale", Vector2(1.08, 1.08), 0.12)
 	hover_tween.tween_property(sprite, "self_modulate", Color(1.2, 1.2, 1.15), 0.12)
 	hover_tween.tween_property(sprite, "offset:y", -4.0, 0.12)
+	if floating_bar:
+		hover_tween.tween_property(floating_bar, "scale", Vector2(1.08, 1.08), 0.12)
+		hover_tween.tween_property(floating_bar, "position:y", _fb_origin_y - 4.0, 0.12)
 
 func _on_hover_exit():
 	if hover_tween:
@@ -110,6 +115,9 @@ func _on_hover_exit():
 	hover_tween.tween_property(sprite, "scale", Vector2(1, 1), 0.1)
 	hover_tween.tween_property(sprite, "self_modulate", Color.WHITE, 0.1)
 	hover_tween.tween_property(sprite, "offset:y", 0.0, 0.1)
+	if floating_bar:
+		hover_tween.tween_property(floating_bar, "scale", Vector2(1, 1), 0.1)
+		hover_tween.tween_property(floating_bar, "position:y", _fb_origin_y, 0.1)
 
 func _exit_tree():
 	if main and main.has_method("unregister_character"):

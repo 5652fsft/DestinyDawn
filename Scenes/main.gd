@@ -33,6 +33,8 @@ var default_deck: Array[String] = [
 ]
 
 func _ready():
+	if not multiplayer.has_multiplayer_peer():
+		GlobalGameData.is_host = true
 	_setup_player_panels()
 	if multiplayer.is_server():
 		for i in range(3):
