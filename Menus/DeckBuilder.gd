@@ -14,7 +14,7 @@ func _ready():
 
 func _build_pool():
 	var all_ids = CardDatabase.get_all_card_ids()
-	var grid = $HBoxContainer/CardPool/GridContainer
+	var grid = $HBoxContainer/CardPool/PoolScroll/GridContainer
 	for cid in all_ids:
 		var data = CardDatabase.get_card(cid)
 		if not data:
