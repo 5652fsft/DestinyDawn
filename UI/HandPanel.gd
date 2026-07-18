@@ -36,12 +36,12 @@ func play_draw_animation(hand: Array[String]):
 
 func _fly_in_card(data: CardData, hand: Array[String]):
 	var card = card_scene.instantiate()
-	card.setup(data)
-	card.pivot_offset = card.size * 0.5
 	card.scale = Vector2.ONE
 	card.mouse_filter = MOUSE_FILTER_IGNORE
 	card.z_index = 100
 	add_child(card)
+	card.setup(data)
+	card.pivot_offset = card.size * 0.5
 
 	card.position = Vector2(-card.size.x, card_container.size.y * 0.5)
 	var end_x = card_container.size.x * 0.5

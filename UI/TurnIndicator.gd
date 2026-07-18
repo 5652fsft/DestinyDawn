@@ -33,12 +33,14 @@ func update_turn_display():
 		turn_label.text = "你的回合-攻击阶段" if _is_attack_phase() else "你的回合-移动阶段"
 		show()
 		end_turn_button.show()
+		end_turn_button.disabled = false
 	elif phase == GlobalGameData.TurnPhase.NONE or phase == GlobalGameData.TurnPhase.START_ROUND:
 		hide()
 	else:
 		turn_label.text = "对方回合"
 		show()
 		end_turn_button.show()
+		end_turn_button.disabled = true
 
 func _on_EndTurnButton_pressed():
 	main.unselect_character(null, true)
