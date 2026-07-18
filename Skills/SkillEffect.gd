@@ -55,6 +55,8 @@ static func _bronya_active(character: Node, target: Node) -> bool:
 	if not "shield" in target:
 		target.set("shield", 0)
 	target.shield += 30
+	if target.has_method("rpc"):
+		target.rpc("_sync_shield", target.shield)
 	print("[Skill] %s [护卫指令] → %s 护盾 +30" % [character.character_name, target.name])
 	return true
 

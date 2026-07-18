@@ -6,6 +6,7 @@ const FONT = preload("res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf")
 @onready var hp_label = $HPLabel
 @onready var attack_label = $AttackLabel
 @onready var move_label = $MovePointsLabel
+@onready var attack_range_label = $AttackRangeLabel
 @onready var shield_label = $ShieldLabel
 @onready var passive_label = $PassiveLabel
 @onready var passive_desc_container = $PassiveDescContainer
@@ -53,7 +54,10 @@ func refresh():
 		attack_label.text = "攻击: %d" % base_atk
 
 	var move_pts = current_character.effective_move_points if "effective_move_points" in current_character else current_character.move_points
-	move_label.text = "移动力: %d" % move_pts
+	move_label.text = "移动范围: %d" % move_pts
+
+	var atk_range = current_character.attack_range if "attack_range" in current_character else 1
+	attack_range_label.text = "攻击范围: %d" % atk_range
 
 	if "shield" in current_character and current_character.shield > 0:
 		shield_label.show()
@@ -81,7 +85,7 @@ func _passive_desc_queue_free():
 func _update_passive_desc(desc: String):
 	_passive_desc_queue_free()
 	var label = Label.new()
-	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_font_size_override("font_size", 14)
 	label.add_theme_font_override("font", FONT)
 	label.text = desc
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -98,11 +102,9 @@ func _update_buffs():
 		return
 	for key in buf:
 		var list = buf[key]
-		var total = 0
 		for entry in list:
-			total += entry.value
 			var label = Label.new()
-			label.add_theme_font_size_override("font_size", 18)
+			label.add_theme_font_size_override("font_size", 14)
 			label.add_theme_font_override("font", FONT)
 			label.text = _buff_desc(key, entry, list.size())
 			buffs_container.add_child(label)
