@@ -30,7 +30,7 @@ func _ready():
 		queue_free()
 		return
 
-	faction_ring.points = make_hexagon_points(55.0)
+	faction_ring.points = make_hexagon_points(70.0)
 	faction_ring.z_index = -1
 	faction_ring.antialiased = true
 	faction_ring.width = 6

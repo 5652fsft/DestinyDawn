@@ -8,7 +8,6 @@
 [ext_resource type="Script" uid="uid://bui6brqlb74jo" path="res://Global/EnergySystem.gd" id="6_p4fma"]
 [ext_resource type="Script" uid="uid://6cyfe3cacndq" path="res://Global/DeckManager.gd" id="7_p4fma"]
 [ext_resource type="PackedScene" uid="uid://c2g1mg0bkjl0w" path="res://UI/HandPanel.tscn" id="8_p4fma"]
-[ext_resource type="PackedScene" uid="uid://b3fwj46p04myk" path="res://UI/EnergyBar.tscn" id="9_p4fma"]
 [ext_resource type="PackedScene" uid="uid://b4hqxvb38t0ya" path="res://UI/SkillPanel.tscn" id="10_p4fma"]
 [ext_resource type="PackedScene" uid="uid://crt0kt1u5eftp" path="res://UI/PlayerInfoPanel.tscn" id="11_p4fma"]
 [ext_resource type="Theme" uid="uid://cychdcmr3tshb" path="res://UI/Theme/GameTheme.tres" id="12_p4fma"]
@@ -59,17 +58,19 @@ layout_mode = 3
 anchors_preset = 7
 theme = ExtResource("12_p4fma")
 
-[node name="EnergyBar" parent="UI" unique_id=499079210 instance=ExtResource("9_p4fma")]
-theme = ExtResource("12_p4fma")
-
 [node name="SkillPanel" parent="UI" unique_id=1934206860 instance=ExtResource("10_p4fma")]
 theme = ExtResource("12_p4fma")
 
 [node name="HostPlayerPanel" parent="UI" unique_id=1883136691 instance=ExtResource("11_p4fma")]
-offset_left = 10.0
-offset_top = 10.0
-offset_right = 200.0
-offset_bottom = 80.0
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -80.0
+offset_right = -10.0
+offset_bottom = -10.0
 theme = ExtResource("12_p4fma")
 
 [node name="ClientPlayerPanel" parent="UI" unique_id=731373582 instance=ExtResource("11_p4fma")]

@@ -112,7 +112,8 @@ func _drop_card():
 					tween.tween_property(_ghost, "modulate:a", 0.0, 0.25)
 					tween.tween_property(_ghost, "rotation", 0.5, 0.25)
 					tween.finished.connect(_cleanup_ghost)
-					return
+				queue_free()
+				return
 	if _ghost:
 		_ghost.queue_free()
 		_ghost = null
