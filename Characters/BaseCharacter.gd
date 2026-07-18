@@ -38,6 +38,7 @@ var valid_attack_cells: Dictionary = {}
 var is_moving: bool = false
 var is_attacking: bool = false
 var hit_tween: Tween = null
+var hover_tween: Tween = null
 var shield: int = 0
 var buffs: Dictionary = {}
 
@@ -64,6 +65,9 @@ func _enter_tree():
 func _ready():
 	_hp = max_hp
 	main.register_character(self)
+	mouse_entered.connect(_on_hover_enter)
+	mouse_exited.connect(_on_hover_exit)
+	
 	var idx = int(name.get_slice("_", 1))
 	if name.begins_with("Host"):
 		position = GlobalGameData.host_birth_point[idx]
@@ -88,6 +92,18 @@ func _ready():
 		global_position = aligned_pos
 		target_world = aligned_pos
 		velocity = Vector2.ZERO
+
+func _on_hover_enter():
+	if hover_tween:
+		hover_tween.kill()
+	hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	hover_tween.tween_property(self, "scale", Vector2(1.05, 1.05), 0.1)
+
+func _on_hover_exit():
+	if hover_tween:
+		hover_tween.kill()
+	hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	hover_tween.tween_property(self, "scale", Vector2(1, 1), 0.1)
 
 func _exit_tree():
 	if main and main.has_method("unregister_character"):
