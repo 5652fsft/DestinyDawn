@@ -41,7 +41,7 @@ func _update_all():
 		var count = deck.count(cid)
 		pool_widgets[cid].set_pool_mode(count > 0, count)
 	# Update deck list
-	var deck_list = $HBoxContainer/DeckPanel/DeckList
+	var deck_list = $HBoxContainer/DeckPanel/DeckScroll/DeckList
 	for c in deck_list.get_children():
 		c.queue_free()
 	for cid in deck:
