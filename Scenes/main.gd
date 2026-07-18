@@ -19,6 +19,8 @@ var is_targeting: bool = false
 @onready var energy_system = $EnergySystem
 @onready var deck_manager = $DeckManager
 @onready var skill_panel = $UI/SkillPanel
+@onready var host_player_panel = $UI/HostPlayerPanel
+@onready var client_player_panel = $UI/ClientPlayerPanel
 
 const CHARACTER_bronya = preload("res://Characters/Bronya/bronya.tscn")
 const CHARACTER_seele = preload("res://Characters/Seele/seele.tscn")
@@ -470,8 +472,31 @@ func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn)
 func update_ui_turn_indicator():
 	turn_indicator.update_turn_display()
 	_update_energy_ui()
+	_update_player_panels()
 	if hand_panel:
 		hand_panel.clear_selection()
+
+func _update_player_panels():
+	if not energy_system:
+		return
+	if host_player_panel:
+		var host_energy = energy_system.get_energy(1)
+		var host_turn = _is_player_turn(true)
+		host_player_panel.refresh(host_turn, host_energy)
+	if client_player_panel:
+		var client_energy = energy_system.get_energy(2)
+		var client_turn = _is_player_turn(false)
+		client_player_panel.refresh(client_turn, client_energy)
+
+func _is_player_turn(check_host: bool) -> bool:
+	var phase = GlobalGameData.current_turn_phase
+	var is_host_turn = GlobalGameData.is_host_turn
+	match phase:
+		GlobalGameData.TurnPhase.PLAYER_MOVE, GlobalGameData.TurnPhase.PLAYER_ATTACK:
+			return is_host_turn == check_host
+		GlobalGameData.TurnPhase.ENEMY_MOVE, GlobalGameData.TurnPhase.ENEMY_ATTACK:
+			return is_host_turn != check_host
+	return false
 	
 func check_move() -> void:
 	var my_count = 0

@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://crt0kt1u5eftp"]
+
+[ext_resource type="Script" uid="uid://bmg1jdmhbo2uf" path="res://UI/PlayerInfoPanel.gd" id="1_yv6cf"]
+
+[node name="PlayerInfoPanel" type="Panel" unique_id=1419199440]
+script = ExtResource("1_yv6cf")
