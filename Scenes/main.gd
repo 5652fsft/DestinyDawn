@@ -30,34 +30,48 @@ const CHARACTER_ELAINA = preload("res://Characters/Elaina/Elaina.tscn")
 const CHARACTER_FIREFLY = preload("res://Characters/Firefly/Firefly.tscn")
 const CHARACTER_SILVERWOLF = preload("res://Characters/SilverWolf/SilverWolf.tscn")
 
-var team_roster: Array[PackedScene] = [
-	CHARACTER_BRONYA,
-	CHARACTER_ELAINA,
-	CHARACTER_FIREFLY,
-]
-var enemy_roster: Array[PackedScene] = [
-	CHARACTER_SEELE,
-	CHARACTER_SILVERWOLF,
-	CHARACTER_FIREFLY,
-]
+var team_roster: Array[PackedScene] = []
+var enemy_roster: Array[PackedScene] = []
+var default_deck: Array[String] = []
 
 var last_attacker: Node = null
 var skill_overlays: Array[Node] = []
 
-# === 默认卡组（临时：Phase 6 将改为战前选择） ===
-var default_deck: Array[String] = [
-	"card_fireball", "card_ice_shard",
-	"card_heal", "card_small_heal",
-	"card_shield", "card_strength",
-	"card_weakness", "card_poison_blade",
-	"card_reckoning", "card_regen",
-]
+func _build_team_from_selection():
+	team_roster.clear()
+	enemy_roster.clear()
+	var map = {
+		"bronya": CHARACTER_BRONYA, "seele": CHARACTER_SEELE,
+		"elaina": CHARACTER_ELAINA, "firefly": CHARACTER_FIREFLY,
+		"silverwolf": CHARACTER_SILVERWOLF,
+	}
+	if not GlobalGameData.selected_team.is_empty():
+		for cid in GlobalGameData.selected_team:
+			if cid in map:
+				team_roster.append(map[cid])
+	if not GlobalGameData.client_team.is_empty():
+		for cid in GlobalGameData.client_team:
+			if cid in map:
+				enemy_roster.append(map[cid])
+	# 空编队时用默认
+	if team_roster.is_empty():
+		team_roster = [CHARACTER_BRONYA, CHARACTER_ELAINA, CHARACTER_FIREFLY]
+	if enemy_roster.is_empty():
+		enemy_roster = [CHARACTER_SEELE, CHARACTER_SILVERWOLF, CHARACTER_FIREFLY]
+
+func _build_deck_from_selection():
+	if not GlobalGameData.selected_deck.is_empty():
+		default_deck = GlobalGameData.selected_deck.duplicate()
+	else:
+		default_deck = ["card_fireball","card_ice_shard","card_heal","card_small_heal","card_shield","card_strength","card_weakness","card_poison_blade","card_reckoning","card_regen"]
 
 func _ready():
 	_init_buff_manager()
 	_init_vfx_manager()
 	if not multiplayer.has_multiplayer_peer():
 		GlobalGameData.is_host = true
+	_build_team_from_selection()
+	_build_deck_from_selection()
 	_setup_player_panels()
 	if multiplayer.is_server():
 		for i in range(team_roster.size()):
@@ -84,6 +98,19 @@ func _spawn_character(scene_path: String, char_name: String, authority: int, pos
 func _spawn_character_remote(scene_path: String, char_name: String, authority: int, pos: Vector2):
 	_spawn_character(scene_path, char_name, authority, pos)
 
+# Phase 6 — LAN 编队/卡组同步
+@rpc("any_peer", "reliable")
+func _sync_host_setup(team_ids: Array, deck_ids: Array):
+	GlobalGameData.host_team = team_ids
+	GlobalGameData.selected_deck = deck_ids
+
+@rpc("any_peer", "reliable")
+func _client_send_setup(team_ids: Array, deck_ids: Array):
+	GlobalGameData.client_team = team_ids
+	# 客户端卡组用于玩家2
+	if deck_manager:
+		deck_manager.init_player(2, deck_ids)
+
 func _init_buff_manager():
 	var bm = Node.new()
 	bm.name = "BuffManager"
@@ -100,11 +127,21 @@ func _init_vfx_manager():
 
 func _on_client_joined(id: int):
 	print("[Net] 客户端 %d 加入" % id)
-	# 将 Host 角色同步给新客户端
+	# 客户端加入后，请求其编队和卡组
+	rpc_id(id, "_request_client_setup")
+	# 先使用 Host 的编队初始化卡组并生成 Host 角色
+	_build_team_from_selection()
+	_build_deck_from_selection()
+	_init_player_card_systems()
 	for i in range(team_roster.size()):
 		rpc_id(id, "_spawn_character_remote", team_roster[i].resource_path, "HostCharacter_%d" % i, multiplayer.get_unique_id(), GlobalGameData.host_birth_point[i])
-	_init_player_card_systems()
+	# 延迟等客户端回应后生成客户端角色
 	call_deferred("_deferred_spawn_client_characters", id)
+
+@rpc("any_peer", "reliable")
+func _request_client_setup():
+	# 客户端收到后发送自己的编队和卡组
+	rpc_id(1, "_client_send_setup", GlobalGameData.selected_team, GlobalGameData.selected_deck)
 
 func _deferred_spawn_client_characters(id: int):
 	for i in range(enemy_roster.size()):
@@ -390,6 +427,10 @@ func _execute_play_card(player_id: int, card_id: String, target_path: String):
 
 	print("[Card] %s 使用 [%s]，目标: %s" % [player_name, card_data.card_name, target.name if target else "无"])
 
+	# 战斗统计：记录卡牌使用
+	var stat_key = "host_cards_played" if player_id == 1 else "client_cards_played"
+	GlobalGameData.battle_stats[stat_key] += 1
+
 	CardEffect.execute(card_data, caster, target, self)
 	var hand = deck_manager.get_hand(player_id)
 	var energy = energy_system.get_energy(player_id)
@@ -525,6 +566,8 @@ func start_new_round():
 		else:
 			print("[Phase] 客户端先手")
 	
+	GlobalGameData.battle_stats.turns_taken += 1
+	
 	rpc("reset_character_state")
 	rpc("draw_for_new_turn")
 	if multiplayer.has_multiplayer_peer():
@@ -556,6 +599,13 @@ func draw_for_new_turn():
 		energy_system.restore_energy(2)
 		sync_all_card_state()
 
+func show_battle_result():
+	var is_host_win = GlobalGameData.host_characters.any(func(c): return c.hp > 0)
+	var winner_text = "服务端" if is_host_win else "客户端"
+	print("[Phase] 胜利方: %s" % winner_text)
+	if $UI.has_node("BattleResult"):
+		$UI/BattleResult.show_result(is_host_win, GlobalGameData.battle_stats)
+
 func sync_all_card_state():
 	for pid in [1, 2]:
 		rpc_id(0, "_sync_energy", pid, energy_system.get_energy(pid))
@@ -581,6 +631,8 @@ func advance_turn_phase():
 	if check_victory():
 		print("[Phase] 游戏结束")
 		GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.GAME_OVER
+		rpc_id(0, "_sync_turn_phase", GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn)
+		show_battle_result()
 		return
 	
 	match GlobalGameData.current_turn_phase:
