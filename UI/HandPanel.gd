@@ -54,7 +54,7 @@ func _layout_cards():
 	if count == 0:
 		return
 	var center_x = card_container.size.x * 0.5
-	var base_y = card_container.size.y * 0.3
+	var base_y = card_container.size.y * 0.5
 	for i in range(count):
 		var card = card_uis[i]
 		var t = float(i) / max(count - 1, 1) - 0.5
