@@ -7,6 +7,7 @@ const FONT = preload("res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf")
 @onready var attack_label = $AttackLabel
 @onready var move_label = $MovePointsLabel
 @onready var shield_label = $ShieldLabel
+@onready var passive_label = $PassiveLabel
 @onready var buffs_container = $BuffsContainer
 
 var current_character: Node = null
@@ -59,7 +60,16 @@ func refresh():
 	else:
 		shield_label.hide()
 
+	_update_passive()
 	_update_buffs()
+
+func _update_passive():
+	if "passive_skill" in current_character and current_character.passive_skill:
+		var ps = current_character.passive_skill
+		passive_label.show()
+		passive_label.text = "[b]被动: %s[/b]\n%s" % [ps.skill_name, ps.description]
+	else:
+		passive_label.hide()
 
 func _update_buffs():
 	for child in buffs_container.get_children():

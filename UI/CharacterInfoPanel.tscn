@@ -55,12 +55,23 @@ offset_bottom = 280.0
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 24
 
+[node name="PassiveLabel" type="RichTextLabel" parent="."]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 290.0
+offset_right = 350.0
+offset_bottom = 340.0
+bbcode_enabled = true
+theme_override_fonts/normal_font = ExtResource("2_6xa78")
+theme_override_font_sizes/normal_font_size = 16
+mouse_filter = 1
+
 [node name="BuffsLabel" type="Label" parent="."]
 layout_mode = 0
 offset_left = 50.0
-offset_top = 300.0
+offset_top = 350.0
 offset_right = 150.0
-offset_bottom = 330.0
+offset_bottom = 380.0
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 20
 text = "Buff:"
@@ -68,6 +79,6 @@ text = "Buff:"
 [node name="BuffsContainer" type="VBoxContainer" parent="."]
 layout_mode = 0
 offset_left = 50.0
-offset_top = 330.0
+offset_top = 380.0
 offset_right = 350.0
-offset_bottom = 600.0
+offset_bottom = 650.0
