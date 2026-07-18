@@ -173,6 +173,8 @@ func unregister_character(chara: CharacterBody2D):
 	if selected_character == chara:
 		if highlight_layer:
 			highlight_layer.clear()
+	if multiplayer.is_server() and check_victory():
+		rpc("advance_turn_phase")
 			
 func select_character(chara: CharacterBody2D):
 	if chara.name.begins_with("Host") != GlobalGameData.is_host:
@@ -382,6 +384,7 @@ func _on_target_selected(target: Node):
 		GlobalGameData.character_attack_used_num += 1
 		skill_panel._update_cooldown()
 		cancel_targeting()
+		check_attack()
 
 func _target_play_card(card_data: CardData, target: Node):
 	var target_path = ""
