@@ -156,6 +156,10 @@ func get_grid_layer() -> TileMapLayer:
 	return grid_layer
 
 func get_current_cell() -> Vector2i:
+	if not grid_layer:
+		return Vector2i(-1, -1)
+	var local_pos = grid_layer.to_local(global_position)
+	return grid_layer.local_to_map(local_pos)
 
 func _update_sprite_texture():
 	if not sprite:
