@@ -44,7 +44,7 @@ var enemy_roster: Array[PackedScene] = [
 var last_attacker: Node = null
 var skill_overlays: Array[Node] = []
 
-# === 默认卡组（临时：Phase 4 将改为战前选择） ===
+# === 默认卡组（临时：Phase 6 将改为战前选择） ===
 var default_deck: Array[String] = [
 	"card_fireball", "card_ice_shard",
 	"card_heal", "card_small_heal",
