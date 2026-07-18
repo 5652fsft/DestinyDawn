@@ -1,28 +1,14 @@
 extends Node2D
 
 var parent_character: CharacterBody2D
-var faction_color: Color = Color.WHITE
 var pulse_tween: Tween = null
 
 @onready var hp_bar: ColorRect = $HPBar
 @onready var hp_fill: ColorRect = $HPBar/HPFill
 @onready var hp_label: Label = $HPBar/HPLabel
 @onready var shield_outline: Panel = $HPBar/ShieldOutline
-@onready var faction_ring: Line2D = $FactionRing
+@onready var ring_sprite: Sprite2D = $FactionRingSprite
 @onready var selection_indicator: Line2D = $SelectionIndicator
-
-static func make_hexagon_points(radius: float) -> PackedVector2Array:
-	var w = radius * sqrt(3) / 2.0
-	var h = radius
-	return PackedVector2Array([
-		Vector2(0, -h),
-		Vector2(w, -h / 2.0),
-		Vector2(w, h / 2.0),
-		Vector2(0, h),
-		Vector2(-w, h / 2.0),
-		Vector2(-w, -h / 2.0),
-		Vector2(0, -h)
-	])
 
 func _ready():
 	parent_character = get_parent() as CharacterBody2D
@@ -30,12 +16,7 @@ func _ready():
 		queue_free()
 		return
 
-	faction_ring.points = make_hexagon_points(72.0)
-	faction_ring.z_index = 1
-	faction_ring.antialiased = true
-	faction_ring.width = 6
-
-	selection_indicator.points = make_hexagon_points(55.0)
+	selection_indicator.points = _hexagon(55.0)
 	selection_indicator.z_index = -1
 	selection_indicator.antialiased = true
 
@@ -52,22 +33,41 @@ func _ready():
 	shield_style.corner_radius_bottom_right = 2
 	shield_outline.add_theme_stylebox_override("panel", shield_style)
 
-	_update_faction()
+	_update_ring_texture()
 	refresh()
 
-func _update_faction():
+func _hexagon(radius: float) -> PackedVector2Array:
+	var w = radius * sqrt(3) / 2.0
+	var h = radius
+	return PackedVector2Array([
+		Vector2(0, -h),
+		Vector2(w, -h / 2.0),
+		Vector2(w, h / 2.0),
+		Vector2(0, h),
+		Vector2(-w, h / 2.0),
+		Vector2(-w, -h / 2.0),
+		Vector2(0, -h)
+	])
+
+func _update_ring_texture():
+	if not parent_character or not ring_sprite:
+		return
 	var is_host = parent_character.name.begins_with("Host")
 	var is_friendly = is_host == GlobalGameData.is_host
-	faction_color = Color(0.3, 0.5, 1.0, 0.8) if is_friendly else Color(1.0, 0.3, 0.3, 0.8)
-	if faction_ring:
-		faction_ring.default_color = faction_color
+	var suffix = "_blue.png" if is_friendly else "_red.png"
+
+	var script_path = parent_character.get_script().get_path()
+	var char_id = script_path.get_file().get_basename()
+	var tex_path = "res://Assets/Sprites/Rings/%s%s" % [char_id, suffix]
+	var tex = load(tex_path)
+	if tex:
+		ring_sprite.texture = tex
 
 func refresh():
 	if not parent_character or not is_inside_tree():
 		return
 	_update_hp()
 	_update_shield()
-	_update_faction()
 
 func _update_hp():
 	var hp = parent_character.hp if "hp" in parent_character else 0

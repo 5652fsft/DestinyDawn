@@ -462,8 +462,8 @@ func _play_attack_animation(target_path: NodePath):
 
 	var dir = sign(target_node.global_position.x - global_position.x)
 	var lurch = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	lurch.tween_property(sprite, "offset:x", dir * 12.0, 0.015)
-	lurch.tween_property(sprite, "offset:x", 0.0, 0.02)
+	lurch.tween_property(sprite, "offset:x", dir * 12.0, 0.04)
+	lurch.tween_property(sprite, "offset:x", 0.0, 0.06)
 
 	# 受击反馈 + 粒子
 	if target_node.hit_tween and target_node.hit_tween.is_running():
