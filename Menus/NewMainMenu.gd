@@ -45,11 +45,12 @@ func _on_ip_confirm():
 	get_tree().change_scene_to_file("res://Scenes/scene.tscn")
 
 func _on_settings_pressed():
-	$SettingsPanel.popup_centered()
+	$SettingsPanel.show()
 
 func _on_settings_close():
 	GlobalGameData.player_name = $SettingsPanel/NameEdit.text
 	$SettingsPanel.hide()
+	_update_status()
 
 func _on_quit_pressed():
 	get_tree().quit()
