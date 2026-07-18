@@ -40,6 +40,8 @@ var is_moving: bool = false
 var is_attacking: bool = false
 var hit_tween: Tween = null
 var hover_tween: Tween = null
+var _original_y: float = 0.0
+var _is_hovered: bool = false
 var shield: int = 0
 var buffs: Dictionary = {}
 
@@ -66,8 +68,7 @@ func _enter_tree():
 func _ready():
 	_hp = max_hp
 	main.register_character(self)
-	mouse_entered.connect(_on_hover_enter)
-	mouse_exited.connect(_on_hover_exit)
+	_original_y = position.y
 	
 	var idx = int(name.get_slice("_", 1))
 	if name.begins_with("Host"):
@@ -93,18 +94,25 @@ func _ready():
 		global_position = aligned_pos
 		target_world = aligned_pos
 		velocity = Vector2.ZERO
+	_original_y = position.y
 
 func _on_hover_enter():
 	if hover_tween:
 		hover_tween.kill()
 	hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	hover_tween.tween_property(self, "scale", Vector2(1.05, 1.05), 0.1)
+	hover_tween.set_parallel(true)
+	hover_tween.tween_property(self, "scale", Vector2(1.08, 1.08), 0.12)
+	hover_tween.tween_property(self, "self_modulate", Color(1.2, 1.2, 1.15), 0.12)
+	hover_tween.tween_property(self, "position:y", _original_y - 4.0, 0.12)
 
 func _on_hover_exit():
 	if hover_tween:
 		hover_tween.kill()
 	hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	hover_tween.set_parallel(true)
 	hover_tween.tween_property(self, "scale", Vector2(1, 1), 0.1)
+	hover_tween.tween_property(self, "self_modulate", Color.WHITE, 0.1)
+	hover_tween.tween_property(self, "position:y", _original_y, 0.1)
 
 func _exit_tree():
 	if main and main.has_method("unregister_character"):
@@ -524,7 +532,27 @@ func _sync_shield(new_shield: int):
 func _sync_buffs(new_buffs: Dictionary):
 	buffs = new_buffs
 
+func _check_hover():
+	var space = get_world_2d().direct_space_state
+	var mouse_pos = get_global_mouse_position()
+	var query = PhysicsPointQueryParameters2D.new()
+	query.position = mouse_pos
+	query.collision_mask = click_layer
+	var results = space.intersect_point(query)
+	var hovered = false
+	for r in results:
+		if r.collider == self:
+			hovered = true
+			break
+	if hovered and not _is_hovered:
+		_is_hovered = true
+		_on_hover_enter()
+	elif not hovered and _is_hovered:
+		_is_hovered = false
+		_on_hover_exit()
+
 func _process(delta):
+	_check_hover()
 	if not multiplayer or not multiplayer.has_multiplayer_peer():
 		move_toward_target()
 		return

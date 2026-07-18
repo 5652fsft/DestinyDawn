@@ -30,10 +30,10 @@ func _ready():
 		queue_free()
 		return
 
-	faction_ring.points = make_hexagon_points(68.0)
+	faction_ring.points = make_hexagon_points(66.0)
 	faction_ring.z_index = -1
 	faction_ring.antialiased = true
-	faction_ring.width = 7
+	faction_ring.width = 6
 
 	selection_indicator.points = make_hexagon_points(55.0)
 	selection_indicator.z_index = -1
@@ -58,7 +58,7 @@ func _ready():
 func _update_faction():
 	var is_host = parent_character.name.begins_with("Host")
 	var is_friendly = is_host == GlobalGameData.is_host
-	faction_color = Color(0.3, 0.5, 1.0, 1.0) if is_friendly else Color(1.0, 0.3, 0.3, 1.0)
+	faction_color = Color(0.3, 0.5, 1.0, 0.8) if is_friendly else Color(1.0, 0.3, 0.3, 0.8)
 	if faction_ring:
 		faction_ring.default_color = faction_color
 
