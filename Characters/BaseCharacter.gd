@@ -70,6 +70,7 @@ func _enter_tree():
 func _ready():
 	_hp = max_hp
 	main.register_character(self)
+	add_to_group("characters")
 	
 	var idx = int(name.get_slice("_", 1))
 	if name.begins_with("Host"):

@@ -438,7 +438,10 @@ func start_new_round():
 	
 	rpc("reset_character_state")
 	rpc("draw_for_new_turn")
-	rpc("process_all_buffs")
+	if multiplayer.has_multiplayer_peer():
+		rpc("process_all_buffs")
+	else:
+		process_all_buffs()
 	GlobalGameData.turn_has_been_drawn = true
 
 	advance_turn_phase()
