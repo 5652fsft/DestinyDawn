@@ -80,6 +80,10 @@ func _spawn_character(scene_path: String, char_name: String, authority: int, pos
 	chara.position = pos
 	Characters.add_child(chara)
 
+@rpc("any_peer", "reliable")
+func _spawn_character_remote(scene_path: String, char_name: String, authority: int, pos: Vector2):
+	_spawn_character(scene_path, char_name, authority, pos)
+
 func _init_buff_manager():
 	var bm = Node.new()
 	bm.name = "BuffManager"
@@ -96,12 +100,16 @@ func _init_vfx_manager():
 
 func _on_client_joined(id: int):
 	print("[Net] 客户端 %d 加入" % id)
+	# 将 Host 角色同步给新客户端
+	for i in range(team_roster.size()):
+		rpc_id(id, "_spawn_character_remote", team_roster[i].resource_path, "HostCharacter_%d" % i, multiplayer.get_unique_id(), GlobalGameData.host_birth_point[i])
 	_init_player_card_systems()
 	call_deferred("_deferred_spawn_client_characters", id)
 
 func _deferred_spawn_client_characters(id: int):
 	for i in range(enemy_roster.size()):
 		_spawn_character(enemy_roster[i].resource_path, "Client%dCharacter_%d" % [id, i], id, GlobalGameData.client_birth_point[i])
+		rpc("_spawn_character_remote", enemy_roster[i].resource_path, "Client%dCharacter_%d" % [id, i], id, GlobalGameData.client_birth_point[i])
 	print("[Info] 开始游戏")
 	rpc("advance_turn_phase")
 
