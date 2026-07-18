@@ -97,26 +97,38 @@ func _update_buffs():
 	if buf.is_empty():
 		return
 	for key in buf:
-		var entry = buf[key]
-		var label = Label.new()
-		label.add_theme_font_size_override("font_size", 18)
-		label.add_theme_font_override("font", FONT)
-		label.text = _buff_desc(key, entry)
-		buffs_container.add_child(label)
+		var list = buf[key]
+		var total = 0
+		for entry in list:
+			total += entry.value
+			var label = Label.new()
+			label.add_theme_font_size_override("font_size", 18)
+			label.add_theme_font_override("font", FONT)
+			label.text = _buff_desc(key, entry, list.size())
+			buffs_container.add_child(label)
 
-func _buff_desc(key: String, entry: Dictionary) -> String:
+func _buff_desc(key: String, entry: Dictionary, stacks: int = 1) -> String:
 	var dur = entry.get("remaining", 0)
 	var val = entry.get("value", 0)
+	var stack_tag = " x%d" % stacks if stacks > 1 else ""
 	match key:
 		"attack_buff":
-			return "力量强化: 攻击 +%d（%d回合）" % [val, dur]
+			return "力量强化 +%d%s（%d回合）" % [val, stack_tag, dur]
 		"attack_debuff":
-			return "虚弱: 攻击 %d（%d回合）" % [val, dur]
+			return "虚弱 %d%s（%d回合）" % [val, stack_tag, dur]
 		"move_debuff":
-			return "迟缓: 移动力 %d（%d回合）" % [val, dur]
+			return "迟缓 %d%s（%d回合）" % [val, stack_tag, dur]
 		"defense_buff":
-			return "防御强化（%d回合）" % dur
-	return "%s（%d回合）" % [key, dur]
+			return "铁壁%s（%d回合）" % [stack_tag, dur]
+		"poison":
+			return "中毒 %d%s（%d回合）" % [val, stack_tag, dur]
+		"burn":
+			return "灼烧 %d%s（%d回合）" % [val, stack_tag, dur]
+		"regen":
+			return "再生 +%d%s（%d回合）" % [val, stack_tag, dur]
+		"mark":
+			return "标记%s（%d回合）" % [stack_tag, dur]
+	return "%s: %d%s（%d回合）" % [key, val, stack_tag, dur]
 
 func _on_CloseButton_pressed():
 	_disconnect_buffs()

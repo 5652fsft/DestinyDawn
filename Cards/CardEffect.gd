@@ -78,9 +78,17 @@ static func _execute_debuff_move(card: CardData, target: Node) -> bool:
 static func _apply_temp_buff(target: Node, buff_key: String, value: int, duration: int) -> bool:
 	if not target:
 		return false
+	var main = target.get_tree().current_scene
+	var bm = main.get_node_or_null("BuffManager") if main else null
+	if bm and bm.has_method("apply_buff"):
+		return bm.apply_buff(target, buff_key, value, duration)
+	# fallback: direct
 	if not "buffs" in target:
 		target.set("buffs", {})
-	target.buffs[buff_key] = { "value": value, "remaining": duration }
+	var entry = { "value": value, "remaining": duration }
+	if not target.buffs.has(buff_key):
+		target.buffs[buff_key] = []
+	target.buffs[buff_key].append(entry)
 	if target.has_method("rpc"):
 		target.rpc("_sync_buffs", target.buffs.duplicate())
 		var vfx_color = Color(1.0, 0.9, 0.2) if value > 0 else Color(0.6, 0.2, 0.8)
@@ -102,6 +110,10 @@ static func _execute_draw_card(card: CardData, caster: Node, main: Node) -> bool
 static func _execute_cleanse(target: Node) -> bool:
 	if not target:
 		return false
+	var main = target.get_tree().current_scene
+	var bm = main.get_node_or_null("BuffManager") if main else null
+	if bm and bm.has_method("cleanse"):
+		return bm.cleanse(target, "all") > 0
 	if "buffs" in target:
 		target.buffs.clear()
 		if target.has_method("rpc"):

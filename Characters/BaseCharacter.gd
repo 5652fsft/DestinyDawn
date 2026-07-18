@@ -32,6 +32,13 @@ var floating_bar: Node2D = null
 @onready var grid_layer: TileMapLayer = main.get_node("Map/Ground")
 @onready var highlight_layer: TileMapLayer = main.get_node("Map/Highlight")
 
+var buff_manager: Node:
+	get:
+		if _bm == null and main:
+			_bm = main.get_node_or_null("BuffManager")
+		return _bm
+var _bm: Node = null
+
 signal buffs_changed
 
 # === 状态变量 ===
@@ -45,7 +52,13 @@ var hover_tween: Tween = null
 var _is_hovered: bool = false
 var _fb_origin_y: float = 0.0
 var shield: int = 0
-var buffs: Dictionary = {}
+var buffs: Dictionary = {}  # {"buff_id": [{"value": int, "remaining": int}, ...]}
+
+func get_buffs(buff_id: String) -> Array:
+	return buffs.get(buff_id, [])
+
+func get_all_buffs() -> Dictionary:
+	return buffs
 
 var is_selected: bool = false:
 	set(value):
@@ -511,30 +524,29 @@ func _sync_hp(new_hp: int):
 var effective_attack: int:
 	get:
 		var base = attack
-		if buffs.has("attack_buff"):
-			base += buffs["attack_buff"].value
-		if buffs.has("attack_debuff"):
-			base += buffs["attack_debuff"].value
+		if buff_manager:
+			base += buff_manager.get_total(self, "attack_buff")
+			base += buff_manager.get_total(self, "attack_debuff")
 		return max(0, base)
 
 var effective_move_points: int:
 	get:
 		var base = move_points
-		if buffs.has("move_debuff"):
-			base += buffs["move_debuff"].value
+		if buff_manager:
+			base += buff_manager.get_total(self, "move_debuff")
 		return max(1, base)
 
 func process_buffs():
-	for key in buffs.keys():
-		buffs[key].remaining -= 1
-		if buffs[key].remaining <= 0:
-			buffs.erase(key)
-	if multiplayer.has_multiplayer_peer():
-		if multiplayer.is_server():
-			rpc_id(0, "_sync_buffs", buffs.duplicate())
-	else:
-		_sync_buffs(buffs.duplicate())
-	buffs_changed.emit()
+	if not buff_manager:
+		return
+	var ticks = buff_manager.process(self)
+	buff_manager._sync_and_emit(self)
+	# apply DOT/HOT ticks
+	for t in ticks:
+		if t.is_damage:
+			rpc("take_damage", t.value)
+		else:
+			rpc("take_damage", -t.value)
 
 @rpc("any_peer", "call_local", "reliable")
 func _sync_shield(new_shield: int):
