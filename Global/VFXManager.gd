@@ -73,7 +73,6 @@ func _make_hit() -> GPUParticles2D:
 	p.amount = 8
 	p.lifetime = 0.3
 	p.process_material = _material(PRESET_COLORS.hit, 270, 180, Vector2(0, 0), 150)
-	p.scale_amount = 0.8
 	return p
 
 func _make_heal() -> GPUParticles2D:
