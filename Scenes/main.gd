@@ -33,6 +33,7 @@ var default_deck: Array[String] = [
 ]
 
 func _ready():
+	_setup_player_panels()
 	if multiplayer.is_server():
 		for i in range(3):
 			var chara = CHARACTER_bronya.instantiate()
@@ -272,6 +273,7 @@ func _on_target_selected(target: Node):
 		var who = "Host" if GlobalGameData.is_host else "Client"
 		print("[Info] %s 对 %s 释放 %s" % [who, target.name, card_data.card_name])
 		_target_play_card(card_data, target)
+		hand_panel.remove_card_via_data(card_data)
 		cancel_targeting()
 	elif selected_character and selected_character.has_method("use_active_skill") and selected_character.active_skill:
 		selected_character.use_active_skill(target)
@@ -519,6 +521,43 @@ func update_ui_turn_indicator():
 	_update_player_panels()
 	if hand_panel:
 		hand_panel.clear_selection()
+
+func _setup_player_panels():
+	var is_local_host = GlobalGameData.is_host
+	if is_local_host:
+		host_player_panel.anchor_left = 1.0
+		host_player_panel.anchor_top = 1.0
+		host_player_panel.anchor_right = 1.0
+		host_player_panel.anchor_bottom = 1.0
+		host_player_panel.offset_left = -200.0
+		host_player_panel.offset_top = -80.0
+		host_player_panel.offset_right = -10.0
+		host_player_panel.offset_bottom = -10.0
+		client_player_panel.anchor_left = 1.0
+		client_player_panel.anchor_top = 0.0
+		client_player_panel.anchor_right = 1.0
+		client_player_panel.anchor_bottom = 0.0
+		client_player_panel.offset_left = -200.0
+		client_player_panel.offset_top = 10.0
+		client_player_panel.offset_right = -10.0
+		client_player_panel.offset_bottom = 80.0
+	else:
+		client_player_panel.anchor_left = 1.0
+		client_player_panel.anchor_top = 1.0
+		client_player_panel.anchor_right = 1.0
+		client_player_panel.anchor_bottom = 1.0
+		client_player_panel.offset_left = -200.0
+		client_player_panel.offset_top = -80.0
+		client_player_panel.offset_right = -10.0
+		client_player_panel.offset_bottom = -10.0
+		host_player_panel.anchor_left = 1.0
+		host_player_panel.anchor_top = 0.0
+		host_player_panel.anchor_right = 1.0
+		host_player_panel.anchor_bottom = 0.0
+		host_player_panel.offset_left = -200.0
+		host_player_panel.offset_top = 10.0
+		host_player_panel.offset_right = -10.0
+		host_player_panel.offset_bottom = 80.0
 
 func _update_player_panels():
 	if not energy_system:

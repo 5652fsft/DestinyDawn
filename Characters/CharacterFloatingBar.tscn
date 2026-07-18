@@ -41,8 +41,8 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="FactionRing" type="Line2D" parent="." unique_id=1797410036]
-width = 6
-default_color = Color(1, 1, 1, 0.5)
+width = 7
+default_color = Color(1, 1, 1, 1)
 
 [node name="SelectionIndicator" type="Line2D" parent="." unique_id=1440890590]
 width = 4

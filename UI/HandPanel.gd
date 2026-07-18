@@ -23,6 +23,17 @@ func set_hand(card_ids: Array[String]):
 			continue
 		_add_card(data, i)
 
+func remove_card_via_data(data: CardData) -> bool:
+	for i in range(card_uis.size() - 1, -1, -1):
+		if card_uis[i].card_data == data:
+			var card = card_uis[i]
+			card_uis.remove_at(i)
+			card.queue_free()
+			if selected_card_ui == card:
+				selected_card_ui = null
+			return true
+	return false
+
 func _add_card(data: CardData, index: int = 0):
 	var instance = card_scene.instantiate()
 	instance.card_clicked.connect(_on_card_clicked)
