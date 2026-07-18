@@ -15,7 +15,6 @@ var is_targeting: bool = false
 @onready var character_info_panel = $UI/CharacterInfoPanel
 @onready var turn_indicator = $UI/TurnIndicator
 @onready var hand_panel = $UI/HandPanel
-@onready var energy_bar = $UI/EnergyBar
 @onready var energy_system = $EnergySystem
 @onready var deck_manager = $DeckManager
 @onready var skill_panel = $UI/SkillPanel
@@ -285,12 +284,18 @@ func _target_play_card(card_data: CardData, target: Node):
 	if target:
 		target_path = target.get_path()
 	var my_pid = 1 if GlobalGameData.is_host else 2
-	rpc("_server_play_card", my_pid, card_data.id, target_path)
+	if multiplayer.has_multiplayer_peer():
+		rpc("_server_play_card", my_pid, card_data.id, target_path)
+	else:
+		_execute_play_card(my_pid, card_data.id, target_path)
 
 @rpc("any_peer", "call_local", "reliable")
 func _server_play_card(player_id: int, card_id: String, target_path: String):
 	if not multiplayer.is_server():
 		return
+	_execute_play_card(player_id, card_id, target_path)
+
+func _execute_play_card(player_id: int, card_id: String, target_path: String):
 	var card_data = CardDatabase.get_card(card_id)
 	if not card_data:
 		return
@@ -304,8 +309,8 @@ func _server_play_card(player_id: int, card_id: String, target_path: String):
 	if target_path and not target_path.is_empty():
 		target = get_node_or_null(target_path)
 	var caster: Node = null
-	var who = "Host" if player_id == multiplayer.get_unique_id() else "Client"
-	if player_id == multiplayer.get_unique_id():
+	var who = "Host" if player_id == 1 else "Client"
+	if player_id == 1:
 		for c in GlobalGameData.host_characters:
 			if c.hp > 0:
 				caster = c
@@ -319,9 +324,14 @@ func _server_play_card(player_id: int, card_id: String, target_path: String):
 	print("[Info] %s 释放 %s，目标: %s，施法者: %s" % [who, card_data.card_name, target.name if target else "无", caster.name if caster else "无"])
 
 	CardEffect.execute(card_data, caster, target, self)
-	rpc_id(0, "_sync_card_play", player_id, card_id, target_path)
-	rpc_id(0, "_sync_energy", player_id, energy_system.get_energy(player_id))
-	rpc_id(0, "_sync_hand", player_id, deck_manager.get_hand(player_id))
+	var hand = deck_manager.get_hand(player_id)
+	var energy = energy_system.get_energy(player_id)
+	if multiplayer.has_multiplayer_peer():
+		rpc("_sync_card_play", player_id, card_id, target_path)
+		rpc("_sync_energy", player_id, energy)
+		rpc("_sync_hand", player_id, hand)
+	_sync_hand(player_id, hand)
+	_sync_energy(player_id, energy)
 
 @rpc("call_local", "reliable")
 func _sync_card_play(_player_id: int, _card_id: String, _target_path: String):
@@ -329,9 +339,8 @@ func _sync_card_play(_player_id: int, _card_id: String, _target_path: String):
 
 @rpc("call_local", "reliable")
 func _sync_energy(player_id: int, value: int):
-
 	energy_system.player_energy[player_id] = value
-	_update_energy_ui()
+	_update_player_panels()
 
 @rpc("call_local", "reliable")
 func _sync_hand(player_id: int, hand: Array):
@@ -373,11 +382,8 @@ func highlight_skill_targets():
 				if c.hp > 0:
 					highlight_layer.set_cell(_get_character_cell(c), 0, Vector2i.ZERO)
 
-func _update_energy_ui():
-	var pid = 1 if GlobalGameData.is_host else 2
-	var val = energy_system.get_energy(pid)
-	var max_v = energy_system.max_energy
-	energy_bar.update_display(val, max_v)
+func _update_player_energy():
+	_update_player_panels()
 
 func draw_extra_card(caster: Node):
 	if not multiplayer.is_server():
@@ -510,7 +516,6 @@ func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn)
 
 func update_ui_turn_indicator():
 	turn_indicator.update_turn_display()
-	_update_energy_ui()
 	_update_player_panels()
 	if hand_panel:
 		hand_panel.clear_selection()

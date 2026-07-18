@@ -1,3 +1,6 @@
 [gd_scene format=3 uid="uid://fba32ky7pmrp"]
 
+[ext_resource type="Script" path="res://Effects/FloatingNumber.gd" id="1_eqcfj"]
+
 [node name="FloatingNumber" type="Label" unique_id=1875731935]
+script = ExtResource("1_eqcfj")

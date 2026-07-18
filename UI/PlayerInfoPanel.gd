@@ -3,19 +3,28 @@ extends Panel
 @export var player_side: String = "Host"
 
 @onready var player_name_label: Label = $VBoxContainer/PlayerName
-@onready var faction_indicator: ColorRect = $VBoxContainer/FactionRow/FactionDot
-@onready var energy_label: Label = $VBoxContainer/FactionRow/EnergyLabel
 @onready var turn_highlight: ColorRect = $TurnHighlight
+@onready var energy_dots: HBoxContainer = $VBoxContainer/FactionRow/EnergyDots
 
 func _ready():
-	var is_host_side = player_side == "Host"
-	var name_text = "玩家1 (Host)" if is_host_side else "玩家2 (Client)"
-	var color = Color(0.3, 0.5, 1.0, 0.8) if is_host_side else Color(1.0, 0.3, 0.3, 0.8)
-	
-	player_name_label.text = name_text
-	faction_indicator.color = color
+	player_name_label.text = player_side
+
+	for dot in energy_dots.get_children():
+		var style = StyleBoxFlat.new()
+		style.corner_radius_top_left = 6
+		style.corner_radius_top_right = 6
+		style.corner_radius_bottom_left = 6
+		style.corner_radius_bottom_right = 6
+		if dot is ColorRect:
+			dot.add_theme_stylebox_override("panel", style)
 
 func refresh(is_my_turn: bool, energy: int = -1):
 	turn_highlight.visible = is_my_turn
 	if energy >= 0:
-		energy_label.text = "能量: %d" % energy
+		var is_local = (player_side == "Host") == GlobalGameData.is_host
+		var full_color = Color(0.3, 0.5, 1.0, 1.0) if is_local else Color(1.0, 0.3, 0.3, 1.0)
+		var empty_color = Color(0.2, 0.2, 0.3, 1.0)
+		for i in range(energy_dots.get_child_count()):
+			var dot = energy_dots.get_child(i)
+			if dot is ColorRect:
+				dot.color = full_color if i < energy else empty_color

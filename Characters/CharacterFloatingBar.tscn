@@ -1,62 +1,49 @@
 [gd_scene format=3 uid="uid://dgleh5lfnpj7g"]
 
 [ext_resource type="Script" uid="uid://cstwgo8y88w7e" path="res://Characters/CharacterFloatingBar.gd" id="1_fdngo"]
-
 [node name="CharacterFloatingBar" type="Node2D" unique_id=462093114]
 script = ExtResource("1_fdngo")
 
 [node name="HPBar" type="ColorRect" parent="." unique_id=795358018]
-offset_left = -44.0
-offset_top = -24.0
-offset_right = 44.0
-offset_bottom = -16.0
-color = Color(0, 0, 0, 0.7)
+offset_left = -30.0
+offset_top = 38.0
+offset_right = 30.0
+offset_bottom = 48.0
+color = Color(0, 0, 0, 0.6)
 
 [node name="HPFill" type="ColorRect" parent="HPBar" unique_id=1785860220]
 layout_mode = 0
 offset_left = 1.0
 offset_top = 1.0
-offset_right = 87.0
-offset_bottom = 7.0
+offset_right = 59.0
+offset_bottom = 9.0
 color = Color(0.2, 0.8, 0.2, 1)
 
-[node name="HPLabel" type="Label" parent="." unique_id=547392923]
-offset_left = -44.0
-offset_top = -36.0
-offset_right = 44.0
-offset_bottom = -13.0
-theme_override_colors/font_color = Color(1, 1, 1, 0.9)
-theme_override_font_sizes/font_size = 10
+[node name="ShieldOutline" type="Panel" parent="HPBar" unique_id=9876543220]
+visible = false
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 60.0
+offset_bottom = 10.0
+mouse_filter = 1
+
+[node name="HPLabel" type="Label" parent="HPBar" unique_id=547392923]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 60.0
+offset_bottom = 10.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 8
 text = "100/100"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="ShieldIcon" type="ColorRect" parent="." unique_id=2092061534]
-visible = false
-offset_left = 32.0
-offset_top = -14.0
-offset_right = 46.0
-offset_bottom = -4.0
-color = Color(0.2, 0.5, 1, 0.8)
+[node name="FactionRing" type="Line2D" parent="." unique_id=1797410036]
+width = 6
+default_color = Color(1, 1, 1, 0.5)
 
-[node name="ShieldLabel" type="Label" parent="." unique_id=591799257]
-visible = false
-offset_left = 46.0
-offset_top = -16.0
-offset_right = 70.0
-offset_bottom = 7.0
-theme_override_colors/font_color = Color(0.4, 0.7, 1, 1)
-theme_override_font_sizes/font_size = 10
-
-[node name="FactionRing" type="ColorRect" parent="." unique_id=1797410036]
-offset_left = -56.0
-offset_top = -100.0
-offset_right = 56.0
-offset_bottom = -30.0
-color = Color(1, 1, 1, 0.08)
-
-[node name="SelectionIndicator" type="ColorRect" parent="." unique_id=1440890590]
-offset_left = -56.0
-offset_top = -56.0
-offset_right = 56.0
-offset_bottom = 56.0
-color = Color(1, 1, 0, 0)
+[node name="SelectionIndicator" type="Line2D" parent="." unique_id=1440890590]
+width = 4
+default_color = Color(1, 1, 0, 0)

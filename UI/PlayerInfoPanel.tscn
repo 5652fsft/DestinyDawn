@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://crt0kt1u5eftp"]
 
 [ext_resource type="Script" uid="uid://bmg1jdmhbo2uf" path="res://UI/PlayerInfoPanel.gd" id="1_yv6cf"]
+[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf" id="2_lbsfr"]
 
 [node name="PlayerInfoPanel" type="Panel" unique_id=1419199440]
 script = ExtResource("1_yv6cf")
@@ -17,17 +18,65 @@ offset_bottom = -8.0
 [node name="PlayerName" type="Label" parent="VBoxContainer" unique_id=1203884164]
 layout_mode = 2
 text = "玩家"
+theme_override_fonts/font = ExtResource("2_lbsfr")
+theme_override_font_sizes/font_size = 16
 
 [node name="FactionRow" type="HBoxContainer" parent="VBoxContainer" unique_id=1517087466]
 layout_mode = 2
 
-[node name="FactionDot" type="ColorRect" parent="VBoxContainer/FactionRow" unique_id=265754027]
-custom_minimum_size = Vector2(16, 16)
+[node name="EnergyDots" type="HBoxContainer" parent="VBoxContainer/FactionRow" unique_id=1234567891]
 layout_mode = 2
+alignment = 0
 
-[node name="EnergyLabel" type="Label" parent="VBoxContainer/FactionRow" unique_id=1718437659]
+[node name="Dot0" type="ColorRect" parent="VBoxContainer/FactionRow/EnergyDots" unique_id=1234567892]
+custom_minimum_size = Vector2(12, 12)
 layout_mode = 2
-text = "能量: 0"
+color = Color(0.2, 0.2, 0.3, 1)
+
+[node name="Dot1" type="ColorRect" parent="VBoxContainer/FactionRow/EnergyDots" unique_id=1234567893]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+color = Color(0.2, 0.2, 0.3, 1)
+
+[node name="Dot2" type="ColorRect" parent="VBoxContainer/FactionRow/EnergyDots" unique_id=1234567894]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+color = Color(0.2, 0.2, 0.3, 1)
+
+[node name="Dot3" type="ColorRect" parent="VBoxContainer/FactionRow/EnergyDots" unique_id=1234567895]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+color = Color(0.2, 0.2, 0.3, 1)
+
+[node name="Dot4" type="ColorRect" parent="VBoxContainer/FactionRow/EnergyDots" unique_id=1234567896]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+color = Color(0.2, 0.2, 0.3, 1)
+
+[node name="Dot5" type="ColorRect" parent="VBoxContainer/FactionRow/EnergyDots" unique_id=1234567897]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+color = Color(0.2, 0.2, 0.3, 1)
+
+[node name="Dot6" type="ColorRect" parent="VBoxContainer/FactionRow/EnergyDots" unique_id=1234567898]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+color = Color(0.2, 0.2, 0.3, 1)
+
+[node name="Dot7" type="ColorRect" parent="VBoxContainer/FactionRow/EnergyDots" unique_id=1234567899]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+color = Color(0.2, 0.2, 0.3, 1)
+
+[node name="Dot8" type="ColorRect" parent="VBoxContainer/FactionRow/EnergyDots" unique_id=1234567900]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+color = Color(0.2, 0.2, 0.3, 1)
+
+[node name="Dot9" type="ColorRect" parent="VBoxContainer/FactionRow/EnergyDots" unique_id=1234567901]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+color = Color(0.2, 0.2, 0.3, 1)
 
 [node name="TurnHighlight" type="ColorRect" parent="." unique_id=1121483491]
 layout_mode = 0

@@ -283,10 +283,14 @@ func get_current_phase() -> String:
 		_:
 			return "Invalid"
 
+func _is_mouse_over_ui() -> bool:
+	var ctrl = get_viewport().gui_get_hovered_control()
+	return ctrl != null and (ctrl is BaseButton or ctrl is LineEdit)
+
 func handle_move():
 	if hp <= 0:
 		return
-	if Input.is_action_just_pressed("Click"):
+	if Input.is_action_just_pressed("Click") and not _is_mouse_over_ui():
 		if main.is_targeting:
 			return
 		if main.is_any_character_moving:
@@ -342,7 +346,7 @@ func handle_move():
 func handle_attack():
 	if hp <= 0:
 		return
-	if Input.is_action_just_pressed("Click"):
+	if Input.is_action_just_pressed("Click") and not _is_mouse_over_ui():
 		if main.is_targeting:
 			return
 		var mouse_pos = get_global_mouse_position()

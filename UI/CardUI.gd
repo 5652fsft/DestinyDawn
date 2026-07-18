@@ -15,24 +15,43 @@ signal card_drag_started(card: CardUI)
 
 var _hover_tween: Tween = null
 var _base_scale: Vector2 = Vector2(1, 1)
+
 var _is_dragging: bool = false
 var _drag_threshold: float = 15.0
 var _press_start_pos: Vector2 = Vector2.ZERO
 var _ghost: Panel = null
 
-@onready var cost_label: Label = $MarginContainer/VBoxContainer/TopRow/CostLabel
+@onready var cost_number: Label = $CostCircle/CostNumber
 @onready var name_label: Label = $MarginContainer/VBoxContainer/NameLabel
 @onready var desc_label: Label = $MarginContainer/VBoxContainer/DescLabel
-@onready var type_label: Label = $MarginContainer/VBoxContainer/TopRow/TypeLabel
+@onready var type_label: Label = $TypeLabel
+@onready var cost_circle: ColorRect = $CostCircle
 
 func _ready():
 	mouse_entered.connect(_on_hover_enter)
 	mouse_exited.connect(_on_hover_exit)
 	_base_scale = scale
 
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.2, 0.3, 0.5, 0.9)
+	style.corner_radius_top_left = 14
+	style.corner_radius_top_right = 14
+	style.corner_radius_bottom_left = 14
+	style.corner_radius_bottom_right = 14
+	cost_circle.add_theme_stylebox_override("panel", style)
+
+	var panel_style = StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.12, 0.12, 0.2, 1.0)
+	panel_style.corner_radius_top_left = 8
+	panel_style.corner_radius_top_right = 8
+	panel_style.corner_radius_bottom_left = 8
+	panel_style.corner_radius_bottom_right = 8
+	panel_style.shadow_size = 0
+	add_theme_stylebox_override("panel", panel_style)
+
 func setup(data: CardData):
 	card_data = data
-	cost_label.text = "费用: %d" % data.cost
+	cost_number.text = str(data.cost)
 	name_label.text = data.card_name
 	desc_label.text = data.description
 	type_label.text = CardData.CardType.keys()[data.card_type]
@@ -68,27 +87,13 @@ func _start_drag():
 	card_drag_started.emit(self)
 
 func _create_ghost():
-	_ghost = Panel.new()
-	_ghost.size = size
-	_ghost.scale = _base_scale * 1.15
-	_ghost.modulate = Color(1, 1, 1, 0.85)
+	_ghost = duplicate(2)
+	_ghost.set_script(null)
 	_ghost.mouse_filter = MOUSE_FILTER_IGNORE
-	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.15, 0.15, 0.25, 0.9)
-	style.corner_radius_top_left = 6
-	style.corner_radius_top_right = 6
-	style.corner_radius_bottom_left = 6
-	style.corner_radius_bottom_right = 6
-	_ghost.add_theme_stylebox_override("panel", style)
-	
-	var lbl = Label.new()
-	lbl.text = card_data.card_name if card_data else ""
-	lbl.horizontal_alignment = 1
-	lbl.vertical_alignment = 1
-	lbl.add_theme_font_size_override("font_size", 14)
-	lbl.add_theme_color_override("font_color", Color.WHITE)
-	_ghost.add_child(lbl)
-	
+	_ghost.scale = _base_scale
+	_ghost.modulate = Color(1, 1, 1, 0.8)
+	_ghost.self_modulate = Color.WHITE
+
 	var main = get_tree().current_scene
 	if main and main.has_node("UI"):
 		main.get_node("UI").add_child(_ghost)
@@ -122,8 +127,20 @@ func _on_hover_enter():
 		_hover_tween.kill()
 	z_index = 10
 	_hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_hover_tween.tween_property(self, "scale", _base_scale * 1.12, 0.12)
+	_hover_tween.tween_property(self, "scale", _base_scale * 1.25, 0.12)
+	_hover_tween.parallel().tween_property(self, "rotation", 0.03, 0.12)
 	_hover_tween.parallel().tween_property(self, "self_modulate", Color(1, 1, 0.85), 0.12)
+
+	var panel_style = StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.15, 0.15, 0.25, 1.0)
+	panel_style.corner_radius_top_left = 8
+	panel_style.corner_radius_top_right = 8
+	panel_style.corner_radius_bottom_left = 8
+	panel_style.corner_radius_bottom_right = 8
+	panel_style.shadow_size = 16
+	panel_style.shadow_color = Color(0, 0, 0, 0.5)
+	panel_style.shadow_offset = Vector2(4, 4)
+	add_theme_stylebox_override("panel", panel_style)
 
 func _on_hover_exit():
 	if _hover_tween:
@@ -131,5 +148,15 @@ func _on_hover_exit():
 	z_index = 0
 	_hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	_hover_tween.tween_property(self, "scale", _base_scale, 0.12)
+	_hover_tween.parallel().tween_property(self, "rotation", 0.0, 0.12)
 	if not is_card_selected:
 		_hover_tween.parallel().tween_property(self, "self_modulate", Color.WHITE, 0.12)
+
+	var panel_style = StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.12, 0.12, 0.2, 1.0)
+	panel_style.corner_radius_top_left = 8
+	panel_style.corner_radius_top_right = 8
+	panel_style.corner_radius_bottom_left = 8
+	panel_style.corner_radius_bottom_right = 8
+	panel_style.shadow_size = 0
+	add_theme_stylebox_override("panel", panel_style)

@@ -16,18 +16,27 @@ func clear():
 
 func set_hand(card_ids: Array[String]):
 	clear()
-	for cid in card_ids:
+	for i in range(card_ids.size()):
+		var cid = card_ids[i]
 		var data = CardDatabase.get_card(cid)
 		if not data:
 			continue
-		_add_card(data)
+		_add_card(data, i)
 
-func _add_card(data: CardData):
+func _add_card(data: CardData, index: int = 0):
 	var instance = card_scene.instantiate()
 	instance.card_clicked.connect(_on_card_clicked)
 	card_container.add_child(instance)
 	instance.setup(data)
 	card_uis.append(instance)
+
+	instance.scale = Vector2.ZERO
+	instance.modulate.a = 0.0
+	var delay = index * 0.08
+	var tween = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_interval(delay)
+	tween.tween_property(instance, "scale", Vector2.ONE, 0.25)
+	tween.parallel().tween_property(instance, "modulate:a", 1.0, 0.15)
 
 func _on_card_clicked(card_ui: CardUI):
 	if selected_card_ui == card_ui:
