@@ -9,6 +9,11 @@ extends Panel
 
 var current_character: Node = null
 
+func _ready():
+	var bg = StyleBoxFlat.new()
+	bg.bg_color = Color(0.08, 0.08, 0.15, 0.85)
+	add_theme_stylebox_override("panel", bg)
+
 func show_for(character: Node):
 	if not character:
 		hide()

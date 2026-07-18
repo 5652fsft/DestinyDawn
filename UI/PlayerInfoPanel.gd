@@ -18,14 +18,12 @@ func _ready():
 		if dot is ColorRect:
 			dot.add_theme_stylebox_override("panel", style)
 
-	var is_local = (player_side == "Host") == GlobalGameData.is_host
+	var effective_host = GlobalGameData.is_host
+	if not multiplayer.has_multiplayer_peer():
+		effective_host = true
+	var is_local = (player_side == "Host") == effective_host
 	var bg = StyleBoxFlat.new()
-	
 	bg.bg_color = Color(0.12, 0.12, 0.2, 1.0) if is_local else Color(0.2, 0.1, 0.1, 1.0)
-	bg.corner_radius_top_left = 8
-	bg.corner_radius_top_right = 8
-	bg.corner_radius_bottom_left = 8
-	bg.corner_radius_bottom_right = 8
 	add_theme_stylebox_override("panel", bg)
 
 func refresh(is_my_turn: bool, energy: int = -1):
