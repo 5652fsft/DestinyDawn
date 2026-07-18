@@ -301,18 +301,22 @@ func show_attack_range():
 		if cell != start_cell and enemy and is_enemy(enemy):
 			if highlight_layer:
 				highlight_layer.set_cell(cell, 0, Vector2i.ZERO)
-			# 六边形高亮直接作为角色的子节点（自动跟随，无偏移）
 			var hex = Polygon2D.new()
-			var r = 55.0
+			var r = 85.0
 			var pts: PackedVector2Array = []
 			for k in range(6):
 				var a = deg_to_rad(60 * k - 30)
 				pts.append(Vector2(cos(a) * r, sin(a) * r))
 			hex.polygon = pts
-			hex.color = Color(1.0, 0.15, 0.15, 0.5)
-			hex.z_index = 50
+			hex.color = Color(1.0, 0.15, 0.15, 0.4)
+			hex.z_index = 1
 			hex.name = "AttackRangeHighlight"
-			enemy.add_child(hex)
+			# 挂在 Sprite2D 下以跟随动画（缩放、偏移、悬停等）
+			var spr = enemy.get_node_or_null("Sprite2D")
+			if spr:
+				spr.add_child(hex)
+			else:
+				enemy.add_child(hex)
 			highlight_overlays.append(hex)
 
 func hide_move_range():
