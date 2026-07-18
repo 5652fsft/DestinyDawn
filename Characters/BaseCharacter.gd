@@ -146,6 +146,9 @@ func _exit_tree():
 	if main and main.has_method("unregister_character"):
 		main.unregister_character(self)
 
+func get_grid_layer() -> TileMapLayer:
+	return grid_layer
+
 func get_current_cell() -> Vector2i:
 	if not grid_layer:
 		return Vector2i(-1, -1)
@@ -523,6 +526,12 @@ func take_damage(damage: int):
 			rpc_id(0, "_sync_hp", hp)
 		return
 	
+	# MARK: take extra damage
+	var mark_pct = buff_manager.get_total(self, "mark") if buff_manager else 0
+	if mark_pct > 0:
+		damage = damage * (100 + mark_pct) / 100
+		print("[Mark] %s 被标记，额外承受 %d%% 伤害！" % [name, mark_pct])
+	
 	var absorbed = min(shield, damage)
 	shield -= absorbed
 	damage -= absorbed
@@ -564,7 +573,8 @@ var effective_move_points: int:
 	get:
 		var base = move_points
 		if buff_manager:
-			base += buff_manager.get_total(self, "move_debuff")
+			base -= buff_manager.get_total(self, "move_debuff")
+			base += buff_manager.get_total(self, "extra_move")
 		return max(1, base)
 
 func process_buffs():

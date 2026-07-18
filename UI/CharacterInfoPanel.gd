@@ -127,7 +127,11 @@ func _buff_desc(key: String, entry: Dictionary, stacks: int = 1) -> String:
 		"regen":
 			return "再生 +%d%s（%d回合）" % [val, stack_tag, dur]
 		"mark":
-			return "标记%s（%d回合）" % [stack_tag, dur]
+			return "标记 +%d%%%s（%d回合）" % [val, stack_tag, dur]
+		"extra_move":
+			return "加速 +%d%s（%d回合）" % [val, stack_tag, dur]
+		"taunt":
+			return "嘲讽%s（%d回合）" % [stack_tag, dur]
 	return "%s: %d%s（%d回合）" % [key, val, stack_tag, dur]
 
 func _on_CloseButton_pressed():
