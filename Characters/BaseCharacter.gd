@@ -208,7 +208,7 @@ func show_move_range():
 	var start_cell: Vector2i = grid_layer.local_to_map(char_local)
 	
 	if get_move_cost(start_cell) <= 0:
-		print("[Warning] 起始格不可通行")
+		print("[Warn] 起始格不可通行")
 		return
 
 	valid_move_cells[start_cell] = 0
@@ -406,7 +406,7 @@ func handle_move():
 	
 		elif is_selected:
 			if GlobalGameData.character_move_used.get(name, false):
-				print("[Warning] 本回合已移动！")
+				print("[Warn] 本回合已移动！")
 				return
 			
 			if grid_layer:
@@ -414,11 +414,11 @@ func handle_move():
 				var cell_coord: Vector2i = grid_layer.local_to_map(local_mouse)
 			
 				if not valid_move_cells.has(cell_coord):
-					print("[Warning] 目标格子超出移动范围、不可达或被阻挡")
+					print("[Warn] 目标格子超出移动范围、不可达或被阻挡")
 					return
 				
 				if main.is_cell_occupied(cell_coord, self):
-					print("[Warning] 目标格子已被占据！")
+					print("[Warn] 目标格子已被占据！")
 					return
 				
 				main.start_character_move()
@@ -426,7 +426,7 @@ func handle_move():
 				
 				var target_local = grid_layer.map_to_local(cell_coord)
 				target_world = grid_layer.to_global(target_local)
-				print("[Info] ", name, "移动至格子: ", cell_coord, " (总消耗: ", valid_move_cells[cell_coord], ")")
+				print("[Move] %s → (%d, %d) 消耗 %d" % [name, cell_coord.x, cell_coord.y, valid_move_cells[cell_coord]])
 				GlobalGameData.character_move_used[name] = true
 				GlobalGameData.character_move_used_num += 1
 			main.unselect_character(self)
@@ -466,12 +466,12 @@ func handle_attack():
 							GlobalGameData.character_attack_used_num += 1
 							GlobalGameData.character_attack_used[name] = true
 						else:
-							print("[Info] 本回合已攻击过！")
+							print("[Warn] %s 本回合已攻击过！" % name)
 						main.unselect_character(self)
 						main.check_attack()
 						return
 					else:
-						print("[Info] 目标超出攻击范围！")
+						print("[Warn] %s 目标超出攻击范围！" % name)
 						return
 			# 点击空地 → 取消选中
 			main.unselect_character(self)
@@ -489,7 +489,7 @@ func perform_attack(target_path: NodePath):
 		return
 		
 	target.rpc("take_damage", effective_attack)
-	print("[Info] %s 对 %s 造成 %d 点伤害！" % [name, target.name, effective_attack])
+	print("[Combat] %s → %s 造成 %d 点伤害" % [name, target.name, effective_attack])
 	
 	# 同步动画（所有客户端）
 	rpc_id(0, "_play_attack_animation", target_path)
@@ -566,7 +566,7 @@ func take_damage(damage: int):
 		hp = min(max_hp, hp - damage)
 		_spawn_float(-damage, true)
 		if multiplayer.is_server():
-			print("[HP] %s 治疗 %d，当前 HP: %d" % [name, -damage, hp])
+			print("[Combat] %s 治疗 %d 点" % [name, -damage])
 			rpc_id(0, "_sync_hp", hp)
 		return
 	
@@ -574,7 +574,7 @@ func take_damage(damage: int):
 	var mark_pct = buff_manager.get_total(self, "mark") if buff_manager else 0
 	if mark_pct > 0:
 		damage = damage * (100 + mark_pct) / 100
-		print("[Mark] %s 被标记，额外承受 %d%% 伤害！" % [name, mark_pct])
+		print("[Buff] %s 被标记，额外承受 %d%% 伤害！" % [name, mark_pct])
 	
 	var absorbed = min(shield, damage)
 	shield -= absorbed
@@ -582,13 +582,13 @@ func take_damage(damage: int):
 	if absorbed > 0:
 		_spawn_float(absorbed, false, true)
 		if multiplayer.is_server():
-			print("[Shield] %s 护盾吸收 %d 点伤害，剩余护盾: %d" % [name, absorbed, shield])
+			print("[Combat] %s 护盾吸收 %d 点伤害，剩余护盾: %d" % [name, absorbed, shield])
 	
 	hp = max(0, hp - damage)
 	_spawn_float(damage)
 	_shake_camera(3.0)
 	if multiplayer.is_server():
-		print("[HP] %s 剩余 HP: %d" % [name, hp])
+		print("[Combat] %s 剩余 HP: %d" % [name, hp])
 	if hp <= 0:
 		hide()
 		collision_layer = 0

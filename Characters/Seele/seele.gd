@@ -43,7 +43,7 @@ func perform_attack(target_path: NodePath):
 		dmg = int(dmg * 1.5)
 
 	target.rpc("take_damage", dmg)
-	print("[Info] %s 对 %s 造成 %d 点伤害！" % [name, target.name, dmg])
+	print("[Combat] %s → %s 造成 %d 点伤害（暗影突袭）" % [name, target.name, dmg])
 	rpc_id(0, "_play_attack_animation", target_path)
 
 func use_active_skill(target: Node) -> bool:

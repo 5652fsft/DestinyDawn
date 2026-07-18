@@ -68,7 +68,7 @@ func _init_vfx_manager():
 	vfx_manager = vm
 
 func _on_client_joined(id: int):
-	print("[Info] 客户端 %d 加入，为其创建角色" % id)
+	print("[Net] 客户端 %d 加入" % id)
 	_init_player_card_systems()
 	call_deferred("_deferred_spawn_client_characters", id)
 
@@ -205,9 +205,9 @@ func on_card_played(card_data: CardData):
 	if get_current_player_id() != my_pid:
 		return
 	if not energy_system.can_afford(my_pid, card_data.cost):
-		print("[Warning] %s 能量不足，无法使用 %s" % [who, card_data.card_name])
+		print("[Warn] %s 能量不足，无法使用 %s" % [who, card_data.card_name])
 		return
-	print("[Info] %s 选中卡牌: %s" % [who, card_data.card_name])
+	print("[Card] %s 选中卡牌 [%s]" % [who, card_data.card_name])
 	if card_data.target_type == CardData.TargetType.NONE:
 		rpc("_server_play_card", my_pid, card_data.id, "")
 	else:
@@ -288,8 +288,8 @@ func _on_target_selected(target: Node):
 		return
 	if pending_card_data:
 		var card_data = pending_card_data
-		var who = "Host" if GlobalGameData.is_host else "Client"
-		print("[Info] %s 对 %s 释放 %s" % [who, target.name, card_data.card_name])
+		var player_name = "玩家1(Host)" if GlobalGameData.is_host else "玩家2(Client)"
+		print("[Info] %s 对 %s 使用 [%s]" % [player_name, target.name, card_data.card_name])
 		_target_play_card(card_data, target)
 		hand_panel.remove_card_via_data(card_data)
 		cancel_targeting()
@@ -329,7 +329,7 @@ func _execute_play_card(player_id: int, card_id: String, target_path: String):
 	if target_path and not target_path.is_empty():
 		target = get_node_or_null(target_path)
 	var caster: Node = null
-	var who = "Host" if player_id == 1 else "Client"
+	var player_name = "玩家1(Host)" if player_id == 1 else "玩家2(Client)"
 	if player_id == 1:
 		for c in GlobalGameData.host_characters:
 			if c.hp > 0:
@@ -341,7 +341,7 @@ func _execute_play_card(player_id: int, card_id: String, target_path: String):
 				caster = c
 				break
 
-	print("[Info] %s 释放 %s，目标: %s，施法者: %s" % [who, card_data.card_name, target.name if target else "无", caster.name if caster else "无"])
+	print("[Card] %s 使用 [%s]，目标: %s" % [player_name, card_data.card_name, target.name if target else "无"])
 
 	CardEffect.execute(card_data, caster, target, self)
 	var hand = deck_manager.get_hand(player_id)
@@ -448,9 +448,9 @@ func start_new_round():
 	if not GlobalGameData.turn_has_been_drawn:
 		GlobalGameData.is_host_turn = true if randi() % 2 else false
 		if GlobalGameData.is_host_turn:
-			print("[Info] 服务端先手")
+			print("[Phase] 服务端先手")
 		else:
-			print("[Info] 客户端先手")
+			print("[Phase] 客户端先手")
 	
 	rpc("reset_character_state")
 	rpc("draw_for_new_turn")
@@ -504,7 +504,7 @@ func advance_turn_phase():
 		return
 		
 	if check_victory():
-		print("[Info] 游戏结束")
+		print("[Phase] 游戏结束")
 		GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.GAME_OVER
 		return
 	
@@ -608,7 +608,7 @@ func check_move() -> void:
 		my_count += 1
 	if GlobalGameData.character_move_used_num >= my_count:
 		GlobalGameData.character_move_used_num = 0
-		print("[Info] 移动次数耗尽，进入下一阶段")
+		print("[Phase] 移动次数耗尽，进入下一阶段")
 		rpc("advance_turn_phase")
 		
 func check_attack() -> void:
@@ -619,7 +619,7 @@ func check_attack() -> void:
 		my_count += 1
 	if GlobalGameData.character_attack_used_num >= my_count:
 		GlobalGameData.character_attack_used_num = 0
-		print("[Info] 攻击次数耗尽，进入下一阶段")
+		print("[Phase] 攻击次数耗尽，进入下一阶段")
 		rpc("advance_turn_phase")
 
 func check_victory() -> bool:
@@ -630,10 +630,10 @@ func check_victory() -> bool:
 	var client_alive = GlobalGameData.client_characters.any(func(c): return c.hp > 0)
 	
 	if not host_alive:
-		print("[Info] 客户端玩家胜利")
+		print("[Phase] 客户端玩家胜利")
 		return true
 	if not client_alive:
-		print("[Info] 服务端玩家胜利")
+		print("[Phase] 服务端玩家胜利")
 		return true
 	return false
 
