@@ -40,7 +40,7 @@ func remove_buff(target: Node, buff_id: String, index: int = -1) -> bool:
 		if list.is_empty():
 			target.buffs.erase(buff_id)
 		else:
-			_ref_entry(target, buff_id, null, false, list)
+			target.buffs[buff_id] = list
 
 	_sync_and_emit(target)
 	return true
