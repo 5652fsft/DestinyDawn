@@ -168,7 +168,7 @@ func _update_sprite_texture():
 	var char_id = script_path.get_file().get_basename()
 	var is_host_side = name.begins_with("Host")
 	var is_friendly = is_host_side == GlobalGameData.is_host
-	var suffix = "_blue.png" if is_friendly else "_red.png"
+	var suffix = "_Blue.png" if is_friendly else "_Red.png"
 	var tex = load("res://Assets/Sprites/Characters/%s%s" % [char_id, suffix])
 	if tex:
 		sprite.texture = tex
