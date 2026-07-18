@@ -15,11 +15,16 @@ var hp: int:
 		_hp = value
 		if main and main.has_method("_update_character_info_panel"):
 			main._update_character_info_panel(self)
+		if floating_bar:
+			floating_bar.refresh()
 @export var attack: int = 20
 @export var attack_range: int = 2  # 默认近战，1格
 
 # === 节点引用 ===
 @onready var sprite: Sprite2D = $Sprite2D
+
+const FLOATING_BAR = preload("res://Characters/CharacterFloatingBar.tscn")
+var floating_bar: Node2D = null
 
 # === 外部依赖 ===
 @onready var main: Node2D = get_tree().current_scene
@@ -66,6 +71,12 @@ func _ready():
 	collision_layer = click_layer
 	collision_mask = 0
 	sprite.modulate = Color.WHITE
+	
+	# 创建头顶浮动状态栏
+	floating_bar = FLOATING_BAR.instantiate()
+	floating_bar.z_index = 10
+	add_child(floating_bar)
+	floating_bar.refresh()
 	
 	# 对齐角色到格子中心
 	if grid_layer:
@@ -461,6 +472,8 @@ func process_buffs():
 @rpc("any_peer", "call_local", "reliable")
 func _sync_shield(new_shield: int):
 	shield = new_shield
+	if floating_bar:
+		floating_bar.refresh()
 
 @rpc("any_peer", "call_local", "reliable")
 func _sync_buffs(new_buffs: Dictionary):
