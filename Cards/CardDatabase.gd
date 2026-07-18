@@ -105,6 +105,47 @@ static func _register_cards():
 		_create_card("card_taunt", "嘲讽", CardData.CardType.TACTICAL, 1,
 			CardData.TargetType.ENEMY_SINGLE, "嘲讽目标，使其强制攻击施法者（持续 1 回合）",
 			CardData.EffectType.TAUNT, 1, 1),
+
+		# === Phase 5.3 新卡牌 ===
+		_create_card("card_overload", "能量过载", CardData.CardType.TACTICAL, 0,
+			CardData.TargetType.SELF, "获得 2 能量，自身受到 5 点伤害",
+			CardData.EffectType.DRAW_CARD, 1),
+
+		_create_card("card_shield_overload", "护盾过载", CardData.CardType.SHIELD, 1,
+			CardData.TargetType.SELF, "获得 10 护盾，若已有护盾则翻倍",
+			CardData.EffectType.SHIELD, 10),
+
+		_create_card("card_double_edge", "双刃剑", CardData.CardType.BUFF, 1,
+			CardData.TargetType.SELF, "攻击 +15，防御 -5（持续 2 回合）",
+			CardData.EffectType.BUFF_ATTACK, 15, 2),
+
+		_create_card("card_echo", "回响", CardData.CardType.TACTICAL, 2,
+			CardData.TargetType.NONE, "额外抽 2 张牌",
+			CardData.EffectType.DRAW_CARD, 2),
+
+		_create_card("card_hemorrhage", "出血", CardData.CardType.DEBUFF, 1,
+			CardData.TargetType.ENEMY_SINGLE, "每回合损失 8 点生命（持续 3 回合）",
+			CardData.EffectType.DAMAGE_OVER_TIME, 8, 3),
+
+		_create_card("card_ice_shield", "冰盾", CardData.CardType.SHIELD, 2,
+			CardData.TargetType.ALLY_SINGLE, "提供 20 点护盾",
+			CardData.EffectType.SHIELD, 20),
+
+		_create_card("card_life_split", "生命分流", CardData.CardType.HEAL, 1,
+			CardData.TargetType.ALLY_SINGLE, "治疗 15 点，若目标满血则额外抽 1 张牌",
+			CardData.EffectType.HEAL, 15),
+
+		_create_card("card_reckoning", "惩戒", CardData.CardType.ATTACK, 1,
+			CardData.TargetType.ENEMY_SINGLE, "造成 8×目标身上 buff 数的伤害",
+			CardData.EffectType.DAMAGE, 8),
+
+		_create_card("card_regen", "再生术", CardData.CardType.HEAL, 1,
+			CardData.TargetType.ALLY_SINGLE, "每回合恢复 6 点生命（持续 3 回合）",
+			CardData.EffectType.HEAL_OVER_TIME, 6, 3),
+
+		_create_card("card_disarm", "时停", CardData.CardType.DEBUFF, 2,
+			CardData.TargetType.ENEMY_SINGLE, "目标虚弱 3 回合",
+			CardData.EffectType.DEBUFF_ATTACK, 10, 3),
 	]
 
 	for c in cards:

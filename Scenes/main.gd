@@ -45,10 +45,11 @@ var last_attacker: Node = null
 
 # === 默认卡组（临时：Phase 4 将改为战前选择） ===
 var default_deck: Array[String] = [
-	"card_fireball", "card_fireball",
-	"card_ice_shard", "card_ice_shard",
+	"card_fireball", "card_ice_shard",
 	"card_heal", "card_small_heal",
-	"card_shield", "card_strength"
+	"card_shield", "card_strength",
+	"card_weakness", "card_poison_blade",
+	"card_reckoning", "card_regen",
 ]
 
 func _ready():
