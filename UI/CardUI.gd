@@ -6,6 +6,7 @@ signal card_drag_started(card: CardUI)
 
 var _hover_tween: Tween = null
 var _base_scale: Vector2 = Vector2(1, 1)
+var _saved_z: int = 0
 
 var _is_dragging: bool = false
 var _drag_threshold: float = 15.0
@@ -121,6 +122,7 @@ func _cleanup_ghost():
 func _on_hover_enter():
 	if _hover_tween:
 		_hover_tween.kill()
+	_saved_z = z_index
 	z_index = 10
 	_hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	_hover_tween.tween_property(self, "scale", _base_scale * 1.35, 0.12)
@@ -140,7 +142,7 @@ func _on_hover_enter():
 func _on_hover_exit():
 	if _hover_tween:
 		_hover_tween.kill()
-	z_index = 0
+	z_index = _saved_z
 	_hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	_hover_tween.tween_property(self, "scale", _base_scale, 0.12)
 	_hover_tween.parallel().tween_property(self, "self_modulate", Color.WHITE, 0.12)
