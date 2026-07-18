@@ -1,7 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://fk1ww3enxjfj"]
+[gd_scene format=3 uid="uid://fk1ww3enxjfj"]
 
 [ext_resource type="Script" uid="uid://bk66soey1gkfx" path="res://Characters/Bronya/bronya.gd" id="1_br5t4"]
-[ext_resource type="Texture2D" uid="uid://cbwvycwpywre8" path="res://Characters/Bronya/bronya_sprite.png" id="2_br5t4"]
 [ext_resource type="PackedScene" uid="uid://dgleh5lfnpj7g" path="res://Characters/CharacterFloatingBar.tscn" id="3_br5t4"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_xa6pd"]
@@ -22,7 +21,6 @@ shape = SubResource("CircleShape2D_xa6pd")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.95, 0.95)
-texture = ExtResource("2_br5t4")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_br5t4")

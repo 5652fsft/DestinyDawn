@@ -50,9 +50,6 @@ offset_top = 1.0
 offset_right = 59.0
 offset_bottom = 9.0
 
-[node name="FactionRingSprite" type="Sprite2D" parent="." unique_id=1797410036]
-z_index = 1
-
 [node name="SelectionIndicator" type="Line2D" parent="." unique_id=1440890590]
 visible = false
 width = 8.0

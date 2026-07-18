@@ -1,7 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://cj80ggih730w"]
+[gd_scene format=3 uid="uid://cj80ggih730w"]
 
 [ext_resource type="Script" uid="uid://btsv0s1u7c3u6" path="res://Characters/Seele/seele.gd" id="1_md115"]
-[ext_resource type="Texture2D" uid="uid://uh6mv1coe4uw" path="res://Characters/Seele/seele_sprite.png" id="2_md115"]
 [ext_resource type="PackedScene" uid="uid://dgleh5lfnpj7g" path="res://Characters/CharacterFloatingBar.tscn" id="3_md115"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_xa6pd"]
@@ -22,7 +21,6 @@ shape = SubResource("CircleShape2D_xa6pd")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.95, 0.95)
-texture = ExtResource("2_md115")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_md115")

@@ -7,7 +7,6 @@ var pulse_tween: Tween = null
 @onready var hp_fill: ColorRect = $HPBar/HPFill
 @onready var hp_label: Label = $HPBar/HPLabel
 @onready var shield_outline: Panel = $HPBar/ShieldOutline
-@onready var ring_sprite: Sprite2D = $FactionRingSprite
 @onready var selection_indicator: Line2D = $SelectionIndicator
 
 func _ready():
@@ -36,7 +35,6 @@ func _ready():
 	shield_style.corner_radius_bottom_right = 2
 	shield_outline.add_theme_stylebox_override("panel", shield_style)
 
-	_update_ring_texture()
 	refresh()
 
 func _hexagon(radius: float) -> PackedVector2Array:
@@ -50,20 +48,6 @@ func _hexagon(radius: float) -> PackedVector2Array:
 		Vector2(-w, h / 2.0),
 		Vector2(-w, -h / 2.0),
 	])
-
-func _update_ring_texture():
-	if not parent_character or not ring_sprite:
-		return
-	var is_host = parent_character.name.begins_with("Host")
-	var is_friendly = is_host == GlobalGameData.is_host
-	var suffix = "_blue.png" if is_friendly else "_red.png"
-
-	var script_path = parent_character.get_script().get_path()
-	var char_id = script_path.get_file().get_basename()
-	var tex_path = "res://Assets/Sprites/Rings/%s%s" % [char_id, suffix]
-	var tex = load(tex_path)
-	if tex:
-		ring_sprite.texture = tex
 
 func refresh():
 	if not parent_character or not is_inside_tree():

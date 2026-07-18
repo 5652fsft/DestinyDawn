@@ -122,6 +122,8 @@ func _ready():
 		target_world = aligned_pos
 		velocity = Vector2.ZERO
 
+	_update_sprite_texture()
+
 func _on_hover_enter():
 	if hover_tween:
 		hover_tween.kill()
@@ -154,6 +156,18 @@ func get_grid_layer() -> TileMapLayer:
 	return grid_layer
 
 func get_current_cell() -> Vector2i:
+
+func _update_sprite_texture():
+	if not sprite:
+		return
+	var script_path = get_script().get_path()
+	var char_id = script_path.get_file().get_basename()
+	var is_host_side = name.begins_with("Host")
+	var is_friendly = is_host_side == GlobalGameData.is_host
+	var suffix = "_blue.png" if is_friendly else "_red.png"
+	var tex = load("res://Assets/Sprites/Rings/%s%s" % [char_id, suffix])
+	if tex:
+		sprite.texture = tex
 	if not grid_layer:
 		return Vector2i(-1, -1)
 	var local_pos = grid_layer.to_local(global_position)
