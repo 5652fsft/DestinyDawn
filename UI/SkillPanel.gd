@@ -4,8 +4,10 @@ const FONT = preload("res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf")
 
 var current_character: Node = null
 var active_skill: BaseSkill = null
+var _targeting: bool = false
 
 signal skill_used(skill: BaseSkill, target_type: int)
+signal skill_cancelled()
 
 @onready var skill_name_label = $VBoxContainer/SkillNameLabel
 @onready var skill_desc_label = $VBoxContainer/SkillDescLabel
@@ -37,16 +39,34 @@ func show_for(character: Node):
 	skill_desc_label.add_theme_font_override("font", FONT)
 	cooldown_label.add_theme_font_override("font", FONT)
 	_update_cooldown()
+	_targeting = false
+	use_button.text = "使用技能"
 	show()
+
+func set_targeting_mode(active: bool):
+	_targeting = active
+	if active:
+		use_button.text = "取消使用技能"
+		use_button.disabled = false
+	else:
+		use_button.text = "使用技能"
+		_update_cooldown()
 
 func _update_cooldown():
 	if not active_skill:
 		return
 	var cd = active_skill.current_cooldown
 	cooldown_label.text = "冷却: %d 回合" % cd if cd > 0 else "就绪"
-	use_button.disabled = cd > 0
+	if not _targeting:
+		use_button.disabled = cd > 0
 
 func _on_use_button_pressed():
 	if not active_skill:
+		return
+	if _targeting:
+		# 取消技能选择
+		var main = get_tree().current_scene
+		if main and main.has_method("cancel_targeting"):
+			main.cancel_targeting()
 		return
 	skill_used.emit(active_skill, active_skill.target_type)

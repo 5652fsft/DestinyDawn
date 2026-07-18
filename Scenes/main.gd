@@ -306,11 +306,19 @@ func _is_valid_target(target_type: int, is_ally: bool) -> bool:
 		_:
 			return false
 
+func _update_skill_button():
+	if skill_panel and skill_panel.has_method("set_targeting_mode"):
+		skill_panel.set_targeting_mode(is_targeting)
+
 func cancel_targeting():
 	pending_card_data = null
 	is_targeting = false
 	highlight_layer.clear()
 	_clear_skill_overlays()
+	_update_skill_button()
+	# 恢复攻击范围高亮（攻击阶段且角色仍选中）
+	if selected_character and selected_character.get_current_phase() == "Attack" and not GlobalGameData.character_attack_used.get(selected_character.name, false):
+		selected_character.show_attack_range()
 
 func _on_target_selected(target: Node):
 	if not is_targeting:
@@ -402,19 +410,25 @@ func _sync_hand(player_id: int, hand: Array):
 func _on_skill_used(skill: BaseSkill, target_type: int):
 	if not selected_character or not skill:
 		return
+	# 隐藏攻击范围高亮（如果存在）
+	if selected_character.has_method("hide_attack_range"):
+		selected_character.hide_attack_range()
 	match target_type:
 		BaseSkill.SkillTarget.NONE, BaseSkill.SkillTarget.SELF:
 			selected_character.use_active_skill(selected_character)
+			_update_skill_button()
 		BaseSkill.SkillTarget.ALLY_SINGLE:
 			pending_card_data = null
 			is_targeting = true
 			highlight_skill_targets()
+			_update_skill_button()
 		BaseSkill.SkillTarget.ENEMY_SINGLE:
 			pending_card_data = null
 			is_targeting = true
 			highlight_skill_targets()
+			_update_skill_button()
 
-func _make_hex_overlay(color: Color, r: float = 45.0) -> Polygon2D:
+func _make_hex_overlay(color: Color, r: float = 68.0) -> Polygon2D:
 	var hex = Polygon2D.new()
 	var pts: PackedVector2Array = []
 	for k in range(6):
@@ -443,7 +457,7 @@ func highlight_skill_targets():
 	var hex_color = Color(0.2, 0.4, 1.0, 0.45) if is_ally_target else Color(1.0, 0.15, 0.15, 0.45)
 	for c in targets:
 		if c.hp > 0:
-			var hex = _make_hex_overlay(hex_color)
+			var hex = _make_hex_overlay(hex_color, 68.0)
 			var spr = c.get_node_or_null("Sprite2D")
 			if spr:
 				spr.add_child(hex)
