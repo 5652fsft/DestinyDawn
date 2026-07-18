@@ -446,6 +446,7 @@ func _play_attack_animation(target_path: NodePath):
 	_shake_camera(4.0)
 
 @rpc("call_local", "reliable")
+@rpc("any_peer", "call_local", "reliable")
 func _play_vfx(color: Color, duration: float = 0.2):
 	if not sprite:
 		return

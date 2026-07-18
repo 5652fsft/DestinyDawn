@@ -17,13 +17,13 @@ func clear():
 func set_hand(card_ids: Array[String]):
 	var existing: Dictionary = {}
 	for card in card_uis:
-		if card.card_data:
+		if is_instance_valid(card) and card.card_data:
 			existing[card.card_data.id] = card
 	var ids_set: Dictionary = {}
 	for cid in card_ids:
 		ids_set[cid] = true
 	for i in range(card_uis.size() - 1, -1, -1):
-		if card_uis[i].card_data and card_uis[i].card_data.id not in ids_set:
+		if is_instance_valid(card_uis[i]) and card_uis[i].card_data and card_uis[i].card_data.id not in ids_set:
 			card_uis[i].queue_free()
 			card_uis.remove_at(i)
 	var ordered: Array[CardUI] = []
