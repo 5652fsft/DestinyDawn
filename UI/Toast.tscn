@@ -3,11 +3,10 @@
 [ext_resource type="Script" path="res://UI/Toast.gd" id="1"]
 
 [node name="Toast" type="Label"]
-anchors_preset = 13
-anchor_top = 0.08
-offset_left = -350.0
-offset_right = 350.0
-grow_horizontal = 2
+offset_left = 290.0
+offset_top = 60.0
+offset_right = 990.0
+offset_bottom = 100.0
 mouse_filter = 2
 autowrap_mode = 2
 theme_override_constants/line_spacing = 0

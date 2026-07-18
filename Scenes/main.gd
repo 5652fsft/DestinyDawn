@@ -42,6 +42,7 @@ var enemy_roster: Array[PackedScene] = [
 ]
 
 var last_attacker: Node = null
+var skill_overlays: Array[Node] = []
 
 # === 默认卡组（临时：Phase 4 将改为战前选择） ===
 var default_deck: Array[String] = [
@@ -309,6 +310,7 @@ func cancel_targeting():
 	pending_card_data = null
 	is_targeting = false
 	highlight_layer.clear()
+	_clear_skill_overlays()
 
 func _on_target_selected(target: Node):
 	if not is_targeting:
@@ -412,22 +414,42 @@ func _on_skill_used(skill: BaseSkill, target_type: int):
 			is_targeting = true
 			highlight_skill_targets()
 
+func _make_hex_overlay(color: Color, r: float = 45.0) -> Polygon2D:
+	var hex = Polygon2D.new()
+	var pts: PackedVector2Array = []
+	for k in range(6):
+		var a = deg_to_rad(60 * k - 30)
+		pts.append(Vector2(cos(a) * r, sin(a) * r))
+	hex.polygon = pts
+	hex.color = color
+	hex.z_index = 60
+	return hex
+
+func _clear_skill_overlays():
+	for h in skill_overlays:
+		if is_instance_valid(h):
+			h.queue_free()
+	skill_overlays.clear()
+
 func highlight_skill_targets():
-	highlight_layer.clear()
+	_clear_skill_overlays()
 	if not selected_character:
 		return
 	var skill = selected_character.active_skill
 	if not skill:
 		return
-	match skill.target_type:
-		BaseSkill.SkillTarget.ALLY_SINGLE:
-			for c in _get_my_characters():
-				if c.hp > 0:
-					highlight_layer.set_cell(_get_character_cell(c), 0, Vector2i.ZERO)
-		BaseSkill.SkillTarget.ENEMY_SINGLE:
-			for c in _get_enemy_characters():
-				if c.hp > 0:
-					highlight_layer.set_cell(_get_character_cell(c), 0, Vector2i.ZERO)
+	var is_ally_target = skill.target_type == BaseSkill.SkillTarget.ALLY_SINGLE
+	var targets = _get_my_characters() if is_ally_target else _get_enemy_characters()
+	var hex_color = Color(0.2, 0.4, 1.0, 0.45) if is_ally_target else Color(1.0, 0.15, 0.15, 0.45)
+	for c in targets:
+		if c.hp > 0:
+			var hex = _make_hex_overlay(hex_color)
+			var spr = c.get_node_or_null("Sprite2D")
+			if spr:
+				spr.add_child(hex)
+			else:
+				c.add_child(hex)
+			skill_overlays.append(hex)
 
 func _update_player_energy():
 	_update_player_panels()
