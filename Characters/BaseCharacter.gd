@@ -58,6 +58,7 @@ var hit_tween: Tween = null
 var hover_tween: Tween = null
 var _is_hovered: bool = false
 var _fb_origin_y: float = 0.0
+var _base_sprite_scale: Vector2 = Vector2.ONE
 var shield: int = 0
 var buffs: Dictionary = {}  # {"buff_id": [{"value": int, "remaining": int}, ...]}
 
@@ -103,6 +104,7 @@ func _ready():
 	collision_layer = click_layer
 	collision_mask = 0
 	sprite.modulate = Color.WHITE
+	_base_sprite_scale = sprite.scale
 	
 	# 查找场景中集成的 FloatingBar，如果没有则动态创建
 	floating_bar = get_node_or_null("FloatingBar")
@@ -141,11 +143,11 @@ func _on_hover_exit():
 		hover_tween.kill()
 	hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	hover_tween.set_parallel(true)
-	hover_tween.tween_property(sprite, "scale", Vector2(1, 1), 0.1)
+	hover_tween.tween_property(sprite, "scale", _base_sprite_scale, 0.1)
 	hover_tween.tween_property(sprite, "self_modulate", Color.WHITE, 0.1)
 	hover_tween.tween_property(sprite, "offset:y", 0.0, 0.1)
 	if floating_bar:
-		hover_tween.tween_property(floating_bar, "scale", Vector2(1, 1), 0.1)
+		hover_tween.tween_property(floating_bar, "scale", _base_sprite_scale, 0.1)
 		hover_tween.tween_property(floating_bar, "position:y", _fb_origin_y, 0.1)
 
 func _exit_tree():
