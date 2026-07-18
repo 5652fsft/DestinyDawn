@@ -300,7 +300,12 @@ func get_current_phase() -> String:
 			return "Invalid"
 
 func _is_mouse_over_ui() -> bool:
-	return get_viewport().gui_get_hovered_control() != null
+	var ctrl = get_viewport().gui_get_hovered_control()
+	while ctrl:
+		if ctrl is BaseButton or ctrl is LineEdit or ctrl is CardUI:
+			return true
+		ctrl = ctrl.get_parent()
+	return false
 
 func handle_move():
 	if hp <= 0:
