@@ -86,7 +86,7 @@ var is_selected: bool = false:
 			show_move_range()
 		elif not value and get_current_phase() == "Move":
 			hide_move_range()
-		elif value and get_current_phase() == "Attack":
+		elif value and get_current_phase() == "Attack" and not GlobalGameData.character_attack_used.get(name, false):
 			show_attack_range()
 		elif not value and get_current_phase() == "Attack":
 			hide_attack_range()

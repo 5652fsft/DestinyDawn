@@ -19,14 +19,14 @@ offset_bottom = 140.0
 [node name="SkillNameLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_af7tq")
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 18
 text = "技能名"
 
 [node name="SkillDescLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 autowrap_mode = 2
 theme_override_fonts/font = ExtResource("2_af7tq")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 14
 text = "技能描述"
 
 [node name="CooldownLabel" type="Label" parent="VBoxContainer"]
