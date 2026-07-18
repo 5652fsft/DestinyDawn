@@ -1,25 +1,30 @@
 class_name CardEffect
 extends Node
 
+static func _affinity_multiplier(caster: Node, key: String) -> float:
+	if caster and "affinity" in caster and key in caster.affinity:
+		return 1.0 + caster.affinity[key]
+	return 1.0
+
 static func execute(card: CardData, caster: Node, target: Node, main: Node) -> bool:
 	if not card or not caster or not main:
 		return false
 
 	match card.effect_type:
 		CardData.EffectType.DAMAGE:
-			return _execute_damage(card, target, main)
+			return _execute_damage(card, target, main, caster)
 		CardData.EffectType.HEAL:
-			return _execute_heal(card, target)
+			return _execute_heal(card, target, caster)
 		CardData.EffectType.SHIELD:
-			return _execute_shield(card, target)
+			return _execute_shield(card, target, caster)
 		CardData.EffectType.BUFF_ATTACK:
-			return _execute_buff_attack(card, target)
+			return _execute_buff_attack(card, target, caster)
 		CardData.EffectType.BUFF_DEFENSE:
-			return _execute_buff_defense(card, target)
+			return _execute_buff_defense(card, target, caster)
 		CardData.EffectType.DEBUFF_ATTACK:
-			return _execute_debuff_attack(card, target)
+			return _execute_debuff_attack(card, target, caster)
 		CardData.EffectType.DEBUFF_MOVE:
-			return _execute_debuff_move(card, target)
+			return _execute_debuff_move(card, target, caster)
 		CardData.EffectType.TELEPORT:
 			return _execute_teleport(card, target, main, caster)
 		CardData.EffectType.SWAP:
@@ -33,7 +38,7 @@ static func execute(card: CardData, caster: Node, target: Node, main: Node) -> b
 		CardData.EffectType.AOE_DAMAGE:
 			return _execute_aoe_damage(card, target, main, caster)
 		CardData.EffectType.AOE_HEAL:
-			return _execute_aoe_heal(card, target, main)
+			return _execute_aoe_heal(card, target, main, caster)
 		CardData.EffectType.CHAIN_DAMAGE:
 			return _execute_chain_damage(card, target, main)
 		CardData.EffectType.DAMAGE_OVER_TIME:
@@ -50,19 +55,20 @@ static func execute(card: CardData, caster: Node, target: Node, main: Node) -> b
 			push_warning("未知卡牌效果类型: ", card.effect_type)
 			return false
 
-static func _execute_damage(card: CardData, target: Node, main: Node) -> bool:
+static func _execute_damage(card: CardData, target: Node, main: Node, caster: Node = null) -> bool:
 	if not target or not target.has_method("take_damage"):
 		return false
+	var dmg = int(card.effect_value * _affinity_multiplier(caster, "attack_bonus"))
 	if target.has_method("rpc"):
-		target.rpc("take_damage", card.effect_value)
+		target.rpc("take_damage", dmg)
 	else:
-		target.take_damage(card.effect_value)
+		target.take_damage(dmg)
 	return true
 
-static func _execute_heal(card: CardData, target: Node) -> bool:
+static func _execute_heal(card: CardData, target: Node, caster: Node = null) -> bool:
 	if not target or not "hp" in target or not "max_hp" in target:
 		return false
-	var heal_amount = min(card.effect_value, target.max_hp - target.hp)
+	var heal_amount = min(int(card.effect_value * _affinity_multiplier(caster, "heal_bonus")), target.max_hp - target.hp)
 	if heal_amount <= 0:
 		return false
 	if target.has_method("rpc"):
@@ -72,28 +78,28 @@ static func _execute_heal(card: CardData, target: Node) -> bool:
 		target.hp = min(target.max_hp, target.hp + heal_amount)
 	return true
 
-static func _execute_shield(card: CardData, target: Node) -> bool:
+static func _execute_shield(card: CardData, target: Node, caster: Node = null) -> bool:
 	if not target:
 		return false
 	if not "shield" in target:
 		target.set("shield", 0)
-	target.shield = target.shield + card.effect_value
+	target.shield = target.shield + int(card.effect_value * _affinity_multiplier(caster, "shield_bonus"))
 	if target.has_method("rpc"):
 		target.rpc("_sync_shield", target.shield)
 		target.rpc("_play_vfx_preset", "shield")
 	return true
 
-static func _execute_buff_attack(card: CardData, target: Node) -> bool:
-	return _apply_temp_buff(target, "attack_buff", card.effect_value, card.effect_duration)
+static func _execute_buff_attack(card: CardData, target: Node, caster: Node = null) -> bool:
+	return _apply_temp_buff(target, "attack_buff", int(card.effect_value * _affinity_multiplier(caster, "attack_bonus")), card.effect_duration)
 
-static func _execute_buff_defense(card: CardData, target: Node) -> bool:
+static func _execute_buff_defense(card: CardData, target: Node, caster: Node = null) -> bool:
 	return _apply_temp_buff(target, "defense_buff", card.effect_value, card.effect_duration)
 
-static func _execute_debuff_attack(card: CardData, target: Node) -> bool:
-	return _apply_temp_buff(target, "attack_debuff", -card.effect_value, card.effect_duration)
+static func _execute_debuff_attack(card: CardData, target: Node, caster: Node = null) -> bool:
+	return _apply_temp_buff(target, "attack_debuff", -int(card.effect_value * _affinity_multiplier(caster, "debuff_bonus")), card.effect_duration)
 
-static func _execute_debuff_move(card: CardData, target: Node) -> bool:
-	return _apply_temp_buff(target, "move_debuff", -card.effect_value, card.effect_duration)
+static func _execute_debuff_move(card: CardData, target: Node, caster: Node = null) -> bool:
+	return _apply_temp_buff(target, "move_debuff", -int(card.effect_value * _affinity_multiplier(caster, "debuff_bonus")), card.effect_duration)
 
 static func _apply_temp_buff(target: Node, buff_key: String, value: int, duration: int) -> bool:
 	if not target:
@@ -165,16 +171,17 @@ static func _execute_aoe_damage(card: CardData, target: Node, main: Node, caster
 		caster.rpc("_play_vfx_preset", "explosion")
 	return true
 
-static func _execute_aoe_heal(card: CardData, target: Node, main: Node) -> bool:
+static func _execute_aoe_heal(card: CardData, target: Node, main: Node, caster: Node = null) -> bool:
 	if not target or not main:
 		return false
+	var val = int(card.effect_value * _affinity_multiplier(caster, "heal_bonus"))
 	var targets = _get_characters_in_range(main, target, card.effect_radius)
 	for t in targets:
 		if t.has_method("take_damage"):
 			if t.has_method("rpc"):
-				t.rpc("take_damage", -card.effect_value)
+				t.rpc("take_damage", -val)
 			else:
-				t.take_damage(-card.effect_value)
+				t.take_damage(-val)
 	return true
 
 static func _execute_chain_damage(card: CardData, primary: Node, main: Node) -> bool:
