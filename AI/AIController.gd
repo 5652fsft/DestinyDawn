@@ -276,7 +276,10 @@ func _execute_card(chara: Node, card_id: String, target: Node):
 	if target != null and is_instance_valid(target):
 		target_path = target.get_path()
 	_log("%s 使用卡牌 %s，目标: %s" % [chara.character_name, card_id, target_path if target_path else "无"], "Card")
+	var prev_selected = _main.selected_character
+	_main.selected_character = chara
 	_main._execute_play_card(2, card_id, target_path)
+	_main.selected_character = prev_selected
 
 
 # ==================== 移动评估 ====================

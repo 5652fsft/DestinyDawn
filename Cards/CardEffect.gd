@@ -10,18 +10,28 @@ static func execute(card: CardData, caster: Node, target: Node, main: Node) -> b
 
 	match card.effect_type:
 		CardData.EffectType.DAMAGE:
+			if card.id == "card_reckoning":
+				return _execute_reckoning(card, target, main, caster)
 			return _execute_damage(card, target, main, caster)
 		CardData.EffectType.HEAL:
+			if card.id == "card_life_split":
+				return _execute_life_split(card, target, caster, main)
 			return _execute_heal(card, target, caster)
 		CardData.EffectType.SHIELD:
+			if card.id == "card_shield_overload":
+				return _execute_shield_overload(card, target, caster)
 			return _execute_shield(card, target, caster)
 		CardData.EffectType.BUFF_ATTACK:
+			if card.id == "card_double_edge":
+				return _execute_double_edge(card, target, caster)
 			return _execute_buff_attack(card, target, caster)
 		CardData.EffectType.BUFF_DEFENSE:
 			return _execute_buff_defense(card, target, caster)
 		CardData.EffectType.DEBUFF_ATTACK:
 			return _execute_debuff_attack(card, target, caster)
 		CardData.EffectType.DEBUFF_MOVE:
+			if card.id == "card_frostbite":
+				return _execute_frostbite(card, target, caster)
 			return _execute_debuff_move(card, target, caster)
 		CardData.EffectType.TELEPORT:
 			return _execute_teleport(card, target, main, caster)
@@ -30,6 +40,10 @@ static func execute(card: CardData, caster: Node, target: Node, main: Node) -> b
 		CardData.EffectType.EXTRA_MOVE:
 			return _apply_temp_buff(target, "extra_move", card.effect_value, card.effect_duration)
 		CardData.EffectType.DRAW_CARD:
+			if card.id == "card_siphon":
+				return _execute_siphon(card, target, caster, main)
+			if card.id == "card_overload":
+				return _execute_overload(card, target, caster, main)
 			return _execute_draw_card(card, caster, main)
 		CardData.EffectType.CLEANSE:
 			return _execute_cleanse(target)
@@ -57,16 +71,49 @@ static func _execute_damage(card: CardData, target: Node, main: Node, caster: No
 	if not target or not target.has_method("take_damage"):
 		return false
 	var dmg = int(card.effect_value * _affinity_multiplier(caster, "attack_bonus"))
-	if target.has_method("rpc"):
-		target.rpc("take_damage", dmg)
-	else:
-		target.take_damage(dmg)
+	_rpc_take_damage(target, dmg)
+	return true
+
+# 惩戒：伤害 = 8 × 目标 buff 数
+static func _execute_reckoning(card: CardData, target: Node, main: Node, caster: Node = null) -> bool:
+	if not target or not target.has_method("take_damage"):
+		return false
+	if not "buffs" in target:
+		return _execute_damage(card, target, main, caster)
+	var buff_count = 0
+	for key in target.buffs:
+		buff_count += target.buffs[key].size()
+	var dmg = max(1, card.effect_value * buff_count)
+	var msg = "[惩戒] %s 身上 %d 个 buff，造成 %d 点伤害" % [target.character_name if "character_name" in target else target.name, buff_count, dmg]
+	if target.has_method("get_tree") and target.get_tree() and target.get_tree().current_scene and target.get_tree().current_scene.has_method("show_toast"):
+		target.get_tree().current_scene.show_toast(msg, 1.5)
+	_rpc_take_damage(target, dmg)
 	return true
 
 static func _execute_heal(card: CardData, target: Node, caster: Node = null) -> bool:
 	if not target or not "hp" in target or not "max_hp" in target:
 		return false
 	var heal_amount = min(int(card.effect_value * _affinity_multiplier(caster, "heal_bonus")), target.max_hp - target.hp)
+	if heal_amount <= 0:
+		return false
+	if target.has_method("rpc"):
+		target.rpc("take_damage", -heal_amount)
+		target.rpc("_play_vfx_preset", "heal")
+	else:
+		target.hp = min(target.max_hp, target.hp + heal_amount)
+	return true
+
+# 生命分流：治疗 15，若目标满血则额外抽 1 张牌
+static func _execute_life_split(card: CardData, target: Node, caster: Node, main: Node) -> bool:
+	if not target or not "hp" in target or not "max_hp" in target:
+		return false
+	if target.hp >= target.max_hp:
+		if main and main.has_method("draw_extra_card"):
+			main.draw_extra_card(caster, 1)
+			if main.has_method("show_toast"):
+				main.show_toast("[生命分流] 目标满血，额外抽 1 张牌", 1.5)
+		return true
+	var heal_amount = min(card.effect_value, target.max_hp - target.hp)
 	if heal_amount <= 0:
 		return false
 	if target.has_method("rpc"):
@@ -87,8 +134,29 @@ static func _execute_shield(card: CardData, target: Node, caster: Node = null) -
 		target.rpc("_play_vfx_preset", "shield")
 	return true
 
+# 护盾过载：获得 10 护盾，若已有护盾则翻倍
+static func _execute_shield_overload(card: CardData, target: Node, caster: Node = null) -> bool:
+	if not target:
+		return false
+	if not "shield" in target:
+		target.set("shield", 0)
+	if target.shield > 0:
+		target.shield = target.shield * 2
+	else:
+		target.shield = target.shield + card.effect_value
+	if target.has_method("rpc"):
+		target.rpc("_sync_shield", target.shield)
+		target.rpc("_play_vfx_preset", "shield")
+	return true
+
 static func _execute_buff_attack(card: CardData, target: Node, caster: Node = null) -> bool:
 	return _apply_temp_buff(target, "attack_buff", int(card.effect_value * _affinity_multiplier(caster, "attack_bonus")), card.effect_duration)
+
+# 双刃剑：攻击 +15，防御 -5
+static func _execute_double_edge(card: CardData, target: Node, caster: Node = null) -> bool:
+	_apply_temp_buff(target, "attack_buff", int(card.effect_value * _affinity_multiplier(caster, "attack_bonus")), card.effect_duration)
+	_apply_temp_buff(target, "defense_buff", -5, card.effect_duration)
+	return true
 
 static func _execute_buff_defense(card: CardData, target: Node, caster: Node = null) -> bool:
 	return _apply_temp_buff(target, "defense_buff", card.effect_value, card.effect_duration)
@@ -98,6 +166,13 @@ static func _execute_debuff_attack(card: CardData, target: Node, caster: Node = 
 
 static func _execute_debuff_move(card: CardData, target: Node, caster: Node = null) -> bool:
 	return _apply_temp_buff(target, "move_debuff", -int(card.effect_value * _affinity_multiplier(caster, "debuff_bonus")), card.effect_duration)
+
+# 冰冻术：15 伤害 + 迟缓 2 回合
+static func _execute_frostbite(card: CardData, target: Node, caster: Node = null) -> bool:
+	if target and target.has_method("take_damage"):
+		_rpc_take_damage(target, 15)
+	_apply_temp_buff(target, "move_debuff", -card.effect_value, card.effect_duration)
+	return true
 
 static func _apply_temp_buff(target: Node, buff_key: String, value: int, duration: int) -> bool:
 	if not target:
@@ -127,23 +202,55 @@ static func _execute_teleport(card: CardData, target: Node, main: Node, caster: 
 		Vector2i(1,0), Vector2i(1,-1), Vector2i(0,-1),
 		Vector2i(-1,0), Vector2i(-1,1), Vector2i(0,1)
 	]
-	var pick = target_cell + neighbors[randi() % neighbors.size()]
+	# 寻找有效传送格：可通行且未被占用
+	var valid = []
+	for d in neighbors:
+		var pick = target_cell + d
+		if caster.has_method("get_move_cost") and caster.get_move_cost(pick) > 0:
+			if main and main.has_method("is_cell_occupied") and not main.is_cell_occupied(pick, caster):
+				valid.append(pick)
+	if valid.is_empty():
+		return false
+	var pick = valid[randi() % valid.size()]
 	if caster.has_method("get_grid_layer"):
 		var gl = caster.get_grid_layer()
 		if gl:
 			var world_pos = gl.to_global(gl.map_to_local(pick))
 			caster.global_position = world_pos
 			caster.target_world = world_pos
-	caster.rpc("_play_vfx_preset", "entrance")
+	if caster.has_method("rpc"):
+		caster.rpc("_play_vfx_preset", "entrance")
 	if card.effect_value > 0 and target.has_method("take_damage"):
-		target.rpc("take_damage", card.effect_value)
+		_rpc_take_damage(target, card.effect_value)
+	if target.has_method("rpc"):
 		target.rpc("_play_vfx_preset", "hit")
 	return true
 
 static func _execute_draw_card(card: CardData, caster: Node, main: Node) -> bool:
 	if not main or not main.has_method("draw_extra_card"):
 		return false
-	main.draw_extra_card(caster)
+	main.draw_extra_card(caster, card.effect_value)
+	return true
+
+# 法力汲取：8 伤害 + 抽 1 张牌
+static func _execute_siphon(card: CardData, target: Node, caster: Node, main: Node) -> bool:
+	if target and target.has_method("take_damage"):
+		_rpc_take_damage(target, 8)
+	if main and main.has_method("draw_extra_card"):
+		main.draw_extra_card(caster, 1)
+	return true
+
+# 能量过载：获得 2 能量，自身受到 5 点伤害
+static func _execute_overload(card: CardData, target: Node, caster: Node, main: Node) -> bool:
+	if not main:
+		return false
+	var energy_node = main.get_node_or_null("EnergySystem")
+	if energy_node and energy_node.has_method("set_energy"):
+		var pid = 1 if _is_host_side(caster) else 2
+		var cur = energy_node.get_energy(pid)
+		energy_node.set_energy(pid, cur + 2)
+	if caster and caster.has_method("take_damage"):
+		_rpc_take_damage(caster, 5)
 	return true
 
 static func _get_characters_in_range(main: Node, center: Node, radius: int) -> Array:
@@ -199,6 +306,7 @@ static func _rpc_take_damage(node: Node, amount: int):
 static func _execute_chain_damage(card: CardData, primary: Node, main: Node) -> bool:
 	if not primary or not main:
 		return false
+	var is_caster_host = _is_host_side(primary)
 	var hit: Array = [primary]
 	var remaining = 3
 	var current = primary
@@ -208,6 +316,8 @@ static func _execute_chain_damage(card: CardData, primary: Node, main: Node) -> 
 		for c in main.get_tree().get_nodes_in_group("characters"):
 			if c in hit:
 				continue
+			if _is_host_side(c) == is_caster_host:
+				continue  # 跳过友方
 			var d = current.global_position.distance_to(c.global_position)
 			if d < nearest_dist and d <= 200.0:
 				nearest = c
@@ -215,10 +325,7 @@ static func _execute_chain_damage(card: CardData, primary: Node, main: Node) -> 
 		if not nearest:
 			break
 		var dmg = card.effect_value - (3 - remaining) * 5
-		if nearest.has_method("rpc"):
-			nearest.rpc("take_damage", max(1, dmg))
-		else:
-			nearest.take_damage(max(1, dmg))
+		_rpc_take_damage(nearest, max(1, dmg))
 		hit.append(nearest)
 		current = nearest
 		remaining -= 1

@@ -380,7 +380,7 @@ func on_card_dropped(card_data: CardData) -> bool:
 				if card:
 					var target_type = card.target_type
 					var is_ally = _is_ally(hit)
-					if _is_valid_target(target_type, is_ally):
+					if _is_valid_target(target_type, is_ally, hit):
 						_on_target_selected(hit)
 						return true
 		cancel_targeting()
@@ -390,10 +390,10 @@ func _is_ally(chara: CharacterBody2D) -> bool:
 	var is_host = chara.name.begins_with("Host")
 	return is_host == GlobalGameData.is_host
 
-func _is_valid_target(target_type: int, is_ally: bool) -> bool:
+func _is_valid_target(target_type: int, is_ally: bool, hit: Node = null) -> bool:
 	match target_type:
 		CardData.TargetType.SELF:
-			return selected_character != null
+			return hit != null and hit == selected_character
 		CardData.TargetType.ALLY_SINGLE, CardData.TargetType.ALLY_ALL:
 			return is_ally
 		CardData.TargetType.ENEMY_SINGLE, CardData.TargetType.ENEMY_ALL:
@@ -422,6 +422,11 @@ func _on_target_selected(target: Node):
 		return
 	if pending_card_data:
 		var card_data = pending_card_data
+		# SELF 目标验证：目标必须是选中的角色
+		if card_data.target_type == CardData.TargetType.SELF and target != selected_character:
+			show_toast("该卡牌只能对自己使用")
+			cancel_targeting()
+			return
 		var player_name = "玩家1(Host)" if GlobalGameData.is_host else "玩家2(Client)"
 		print("[Info] %s 对 %s 使用 [%s]" % [player_name, target.name, card_data.card_name])
 		_target_play_card(card_data, target)
@@ -463,16 +468,20 @@ func _execute_play_card(player_id: int, card_id: String, target_path: String):
 		target = get_node_or_null(target_path)
 	var caster: Node = null
 	var player_name = "玩家1(Host)" if player_id == 1 else "玩家2(Client)"
-	if player_id == 1:
-		for c in GlobalGameData.host_characters:
-			if c.hp > 0:
-				caster = c
-				break
-	else:
-		for c in GlobalGameData.client_characters:
-			if c.hp > 0:
-				caster = c
-				break
+	# 优先用选中的角色作为施法者
+	if selected_character and selected_character.hp > 0:
+		caster = selected_character
+	if not caster:
+		if player_id == 1:
+			for c in GlobalGameData.host_characters:
+				if c.hp > 0:
+					caster = c
+					break
+		else:
+			for c in GlobalGameData.client_characters:
+				if c.hp > 0:
+					caster = c
+					break
 
 	print("[Card] %s 使用 [%s]，目标: %s" % [player_name, card_data.card_name, target.name if target else "无"])
 
@@ -585,11 +594,11 @@ func highlight_skill_targets():
 func _update_player_energy():
 	_update_player_panels()
 
-func draw_extra_card(caster: Node):
+func draw_extra_card(caster: Node, count: int = 1):
 	if not multiplayer.is_server():
 		return
 	var pid = 1 if caster in GlobalGameData.host_characters else 2
-	deck_manager.draw_cards(pid, 1)
+	deck_manager.draw_cards(pid, count)
 
 func _get_my_characters() -> Array:
 	if GlobalGameData.is_host:
