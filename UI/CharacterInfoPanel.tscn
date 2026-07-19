@@ -91,7 +91,7 @@ text = "天赋"
 layout_mode = 2
 
 [node name="PassiveVBox" type="VBoxContainer" parent="ScrollContainer/VBox/PassiveBox" unique_id=750891706]
-layout_mode = 0
+layout_mode = 2
 
 [node name="PassiveNameLabel" type="Label" parent="ScrollContainer/VBox/PassiveBox/PassiveVBox" unique_id=619135771]
 layout_mode = 2
@@ -123,7 +123,7 @@ text = "技能"
 layout_mode = 2
 
 [node name="SkillVBox" type="VBoxContainer" parent="ScrollContainer/VBox/SkillBox" unique_id=316582156]
-layout_mode = 0
+layout_mode = 2
 
 [node name="SkillNameLabel" type="Label" parent="ScrollContainer/VBox/SkillBox/SkillVBox" unique_id=40990969]
 layout_mode = 2
