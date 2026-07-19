@@ -95,6 +95,6 @@ text = "Buff"
 [node name="BuffsContainer" type="VBoxContainer" parent="."]
 layout_mode = 0
 offset_left = 50.0
-offset_top = 248.0
+offset_top = 276.0
 offset_right = 350.0
 offset_bottom = 700.0
