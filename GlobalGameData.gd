@@ -48,12 +48,12 @@ var battle_stats: Dictionary = {
 
 # 角色出生点
 var host_birth_point = [
-	Vector2(100, 60),
-	Vector2(60, 180),
-	Vector2(140, 300),
+	Vector2(-252, 184),
+	Vector2(-315, 515),
+	Vector2(63, 515),
 ]
 var client_birth_point = [
-	Vector2(500, 60),
-	Vector2(540, 180),
-	Vector2(460, 300),
+	Vector2(567, -588),
+	Vector2(945, -588),
+	Vector2(1008, -257),
 ]

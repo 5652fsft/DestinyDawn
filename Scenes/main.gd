@@ -674,9 +674,10 @@ func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn)
 		skill_panel.hide()
 	# 回合提示
 	if phase == GlobalGameData.TurnPhase.PLAYER_MOVE or phase == GlobalGameData.TurnPhase.ENEMY_MOVE:
-		var is_my_turn = host_turn == GlobalGameData.is_host
+		var is_enemy_phase = phase == GlobalGameData.TurnPhase.ENEMY_MOVE
+		var is_my_turn = (host_turn == GlobalGameData.is_host) != is_enemy_phase
 		if not _turn_toast_shown:
-			show_toast("你先手" if is_my_turn else "对方先手", 2.0)
+			show_toast("我方先手" if is_my_turn else "对方先手", 2.0)
 			_turn_toast_shown = true
 		else:
 			show_toast("我方回合" if is_my_turn else "敌方回合", 1.5)

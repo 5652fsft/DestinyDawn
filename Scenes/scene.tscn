@@ -15,14 +15,14 @@
 [ext_resource type="PackedScene" uid="uid://i3ka4v2gb3yh" path="res://UI/BattleResult.tscn" id="14_p4fma"]
 
 [node name="Main" type="Node2D" unique_id=1808279475]
-position = Vector2(0, 0)
+position = Vector2(-300, 200)
 script = ExtResource("1_6yy46")
 
 [node name="Camera" type="Camera2D" parent="." unique_id=480155879]
-limit_left = -200
-limit_top = -200
-limit_right = 800
-limit_bottom = 600
+limit_left = -600
+limit_top = -800
+limit_right = 1400
+limit_bottom = 800
 script = ExtResource("4_8t5iv")
 
 [node name="Map" type="Node2D" parent="." unique_id=1586058357]
