@@ -54,9 +54,9 @@ func refresh():
 		var diff = buffed_atk - base_atk
 		var sign = "+" if diff > 0 else ""
 		var color = "green" if diff > 0 else "red"
-		attack_label.text = "攻击: %d  [color=%s]%s%d[/color]" % [base_atk, color, sign, diff]
+		attack_label.text = "攻击力: %d  [color=%s]%s%d[/color]" % [base_atk, color, sign, diff]
 	else:
-		attack_label.text = "攻击: %d" % base_atk
+		attack_label.text = "攻击力: %d" % base_atk
 
 	var move_pts = current_character.effective_move_points if "effective_move_points" in current_character else current_character.move_points
 	move_label.text = "移动范围: %d" % move_pts

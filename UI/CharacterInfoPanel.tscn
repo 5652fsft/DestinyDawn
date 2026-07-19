@@ -3,76 +3,76 @@
 [ext_resource type="Script" uid="uid://cac87jyl3bpqm" path="res://UI/CharacterInfoPanel.gd" id="1_50icj"]
 [ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2_6xa78"]
 
-[node name="CharacterInfoPanel" type="Panel"]
+[node name="CharacterInfoPanel" type="Panel" unique_id=524866974]
 visible = false
 offset_right = 358.0
 offset_bottom = 720.0
 script = ExtResource("1_50icj")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="."]
+[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=832753705]
 layout_mode = 0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 350.0
-offset_bottom = 712.0
+offset_left = 20.0
+offset_top = 30.0
+offset_right = 340.0
+offset_bottom = 460.0
 
-[node name="VBox" type="VBoxContainer" parent="ScrollContainer"]
-layout_mode = 2
+[node name="VBox" type="VBoxContainer" parent="ScrollContainer" unique_id=2023283012]
 custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
 
-[node name="NameLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="NameLabel" type="Label" parent="ScrollContainer/VBox" unique_id=539442598]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 24
 
-[node name="ActionLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="ActionLabel" type="Label" parent="ScrollContainer/VBox" unique_id=160994237]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
 
-[node name="AttrHeader" type="HSeparator" parent="ScrollContainer/VBox"]
+[node name="AttrHeader" type="HSeparator" parent="ScrollContainer/VBox" unique_id=544481999]
 layout_mode = 2
 
-[node name="AttrLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="AttrLabel" type="Label" parent="ScrollContainer/VBox" unique_id=1008443157]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 14
 text = "属性"
 
-[node name="HPLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="HPLabel" type="Label" parent="ScrollContainer/VBox" unique_id=1056265313]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
-[node name="AttackLabel" type="RichTextLabel" parent="ScrollContainer/VBox"]
+[node name="AttackLabel" type="RichTextLabel" parent="ScrollContainer/VBox" unique_id=1812238725]
 layout_mode = 2
 theme_override_fonts/normal_font = ExtResource("2_6xa78")
 theme_override_font_sizes/normal_font_size = 15
 bbcode_enabled = true
 
-[node name="MovePointsLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="MovePointsLabel" type="Label" parent="ScrollContainer/VBox" unique_id=1950372560]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
-[node name="AttackRangeLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="AttackRangeLabel" type="Label" parent="ScrollContainer/VBox" unique_id=299935244]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
-[node name="ShieldLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="ShieldLabel" type="Label" parent="ScrollContainer/VBox" unique_id=383931468]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
-[node name="BuffHeader" type="HSeparator" parent="ScrollContainer/VBox"]
+[node name="BuffHeader" type="HSeparator" parent="ScrollContainer/VBox" unique_id=1239085440]
 layout_mode = 2
 
-[node name="BuffLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="BuffLabel" type="Label" parent="ScrollContainer/VBox" unique_id=637662349]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 14
 text = "效果"
 
-[node name="BuffsContainer" type="VBoxContainer" parent="ScrollContainer/VBox"]
+[node name="BuffsContainer" type="VBoxContainer" parent="ScrollContainer/VBox" unique_id=1082733770]
 layout_mode = 2
