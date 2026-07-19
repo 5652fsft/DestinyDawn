@@ -46,7 +46,7 @@ func setup(id: String, data: Dictionary):
 
 func _apply_style():
 	var p = StyleBoxFlat.new()
-	p.bg_color = CardTheme.CARD_BG
+	p.bg_color = Color(0.12, 0.12, 0.2, 0.1)
 	p.corner_radius_top_left = CardTheme.CARD_BORDER_RADIUS
 	p.corner_radius_top_right = CardTheme.CARD_BORDER_RADIUS
 	p.corner_radius_bottom_left = CardTheme.CARD_BORDER_RADIUS

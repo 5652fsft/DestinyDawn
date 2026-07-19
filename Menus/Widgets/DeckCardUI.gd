@@ -28,9 +28,9 @@ func _apply_style():
 	c.corner_radius_bottom_left = CardTheme.COST_RADIUS
 	c.corner_radius_bottom_right = CardTheme.COST_RADIUS
 	$CostCircle.add_theme_stylebox_override("panel", c)
-	# 卡牌背景
+	# 卡牌背景（半透明）
 	var p = StyleBoxFlat.new()
-	p.bg_color = CardTheme.CARD_BG
+	p.bg_color = Color(0.12, 0.12, 0.2, 0.1)
 	p.corner_radius_top_left = CardTheme.CARD_BORDER_RADIUS
 	p.corner_radius_top_right = CardTheme.CARD_BORDER_RADIUS
 	p.corner_radius_bottom_left = CardTheme.CARD_BORDER_RADIUS
