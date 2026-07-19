@@ -114,27 +114,27 @@ func _buff_desc(key: String, entry: Dictionary) -> String:
 	var val = entry.get("value", 0)
 	match key:
 		"attack_buff":
-			return "力量强化 攻击力+%d（%d回合）" % [val, dur]
+			return "[力量强化] 攻击力+%d（%d回合）" % [val, dur]
 		"attack_debuff":
-			return "虚弱 攻击力-%d（%d回合）" % [val, dur]
+			return "[虚弱] 攻击力-%d（%d回合）" % [val, dur]
 		"move_debuff":
-			return "迟缓 移动力-%d（%d回合）" % [val, dur]
+			return "[迟缓] 移动力-%d（%d回合）" % [val, dur]
 		"defense_buff":
-			return "铁壁 防御提升（%d回合）" % [dur]
+			return "[铁壁] 防御提升（%d回合）" % [dur]
 		"poison":
-			return "中毒 每回合-%d生命（%d回合）" % [val, dur]
+			return "[中毒] 每回合-%d生命（%d回合）" % [val, dur]
 		"burn":
-			return "灼烧 每回合-%d生命（%d回合）" % [val, dur]
+			return "[灼烧] 每回合-%d生命（%d回合）" % [val, dur]
 		"regen":
-			return "再生 每回合恢复+%d生命（%d回合）" % [val, dur]
+			return "[再生] 每回合恢复+%d生命（%d回合）" % [val, dur]
 		"mark":
-			return "标记 受伤加深+%d%%（%d回合）" % [val, dur]
+			return "[标记] 受伤加深+%d%%（%d回合）" % [val, dur]
 		"extra_move":
-			return "加速 移动力+%d（%d回合）" % [val, dur]
+			return "[加速] 移动力+%d（%d回合）" % [val, dur]
 		"taunt":
-			return "嘲讽 强制攻击（%d回合）" % [dur]
+			return "[嘲讽] 强制攻击（%d回合）" % [dur]
 		"bloodthirst":
-			return "嗜血成性 攻击力+%d%%（%d回合）" % [val, dur]
+			return "[嗜血成性] 攻击力+%d%%（%d回合）" % [val, dur]
 	return "%s %d（%d回合）" % [key, val, dur]
 
 func _on_CloseButton_pressed():
