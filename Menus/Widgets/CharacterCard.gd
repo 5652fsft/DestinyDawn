@@ -7,6 +7,7 @@ var _in_team: bool = false
 var _flipped: bool = false
 var _hover_tween: Tween = null
 var _flip_tween: Tween = null
+var _base_scale: Vector2 = Vector2.ONE
 var _full_scale: Vector2 = Vector2.ONE
 
 signal clicked(cid: String)
@@ -27,6 +28,7 @@ func setup(id: String, data: Dictionary):
 	$CardBack/Scroll/VBox/SkillLabel.text = "技能: %s" % data.skill
 
 	pivot_offset = size * 0.5
+	_base_scale = scale
 	_full_scale = scale
 	_apply_style()
 
@@ -64,6 +66,7 @@ func _ready():
 	mouse_entered.connect(_on_hover_enter)
 	mouse_exited.connect(_on_hover_exit)
 	pivot_offset = size * 0.5
+	_base_scale = scale
 	_full_scale = scale
 	z_index = 5
 
@@ -83,14 +86,14 @@ func _on_hover_enter():
 	if _hover_tween: _hover_tween.kill()
 	z_index = 20
 	_hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_hover_tween.tween_method(_set_full_scale, _full_scale, _full_scale * 1.08, CardTheme.HOVER_TWEEN_SEC)
+	_hover_tween.tween_method(_set_full_scale, _full_scale, _base_scale * 1.08, CardTheme.HOVER_TWEEN_SEC)
 	_hover_tween.parallel().tween_property(self, "self_modulate", CardTheme.HOVER_MODULATE, CardTheme.HOVER_TWEEN_SEC)
 
 func _on_hover_exit():
 	if _hover_tween: _hover_tween.kill()
 	z_index = 5
 	_hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_hover_tween.tween_method(_set_full_scale, scale, _full_scale, CardTheme.HOVER_TWEEN_SEC)
+	_hover_tween.tween_method(_set_full_scale, scale, _base_scale, CardTheme.HOVER_TWEEN_SEC)
 	_hover_tween.parallel().tween_property(self, "self_modulate", Color.WHITE, CardTheme.HOVER_TWEEN_SEC)
 
 func _set_full_scale(s: Vector2):
