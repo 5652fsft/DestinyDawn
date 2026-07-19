@@ -4,10 +4,10 @@ var active_skill: BaseSkill
 var passive_skill: BaseSkill
 
 func _ready():
-	max_hp = 65
+	max_hp = 55
 	super()
 	character_name = "银狼"
-	hp = 65
+	hp = 55
 	move_points = 4
 	attack_range = 2
 	attack = 16

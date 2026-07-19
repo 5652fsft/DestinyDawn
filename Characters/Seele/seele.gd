@@ -7,11 +7,11 @@ var last_target_hp: int = -1
 var last_target_max_hp: int = -1
 
 func _ready():
-	max_hp = 65
-	hp = 65
+	max_hp = 55
+	hp = 55
 	super()
 	character_name = "希儿"
-	hp = 65
+	hp = 55
 	move_points = 6
 	attack = 18
 
