@@ -53,21 +53,26 @@ func _update_ui():
 			w.set_in_deck_mode(cid in deck_ids)
 		else:
 			pool_widgets.erase(cid)
-	# 重建出战卡组
+	# 重建出战卡组—增量更新
 	var deck_grid = $VBoxContainer/DeckPanel/DeckGrid
-	# 保留已有卡牌节点，只移除多余的
-	var existing = deck_grid.get_children()
+	# 收集当前卡牌和占位格
 	var existing_ids: Array[String] = []
-	for c in existing:
-		if c.has_method("get") and c.get("card_id") != null:
+	var to_free: Array[Node] = []
+	for c in deck_grid.get_children():
+		var is_card = false
+		if "card_id" in c:
 			var cid = c.card_id
 			if cid in deck_ids:
 				existing_ids.append(cid)
-			else:
-				c.queue_free()
-		else:
-			c.queue_free()
-	# 添加缺失的卡牌
+				is_card = true
+			# 不在deck_ids中的卡牌→标记移除
+		if not is_card:
+			to_free.append(c)
+	# 移除非卡牌节点（占位格等）
+	for c in to_free:
+		deck_grid.remove_child(c)
+		c.queue_free()
+	# 添加缺失的卡牌（到末尾）
 	for cid in deck_ids:
 		if cid in existing_ids: continue
 		var data = CardDatabase.get_card(cid)
@@ -78,12 +83,10 @@ func _update_ui():
 		w.card_reordered.connect(_on_card_reordered)
 		w.set_in_deck_mode(true)
 		deck_grid.add_child(w)
-	# 空槽位占位
-	var current_cards = 0
-	for c in deck_grid.get_children():
-		if c.has_method("get") and c.get("card_id") != null:
-			current_cards += 1
-	for i in range(DECK_SIZE - current_cards):
+		existing_ids.append(cid)
+	# 补充空槽位
+	var card_count = existing_ids.size()
+	for i in range(DECK_SIZE - card_count):
 		var empty = Panel.new()
 		empty.custom_minimum_size = Vector2(120, 170)
 		empty.modulate = Color(1, 1, 1, 0.15)
