@@ -762,11 +762,15 @@ func check_attack() -> void:
 		rpc("advance_turn_phase")
 
 func check_victory() -> bool:
-	if GlobalGameData.host_characters.is_empty() or GlobalGameData.client_characters.is_empty():
+	if not GlobalGameData.turn_has_been_drawn:
 		return false
 	
-	var host_alive = GlobalGameData.host_characters.any(func(c): return c.hp > 0)
-	var client_alive = GlobalGameData.client_characters.any(func(c): return c.hp > 0)
+	var host_alive = false
+	for c in GlobalGameData.host_characters:
+		if c.hp > 0: host_alive = true; break
+	var client_alive = false
+	for c in GlobalGameData.client_characters:
+		if c.hp > 0: client_alive = true; break
 	
 	if not host_alive:
 		print("[Phase] 客户端玩家胜利")

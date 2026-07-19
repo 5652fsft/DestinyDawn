@@ -9,7 +9,14 @@ func _ready():
 		btn.mouse_exited.connect(_on_btn_exit.bind(btn))
 		btn.button_down.connect(_on_btn_down.bind(btn))
 		btn.button_up.connect(_on_btn_up.bind(btn))
+		btn.pivot_offset = btn.size * 0.5
+	call_deferred("_center_button_pivots")
 	_update_status()
+
+func _center_button_pivots():
+	for btn in [$VBoxContainer/TeamButton, $VBoxContainer/DeckButton, $VBoxContainer/HostButton, $VBoxContainer/JoinButton, $VBoxContainer/SettingsButton, $VBoxContainer/QuitButton]:
+		if is_instance_valid(btn):
+			btn.pivot_offset = btn.size * 0.5
 
 func _update_status():
 	var team = GlobalGameData.selected_team
