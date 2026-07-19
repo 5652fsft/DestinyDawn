@@ -11,7 +11,7 @@ func _ready():
 	hp = 90
 	attack = 14
 	attack_range = 1
-	move_points = 3
+	move_points = 5
 	affinity = { attack_bonus = 0.0, heal_bonus = 0.0, shield_bonus = 0.25, debuff_bonus = 0.0 }
 
 	passive_skill = BaseSkill.new()

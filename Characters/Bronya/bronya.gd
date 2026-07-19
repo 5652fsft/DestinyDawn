@@ -8,7 +8,7 @@ func _ready():
 	super()
 	character_name = "布洛妮娅"
 	hp = 80
-	move_points = 3
+	move_points = 5
 	attack = 15
 
 	passive_skill = BaseSkill.new()

@@ -2,11 +2,11 @@ extends Control
 
 const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 var CHARACTERS = {
-	"bronya":    {"name":"布洛妮娅", "hp":80,  "move":3, "atk":15, "skill":"护卫指令"},
-	"seele":     {"name":"希儿",    "hp":65,  "move":4, "atk":18, "skill":"相位突进"},
-	"elaina":    {"name":"伊蕾娜",  "hp":60,  "move":3, "atk":20, "skill":"星尘爆裂"},
-	"firefly":   {"name":"流萤",    "hp":90,  "move":3, "atk":14, "skill":"烈焰冲锋"},
-	"silverwolf":{"name":"银狼",    "hp":65,  "move":4, "atk":16, "skill":"系统入侵"},
+	"bronya":    {"name":"布洛妮娅", "hp":80,  "move":5, "atk":15, "skill":"护卫指令"},
+	"seele":     {"name":"希儿",    "hp":65,  "move":6, "atk":18, "skill":"相位突进"},
+	"elaina":    {"name":"伊蕾娜",  "hp":60,  "move":5, "atk":20, "skill":"星尘爆裂"},
+	"firefly":   {"name":"流萤",    "hp":90,  "move":5, "atk":14, "skill":"烈焰冲锋"},
+	"silverwolf":{"name":"银狼",    "hp":65,  "move":5, "atk":16, "skill":"系统入侵"},
 }
 
 const CARD_SCENE = preload("res://Menus/Widgets/CharacterCard.tscn")
