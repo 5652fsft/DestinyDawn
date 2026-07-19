@@ -106,7 +106,8 @@ func _sync_host_setup(team_ids: Array, deck_ids: Array):
 @rpc("any_peer", "reliable")
 func _client_send_setup(team_ids: Array, deck_ids: Array):
 	GlobalGameData.client_team = team_ids
-	if deck_manager and not deck_ids.is_empty():
+	# 游戏开始后不再覆盖玩家2的卡组，避免重置手牌
+	if deck_manager and not deck_ids.is_empty() and GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.NONE:
 		deck_manager.init_player(2, deck_ids)
 
 func _init_buff_manager():
