@@ -623,6 +623,7 @@ func show_battle_result():
 	var is_host_win = GlobalGameData.host_characters.any(func(c): return c.hp > 0)
 	var i_win = is_host_win if GlobalGameData.is_host else not is_host_win
 	print("[Phase] 胜利方: %s" % ("服务端" if is_host_win else "客户端"))
+	hand_panel.hide()
 	if $UI.has_node("BattleResult"):
 		$UI/BattleResult.show_result(i_win, GlobalGameData.battle_stats)
 
