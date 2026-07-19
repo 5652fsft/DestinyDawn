@@ -79,13 +79,21 @@ func _process(_delta):
 
 
 func _is_ai_phase() -> bool:
+	return _is_ai_move_phase() or _is_ai_attack_phase()
+
+func _is_ai_move_phase() -> bool:
 	var phase = GlobalGameData.current_turn_phase
 	if GlobalGameData.is_host_turn:
-		return phase == GlobalGameData.TurnPhase.ENEMY_MOVE \
-			or phase == GlobalGameData.TurnPhase.ENEMY_ATTACK
+		return phase == GlobalGameData.TurnPhase.ENEMY_MOVE
 	else:
-		return phase == GlobalGameData.TurnPhase.PLAYER_MOVE \
-			or phase == GlobalGameData.TurnPhase.PLAYER_ATTACK
+		return phase == GlobalGameData.TurnPhase.PLAYER_MOVE
+
+func _is_ai_attack_phase() -> bool:
+	var phase = GlobalGameData.current_turn_phase
+	if GlobalGameData.is_host_turn:
+		return phase == GlobalGameData.TurnPhase.ENEMY_ATTACK
+	else:
+		return phase == GlobalGameData.TurnPhase.PLAYER_ATTACK
 
 
 # ==================== 动作队列构建 ====================
@@ -93,9 +101,8 @@ func _is_ai_phase() -> bool:
 func _build_action_queue():
 	_action_queue.clear()
 	var ai_chars = _get_ai_alive()
-	var phase = GlobalGameData.current_turn_phase
 
-	if phase == GlobalGameData.TurnPhase.ENEMY_MOVE:
+	if _is_ai_move_phase():
 		_log("构建移动队列，AI 存活角色: %d" % ai_chars.size(), "Queue")
 		for chara in ai_chars:
 			if GlobalGameData.character_move_used.get(chara.name, false):
@@ -108,7 +115,7 @@ func _build_action_queue():
 			else:
 				_log("%s 无可用移动目标" % chara.character_name)
 
-	elif phase == GlobalGameData.TurnPhase.ENEMY_ATTACK:
+	elif _is_ai_attack_phase():
 		_log("构建攻击队列，AI 存活角色: %d" % ai_chars.size(), "Queue")
 		for chara in ai_chars:
 			if _should_use_skill(chara):
