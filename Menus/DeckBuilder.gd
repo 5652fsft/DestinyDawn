@@ -23,6 +23,7 @@ func _build_pool():
 		var w = CARD_SCENE.instantiate()
 		w.setup(cid, data.card_name, data.cost, TYPE_NAMES.get(data.card_type, "?"), data.description)
 		w.card_added.connect(_on_card_added)
+		w.card_double_clicked.connect(_on_card_double_clicked)
 		grid.add_child(w)
 		pool_widgets[cid] = w
 
@@ -95,6 +96,25 @@ func _update_ui():
 	$VBoxContainer/DeckPanel/CountLabel.text = "%d / %d" % [deck_ids.size(), DECK_SIZE]
 	var sb = get_node_or_null("SaveButton")
 	if sb: sb.disabled = deck_ids.size() < DECK_SIZE
+
+func _on_card_double_clicked(cid: String):
+	if deck_ids.size() >= DECK_SIZE:
+		_show_toast("卡组已满")
+		return
+	if cid in deck_ids:
+		_show_toast("该卡牌已在卡组中")
+		return
+	deck_ids.append(cid)
+	_update_ui()
+	_show_toast("已自动配置到卡槽 %d" % deck_ids.size())
+
+func _show_toast(msg: String):
+	$HintLabel.text = msg
+	$HintLabel.show()
+	$HintLabel.modulate.a = 1.0
+	var tw = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property($HintLabel, "modulate:a", 0.0, 0.35).set_delay(1.2)
+	tw.finished.connect(func(): $HintLabel.hide())
 
 func _on_save_pressed():
 	if deck_ids.size() < DECK_SIZE:
