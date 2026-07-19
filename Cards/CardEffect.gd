@@ -12,6 +12,10 @@ static func execute(card: CardData, caster: Node, target: Node, main: Node) -> b
 		CardData.EffectType.DAMAGE:
 			if card.id == "card_reckoning":
 				return _execute_reckoning(card, target, main, caster)
+			if card.id == "card_fireball":
+				return _execute_fireball(card, target, main, caster)
+			if card.id == "card_ice_shard":
+				return _execute_ice_shard(card, target, caster)
 			return _execute_damage(card, target, main, caster)
 		CardData.EffectType.HEAL:
 			if card.id == "card_life_split":
@@ -88,6 +92,20 @@ static func _execute_reckoning(card: CardData, target: Node, main: Node, caster:
 	if target.has_method("get_tree") and target.get_tree() and target.get_tree().current_scene and target.get_tree().current_scene.has_method("show_toast"):
 		target.get_tree().current_scene.show_toast(msg, 1.5)
 	_rpc_take_damage(target, dmg)
+	return true
+
+# 火球术：20 伤害 + 灼烧 2 回合（每回合 5 点）
+static func _execute_fireball(card: CardData, target: Node, main: Node, caster: Node = null) -> bool:
+	if target and target.has_method("take_damage"):
+		_rpc_take_damage(target, card.effect_value)
+	_apply_temp_buff(target, "burn", 5, 2)
+	return true
+
+# 冰晶碎片：8 伤害 + 迟缓 1 回合
+static func _execute_ice_shard(card: CardData, target: Node, caster: Node = null) -> bool:
+	if target and target.has_method("take_damage"):
+		_rpc_take_damage(target, card.effect_value)
+	_apply_temp_buff(target, "move_debuff", -2, 1)
 	return true
 
 static func _execute_heal(card: CardData, target: Node, caster: Node = null) -> bool:
