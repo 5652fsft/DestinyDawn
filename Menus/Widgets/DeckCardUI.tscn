@@ -5,6 +5,7 @@
 
 [node name="DeckCardUI" type="Panel"]
 custom_minimum_size = Vector2(125, 183)
+scale = Vector2(0.95, 0.95)
 script = ExtResource("1")
 
 [node name="CostCircle" type="ColorRect" parent="."]

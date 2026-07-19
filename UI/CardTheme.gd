@@ -15,6 +15,6 @@ const HOVER_SHADOW_OFFSET = Vector2(4, 4)
 const HOVER_TWEEN_SEC = 0.12
 
 const DECK_HOVER_SCALE = 1.08
-const DECK_BASE_SCALE = 0.9
+const DECK_BASE_SCALE = 0.95
 
 const DISABLED_ALPHA = 0.6
