@@ -13,6 +13,7 @@ func init_player(player_id: int, deck_card_ids: Array[String]):
 	player_decks[player_id] = shuffled
 	player_hands[player_id] = [] as Array[String]
 	player_discards[player_id] = [] as Array[String]
+	print("[Deck] init_player p%d: deck=%d cards" % [player_id, shuffled.size()])
 
 @rpc("authority", "call_local", "reliable")
 func draw_cards(player_id: int, count: int) -> Array[String]:
