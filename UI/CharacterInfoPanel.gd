@@ -115,26 +115,26 @@ func _buff_desc(key: String, entry: Dictionary, stacks: int = 1) -> String:
 	var stack_tag = " x%d" % stacks if stacks > 1 else ""
 	match key:
 		"attack_buff":
-			return "力量强化 +%d%s�?d回合�? % [val, stack_tag, dur]
+			return "力量强化 +%d%s（%d回合）" % [val, stack_tag, dur]
 		"attack_debuff":
-			return "虚弱 %d%s�?d回合�? % [val, stack_tag, dur]
+			return "虚弱 %d%s（%d回合）" % [val, stack_tag, dur]
 		"move_debuff":
-			return "迟缓 %d%s�?d回合�? % [val, stack_tag, dur]
+			return "迟缓 %d%s（%d回合）" % [val, stack_tag, dur]
 		"defense_buff":
-			return "铁壁%s�?d回合�? % [stack_tag, dur]
+			return "铁壁%s（%d回合）" % [stack_tag, dur]
 		"poison":
-			return "中毒 %d%s�?d回合�? % [val, stack_tag, dur]
+			return "中毒 %d%s（%d回合）" % [val, stack_tag, dur]
 		"burn":
-			return "灼烧 %d%s�?d回合�? % [val, stack_tag, dur]
+			return "灼烧 %d%s（%d回合）" % [val, stack_tag, dur]
 		"regen":
-			return "再生 +%d%s�?d回合�? % [val, stack_tag, dur]
+			return "再生 +%d%s（%d回合）" % [val, stack_tag, dur]
 		"mark":
-			return "标记 +%d%%%s�?d回合�? % [val, stack_tag, dur]
+			return "标记 +%d%%%s（%d回合）" % [val, stack_tag, dur]
 		"extra_move":
-			return "加�?+%d%s�?d回合�? % [val, stack_tag, dur]
+			return "加速 +%d%s（%d回合）" % [val, stack_tag, dur]
 		"taunt":
-			return "嘲讽%s�?d回合�? % [stack_tag, dur]
-	return "%s: %d%s�?d回合�? % [key, val, stack_tag, dur]
+			return "嘲讽%s（%d回合）" % [stack_tag, dur]
+	return "%s: %d%s（%d回合）" % [key, val, stack_tag, dur]
 
 func _on_CloseButton_pressed():
 	_disconnect_buffs()

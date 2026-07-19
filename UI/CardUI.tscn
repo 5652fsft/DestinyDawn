@@ -63,7 +63,7 @@ theme_override_fonts/font = ExtResource("2_spd3y")
 theme_override_font_sizes/font_size = 20
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 horizontal_alignment = 1
-text = "卡牌�?
+text = "卡牌名"
 
 [node name="DescLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2

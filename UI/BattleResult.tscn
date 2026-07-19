@@ -19,7 +19,7 @@ offset_bottom = 620.0
 [node name="TitleLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 48
-text = "�?�?
+text = "胜 利"
 horizontal_alignment = 1
 
 [node name="StatsContainer" type="HBoxContainer" parent="VBoxContainer"]
@@ -35,7 +35,7 @@ offset_top = 20.0
 offset_right = 330.0
 offset_bottom = 50.0
 theme_override_font_sizes/font_size = 22
-text = "�?
+text = "你"
 
 [node name="MyDamage" type="Label" parent="VBoxContainer/StatsContainer/MyPanel"]
 offset_left = 20.0
@@ -51,7 +51,7 @@ offset_top = 100.0
 offset_right = 330.0
 offset_bottom = 130.0
 theme_override_font_sizes/font_size = 18
-text = "治疗�? 0"
+text = "治疗量: 0"
 
 [node name="MyCards" type="Label" parent="VBoxContainer/StatsContainer/MyPanel"]
 offset_left = 20.0
@@ -95,7 +95,7 @@ offset_top = 100.0
 offset_right = 330.0
 offset_bottom = 130.0
 theme_override_font_sizes/font_size = 18
-text = "治疗�? 0"
+text = "治疗量: 0"
 
 [node name="EnCards" type="Label" parent="VBoxContainer/StatsContainer/EnemyPanel"]
 offset_left = 20.0
@@ -116,6 +116,6 @@ text = "击杀: 0"
 [node name="ReturnButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
-text = "返回主菜�?
+text = "返回主菜单"
 
 [connection signal="pressed" from="VBoxContainer/ReturnButton" to="." method="_on_return_pressed"]

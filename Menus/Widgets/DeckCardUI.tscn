@@ -32,7 +32,7 @@ offset_right = 116.0
 offset_bottom = 28.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 14
-text = "卡牌�?
+text = "卡牌名"
 
 [node name="TypeLabel" type="Label" parent="."]
 offset_left = 4.0

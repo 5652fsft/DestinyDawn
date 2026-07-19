@@ -28,7 +28,8 @@ func _on_card_added(cid: String):
 	if deck_ids.size() >= DECK_SIZE:
 		return
 	if cid in deck_ids:
-		return  # 同名最�?�?	deck_ids.append(cid)
+		return  # 同名最多1张
+	deck_ids.append(cid)
 	_update_ui()
 
 func _on_card_removed(cid: String):
@@ -59,7 +60,8 @@ func _update_ui():
 		w.card_reordered.connect(_on_card_reordered)
 		w.set_in_deck_mode(true)
 		deck_grid.add_child(w)
-	# 空槽位占�?	for i in range(DECK_SIZE - deck_ids.size()):
+	# 空槽位占位
+	for i in range(DECK_SIZE - deck_ids.size()):
 		var empty = Panel.new()
 		empty.custom_minimum_size = Vector2(120, 170)
 		empty.modulate = Color(1, 1, 1, 0.15)
@@ -70,7 +72,7 @@ func _update_ui():
 
 func _on_save_pressed():
 	if deck_ids.size() < DECK_SIZE:
-		$HintLabel.text = "请选择 %d 张卡�? % DECK_SIZE
+		$HintLabel.text = "请选择 %d 张卡牌" % DECK_SIZE
 		$HintLabel.show()
 		await get_tree().create_timer(1.5).timeout
 		$HintLabel.hide()

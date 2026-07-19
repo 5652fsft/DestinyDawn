@@ -29,7 +29,7 @@ layout_mode = 2
 autowrap_mode = 2
 theme_override_fonts/font = ExtResource("2_af7tq")
 theme_override_font_sizes/font_size = 14
-text = "技能描�?
+text = "技能描述"
 
 [node name="CooldownLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2
@@ -41,4 +41,4 @@ text = "冷却: 0 回合"
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_af7tq")
 theme_override_font_sizes/font_size = 18
-text = "使用技�?
+text = "使用技能"

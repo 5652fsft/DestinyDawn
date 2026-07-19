@@ -50,13 +50,13 @@ offset_bottom = 560.0
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
-text = "编队管理 (未配�?"
+text = "编队管理 (未配置)"
 
 [node name="DeckButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
-text = "卡组构筑 (未配�?"
+text = "卡组构筑 (未配置)"
 
 [node name="HostButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
@@ -80,11 +80,11 @@ text = "设置"
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
-text = "退�?
+text = "退出"
 
 [node name="IPDialog" type="AcceptDialog" parent="."]
 visible = false
-dialog_text = "输入服务�?IP 地址"
+dialog_text = "输入服务器 IP 地址"
 size = Vector2i(300, 150)
 
 [node name="IPLineEdit" type="LineEdit" parent="IPDialog"]

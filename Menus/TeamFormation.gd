@@ -4,7 +4,7 @@ const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 var CHARACTERS = {
 	"bronya":    {"name":"布洛妮娅", "hp":80,  "move":3, "atk":15, "skill":"护卫指令"},
 	"seele":     {"name":"希儿",    "hp":65,  "move":4, "atk":18, "skill":"相位突进"},
-	"elaina":    {"name":"伊蕾�?,  "hp":60,  "move":3, "atk":20, "skill":"星尘爆裂"},
+	"elaina":    {"name":"伊蕾娜",  "hp":60,  "move":3, "atk":20, "skill":"星尘爆裂"},
 	"firefly":   {"name":"流萤",    "hp":90,  "move":3, "atk":14, "skill":"烈焰冲锋"},
 	"silverwolf":{"name":"银狼",    "hp":65,  "move":4, "atk":16, "skill":"系统入侵"},
 }
@@ -22,7 +22,8 @@ func _build_roster():
 		card.selected.connect(_on_character_selected)
 		grid.add_child(card)
 		cards[cid] = card
-	# 检�?slot sprite 是否加载了图�?	_refresh_slot_sprites()
+	# 检查 slot sprite 是否加载了图片
+	_refresh_slot_sprites()
 
 func _refresh_slot_sprites():
 	for i in range(3):
@@ -57,7 +58,7 @@ func _ready():
 		if btn:
 			btn.pressed.connect(_remove_slot.bind(i - 1))
 	if _slot_labels.is_empty() or not _slot_labels[0]:
-		push_error("TeamFormation: Slot1 nodes missing �?check tscn")
+		push_error("TeamFormation: Slot1 nodes missing — check tscn")
 	else:
 		_clear_team()
 	_build_roster()
@@ -66,7 +67,7 @@ func _clear_team():
 	slots.clear()
 	for label in _slot_labels:
 		if label:
-			label.text = "�?
+			label.text = "空"
 
 func _remove_slot(index: int):
 	if index < slots.size():
@@ -88,13 +89,13 @@ func _update_slots():
 			label.text = CHARACTERS[cid]["name"]
 			remove_btn.show()
 		else:
-			label.text = "�?
+			label.text = "空"
 			remove_btn.hide()
 	_refresh_slot_sprites()
 
 func _on_save_pressed():
 	if slots.size() != 3:
-		$HintLabel.text = "请选择 3 名角�?
+		$HintLabel.text = "请选择 3 名角色"
 		$HintLabel.show()
 		await get_tree().create_timer(1.5).timeout
 		$HintLabel.hide()
