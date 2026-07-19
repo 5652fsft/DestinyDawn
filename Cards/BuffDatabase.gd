@@ -18,7 +18,7 @@ static func _all_buffs() -> Dictionary:
 	out["attack_debuff"] = b
 
 	b = BuffData.new()
-	b.id = "defense_buff"; b.name = "铁壁"; b.type = BuffData.BuffType.DEFENSE_BUFF
+	b.id = "defense_buff"; b.name = "伤害减免"; b.type = BuffData.BuffType.DEFENSE_BUFF
 	b.category = BuffData.Category.PHYSICAL; b.is_harmful = false; b.max_stacks = 2
 	out["defense_buff"] = b
 

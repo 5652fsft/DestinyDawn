@@ -108,7 +108,7 @@ _create_card(
 |---|---|---|---|---|---|
 | attack_buff | 力量强化 | ATTACK_BUFF | MAGIC | 3 | 否 |
 | attack_debuff | 虚弱 | ATTACK_DEBUFF | MAGIC | 3 | 否 |
-| defense_buff | 铁壁 | DEFENSE_BUFF | PHYSICAL | 2 | 否 |
+| defense_buff | 伤害减免 | DEFENSE_BUFF | PHYSICAL | 2 | 否 |
 | move_debuff | 迟缓 | MOVE_DEBUFF | MAGIC | 2 | 否 |
 | poison | 中毒 | DAMAGE_OVER_TIME | PHYSICAL | 5 | 是 |
 | burn | 灼烧 | DAMAGE_OVER_TIME | MAGIC | 3 | 是 |

@@ -126,7 +126,11 @@ func _buff_desc(key: String, entry: Dictionary) -> String:
 		"move_debuff":
 			return "[迟缓] 移动力-%d（%d回合）" % [val, dur]
 		"defense_buff":
-			return "[铁壁] 护甲 %d（减伤 %d 点）（%d回合）" % [val, abs(val), dur]
+			var abs_val = abs(val)
+			if val > 0:
+				return "[防御] 受到伤害 -%d（%d回合）" % [abs_val, dur]
+			else:
+				return "[易伤] 受到伤害 +%d（%d回合）" % [abs_val, dur]
 		"poison":
 			return "[中毒] 每回合-%d生命（%d回合）" % [val, dur]
 		"burn":
