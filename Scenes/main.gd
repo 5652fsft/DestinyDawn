@@ -240,7 +240,6 @@ func select_character(chara: CharacterBody2D):
 	chara.is_selected = true
 	character_info_panel.show_for(chara)
 	skill_panel.show_for(chara)
-	passive_skill_panel.show()
 	_update_passive_panel(chara)
 
 func unselect_character(chara: CharacterBody2D, unselect_all = false):
