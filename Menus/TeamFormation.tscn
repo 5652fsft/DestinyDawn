@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cbl5e1kpvq2h6"]
 
 [ext_resource type="Script" uid="uid://d4g0syi1puwjw" path="res://Menus/TeamFormation.gd" id="1"]
-[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf" id="2"]
+[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2"]
 [ext_resource type="Texture2D" uid="uid://dc37n6qm4tnj6" path="res://Assets/Sprites/menubg.jpg" id="3"]
 
 [node name="TeamFormation" type="Control" unique_id=109513811]
@@ -50,7 +50,7 @@ offset_right = 300.0
 offset_bottom = 90.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 22
-text = "可选角色"
+text = "可选角�?
 
 [node name="RosterGrid" type="GridContainer" parent="." unique_id=23484213]
 layout_mode = 0
@@ -88,7 +88,7 @@ offset_right = 250.0
 offset_bottom = 70.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
-text = "空"
+text = "�?
 horizontal_alignment = 1
 
 [node name="RemoveButton" type="Button" parent="Slot1" unique_id=968246877]
@@ -119,7 +119,7 @@ offset_right = 250.0
 offset_bottom = 70.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
-text = "空"
+text = "�?
 horizontal_alignment = 1
 
 [node name="RemoveButton" type="Button" parent="Slot2" unique_id=936310970]
@@ -150,7 +150,7 @@ offset_right = 250.0
 offset_bottom = 70.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
-text = "空"
+text = "�?
 horizontal_alignment = 1
 
 [node name="RemoveButton" type="Button" parent="Slot3" unique_id=2108448067]
@@ -171,7 +171,7 @@ offset_right = 200.0
 offset_bottom = 660.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 18
-text = "← 返回主菜单"
+text = "�?返回主菜�?
 
 [node name="SaveButton" type="Button" parent="." unique_id=1862548020]
 layout_mode = 0
@@ -181,7 +181,7 @@ offset_right = 1240.0
 offset_bottom = 660.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 18
-text = "✔ 保存编队"
+text = "�?保存编队"
 
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="SaveButton" to="." method="_on_save_pressed"]

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://b3fwj46p04myk"]
 
 [ext_resource type="Script" path="res://UI/EnergyBar.gd" id="1_3lfjs"]
-[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf" id="2_tpmdw"]
+[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2_tpmdw"]
 
 [node name="EnergyBar" type="HBoxContainer"]
 offset_left = 30.0

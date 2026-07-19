@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://c6dfr3hiv3qbn"]
 
 [ext_resource type="Script" path="res://Menus/Widgets/DeckCardUI.gd" id="1"]
-[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf" id="2"]
+[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2"]
 
 [node name="DeckCardUI" type="Panel"]
 custom_minimum_size = Vector2(120, 170)
@@ -32,7 +32,7 @@ offset_right = 116.0
 offset_bottom = 28.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 14
-text = "卡牌名"
+text = "卡牌�?
 
 [node name="TypeLabel" type="Label" parent="."]
 offset_left = 4.0

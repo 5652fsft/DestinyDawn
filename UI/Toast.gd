@@ -2,7 +2,7 @@ extends Label
 
 var _tween: Tween = null
 
-const FONT = preload("res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf")
+const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 
 func _ready():
 	horizontal_alignment = 1

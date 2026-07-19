@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://b4hqxvb38t0ya"]
 
 [ext_resource type="Script" path="res://UI/SkillPanel.gd" id="1_af7tq"]
-[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf" id="2_af7tq"]
+[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2_af7tq"]
 
 [node name="SkillPanel" type="Panel"]
 visible = false
@@ -29,7 +29,7 @@ layout_mode = 2
 autowrap_mode = 2
 theme_override_fonts/font = ExtResource("2_af7tq")
 theme_override_font_sizes/font_size = 14
-text = "技能描述"
+text = "技能描�?
 
 [node name="CooldownLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2
@@ -41,4 +41,4 @@ text = "冷却: 0 回合"
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_af7tq")
 theme_override_font_sizes/font_size = 18
-text = "使用技能"
+text = "使用技�?

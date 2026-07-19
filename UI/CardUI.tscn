@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dhc4pen0f81bp"]
 
 [ext_resource type="Script" path="res://UI/CardUI.gd" id="1_5dp7v"]
-[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf" id="2_spd3y"]
+[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2_spd3y"]
 
 [node name="CardUI" type="Panel"]
 custom_minimum_size = Vector2(140, 200)
@@ -63,7 +63,7 @@ theme_override_fonts/font = ExtResource("2_spd3y")
 theme_override_font_sizes/font_size = 20
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 horizontal_alignment = 1
-text = "卡牌名"
+text = "卡牌�?
 
 [node name="DescLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2

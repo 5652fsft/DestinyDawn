@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://buctavd8kwukd"]
 
 [ext_resource type="Script" uid="uid://c0yj3ve78ufat" path="res://UI/TurnIndicator.gd" id="1_w7kas"]
-[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf" id="2_yftyd"]
+[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2_yftyd"]
 
 [node name="TurnIndicator" type="Control"]
 layout_mode = 3

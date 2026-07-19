@@ -1,6 +1,6 @@
 extends Panel
 
-const FONT = preload("res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf")
+const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 
 var current_character: Node = null
 var active_skill: BaseSkill = null
@@ -39,17 +39,17 @@ func show_for(character: Node):
 	skill_desc_label.add_theme_font_override("font", FONT)
 	cooldown_label.add_theme_font_override("font", FONT)
 	_targeting = false
-	use_button.text = "使用技能"
+	use_button.text = "使用技�?
 	_update_cooldown()
 	show()
 
 func set_targeting_mode(active: bool):
 	_targeting = active
 	if active:
-		use_button.text = "取消使用技能"
+		use_button.text = "取消使用技�?
 		use_button.disabled = false
 	else:
-		use_button.text = "使用技能"
+		use_button.text = "使用技�?
 		_update_cooldown()
 
 func _update_cooldown():
@@ -63,20 +63,18 @@ func _update_cooldown():
 	if cd > 0:
 		use_button.disabled = true
 		return
-	# 阶段判断：仅攻击阶段可使用技能
-	if current_character and current_character.has_method("get_current_phase"):
+	# 阶段判断：仅攻击阶段可使用技�?	if current_character and current_character.has_method("get_current_phase"):
 		var phase = current_character.get_current_phase()
 		if phase != "Attack":
 			use_button.disabled = true
-			use_button.text = "移动阶段不可用"
+			use_button.text = "移动阶段不可�?
 			return
-	# 是否已攻击/使用技能
-	if current_character and GlobalGameData.character_attack_used.get(current_character.name, false):
+	# 是否已攻�?使用技�?	if current_character and GlobalGameData.character_attack_used.get(current_character.name, false):
 		use_button.disabled = true
 		use_button.text = "本回合已行动"
 		return
 	use_button.disabled = false
-	use_button.text = "使用技能"
+	use_button.text = "使用技�?
 
 func _on_use_button_pressed():
 	if not active_skill:

@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://c3sue2nobgw1l" path="res://Assets/Sprites/background.jpg" id="1_frw7t"]
 [ext_resource type="Script" uid="uid://dj10pxgshmudd" path="res://Scenes/startup.gd" id="1_tsans"]
-[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf" id="2_8q8xm"]
+[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2_8q8xm"]
 
 [node name="Startup" type="Control"]
 layout_mode = 3

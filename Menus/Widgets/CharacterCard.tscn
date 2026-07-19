@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://c8ibspi314eyd"]
 
 [ext_resource type="Script" path="res://Menus/Widgets/CharacterCard.gd" id="1"]
-[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf" id="2"]
+[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2"]
 
 [node name="CharacterCard" type="Panel"]
 custom_minimum_size = Vector2(160, 220)

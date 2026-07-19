@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://i3ka4v2gb3yh"]
 
 [ext_resource type="Script" path="res://UI/BattleResult.gd" id="1"]
-[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf" id="2"]
+[ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2"]
 
 [node name="BattleResult" type="Panel"]
 anchors_preset = 15
@@ -19,7 +19,7 @@ offset_bottom = 620.0
 [node name="TitleLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 48
-text = "胜 利"
+text = "�?�?
 horizontal_alignment = 1
 
 [node name="StatsContainer" type="HBoxContainer" parent="VBoxContainer"]
@@ -35,7 +35,7 @@ offset_top = 20.0
 offset_right = 330.0
 offset_bottom = 50.0
 theme_override_font_sizes/font_size = 22
-text = "你"
+text = "�?
 
 [node name="MyDamage" type="Label" parent="VBoxContainer/StatsContainer/MyPanel"]
 offset_left = 20.0
@@ -51,7 +51,7 @@ offset_top = 100.0
 offset_right = 330.0
 offset_bottom = 130.0
 theme_override_font_sizes/font_size = 18
-text = "治疗量: 0"
+text = "治疗�? 0"
 
 [node name="MyCards" type="Label" parent="VBoxContainer/StatsContainer/MyPanel"]
 offset_left = 20.0
@@ -95,7 +95,7 @@ offset_top = 100.0
 offset_right = 330.0
 offset_bottom = 130.0
 theme_override_font_sizes/font_size = 18
-text = "治疗量: 0"
+text = "治疗�? 0"
 
 [node name="EnCards" type="Label" parent="VBoxContainer/StatsContainer/EnemyPanel"]
 offset_left = 20.0
@@ -116,6 +116,6 @@ text = "击杀: 0"
 [node name="ReturnButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
-text = "返回主菜单"
+text = "返回主菜�?
 
 [connection signal="pressed" from="VBoxContainer/ReturnButton" to="." method="_on_return_pressed"]

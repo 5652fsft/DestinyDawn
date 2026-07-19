@@ -1,6 +1,6 @@
 extends Panel
 
-const FONT = preload("res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf")
+const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 
 var card_id: String = ""
 
