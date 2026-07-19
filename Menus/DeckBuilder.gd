@@ -28,7 +28,9 @@ func _build_pool():
 
 func _on_pool_card_clicked(cid: String):
 	if cid in deck_ids:
-		# 已在卡组中，点击无效
+		deck_ids.erase(cid)
+		_update_ui()
+		_show_toast("已移出卡组")
 		return
 	if deck_ids.size() >= DECK_SIZE:
 		_show_toast("卡组已满")
@@ -47,7 +49,7 @@ func _update_ui():
 	for cid in pool_widgets.keys():
 		var w = pool_widgets[cid]
 		if is_instance_valid(w):
-			w.set_in_deck_mode(cid in deck_ids)
+			w.set_in_deck_mode(cid not in deck_ids)
 		else:
 			pool_widgets.erase(cid)
 	# 重建出战卡组

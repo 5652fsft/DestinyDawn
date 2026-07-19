@@ -1,6 +1,7 @@
 extends Control
 
 const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
+const CardTheme = preload("res://UI/CardTheme.gd")
 var CHARACTERS = {
 	"bronya":    {"name":"布洛妮娅", "hp":80,  "move":5, "atk":15, "skill":"护卫指令"},
 	"seele":     {"name":"希儿",    "hp":65,  "move":6, "atk":18, "skill":"相位突进"},
@@ -12,90 +13,89 @@ var CHARACTERS = {
 const CARD_SCENE = preload("res://Menus/Widgets/CharacterCard.tscn")
 
 var slots: Array[String] = []
-var cards: Dictionary = {}  # char_id -> CharacterCard node
+var cards: Dictionary = {}
+
+func _ready():
+	slots = GlobalGameData.selected_team.duplicate()
+	_build_roster()
+	_update_slots()
 
 func _build_roster():
 	var grid = $RosterGrid
 	for cid in CHARACTERS:
 		var card = CARD_SCENE.instantiate()
 		card.setup(cid, CHARACTERS[cid])
-		card.selected.connect(_on_character_selected)
+		card.clicked.connect(_on_card_clicked)
 		grid.add_child(card)
 		cards[cid] = card
-	# 检查 slot sprite 是否加载了图片
-	_refresh_slot_sprites()
 
-func _refresh_slot_sprites():
-	for i in range(3):
-		var slot = get_node_or_null("Slot%d" % (i + 1))
-		if not slot: continue
-		var spr = slot.get_node_or_null("Sprite")
-		if not spr: continue
-		if i < slots.size():
-			var cid = slots[i]
-			var tex = load("res://Assets/Sprites/Characters/%s_Blue.png" % cid)
-			if tex: spr.texture = tex
-		else:
-			spr.texture = null
-
-func _on_character_selected(cid: String):
-	if slots.size() >= 3:
-		return
+func _on_card_clicked(cid: String):
 	if cid in slots:
-		return
-	slots.append(cid)
+		slots.erase(cid)
+	else:
+		if slots.size() >= 3:
+			return
+		slots.append(cid)
 	_update_slots()
 
-var _slot_labels: Array = []
-var _slot_buttons: Array = []
+func _update_slots():
+	for cid in cards:
+		cards[cid].set_team_status(cid in slots)
+	_build_slot_uis()
 
-func _ready():
-	for i in range(1, 4):
-		var lbl = get_node_or_null("Slot%d/NameLabel" % i)
-		var btn = get_node_or_null("Slot%d/RemoveButton" % i)
-		_slot_labels.append(lbl)
-		_slot_buttons.append(btn)
-		if btn:
-			btn.pressed.connect(_remove_slot.bind(i - 1))
-	if _slot_labels.is_empty() or not _slot_labels[0]:
-		push_error("TeamFormation: Slot1 nodes missing — check tscn")
-	else:
-		slots = GlobalGameData.selected_team.duplicate()
-		if slots.size() < 3:
-			_clear_team()
+func _build_slot_uis():
+	var container = $SlotContainer
+	for c in container.get_children():
+		c.queue_free()
+	for i in range(3):
+		if i < slots.size():
+			var cid = slots[i]
+			var data = CHARACTERS[cid]
+			var slot = Panel.new()
+			slot.custom_minimum_size = Vector2(220, 80)
+			var p = StyleBoxFlat.new()
+			p.bg_color = CardTheme.CARD_BG
+			p.corner_radius_top_left = CardTheme.CARD_BORDER_RADIUS
+			p.corner_radius_top_right = CardTheme.CARD_BORDER_RADIUS
+			p.corner_radius_bottom_left = CardTheme.CARD_BORDER_RADIUS
+			p.corner_radius_bottom_right = CardTheme.CARD_BORDER_RADIUS
+			slot.add_theme_stylebox_override("panel", p)
+			container.add_child(slot)
+
+			var spr = TextureRect.new()
+			spr.texture = load("res://Assets/Sprites/Standee/%s_Standee.png" % cid)
+			spr.expand_mode = 1
+			spr.stretch_mode = 5
+			spr.size = Vector2(80, 48)
+			spr.position = Vector2(8, 16)
+			slot.add_child(spr)
+
+			var lbl = Label.new()
+			lbl.text = data.name
+			lbl.add_theme_font_override("font", FONT)
+			lbl.add_theme_font_size_override("font_size", 18)
+			lbl.position = Vector2(96, 16)
+			lbl.size = Vector2(110, 28)
+			slot.add_child(lbl)
+
+			var rm = Button.new()
+			rm.text = "移除"
+			rm.add_theme_font_override("font", FONT)
+			rm.add_theme_font_size_override("font_size", 14)
+			rm.position = Vector2(96, 48)
+			rm.size = Vector2(100, 26)
+			rm.pressed.connect(_remove_slot.bind(i))
+			slot.add_child(rm)
 		else:
-			_update_slots()
-	_build_roster()
-
-func _clear_team():
-	slots.clear()
-	for label in _slot_labels:
-		if label:
-			label.text = "空"
+			var empty = Panel.new()
+			empty.custom_minimum_size = Vector2(220, 80)
+			empty.modulate = Color(1, 1, 1, 0.15)
+			container.add_child(empty)
 
 func _remove_slot(index: int):
 	if index < slots.size():
 		slots.remove_at(index)
 		_update_slots()
-
-func _update_slots():
-	for cid in cards:
-		cards[cid].set_team_status(cid in slots)
-	for i in range(3):
-		if i >= _slot_labels.size():
-			continue
-		var label = _slot_labels[i]
-		var remove_btn = _slot_buttons[i]
-		if not label or not remove_btn:
-			continue
-		if i < slots.size():
-			var cid = slots[i]
-			label.text = CHARACTERS[cid]["name"]
-			remove_btn.show()
-		else:
-			label.text = "空"
-			remove_btn.hide()
-	_refresh_slot_sprites()
 
 func _on_save_pressed():
 	if slots.size() != 3:
