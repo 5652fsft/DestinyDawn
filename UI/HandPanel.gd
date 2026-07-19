@@ -16,46 +16,6 @@ func clear():
 	card_uis.clear()
 
 func play_draw_animation(hand: Array[String]):
-	var old_ids := {}
-	for card in card_uis:
-		if is_instance_valid(card) and card.card_data:
-			old_ids[card.card_data.id] = true
-
-	var new_ids: Array[String] = []
-	for cid in hand:
-		if cid not in old_ids:
-			new_ids.append(cid)
-
-	if new_ids.size() == 1:
-		var data = CardDatabase.get_card(new_ids[0])
-		if data:
-			# build id→ui map for reordering
-			var existing: Dictionary = {}
-			for card in card_uis:
-				if is_instance_valid(card) and card.card_data:
-					existing[card.card_data.id] = card
-
-			# create new card, add it to card_container
-			var new_card = card_scene.instantiate()
-			card_container.add_child(new_card)
-			new_card.setup(data)
-			new_card.pivot_offset = new_card.size * 0.5
-			new_card.set_meta("_entrance", true)
-			# starting position: left-middle of container
-			new_card.set_meta("_fly_start", Vector2(0, card_container.size.y * 0.5))
-
-			# rebuild card_uis in hand order
-			var ordered: Array[CardUI] = []
-			for cid in hand:
-				if cid in existing:
-					ordered.append(existing[cid])
-				elif cid == new_ids[0]:
-					ordered.append(new_card)
-			card_uis = ordered
-
-			_layout_cards()
-			return
-
 	set_hand(hand)
 
 func set_hand(card_ids: Array[String]):
