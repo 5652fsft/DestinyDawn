@@ -63,7 +63,6 @@ offset_top = 36.0
 offset_right = 1160.0
 offset_bottom = 220.0
 size_flags_vertical = 3
-theme_override_constants/h_separation = 12
 columns = 8
 
 [node name="CardPool" type="Panel" parent="VBoxContainer" unique_id=1097901601]
