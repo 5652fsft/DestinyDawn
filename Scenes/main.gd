@@ -583,10 +583,10 @@ func highlight_skill_targets():
 func _update_player_energy():
 	_update_player_panels()
 
-func draw_extra_card(caster: Node, count: int = 1):
+func draw_extra_card(chara: Node, count: int = 1):
 	if not multiplayer.is_server():
 		return
-	var pid = 1 if caster in GlobalGameData.host_characters else 2
+	var pid = 1 if chara in GlobalGameData.host_characters else 2
 	deck_manager.draw_cards(pid, count)
 
 func _get_my_characters() -> Array:

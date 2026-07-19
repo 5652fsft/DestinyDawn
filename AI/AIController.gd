@@ -259,15 +259,12 @@ func _execute_skill(chara: Node, target: Node):
 		_log("%s 技能目标无效" % chara.character_name, "Skill")
 		return
 	_log("%s 使用技能 -> %s" % [chara.character_name, target.character_name], "Skill")
-	var prev_selected = _main.selected_character
-	_main.selected_character = chara
 	chara.use_active_skill(target)
 	if chara.active_skill:
 		chara.active_skill.current_cooldown = chara.active_skill.cooldown
 		if not chara.has_method("_consumes_attack_on_skill") or chara._consumes_attack_on_skill():
 			GlobalGameData.character_attack_used[chara.name] = true
 			GlobalGameData.character_attack_used_num += 1
-	_main.selected_character = prev_selected
 	_main.check_attack()
 
 

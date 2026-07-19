@@ -355,16 +355,16 @@ func hide_attack_range():
 
 func get_current_phase() -> String:
 	var phase = GlobalGameData.current_turn_phase
-	var is_host = GlobalGameData.is_host
+	var char_is_host = name.begins_with("Host")
 	match phase:
 		GlobalGameData.TurnPhase.PLAYER_MOVE:
-			return "Move" if is_host == GlobalGameData.is_host_turn else "Wait"
+			return "Move" if char_is_host == GlobalGameData.is_host_turn else "Wait"
 		GlobalGameData.TurnPhase.PLAYER_ATTACK:
-			return "Attack" if is_host == GlobalGameData.is_host_turn else "Wait"
+			return "Attack" if char_is_host == GlobalGameData.is_host_turn else "Wait"
 		GlobalGameData.TurnPhase.ENEMY_MOVE:
-			return "Move" if is_host != GlobalGameData.is_host_turn else "Wait"
+			return "Move" if char_is_host != GlobalGameData.is_host_turn else "Wait"
 		GlobalGameData.TurnPhase.ENEMY_ATTACK:
-			return "Attack" if is_host != GlobalGameData.is_host_turn else "Wait"
+			return "Attack" if char_is_host != GlobalGameData.is_host_turn else "Wait"
 		_:
 			return "Invalid"
 
