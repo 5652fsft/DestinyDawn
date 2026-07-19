@@ -43,6 +43,8 @@ func _ready():
 	mouse_exited.connect(_on_hover_exit)
 	pivot_offset = size * 0.5
 	z_index = 5
+	scale = Vector2(CardTheme.DECK_BASE_SCALE, CardTheme.DECK_BASE_SCALE)
+	_base_scale = scale
 
 func _gui_input(event: InputEvent):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
