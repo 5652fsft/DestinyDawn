@@ -636,7 +636,7 @@ func advance_turn_phase():
 	if check_victory():
 		print("[Phase] 游戏结束")
 		GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.GAME_OVER
-		rpc_id(0, "_sync_turn_phase", GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn)
+		rpc_id(0, "_sync_turn_phase", GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats)
 		show_battle_result()
 		return
 	
@@ -664,9 +664,11 @@ func advance_turn_phase():
 	rpc_id(0, "_sync_turn_phase", GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn)
 
 @rpc("call_local", "reliable")
-func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn):
+func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn, stats: Dictionary = {}):
 	GlobalGameData.current_turn_phase = phase
 	GlobalGameData.is_host_turn = host_turn
+	if not stats.is_empty():
+		GlobalGameData.battle_stats = stats
 	if selected_character:
 		selected_character.is_selected = false
 		selected_character = null
