@@ -379,6 +379,7 @@ func _on_target_selected(target: Node):
 		hand_panel.remove_card_via_data(card_data)
 		cancel_targeting()
 	elif selected_character and selected_character.has_method("use_active_skill") and selected_character.active_skill:
+		var skill_name = selected_character.active_skill.skill_name
 		selected_character.use_active_skill(target)
 		if not selected_character.active_skill: return
 		selected_character.active_skill.current_cooldown = selected_character.active_skill.cooldown
@@ -386,6 +387,7 @@ func _on_target_selected(target: Node):
 		GlobalGameData.character_attack_used_num += 1
 		skill_panel._update_cooldown()
 		cancel_targeting()
+		show_toast("释放 [%s]" % skill_name, 1.0)
 		check_attack()
 
 func _target_play_card(card_data: CardData, target: Node):
@@ -672,6 +674,9 @@ func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn)
 		selected_character = null
 		character_info_panel.hide()
 		skill_panel.hide()
+	if phase == GlobalGameData.TurnPhase.GAME_OVER:
+		show_battle_result()
+		return
 	# 回合提示
 	if phase == GlobalGameData.TurnPhase.PLAYER_MOVE or phase == GlobalGameData.TurnPhase.ENEMY_MOVE:
 		var is_enemy_phase = phase == GlobalGameData.TurnPhase.ENEMY_MOVE
