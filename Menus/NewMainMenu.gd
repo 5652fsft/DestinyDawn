@@ -3,7 +3,8 @@ extends Control
 const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 
 func _ready():
-	for btn in [$TeamButton, $DeckButton, $HostButton, $JoinButton, $SettingsButton, $QuitButton]:
+	var buttons = [$VBoxContainer/TeamButton, $VBoxContainer/DeckButton, $VBoxContainer/HostButton, $VBoxContainer/JoinButton, $VBoxContainer/SettingsButton, $VBoxContainer/QuitButton]
+	for btn in buttons:
 		btn.mouse_entered.connect(_on_btn_enter.bind(btn))
 		btn.mouse_exited.connect(_on_btn_exit.bind(btn))
 		btn.button_down.connect(_on_btn_down.bind(btn))
@@ -13,8 +14,8 @@ func _ready():
 func _update_status():
 	var team = GlobalGameData.selected_team
 	var deck = GlobalGameData.selected_deck
-	$TeamButton.text = "编队管理 (%d/3)" % team.size() if team.size() > 0 else "编队管理 (未配置)"
-	$DeckButton.text = "卡组构筑 (%d/8)" % deck.size() if deck.size() > 0 else "卡组构筑 (未配置)"
+	$VBoxContainer/TeamButton.text = "编队管理 (%d/3)" % team.size() if team.size() > 0 else "编队管理 (未配置)"
+	$VBoxContainer/DeckButton.text = "卡组构筑 (%d/8)" % deck.size() if deck.size() > 0 else "卡组构筑 (未配置)"
 
 func _on_btn_enter(btn):
 	var tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
