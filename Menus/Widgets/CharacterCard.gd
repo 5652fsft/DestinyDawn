@@ -26,9 +26,15 @@ func setup(id: String, data: Dictionary):
 	$CardBack/Scroll/VBox/ATKLabel.text = "ATK: %d" % data.atk
 	$CardBack/Scroll/VBox/MoveLabel.text = "移动: %d" % data.move
 	$CardBack/Scroll/VBox/SkillLabel.text = "技能: %s" % data.skill
+	$CardBack/Scroll/VBox/SkillLabel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	$CardBack/Scroll/VBox/SkillDescLabel.text = "%s (CD: %d)" % [data.get("skill_desc", ""), data.get("skill_cd", 0)]
+	$CardBack/Scroll/VBox/SkillDescLabel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	$CardBack/Scroll/VBox/SkillDescLabel.modulate = Color(0.8, 0.8, 0.9)
 	$CardBack/Scroll/VBox/PassiveLabel.text = "被动: %s" % data.get("passive", "")
+	$CardBack/Scroll/VBox/PassiveLabel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	$CardBack/Scroll/VBox/PassiveDescLabel.text = data.get("passive_desc", "")
+	$CardBack/Scroll/VBox/PassiveDescLabel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	$CardBack/Scroll/VBox/PassiveDescLabel.modulate = Color(0.8, 0.8, 0.9)
 
 	pivot_offset = size * 0.5
 	_base_scale = scale
