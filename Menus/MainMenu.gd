@@ -4,7 +4,7 @@ const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 
 func _ready():
 	GlobalGameData.load_defaults_if_empty()
-	var buttons = [$VBoxContainer/TeamButton, $VBoxContainer/DeckButton, $VBoxContainer/HostButton, $VBoxContainer/JoinButton, $VBoxContainer/SettingsButton, $VBoxContainer/QuitButton]
+	var buttons = [$VBoxContainer/TeamButton, $VBoxContainer/DeckButton, $VBoxContainer/HostButton, $VBoxContainer/JoinButton, $VBoxContainer/AIBattleButton, $VBoxContainer/SettingsButton, $VBoxContainer/QuitButton]
 	for btn in buttons:
 		btn.mouse_entered.connect(_on_btn_enter.bind(btn))
 		btn.mouse_exited.connect(_on_btn_exit.bind(btn))
@@ -15,7 +15,7 @@ func _ready():
 	_update_status()
 
 func _center_button_pivots():
-	for btn in [$VBoxContainer/TeamButton, $VBoxContainer/DeckButton, $VBoxContainer/HostButton, $VBoxContainer/JoinButton, $VBoxContainer/SettingsButton, $VBoxContainer/QuitButton]:
+	for btn in [$VBoxContainer/TeamButton, $VBoxContainer/DeckButton, $VBoxContainer/HostButton, $VBoxContainer/JoinButton, $VBoxContainer/AIBattleButton, $VBoxContainer/SettingsButton, $VBoxContainer/QuitButton]:
 		if is_instance_valid(btn):
 			btn.pivot_offset = btn.size * 0.5
 
@@ -75,6 +75,12 @@ func _on_settings_pressed():
 func _on_settings_close():
 	GlobalGameData.player_name = $SettingsPanel/NameEdit.text
 	$SettingsPanel.hide()
+
+func _on_ai_battle_pressed():
+	GlobalGameData.load_defaults_if_empty()
+	GlobalGameData.is_host = true
+	GlobalGameData.is_ai_mode = true
+	get_tree().change_scene_to_file("res://Scenes/scene.tscn")
 
 func _on_quit_pressed():
 	get_tree().quit()

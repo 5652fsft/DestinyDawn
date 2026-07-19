@@ -1,6 +1,7 @@
 extends Node
 
 var is_host = false
+var is_ai_mode: bool = false
 
 enum TurnPhase {
 	NONE,
@@ -44,6 +45,7 @@ func load_defaults_if_empty():
 # Phase 6 — 对战双方队伍（RPC 同步用）
 var host_team: Array[String] = []
 var client_team: Array[String] = []
+var ai_deck: Array[String] = []
 
 # Phase 6 — 战斗统计
 var battle_stats: Dictionary = {
