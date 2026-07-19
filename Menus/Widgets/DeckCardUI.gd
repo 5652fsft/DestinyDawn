@@ -15,7 +15,7 @@ func setup(cid: String, name_text: String, cost: int, type_text: String, desc: S
 	$NameLabel.text = name_text
 	$DescLabel.text = desc
 	$TypeLabel.text = type_text
-	scale = CardTheme.DECK_BASE_SCALE
+	scale = Vector2(CardTheme.DECK_BASE_SCALE, CardTheme.DECK_BASE_SCALE)
 	_base_scale = scale
 	pivot_offset = size * 0.5
 	_apply_style()
