@@ -3,10 +3,7 @@ extends Panel
 var card_id: String = ""
 var _hover_tween: Tween = null
 var _base_scale: Vector2 = Vector2.ONE
-var _drag_offset: Vector2 = Vector2.ZERO
 var _is_dragging: bool = false
-var _original_parent: Control = null
-var _original_index: int = -1
 
 signal card_added(cid: String)
 signal card_removed(cid: String)
@@ -36,10 +33,15 @@ func _ready():
 	style.shadow_size = 0
 	add_theme_stylebox_override("panel", style)
 
+var _drag_root: Node = null
+
 func _gui_input(event: InputEvent):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			_is_dragging = true
+			_drag_root = get_tree().current_scene
+			if _drag_root:
+				reparent(_drag_root)
 		elif _is_dragging:
 			_is_dragging = false
 			_drop_card()
@@ -51,31 +53,40 @@ func _process(_delta):
 
 func _drop_card():
 	z_index = 5
-	var deck_panel = get_node_or_null("/root/DeckBuilder/HBoxContainer/DeckPanel/DeckScroll/DeckGrid")
-	var pool_scroll = get_node_or_null("/root/DeckBuilder/HBoxContainer/CardPool/PoolScroll/GridContainer")
+	var deck_grid = get_node_or_null("/root/DeckBuilder/VBoxContainer/DeckPanel/DeckGrid")
+	var pool_grid = get_node_or_null("/root/DeckBuilder/VBoxContainer/CardPool/PoolScroll/GridContainer")
 	
 	var drop_pos = get_global_rect().get_center()
-	var in_deck = deck_panel and deck_panel.get_global_rect().has_point(drop_pos)
-	var in_pool = pool_scroll and pool_scroll.get_global_rect().has_point(drop_pos)
+	var in_deck = deck_grid and deck_grid.get_global_rect().has_point(drop_pos)
+	var in_pool = pool_grid and pool_grid.get_global_rect().has_point(drop_pos)
 	
 	var parent_name = get_parent().name if get_parent() else ""
 	var is_from_deck = parent_name == "DeckGrid"
 	
 	if in_deck and not is_from_deck:
+		if deck_grid:
+			reparent(deck_grid)
 		card_added.emit(card_id)
 	elif in_pool and is_from_deck:
+		if pool_grid:
+			reparent(pool_grid)
 		card_removed.emit(card_id)
+	elif in_deck and is_from_deck:
+		# 在卡组内重排
+		if deck_grid:
+			var target_idx = _find_nearest_slot(deck_grid)
+			reparent(deck_grid)
+			if target_idx >= 0:
+				deck_grid.move_child(self, min(target_idx, deck_grid.get_child_count() - 1))
+	elif in_pool and not is_from_deck:
+		if pool_grid:
+			reparent(pool_grid)
 	else:
-		# 同区域拖动：重新排序
-		if is_from_deck:
-			var target_slot = _find_nearest_slot(deck_panel)
-			if target_slot != _original_index and target_slot >= 0:
-				card_reordered.emit(card_id, _original_index, target_slot)
-		# 如果没放到有效区域，回到原位
-		if _original_parent:
-			_original_parent.add_child(self)
-			if _original_index >= 0 and _original_parent.get_child_count() > _original_index:
-				_original_parent.move_child(self, _original_index)
+		# 拖到无效区域，回到对应网格
+		if is_from_deck and deck_grid:
+			reparent(deck_grid)
+		elif pool_grid:
+			reparent(pool_grid)
 
 func _find_nearest_slot(grid: GridContainer) -> int:
 	if not grid:
