@@ -68,10 +68,47 @@ func _build_team_from_selection():
 func _build_deck_from_selection():
 	default_deck = GlobalGameData.selected_deck.duplicate()
 
+func _generate_ai_team_and_deck():
+	var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster"]
+	all_chars.shuffle()
+	GlobalGameData.client_team = all_chars.slice(0, 3)
+	var all_cards = CardDatabase.get_all_card_ids()
+	all_cards.shuffle()
+	GlobalGameData.ai_deck = all_cards.slice(0, 8)
+
+func _init_player_card_systems_ai():
+	deck_manager.init_player(1, GlobalGameData.selected_deck.duplicate())
+	deck_manager.init_player(2, GlobalGameData.ai_deck.duplicate())
+	energy_system.init_players([1, 2])
+
+func _setup_ai_controller():
+	var ai = load("res://AI/AIController.gd").new()
+	ai.name = "AIController"
+	add_child(ai)
+	AILogger.log("AI 控制器已创建并添加到场景", "Mode")
+
 func _ready():
 	GlobalGameData.load_defaults_if_empty()
 	_init_buff_manager()
 	_init_vfx_manager()
+
+	if GlobalGameData.is_ai_mode:
+		AILogger.log("AI 模式初始化开始", "Mode")
+		_generate_ai_team_and_deck()
+		_build_team_from_selection()
+		_build_deck_from_selection()
+		_setup_player_panels()
+		AILogger.log("AI 队伍: %s, AI 卡组: %s" % [GlobalGameData.client_team, GlobalGameData.ai_deck])
+		for i in range(team_roster.size()):
+			_spawn_character(team_roster[i].resource_path, "HostCharacter_%d" % i, 1, GlobalGameData.host_birth_point[i])
+		for i in range(enemy_roster.size()):
+			_spawn_character(enemy_roster[i].resource_path, "ClientCharacter_%d" % i, 1, GlobalGameData.client_birth_point[i])
+		_init_player_card_systems_ai()
+		AILogger.log("双方角色已生成，卡牌系统已初始化", "Mode")
+		_setup_ai_controller()
+		rpc("advance_turn_phase")
+		return
+
 	if not multiplayer.has_multiplayer_peer():
 		GlobalGameData.is_host = true
 	_build_team_from_selection()
