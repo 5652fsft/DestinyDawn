@@ -15,8 +15,7 @@ func setup(cid: String, name_text: String, cost: int, type_text: String, desc: S
 	$NameLabel.text = name_text
 	$DescLabel.text = desc
 	$TypeLabel.text = type_text
-	scale = Vector2(CardTheme.DECK_BASE_SCALE, CardTheme.DECK_BASE_SCALE)
-	_base_scale = scale
+	_reset_scale()
 	pivot_offset = size * 0.5
 	_apply_style()
 
@@ -43,6 +42,9 @@ func _ready():
 	mouse_exited.connect(_on_hover_exit)
 	pivot_offset = size * 0.5
 	z_index = 5
+	_reset_scale()
+
+func _reset_scale():
 	scale = Vector2(CardTheme.DECK_BASE_SCALE, CardTheme.DECK_BASE_SCALE)
 	_base_scale = scale
 
@@ -53,6 +55,7 @@ func _gui_input(event: InputEvent):
 func set_in_deck_mode(in_deck: bool):
 	_in_deck = in_deck
 	modulate = Color(1, 1, 1, 1) if in_deck else Color(CardTheme.DISABLED_ALPHA, CardTheme.DISABLED_ALPHA, CardTheme.DISABLED_ALPHA, 1)
+	_reset_scale()
 
 func _on_hover_enter():
 	if _hover_tween: _hover_tween.kill()
