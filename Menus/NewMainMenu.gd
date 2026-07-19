@@ -3,6 +3,7 @@ extends Control
 const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 
 func _ready():
+	GlobalGameData.load_defaults_if_empty()
 	var buttons = [$VBoxContainer/TeamButton, $VBoxContainer/DeckButton, $VBoxContainer/HostButton, $VBoxContainer/JoinButton, $VBoxContainer/SettingsButton, $VBoxContainer/QuitButton]
 	for btn in buttons:
 		btn.mouse_entered.connect(_on_btn_enter.bind(btn))
@@ -21,8 +22,8 @@ func _center_button_pivots():
 func _update_status():
 	var team = GlobalGameData.selected_team
 	var deck = GlobalGameData.selected_deck
-	$VBoxContainer/TeamButton.text = "编队管理 (%d/3)" % team.size() if team.size() > 0 else "编队管理 (未配置)"
-	$VBoxContainer/DeckButton.text = "卡组构筑 (%d/8)" % deck.size() if deck.size() > 0 else "卡组构筑 (未配置)"
+	$VBoxContainer/TeamButton.text = "编队管理 (%d/3)" % team.size()
+	$VBoxContainer/DeckButton.text = "卡组构筑 (%d/8)" % deck.size()
 
 func _on_btn_enter(btn):
 	var tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)

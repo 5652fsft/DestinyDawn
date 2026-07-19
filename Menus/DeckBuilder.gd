@@ -10,6 +10,7 @@ var deck_ids: Array[String] = []
 var pool_widgets: Dictionary = {}
 
 func _ready():
+	deck_ids = GlobalGameData.selected_deck.duplicate()
 	_build_pool()
 	_update_ui()
 

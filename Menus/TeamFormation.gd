@@ -60,7 +60,11 @@ func _ready():
 	if _slot_labels.is_empty() or not _slot_labels[0]:
 		push_error("TeamFormation: Slot1 nodes missing — check tscn")
 	else:
-		_clear_team()
+		slots = GlobalGameData.selected_team.duplicate()
+		if slots.size() < 3:
+			_clear_team()
+		else:
+			_update_slots()
 	_build_roster()
 
 func _clear_team():

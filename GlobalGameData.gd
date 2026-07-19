@@ -24,10 +24,22 @@ var character_move_used_num: int = 0
 var character_attack_used: Dictionary = {}
 var character_attack_used_num: int = 0
 
+const DEFAULT_TEAM: Array[String] = ["bronya", "seele", "elaina"]
+const DEFAULT_DECK: Array[String] = [
+	"card_fireball", "card_ice_shard", "card_heal", "card_small_heal",
+	"card_shield", "card_strength", "card_weakness", "card_regen",
+]
+
 # Phase 6 — 主菜单配置
 var selected_team: Array[String] = []    # 编队：角色ID列表
 var selected_deck: Array[String] = []    # 卡组：卡牌ID列表
 var player_name: String = "玩家"
+
+func load_defaults_if_empty():
+	if selected_team.is_empty():
+		selected_team = DEFAULT_TEAM.duplicate()
+	if selected_deck.is_empty():
+		selected_deck = DEFAULT_DECK.duplicate()
 
 # Phase 6 — 对战双方队伍（RPC 同步用）
 var host_team: Array[String] = []

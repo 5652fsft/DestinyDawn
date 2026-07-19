@@ -61,12 +61,10 @@ func _build_team_from_selection():
 		enemy_roster = [CHARACTER_SEELE, CHARACTER_SILVERWOLF, CHARACTER_FIREFLY]
 
 func _build_deck_from_selection():
-	if not GlobalGameData.selected_deck.is_empty():
-		default_deck = GlobalGameData.selected_deck.duplicate()
-	else:
-		default_deck = ["card_fireball","card_ice_shard","card_heal","card_small_heal","card_shield","card_strength","card_weakness","card_poison_blade","card_reckoning","card_regen"]
+	default_deck = GlobalGameData.selected_deck.duplicate()
 
 func _ready():
+	GlobalGameData.load_defaults_if_empty()
 	_init_buff_manager()
 	_init_vfx_manager()
 	if not multiplayer.has_multiplayer_peer():
