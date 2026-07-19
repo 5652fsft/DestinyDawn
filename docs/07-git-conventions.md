@@ -1,4 +1,6 @@
-# Git 规范
+# Git 规范 — DestinyDawn
+
+仓库：`git@github.com:5652fsft/DestinyDawn.git`
 
 ## 分支策略
 
