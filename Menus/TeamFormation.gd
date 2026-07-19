@@ -2,7 +2,6 @@ extends Control
 
 const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 const CardTheme = preload("res://UI/CardTheme.gd")
-const CharacterData = preload("res://Global/CharacterData.gd")
 
 const CARD_SCENE = preload("res://Menus/Widgets/CharacterCard.tscn")
 

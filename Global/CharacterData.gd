@@ -1,6 +1,6 @@
-extends Node
+class_name CharacterData
 
-const DATA = {
+static var data = {
 	"bronya":    {"name":"布洛妮娅", "hp":80,  "move":5, "atk":15, "range":1,
 		"skill":"护卫指令", "skill_desc":"为单个友方提供 30 点护盾", "skill_cd":3,
 		"passive":"铁壁", "passive_desc":"受到伤害 -20%（HP<50% 时 -35%）"},
@@ -19,10 +19,10 @@ const DATA = {
 }
 
 static func get(id: String) -> Dictionary:
-	return DATA.get(id, {})
+	return data.get(id, {})
 
 static func get_all_ids() -> Array[String]:
 	var ids: Array[String] = []
-	for k in DATA:
+	for k in data:
 		ids.append(k)
 	return ids
