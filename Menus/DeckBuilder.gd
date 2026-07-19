@@ -91,7 +91,7 @@ func _update_ui():
 	var card_count = existing_ids.size()
 	for i in range(DECK_SIZE - card_count):
 		var empty = Panel.new()
-		empty.custom_minimum_size = Vector2(120, 170)
+		empty.custom_minimum_size = Vector2(125, 183)
 		var es = StyleBoxFlat.new()
 		es.bg_color = Color(0.15, 0.15, 0.25, 0.3)
 		es.corner_radius_top_left = 8
