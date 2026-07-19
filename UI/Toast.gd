@@ -25,8 +25,7 @@ func show_message(msg: String, duration: float = DURATION):
 	label.add_theme_constant_override("shadow_offset_x", 2)
 	label.add_theme_constant_override("shadow_offset_y", 2)
 	label.custom_minimum_size = Vector2(700, 30)
-	label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	label.position = Vector2(0, START_Y)
+	label.position = Vector2(290, START_Y)
 	label.z_index = 10
 	add_child(label)
 
@@ -62,4 +61,4 @@ func _reposition():
 	for i in range(_lines.size()):
 		var label = _lines[i].label
 		if is_instance_valid(label):
-			label.position = Vector2(0, START_Y + i * LINE_H)
+			label.position = Vector2(290, START_Y + i * LINE_H)
