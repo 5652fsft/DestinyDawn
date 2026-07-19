@@ -28,13 +28,18 @@ func _apply_style():
 	c.corner_radius_bottom_left = CardTheme.COST_RADIUS
 	c.corner_radius_bottom_right = CardTheme.COST_RADIUS
 	$CostCircle.add_theme_stylebox_override("panel", c)
-	# 卡牌背景（半透明）
+	# 卡牌背景（毛玻璃）
 	var p = StyleBoxFlat.new()
-	p.bg_color = Color(0.12, 0.12, 0.2, 0.1)
+	p.bg_color = Color(0.15, 0.15, 0.25, 0.8)
 	p.corner_radius_top_left = CardTheme.CARD_BORDER_RADIUS
 	p.corner_radius_top_right = CardTheme.CARD_BORDER_RADIUS
 	p.corner_radius_bottom_left = CardTheme.CARD_BORDER_RADIUS
 	p.corner_radius_bottom_right = CardTheme.CARD_BORDER_RADIUS
+	p.border_color = Color(1, 1, 1, 0.08)
+	p.border_width_top = 1
+	p.border_width_right = 1
+	p.border_width_bottom = 1
+	p.border_width_left = 1
 	add_theme_stylebox_override("panel", p)
 
 func _ready():

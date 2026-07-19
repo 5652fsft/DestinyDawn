@@ -49,11 +49,16 @@ func _build_slot_uis():
 			var slot = Panel.new()
 			slot.custom_minimum_size = Vector2(220, 80)
 			var p = StyleBoxFlat.new()
-			p.bg_color = CardTheme.CARD_BG
+			p.bg_color = Color(0.15, 0.15, 0.25, 0.8)
 			p.corner_radius_top_left = CardTheme.CARD_BORDER_RADIUS
 			p.corner_radius_top_right = CardTheme.CARD_BORDER_RADIUS
 			p.corner_radius_bottom_left = CardTheme.CARD_BORDER_RADIUS
 			p.corner_radius_bottom_right = CardTheme.CARD_BORDER_RADIUS
+			p.border_color = Color(1, 1, 1, 0.08)
+			p.border_width_top = 1
+			p.border_width_right = 1
+			p.border_width_bottom = 1
+			p.border_width_left = 1
 			slot.add_theme_stylebox_override("panel", p)
 			container.add_child(slot)
 
@@ -80,7 +85,13 @@ func _build_slot_uis():
 		else:
 			var empty = Panel.new()
 			empty.custom_minimum_size = Vector2(220, 80)
-			empty.modulate = Color(1, 1, 1, 0.15)
+			var es = StyleBoxFlat.new()
+			es.bg_color = Color(0.15, 0.15, 0.25, 0.15)
+			es.corner_radius_top_left = CardTheme.CARD_BORDER_RADIUS
+			es.corner_radius_top_right = CardTheme.CARD_BORDER_RADIUS
+			es.corner_radius_bottom_left = CardTheme.CARD_BORDER_RADIUS
+			es.corner_radius_bottom_right = CardTheme.CARD_BORDER_RADIUS
+			empty.add_theme_stylebox_override("panel", es)
 			container.add_child(empty)
 
 func _remove_slot(index: int):

@@ -11,6 +11,9 @@ var pool_widgets: Dictionary = {}
 
 func _ready():
 	deck_ids = GlobalGameData.selected_deck.duplicate()
+	var transparent = StyleBoxEmpty.new()
+	$VBoxContainer/DeckPanel.add_theme_stylebox_override("panel", transparent)
+	$VBoxContainer/CardPool.add_theme_stylebox_override("panel", transparent)
 	_build_pool()
 	_update_ui()
 
@@ -90,7 +93,11 @@ func _update_ui():
 		var empty = Panel.new()
 		empty.custom_minimum_size = Vector2(120, 170)
 		var es = StyleBoxFlat.new()
-		es.bg_color = Color(0.12, 0.12, 0.2, 0.06)
+		es.bg_color = Color(0.15, 0.15, 0.25, 0.3)
+		es.corner_radius_top_left = 8
+		es.corner_radius_top_right = 8
+		es.corner_radius_bottom_left = 8
+		es.corner_radius_bottom_right = 8
 		empty.add_theme_stylebox_override("panel", es)
 		deck_grid.add_child(empty)
 	$VBoxContainer/DeckPanel/CountLabel.text = "%d / %d" % [deck_ids.size(), DECK_SIZE]
