@@ -64,6 +64,8 @@ func set_hand(card_ids: Array[String]):
 		var data = CardDatabase.get_card(cid)
 		if data:
 			_add_card(data)
+	if card_uis.is_empty() and not card_ids.is_empty():
+		push_error("HandPanel: set_hand produced 0 cards from " + str(card_ids.size()) + " IDs")
 	_layout_cards()
 
 func remove_card_via_data(data: CardData) -> bool:
