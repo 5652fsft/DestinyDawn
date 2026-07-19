@@ -27,6 +27,7 @@ var is_targeting: bool = false
 var buff_manager: Node = null
 var vfx_manager: Node = null
 @onready var skill_panel = $UI/SkillPanel
+@onready var passive_skill_panel = $UI/PassiveSkillPanel
 @onready var host_player_panel = $UI/HostPlayerPanel
 @onready var client_player_panel = $UI/ClientPlayerPanel
 @onready var toast = $UI/Toast
@@ -239,19 +240,24 @@ func select_character(chara: CharacterBody2D):
 	chara.is_selected = true
 	character_info_panel.show_for(chara)
 	skill_panel.show_for(chara)
+	passive_skill_panel.show()
+	_update_passive_panel(chara)
 
 func unselect_character(chara: CharacterBody2D, unselect_all = false):
 	if unselect_all:
 		if selected_character != null:
 			selected_character.is_selected = false
 			selected_character = null
-			character_info_panel.hide()
-			skill_panel.hide()
+		character_info_panel.hide()
+		skill_panel.hide()
+		passive_skill_panel.hide()
+			passive_skill_panel.hide()
 	else:
 		chara.is_selected = false
 		selected_character = null
 		character_info_panel.hide()
 		skill_panel.hide()
+		passive_skill_panel.hide()
 	
 func is_cell_occupied(cell: Vector2i, except_chara = null) -> bool:
 	cell_occupancy.clear()
@@ -853,6 +859,20 @@ func check_victory() -> bool:
 func _update_character_info_panel(chara):
 	if character_info_panel and character_info_panel.current_character == chara:
 		character_info_panel.refresh()
+		_update_passive_panel(chara)
+
+func _update_passive_panel(chara):
+	if not passive_skill_panel:
+		return
+	if "passive_skill" in chara and chara.passive_skill:
+		var ps = chara.passive_skill
+		passive_skill_panel.get_node("VBoxContainer/SkillNameLabel").text = "天赋·%s" % ps.skill_name
+		passive_skill_panel.get_node("VBoxContainer/SkillDescLabel").text = ps.description
+		passive_skill_panel.get_node("VBoxContainer/CooldownLabel").hide()
+		passive_skill_panel.get_node("VBoxContainer/UseButton").hide()
+		passive_skill_panel.show()
+	else:
+		passive_skill_panel.hide()
 
 func is_my_turn() -> bool:
 	var phase = GlobalGameData.current_turn_phase
