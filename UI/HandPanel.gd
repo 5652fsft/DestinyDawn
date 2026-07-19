@@ -11,12 +11,9 @@ const TARGET_GAP: float = 120.0
 @onready var card_scene: PackedScene = preload("res://UI/CardUI.tscn")
 
 func clear():
-	var n = card_container.get_child_count()
 	for child in card_container.get_children():
 		child.queue_free()
 	card_uis.clear()
-	if n > 0:
-		print("[Hand] clear: removed %d children" % n)
 
 func play_draw_animation(hand: Array[String]):
 	set_hand(hand)
@@ -29,7 +26,6 @@ func set_hand(card_ids: Array[String]):
 			push_error("HandPanel: CardDatabase.get_card returned null for: " + cid)
 		else:
 			_add_card(data)
-	print("[Hand] set_hand: ids=%d, card_uis=%d" % [card_ids.size(), card_uis.size()])
 	_layout_cards()
 
 func remove_card_via_data(data: CardData) -> bool:

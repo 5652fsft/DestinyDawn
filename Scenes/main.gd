@@ -108,8 +108,7 @@ func _sync_host_setup(team_ids: Array, deck_ids: Array):
 @rpc("any_peer", "reliable")
 func _client_send_setup(team_ids: Array, deck_ids: Array):
 	GlobalGameData.client_team = team_ids
-	# 客户端卡组用于玩家2
-	if deck_manager:
+	if deck_manager and not deck_ids.is_empty():
 		deck_manager.init_player(2, deck_ids)
 
 func _init_buff_manager():
@@ -463,7 +462,6 @@ func _sync_hand(player_id: int, hand: Array):
 	if player_id == my_pid:
 		var typed: Array[String] = []
 		typed.assign(hand)
-		print("[Hand] _sync_hand: player=%d, cards=%s" % [player_id, str(typed)])
 		hand_panel.play_draw_animation(typed)
 
 func _on_skill_used(skill: BaseSkill, target_type: int):
