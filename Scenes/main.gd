@@ -56,9 +56,13 @@ func _build_team_from_selection():
 				enemy_roster.append(map[cid])
 	# 空编队时用默认
 	if team_roster.is_empty():
-		team_roster = [CHARACTER_BRONYA, CHARACTER_ELAINA, CHARACTER_FIREFLY]
+		for cid in GlobalGameData.DEFAULT_TEAM:
+			if cid in map:
+				team_roster.append(map[cid])
 	if enemy_roster.is_empty():
-		enemy_roster = [CHARACTER_SEELE, CHARACTER_SILVERWOLF, CHARACTER_FIREFLY]
+		for cid in GlobalGameData.DEFAULT_TEAM:
+			if cid in map:
+				enemy_roster.append(map[cid])
 
 func _build_deck_from_selection():
 	default_deck = GlobalGameData.selected_deck.duplicate()
@@ -143,6 +147,7 @@ func _request_client_setup():
 	rpc_id(1, "_client_send_setup", GlobalGameData.selected_team, GlobalGameData.selected_deck)
 
 func _deferred_spawn_client_characters(id: int):
+	_build_team_from_selection()
 	for i in range(enemy_roster.size()):
 		_spawn_character(enemy_roster[i].resource_path, "Client%dCharacter_%d" % [id, i], id, GlobalGameData.client_birth_point[i])
 		rpc("_spawn_character_remote", enemy_roster[i].resource_path, "Client%dCharacter_%d" % [id, i], id, GlobalGameData.client_birth_point[i])
