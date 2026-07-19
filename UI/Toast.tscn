@@ -2,12 +2,8 @@
 
 [ext_resource type="Script" uid="uid://bw7pe2btchjad" path="res://UI/Toast.gd" id="1"]
 
-[node name="Toast" type="Label" unique_id=1666189889]
-offset_left = 290.0
-offset_top = 60.0
-offset_right = 990.0
-offset_bottom = 100.0
-theme_override_constants/line_spacing = 0
-horizontal_alignment = 1
-autowrap_mode = 2
+[node name="Toast" type="Control"]
+anchors_preset = 13
+anchor_top = 0.08
+mouse_filter = 2
 script = ExtResource("1")
