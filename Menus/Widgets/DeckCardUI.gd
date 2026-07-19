@@ -1,5 +1,7 @@
 extends Panel
 
+const CardTheme = preload("res://UI/CardTheme.gd")
+
 var card_id: String = ""
 var _hover_tween: Tween = null
 var _base_scale: Vector2 = Vector2.ONE

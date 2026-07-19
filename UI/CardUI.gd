@@ -1,6 +1,8 @@
 class_name CardUI
 extends Panel
 
+const CardTheme = preload("res://UI/CardTheme.gd")
+
 var card_data: CardData = null
 signal card_drag_started(card: CardUI)
 
