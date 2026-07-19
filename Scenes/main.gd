@@ -88,7 +88,7 @@ func _generate_ai_team_and_deck():
 func _init_player_card_systems_ai():
 	deck_manager.init_player(1, GlobalGameData.selected_deck.duplicate())
 	deck_manager.init_player(2, GlobalGameData.ai_deck.duplicate())
-	energy_system.init_players([1, 2])
+	energy_system.init_players([1, 2] as Array[int])
 
 func _setup_ai_controller():
 	var ai = load("res://AI/AIController.gd").new()
