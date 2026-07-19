@@ -78,14 +78,10 @@ func _build_slot_uis():
 			lbl.size = Vector2(110, 28)
 			slot.add_child(lbl)
 
-			var rm = Button.new()
-			rm.text = "移除"
-			rm.add_theme_font_override("font", FONT)
-			rm.add_theme_font_size_override("font_size", 14)
-			rm.position = Vector2(96, 48)
-			rm.size = Vector2(100, 26)
-			rm.pressed.connect(_remove_slot.bind(i))
-			slot.add_child(rm)
+			var slot_idx = i
+			slot.gui_input.connect(func(event: InputEvent):
+				if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+					_remove_slot(slot_idx))
 		else:
 			var empty = Panel.new()
 			empty.custom_minimum_size = Vector2(220, 80)
