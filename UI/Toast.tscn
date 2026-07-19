@@ -3,7 +3,9 @@
 [ext_resource type="Script" uid="uid://bw7pe2btchjad" path="res://UI/Toast.gd" id="1"]
 
 [node name="Toast" type="Control"]
-anchors_preset = 13
-anchor_top = 0.08
+offset_left = 290.0
+offset_top = 16.0
+offset_right = 990.0
+offset_bottom = 140.0
 mouse_filter = 2
 script = ExtResource("1")
