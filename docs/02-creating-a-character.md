@@ -236,3 +236,5 @@ static func _newchar_active(character: Node, target: Node):
 - [ ] `Assets/Sprites/Standee/newchar_Standee.png`
 - [ ] `main.gd`: 添加 `const CHARACTER_NEWCHAR` + map 条目
 - [ ] `SkillEffect.gd`: execute_active 分支 / get_passive_modifier 分支
+- [ ] **`AI/AIController.gd`**: `_evaluate_skill_target()` 新增角色技能分支（详见 `docs/08-ai-mode-plan.md#8-新增角色时必须同步更新-ai-逻辑`）
+- [ ] **`Scenes/main.gd`**: `_generate_ai_team_and_deck()` 角色池添加新角色 ID

@@ -36,24 +36,24 @@ MainMenu（点击"单机人机"按钮）
   ├── GlobalGameData.is_host = true
   ├── GlobalGameData.is_ai_mode = true
   └── 跳转 scene.tscn
-        │
-        main.gd _ready()
-        ├── 检测 is_ai_mode
-        ├── 随机生成 AI 队伍 → GlobalGameData.client_team
-        ├── 随机生成 AI 卡组
-        ├── 本地生成 Host 方角色（玩家控制）
-        ├── 本地生成 Client 方角色（AI 控制，authority=1）
-        ├── 初始化双方卡牌系统 + 能量系统
-        ├── 创建 AIController 节点
-        └── advance_turn_phase()
-              │
-              回合循环 ──────────────┐
-              │                       │
-              ├── PLAYER_MOVE: 玩家操作  │
-              ├── PLAYER_ATTACK: 玩家操作 │
-              ├── ENEMY_MOVE: AIController 控制 AI 角色移动
-              ├── ENEMY_ATTACK: AIController 控制 AI 角色攻击/技能/卡牌
-              └── START_ROUND → 循环 ──┘
+		│
+		main.gd _ready()
+		├── 检测 is_ai_mode
+		├── 随机生成 AI 队伍 → GlobalGameData.client_team
+		├── 随机生成 AI 卡组
+		├── 本地生成 Host 方角色（玩家控制）
+		├── 本地生成 Client 方角色（AI 控制，authority=1）
+		├── 初始化双方卡牌系统 + 能量系统
+		├── 创建 AIController 节点
+		└── advance_turn_phase()
+			  │
+			  回合循环 ──────────────┐
+			  │                       │
+			  ├── PLAYER_MOVE: 玩家操作  │
+			  ├── PLAYER_ATTACK: 玩家操作 │
+			  ├── ENEMY_MOVE: AIController 控制 AI 角色移动
+			  ├── ENEMY_ATTACK: AIController 控制 AI 角色攻击/技能/卡牌
+			  └── START_ROUND → 循环 ──┘
 ```
 
 ### 2.2 文件清单
@@ -110,9 +110,9 @@ text = "单机人机"
 **第 5-7 行 `_ready()` 中的按钮列表**：
 ```gdscript
 var buttons = [$VBoxContainer/TeamButton, $VBoxContainer/DeckButton,
-    $VBoxContainer/HostButton, $VBoxContainer/JoinButton,
-    $VBoxContainer/AIBattleButton,  # 新增
-    $VBoxContainer/SettingsButton, $VBoxContainer/QuitButton]
+	$VBoxContainer/HostButton, $VBoxContainer/JoinButton,
+	$VBoxContainer/AIBattleButton,  # 新增
+	$VBoxContainer/SettingsButton, $VBoxContainer/QuitButton]
 ```
 
 **第 17 行 `_center_button_pivots()`** 同理添加 `AIBattleButton`。
@@ -120,10 +120,10 @@ var buttons = [$VBoxContainer/TeamButton, $VBoxContainer/DeckButton,
 **新增响应函数**（附加在第 80 行之后）：
 ```gdscript
 func _on_ai_battle_pressed():
-    GlobalGameData.load_defaults_if_empty()
-    GlobalGameData.is_host = true
-    GlobalGameData.is_ai_mode = true
-    get_tree().change_scene_to_file("res://Scenes/scene.tscn")
+	GlobalGameData.load_defaults_if_empty()
+	GlobalGameData.is_host = true
+	GlobalGameData.is_ai_mode = true
+	get_tree().change_scene_to_file("res://Scenes/scene.tscn")
 ```
 
 > **注意**：AI 的队伍和卡组不在主菜单生成，而是在 `main.gd _ready()` 中完成，保持主菜单视图与 LAN 模式一致。
@@ -139,22 +139,22 @@ func _on_ai_battle_pressed():
 ```gdscript
 # === AI 模式初始化 ===
 if GlobalGameData.is_ai_mode:
-    GlobalGameData.load_defaults_if_empty()
-    _build_team_from_selection()   # 构建玩家（Host）编队
-    _generate_ai_team_and_deck()   # 随机生成 AI 队伍和卡组
-    _build_team_from_selection()   # 重新构建双方编队（读取 host_team / client_team）
-    _init_player_card_systems_ai() # 初始化双方卡牌和能量
-    # 生成 Host 方角色（玩家控制）
-    for i in range(team_roster.size()):
-        _spawn_character(team_roster[i].resource_path,
-            "HostCharacter_%d" % i, 1, GlobalGameData.host_birth_point[i])
-    # 生成 Client 方角色（AI 控制，但 authority 设为本机）
-    for i in range(enemy_roster.size()):
-        _spawn_character(enemy_roster[i].resource_path,
-            "ClientCharacter_%d" % i, 1, GlobalGameData.client_birth_point[i])
-    _setup_ai_controller()
-    rpc("advance_turn_phase")
-    return
+	GlobalGameData.load_defaults_if_empty()
+	_build_team_from_selection()   # 构建玩家（Host）编队
+	_generate_ai_team_and_deck()   # 随机生成 AI 队伍和卡组
+	_build_team_from_selection()   # 重新构建双方编队（读取 host_team / client_team）
+	_init_player_card_systems_ai() # 初始化双方卡牌和能量
+	# 生成 Host 方角色（玩家控制）
+	for i in range(team_roster.size()):
+		_spawn_character(team_roster[i].resource_path,
+			"HostCharacter_%d" % i, 1, GlobalGameData.host_birth_point[i])
+	# 生成 Client 方角色（AI 控制，但 authority 设为本机）
+	for i in range(enemy_roster.size()):
+		_spawn_character(enemy_roster[i].resource_path,
+			"ClientCharacter_%d" % i, 1, GlobalGameData.client_birth_point[i])
+	_setup_ai_controller()
+	rpc("advance_turn_phase")
+	return
 ```
 
 #### 3.4.2 新增辅助函数
@@ -162,33 +162,33 @@ if GlobalGameData.is_ai_mode:
 **`_generate_ai_team_and_deck()`**：
 ```gdscript
 func _generate_ai_team_and_deck():
-    # 随机队伍：从 6 个角色中选 3 个不重复的
-    var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster"]
-    all_chars.shuffle()
-    GlobalGameData.client_team = all_chars.slice(0, 3)
+	# 随机队伍：从 6 个角色中选 3 个不重复的
+	var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster"]
+	all_chars.shuffle()
+	GlobalGameData.client_team = all_chars.slice(0, 3)
 
-    # 随机卡组：从 30 张卡中选 8 张不重复的
-    var all_cards = CardDatabase.get_all_card_ids()
-    all_cards.shuffle()
-    GlobalGameData.ai_deck = all_cards.slice(0, 8)
+	# 随机卡组：从 30 张卡中选 8 张不重复的
+	var all_cards = CardDatabase.get_all_card_ids()
+	all_cards.shuffle()
+	GlobalGameData.ai_deck = all_cards.slice(0, 8)
 ```
 
 **`_init_player_card_systems_ai()`**：
 ```gdscript
 func _init_player_card_systems_ai():
-    # 玩家使用选中的卡组
-    deck_manager.init_player(1, GlobalGameData.selected_deck.duplicate())
-    # AI 使用随机卡组
-    deck_manager.init_player(2, GlobalGameData.ai_deck.duplicate())
-    energy_system.init_players([1, 2])
+	# 玩家使用选中的卡组
+	deck_manager.init_player(1, GlobalGameData.selected_deck.duplicate())
+	# AI 使用随机卡组
+	deck_manager.init_player(2, GlobalGameData.ai_deck.duplicate())
+	energy_system.init_players([1, 2])
 ```
 
 **`_setup_ai_controller()`**：
 ```gdscript
 func _setup_ai_controller():
-    var ai = load("res://AI/AIController.gd").new()
-    ai.name = "AIController"
-    add_child(ai)
+	var ai = load("res://AI/AIController.gd").new()
+	ai.name = "AIController"
+	add_child(ai)
 ```
 
 #### 3.4.3 `GlobalGameData.gd` 补充字段
@@ -224,121 +224,121 @@ var _deck_manager: Node = null
 
 ```gdscript
 func _ready():
-    _main = get_tree().current_scene
-    _energy_system = _main.get_node("EnergySystem")
-    _deck_manager = _main.get_node("DeckManager")
+	_main = get_tree().current_scene
+	_energy_system = _main.get_node("EnergySystem")
+	_deck_manager = _main.get_node("DeckManager")
 
 func _process(delta):
-    if not GlobalGameData.is_ai_mode:
-        return
-    if not _is_ai_phase():
-        return
+	if not GlobalGameData.is_ai_mode:
+		return
+	if not _is_ai_phase():
+		return
 
-    # 处理当前动作
-    if _busy:
-        _action_timer -= delta
-        if _action_timer <= 0:
-            _execute_current_action()
-        return
+	# 处理当前动作
+	if _busy:
+		_action_timer -= delta
+		if _action_timer <= 0:
+			_execute_current_action()
+		return
 
-    # 没有待处理动作时，构建新队列
-    if _action_queue.is_empty():
-        _build_action_queue()
-        if _action_queue.is_empty():
-            _end_phase()
-            return
-        _busy = true
-        _action_timer = ACTION_DELAY
+	# 没有待处理动作时，构建新队列
+	if _action_queue.is_empty():
+		_build_action_queue()
+		if _action_queue.is_empty():
+			_end_phase()
+			return
+		_busy = true
+		_action_timer = ACTION_DELAY
 ```
 
 #### 3.5.3 阶段判断
 
 ```gdscript
 func _is_ai_phase() -> bool:
-    var phase = GlobalGameData.current_turn_phase
-    return phase == GlobalGameData.TurnPhase.ENEMY_MOVE \
-        or phase == GlobalGameData.TurnPhase.ENEMY_ATTACK
+	var phase = GlobalGameData.current_turn_phase
+	return phase == GlobalGameData.TurnPhase.ENEMY_MOVE \
+		or phase == GlobalGameData.TurnPhase.ENEMY_ATTACK
 ```
 
 #### 3.5.4 动作队列构建 `_build_action_queue()`
 
 ```gdscript
 func _build_action_queue():
-    _action_queue.clear()
+	_action_queue.clear()
 
-    var ai_characters = GlobalGameData.client_characters
-    var phase = GlobalGameData.current_turn_phase
+	var ai_characters = GlobalGameData.client_characters
+	var phase = GlobalGameData.current_turn_phase
 
-    if phase == GlobalGameData.TurnPhase.ENEMY_MOVE:
-        # 移动阶段：为每个 AI 角色计算最佳移动
-        for chara in ai_characters:
-            if chara.hp <= 0:
-                continue
-            if GlobalGameData.character_move_used.get(chara.name, false):
-                continue
-            var move_target = _evaluate_move_target(chara)
-            if move_target != null:
-                _action_queue.append({
-                    "type": "move",
-                    "character": chara,
-                    "cell": move_target
-                })
+	if phase == GlobalGameData.TurnPhase.ENEMY_MOVE:
+		# 移动阶段：为每个 AI 角色计算最佳移动
+		for chara in ai_characters:
+			if chara.hp <= 0:
+				continue
+			if GlobalGameData.character_move_used.get(chara.name, false):
+				continue
+			var move_target = _evaluate_move_target(chara)
+			if move_target != null:
+				_action_queue.append({
+					"type": "move",
+					"character": chara,
+					"cell": move_target
+				})
 
-    elif phase == GlobalGameData.TurnPhase.ENEMY_ATTACK:
-        # 攻击阶段：为每个 AI 角色计算行动序列
-        for chara in ai_characters:
-            if chara.hp <= 0:
-                continue
-            # 子队列：技能 → 卡牌 → 普通攻击
-            if _should_use_skill(chara):
-                var skill_target = _evaluate_skill_target(chara)
-                if skill_target != null:
-                    _action_queue.append({
-                        "type": "skill",
-                        "character": chara,
-                        "target": skill_target
-                    })
-            if _should_play_card(chara):
-                var card_action = _evaluate_best_card(chara)
-                if card_action != null:
-                    _action_queue.append(card_action)
-            if not GlobalGameData.character_attack_used.get(chara.name, false):
-                var attack_target = _evaluate_attack_target(chara)
-                if attack_target != null:
-                    _action_queue.append({
-                        "type": "attack",
-                        "character": chara,
-                        "target": attack_target
-                    })
+	elif phase == GlobalGameData.TurnPhase.ENEMY_ATTACK:
+		# 攻击阶段：为每个 AI 角色计算行动序列
+		for chara in ai_characters:
+			if chara.hp <= 0:
+				continue
+			# 子队列：技能 → 卡牌 → 普通攻击
+			if _should_use_skill(chara):
+				var skill_target = _evaluate_skill_target(chara)
+				if skill_target != null:
+					_action_queue.append({
+						"type": "skill",
+						"character": chara,
+						"target": skill_target
+					})
+			if _should_play_card(chara):
+				var card_action = _evaluate_best_card(chara)
+				if card_action != null:
+					_action_queue.append(card_action)
+			if not GlobalGameData.character_attack_used.get(chara.name, false):
+				var attack_target = _evaluate_attack_target(chara)
+				if attack_target != null:
+					_action_queue.append({
+						"type": "attack",
+						"character": chara,
+						"target": attack_target
+					})
 ```
 
 #### 3.5.5 动作执行 `_execute_current_action()`
 
 ```gdscript
 func _execute_current_action():
-    if _action_queue.is_empty():
-        _busy = false
-        return
+	if _action_queue.is_empty():
+		_busy = false
+		return
 
-    var action = _action_queue.pop_front()
-    var chara = action.character
+	var action = _action_queue.pop_front()
+	var chara = action.character
 
-    match action.type:
-        "move":
-            _execute_move(chara, action.cell)
-        "attack":
-            _execute_attack(chara, action.target)
-        "skill":
-            _execute_skill(chara, action.target)
-        "card":
-            _execute_card(action.card_id, action.target)
+	match action.type:
+		"move":
+			_execute_move(chara, action.cell)
+		"attack":
+			_execute_attack(chara, action.target)
+		"skill":
+			_execute_skill(chara, action.target)
+		"card":
+			_execute_card(action.card_id, action.target)
 
-    if _action_queue.is_empty():
-        _busy = false
-        _end_phase()
-    else:
-        _busy = true
-        _action_timer = ACTION_DELAY
+	if _action_queue.is_empty():
+		_busy = false
+		_end_phase()
+	else:
+		_busy = true
+		_action_timer = ACTION_DELAY
 ```
 
 #### 3.5.6 执行函数
@@ -346,14 +346,14 @@ func _execute_current_action():
 **移动执行**：
 ```gdscript
 func _execute_move(chara, cell: Vector2i):
-    var gl = chara.grid_layer
-    if not gl:
-        return
-    var world_pos = gl.to_global(gl.map_to_local(cell))
-    chara.target_world = world_pos
-    GlobalGameData.character_move_used[chara.name] = true
-    GlobalGameData.character_move_used_num += 1
-    _main.check_move()
+	var gl = chara.grid_layer
+	if not gl:
+		return
+	var world_pos = gl.to_global(gl.map_to_local(cell))
+	chara.target_world = world_pos
+	GlobalGameData.character_move_used[chara.name] = true
+	GlobalGameData.character_move_used_num += 1
+	_main.check_move()
 ```
 
 > AI 移动不需要走 `handle_move()` 的输入检测路径，直接设置 `target_world` 即可 — 角色的 `move_toward_target()` 会在 `_process()` 中自动处理移动到目标位置。
@@ -361,24 +361,24 @@ func _execute_move(chara, cell: Vector2i):
 **攻击执行**：
 ```gdscript
 func _execute_attack(chara, target):
-    chara.perform_attack(target.get_path())
-    # perform_attack 内部会处理 attack_used 标记
-    _main.check_attack()
+	chara.perform_attack(target.get_path())
+	# perform_attack 内部会处理 attack_used 标记
+	_main.check_attack()
 ```
 
 **技能执行**：
 ```gdscript
 func _execute_skill(chara, target):
-    chara.use_active_skill(target)
-    # _active_skill_post_exec 处理冷却/行动消耗
-    _main._active_skill_post_exec(chara.active_skill)
+	chara.use_active_skill(target)
+	# _active_skill_post_exec 处理冷却/行动消耗
+	_main._active_skill_post_exec(chara.active_skill)
 ```
 
 **卡牌执行**：
 ```gdscript
 func _execute_card(card_id: String, target):
-    var target_path = target.get_path() if target else ""
-    _main._execute_play_card(2, card_id, target_path)
+	var target_path = target.get_path() if target else ""
+	_main._execute_play_card(2, card_id, target_path)
 ```
 
 #### 3.5.7 决策函数
@@ -396,32 +396,32 @@ func _execute_card(card_id: String, target):
 实现思路：
 ```gdscript
 func _evaluate_move_target(chara) -> Vector2i:
-    var gl = chara.grid_layer
-    var start_cell = chara.get_current_cell()
-    if start_cell == Vector2i(-1, -1):
-        return null
+	var gl = chara.grid_layer
+	var start_cell = chara.get_current_cell()
+	if start_cell == Vector2i(-1, -1):
+		return null
 
-    # BFS 找到角色的所有可达格子
-    var reachable = _bfs_reachable(chara, chara.effective_move_points)
-    if reachable.is_empty():
-        return null
+	# BFS 找到角色的所有可达格子
+	var reachable = _bfs_reachable(chara, chara.effective_move_points)
+	if reachable.is_empty():
+		return null
 
-    # 找到最近的敌方角色
-    var nearest_enemy = _find_nearest_enemy(chara)
-    if not nearest_enemy:
-        return null
-    var enemy_cell = nearest_enemy.get_current_cell()
+	# 找到最近的敌方角色
+	var nearest_enemy = _find_nearest_enemy(chara)
+	if not nearest_enemy:
+		return null
+	var enemy_cell = nearest_enemy.get_current_cell()
 
-    # 近战 vs 远程策略不同
-    if chara.attack_range <= 1:
-        # 近战：选择离敌人最近的格子
-        return _pick_closest_to_target(reachable, enemy_cell)
-    else:
-        # 远程：选择在攻击范围内且离敌人最远的格子（保持距离）
-        var in_range = _filter_cells_in_attack_range(reachable, enemy_cell, chara.attack_range)
-        if in_range.is_empty():
-            return _pick_closest_to_target(reachable, enemy_cell)
-        return _pick_farthest_from_target(in_range, enemy_cell)
+	# 近战 vs 远程策略不同
+	if chara.attack_range <= 1:
+		# 近战：选择离敌人最近的格子
+		return _pick_closest_to_target(reachable, enemy_cell)
+	else:
+		# 远程：选择在攻击范围内且离敌人最远的格子（保持距离）
+		var in_range = _filter_cells_in_attack_range(reachable, enemy_cell, chara.attack_range)
+		if in_range.is_empty():
+			return _pick_closest_to_target(reachable, enemy_cell)
+		return _pick_farthest_from_target(in_range, enemy_cell)
 ```
 
 ##### 攻击评估 `_evaluate_attack_target(chara)`
@@ -433,12 +433,12 @@ func _evaluate_move_target(chara) -> Vector2i:
 
 ```gdscript
 func _evaluate_attack_target(chara) -> Node:
-    var enemies = _get_enemies_in_attack_range(chara)
-    if enemies.is_empty():
-        return null
-    # 按 HP 升序排列，选择最低的
-    enemies.sort_custom(func(a, b): return a.hp < b.hp)
-    return enemies[0]
+	var enemies = _get_enemies_in_attack_range(chara)
+	if enemies.is_empty():
+		return null
+	# 按 HP 升序排列，选择最低的
+	enemies.sort_custom(func(a, b): return a.hp < b.hp)
+	return enemies[0]
 ```
 
 ##### 技能评估 `_evaluate_skill_target(chara)`
@@ -457,22 +457,22 @@ func _evaluate_attack_target(chara) -> Node:
 实现方式：
 ```gdscript
 func _evaluate_skill_target(chara) -> Node:
-    var name = chara.character_name
-    match name:
-        "布洛妮娅":
-            return _find_lowest_hp_ally()
-        "希儿":
-            return _find_killable_with_bonus(chara)
-        "伊蕾娜":
-            return _find_best_aoe_target(chara)
-        "流萤":
-            return _find_highest_value_target()
-        "银狼":
-            return _find_highest_attack_enemy()
-        "芝士仓鼠":
-            return _evaluate_attack_target(chara)
-        _:
-            return null
+	var name = chara.character_name
+	match name:
+		"布洛妮娅":
+			return _find_lowest_hp_ally()
+		"希儿":
+			return _find_killable_with_bonus(chara)
+		"伊蕾娜":
+			return _find_best_aoe_target(chara)
+		"流萤":
+			return _find_highest_value_target()
+		"银狼":
+			return _find_highest_attack_enemy()
+		"芝士仓鼠":
+			return _evaluate_attack_target(chara)
+		_:
+			return null
 ```
 
 ##### 卡牌评估 `_evaluate_best_card(chara)`
@@ -497,53 +497,53 @@ func _evaluate_skill_target(chara) -> Node:
 
 ```gdscript
 func _evaluate_best_card(chara) -> Dictionary:
-    var hand = _deck_manager.get_hand(2)
-    var best_action = null
-    var best_score = -999
+	var hand = _deck_manager.get_hand(2)
+	var best_action = null
+	var best_score = -999
 
-    for card_id in hand:
-        var card = CardDatabase.get_card(card_id)
-        if not card:
-            continue
-        if not _energy_system.can_afford(2, card.cost):
-            continue
+	for card_id in hand:
+		var card = CardDatabase.get_card(card_id)
+		if not card:
+			continue
+		if not _energy_system.can_afford(2, card.cost):
+			continue
 
-        # 根据目标类型获取可用目标和评分
-        var target = null
-        var score = _score_card(card, chara)
+		# 根据目标类型获取可用目标和评分
+		var target = null
+		var score = _score_card(card, chara)
 
-        if score > best_score:
-            best_score = score
-            best_action = {
-                "type": "card",
-                "character": chara,
-                "card_id": card_id,
-                "target": target  # 目标会在执行前解析
-            }
+		if score > best_score:
+			best_score = score
+			best_action = {
+				"type": "card",
+				"character": chara,
+				"card_id": card_id,
+				"target": target  # 目标会在执行前解析
+			}
 
-    return best_action if best_score >= 20 else null
+	return best_action if best_score >= 20 else null
 ```
 
 卡牌目标选取：
 ```gdscript
 func _pick_target_for_card(card: CardData) -> Node:
-    match card.target_type:
-        CardData.TargetType.NONE:
-            return null
-        CardData.TargetType.SELF:
-            return _get_ai_caster_for_card()
-        CardData.TargetType.ALLY_SINGLE:
-            return _find_lowest_hp_ally()
-        CardData.TargetType.ALLY_ALL:
-            return _get_random_ai_character()
-        CardData.TargetType.ENEMY_SINGLE:
-            return _find_lowest_hp_enemy()
-        CardData.TargetType.ENEMY_ALL:
-            return _get_random_enemy()
-        CardData.TargetType.ALL_CHARACTERS:
-            return _get_random_enemy()
-        _:
-            return null
+	match card.target_type:
+		CardData.TargetType.NONE:
+			return null
+		CardData.TargetType.SELF:
+			return _get_ai_caster_for_card()
+		CardData.TargetType.ALLY_SINGLE:
+			return _find_lowest_hp_ally()
+		CardData.TargetType.ALLY_ALL:
+			return _get_random_ai_character()
+		CardData.TargetType.ENEMY_SINGLE:
+			return _find_lowest_hp_enemy()
+		CardData.TargetType.ENEMY_ALL:
+			return _get_random_enemy()
+		CardData.TargetType.ALL_CHARACTERS:
+			return _get_random_enemy()
+		_:
+			return null
 ```
 
 #### 3.5.8 辅助函数
@@ -551,74 +551,74 @@ func _pick_target_for_card(card: CardData) -> Node:
 ```gdscript
 # BFS 找到角色的所有可达格子
 func _bfs_reachable(chara, max_move: int) -> Array[Vector2i]:
-    var gl = chara.grid_layer
-    var start = chara.get_current_cell()
-    if start == Vector2i(-1, -1):
-        return []
-    var result: Array[Vector2i] = []
-    var visited: Dictionary = {}
-    var queue = [{ "cell": start, "cost": 0 }]
-    visited[start] = true
+	var gl = chara.grid_layer
+	var start = chara.get_current_cell()
+	if start == Vector2i(-1, -1):
+		return []
+	var result: Array[Vector2i] = []
+	var visited: Dictionary = {}
+	var queue = [{ "cell": start, "cost": 0 }]
+	visited[start] = true
 
-    var dirs = [Vector2i(1,0), Vector2i(1,-1), Vector2i(0,-1),
-                Vector2i(-1,0), Vector2i(-1,1), Vector2i(0,1)]
+	var dirs = [Vector2i(1,0), Vector2i(1,-1), Vector2i(0,-1),
+				Vector2i(-1,0), Vector2i(-1,1), Vector2i(0,1)]
 
-    while queue.size() > 0:
-        var current = queue.pop_front()
-        for d in dirs:
-            var next = current.cell + d
-            if visited.has(next):
-                continue
-            var cost = chara.get_move_cost(next)
-            if cost <= 0:
-                visited[next] = true
-                continue
-            if current.cost + cost > max_move:
-                continue
-            if _main.is_cell_occupied(next, chara):
-                visited[next] = true
-                continue
-            visited[next] = true
-            result.append(next)
-            queue.append({ "cell": next, "cost": current.cost + cost })
+	while queue.size() > 0:
+		var current = queue.pop_front()
+		for d in dirs:
+			var next = current.cell + d
+			if visited.has(next):
+				continue
+			var cost = chara.get_move_cost(next)
+			if cost <= 0:
+				visited[next] = true
+				continue
+			if current.cost + cost > max_move:
+				continue
+			if _main.is_cell_occupied(next, chara):
+				visited[next] = true
+				continue
+			visited[next] = true
+			result.append(next)
+			queue.append({ "cell": next, "cost": current.cost + cost })
 
-    return result
+	return result
 
 # 找到最近的敌方角色
 func _find_nearest_enemy(chara) -> Node:
-    var enemies = _get_enemy_characters_alive()
-    var nearest = null
-    var min_dist = INF
-    var chara_cell = chara.get_current_cell()
-    for e in enemies:
-        var e_cell = e.get_current_cell()
-        var dist = chara_cell.distance_to(e_cell)
-        if dist < min_dist:
-            min_dist = dist
-            nearest = e
-    return nearest
+	var enemies = _get_enemy_characters_alive()
+	var nearest = null
+	var min_dist = INF
+	var chara_cell = chara.get_current_cell()
+	for e in enemies:
+		var e_cell = e.get_current_cell()
+		var dist = chara_cell.distance_to(e_cell)
+		if dist < min_dist:
+			min_dist = dist
+			nearest = e
+	return nearest
 
 # 获取存活敌方角色
 func _get_enemy_characters_alive() -> Array:
-    var result = []
-    for c in GlobalGameData.host_characters:
-        if c.hp > 0:
-            result.append(c)
-    return result
+	var result = []
+	for c in GlobalGameData.host_characters:
+		if c.hp > 0:
+			result.append(c)
+	return result
 
 # 获取存活 AI 角色
 func _get_ai_characters_alive() -> Array:
-    var result = []
-    for c in GlobalGameData.client_characters:
-        if c.hp > 0:
-            result.append(c)
-    return result
+	var result = []
+	for c in GlobalGameData.client_characters:
+		if c.hp > 0:
+			result.append(c)
+	return result
 
 # 结束当前阶段
 func _end_phase():
-    # 清除选中状态
-    _main.unselect_character(null, true)
-    _main.rpc("advance_turn_phase")
+	# 清除选中状态
+	_main.unselect_character(null, true)
+	_main.rpc("advance_turn_phase")
 ```
 
 #### 3.5.9 角色名映射（用于 AI 队伍生成）
@@ -639,15 +639,15 @@ func _end_phase():
 约第 708-723 行，当前逻辑：
 ```gdscript
 func _process(delta):
-    _check_hover()
-    if not multiplayer or not multiplayer.has_multiplayer_peer():
-        move_toward_target()
-        return
-    if not is_multiplayer_authority():
-        return
-    if name.begins_with("Host") != GlobalGameData.is_host:
-        return
-    ...
+	_check_hover()
+	if not multiplayer or not multiplayer.has_multiplayer_peer():
+		move_toward_target()
+		return
+	if not is_multiplayer_authority():
+		return
+	if name.begins_with("Host") != GlobalGameData.is_host:
+		return
+	...
 ```
 
 AI 模式下，Client 方角色不应处理玩家输入（`handle_move()` / `handle_attack()`），因为 AI 控制器会直接设置 `target_world` 和调用 `perform_attack`。
@@ -655,19 +655,19 @@ AI 模式下，Client 方角色不应处理玩家输入（`handle_move()` / `han
 修改后：
 ```gdscript
 func _process(delta):
-    _check_hover()
-    if not multiplayer or not multiplayer.has_multiplayer_peer():
-        # AI 模式：Client 方角色由 AI 控制，跳过输入处理
-        if GlobalGameData.is_ai_mode and name.begins_with("Client"):
-            move_toward_target()
-            return
-        move_toward_target()
-        return
-    if not is_multiplayer_authority():
-        return
-    if name.begins_with("Host") != GlobalGameData.is_host:
-        return
-    ...原有逻辑...
+	_check_hover()
+	if not multiplayer or not multiplayer.has_multiplayer_peer():
+		# AI 模式：Client 方角色由 AI 控制，跳过输入处理
+		if GlobalGameData.is_ai_mode and name.begins_with("Client"):
+			move_toward_target()
+			return
+		move_toward_target()
+		return
+	if not is_multiplayer_authority():
+		return
+	if name.begins_with("Host") != GlobalGameData.is_host:
+		return
+	...原有逻辑...
 ```
 
 > **关键**：AI 模式中 Client 角色仍然执行 `move_toward_target()` 以响应 AI 设置的 `target_world`，但不处理鼠标输入。
@@ -688,17 +688,119 @@ func _process(delta):
 | `BaseCharacter._process()` | ✅ 完整 | ✅ 添加 AI 分支 | 共享，有标志保护 |
 | `AIController._process()` | ❌ `is_ai_mode` 保护 | ✅ | 独立 |
 
-### 4.2 确保无影响的措施
+## 8. 新增角色时必须同步更新 AI 逻辑
 
-1. **所有 AI 新代码均以 `GlobalGameData.is_ai_mode` 为前置条件**，LAN 模式下该标志始终为 false
-2. **LAN 模式的 `_ready()` 路径不进入任何 AI 分支**，因 AI 分支在 LAN 分支前有 `return`
-3. **LAN 模式下 `GlobalGameData.ai_deck` 不会被初始化**，不会被任何读取
-4. **LAN 模式的 RPC 调用路径完全不变**，AI 模式不需要 RPC，全部本地调用
-5. **Git 分离**：所有改动在 `feature/ai-mode` 分支，`master` 分支不受影响
+> **核心原则**：新增一个角色时，除了按照 `docs/02-creating-a-character.md` 完成角色创建外，必须同步更新以下 AI 相关文件，否则 AI 无法控制新角色。
+
+### 8.1 必须更新的文件
+
+#### `AI/AIController.gd`
+
+**① `_evaluate_skill_target()` — 新增角色技能策略分支**
+
+在 `match name:` 语句块中添加新角色的技能使用策略：
+
+```gdscript
+func _evaluate_skill_target(chara: Node) -> Node:
+	var name = chara.character_name
+	match name:
+		"布洛妮娅":
+			return _find_lowest_hp_ally()
+		"希儿":
+			return _find_killable_with_bonus(chara)
+		"伊蕾娜":
+			return _find_best_aoe_target(chara)
+		"流萤":
+			return _find_highest_value_enemy()
+		"银狼":
+			return _find_highest_attack_enemy()
+		"芝士仓鼠":
+			return _evaluate_attack_target(chara)
+		# === 新增角色在这里追加 ===
+		# "新角色名":
+		#     return _xxx_skill_strategy(chara)
+		_:
+			return null
+```
+
+策略模板（根据新角色技能类型选择）：
+
+| 技能目标类型 | 推荐策略 | 示例 |
+|---|---|---|
+| 对敌伤害 | `_find_lowest_hp_enemy()` | 优先击杀低血量 |
+| 对敌 AOE | `_find_best_aoe_target(chara)` | 找聚集最多的敌人 |
+| 对敌 debuff | `_find_highest_attack_enemy()` | 削弱最高攻敌人 |
+| 友方治疗/护盾 | `_find_lowest_hp_ally()` | 保护最残血队友 |
+| 自身增益 | 返回 `chara` 自身 | 直接对自己用 |
+| 无目标 | 返回 `null` | 不需要目标 |
+
+**② AI 随机队伍角色池**
+
+`Scenes/main.gd` 中的 `_generate_ai_team_and_deck()` 维护 AI 随机选角的角色池。新增角色后必须在该函数中添加新角色 ID：
+
+```gdscript
+func _generate_ai_team_and_deck():
+	var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster"]
+	# 新增角色在这里追加：所有角色必须有对应的 CharacterData 注册
+	# var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster", "new_character_id"]
+	all_chars.shuffle()
+	GlobalGameData.client_team = all_chars.slice(0, 3)
+```
+
+### 8.2 可能需要更新的地方
+
+| 场景 | 文件 | 原因 |
+|---|---|---|
+| 新角色有独特被动（如布洛妮娅减伤、希儿加伤） | `SkillEffect.gd` `get_passive_modifier()` | AI 的 `_process` 不直接调用被动，但被动通过 `effective_attack` / `take_damage` 自动生效。如果被动逻辑在 `SkillEffect.gd` 中实现，AI 不需要额外代码 |
+| 新角色技能需要复杂的目标条件（如优先对带有特定 buff 的敌人使用） | `AI/AIController.gd` | 需在 `_evaluate_skill_target()` 中添加新的辅助函数 |
+| 新角色有特殊行动机制（如芝士仓鼠的额外行动） | `AI/AIController.gd` `_should_use_skill()` | 默认已支持 `_consumes_attack_on_skill()` 方法判断，特殊机制需额外处理 |
+
+### 8.3 调试验证
+
+新增角色后，运行单机人机模式并通过 AILogger 验证：
+
+```bash
+# AI 日志路径
+user://logs/ai.log
+# 查看关键日志条目
+[Queue] 构建攻击队列，AI 存活角色: 3
+[Queue] 新角色名 将使用技能 -> XXX
+[Skill] 新角色名 使用技能 -> XXX
+```
+
+如果技能未按预期使用，检查：
+1. `_should_use_skill()` 是否因 `cooldown` 或 `attack_used` 阻止了技能使用
+2. `_evaluate_skill_target()` 中 `match` 的角色名是否与 `BaseCharacter.gd` 中的 `character_name` 完全一致（中文字符）
+
+### 8.4 检查清单
+
+> 新增角色后逐项勾选：
+
+- [ ] `AI/AIController.gd` — `_evaluate_skill_target()` 已添加新角色分支
+- [ ] `Scenes/main.gd` — `_generate_ai_team_and_deck()` 角色池已包含新角色 ID
+- [ ] 运行 AI 模式，检查日志确认 AI 能正确控制新角色移动
+- [ ] 运行 AI 模式，检查日志确认 AI 会在适当时机使用新角色技能
+- [ ] 如果新角色有特殊机制（如 Hamster 的额外行动），已在 `_should_use_skill()` 中正确处理
+- [ ] 已有 LAN 联机模式不受影响（`GlobalGameData.is_ai_mode == false` 时路径不变）
 
 ---
 
-## 5. 开发阶段与输出物
+## 附录：AI 角色名映射参考
+
+AI 代码中使用的角色名与 `BaseCharacter.gd` 的 `character_name` 必须完全一致：
+
+| 角色 ID | AI 代码中的 `character_name` |
+|---|---|
+| bronya | "布洛妮娅" |
+| seele | "希儿" |
+| elaina | "伊蕾娜" |
+| firefly | "流萤" |
+| silverwolf | "银狼" |
+| hamster | "芝士仓鼠" |
+
+添加新角色时，`_evaluate_skill_target()` 中的 `match` 值必须与 `BaseCharacter.gd` 中设置的 `character_name` 完全一致（包含中文字符）。
+
+---
 
 ### Phase 1：基础设施
 - [x] 创建 `feature/ai-mode` 分支
