@@ -84,7 +84,8 @@ func _update_passive():
 		var ps = current_character.passive_skill
 		passive_panel.get_node("VBoxContainer/SkillNameLabel").text = ps.skill_name
 		passive_panel.get_node("VBoxContainer/SkillDescLabel").text = ps.description
-		passive_panel.get_node("VBoxContainer/CooldownLabel").text = "常驻"
+		passive_panel.get_node("VBoxContainer/CooldownLabel").hide()
+		passive_panel.get_node("VBoxContainer/UseButton").hide()
 		passive_header.show()
 		passive_label.show()
 		passive_panel.show()

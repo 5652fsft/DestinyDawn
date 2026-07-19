@@ -6,19 +6,21 @@
 
 [node name="CharacterInfoPanel" type="Panel" unique_id=93908048]
 visible = false
-offset_right = 358.0
-offset_bottom = 720.0
+offset_left = 20.0
+offset_top = 0.0
+offset_right = 340.0
+offset_bottom = 470.0
 script = ExtResource("1_50icj")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=201581606]
 layout_mode = 0
 offset_left = 8.0
 offset_top = 8.0
-offset_right = 350.0
-offset_bottom = 712.0
+offset_right = 320.0
+offset_bottom = 464.0
 
 [node name="VBox" type="VBoxContainer" parent="ScrollContainer" unique_id=2008776170]
-custom_minimum_size = Vector2(320, 0)
+custom_minimum_size = Vector2(290, 0)
 layout_mode = 2
 theme_override_constants/separation = 4
 
