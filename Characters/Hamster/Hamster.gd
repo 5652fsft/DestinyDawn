@@ -39,7 +39,7 @@ func _consume_extra_attack():
 
 func perform_attack(target_path: NodePath):
 	super(target_path)
-	var target = main.get_node_or_null(target_path) if main and target_path else null
+	var target = get_node_or_null(target_path)
 	if target and target.hp <= 0 and not target.visible and main and main.buff_manager:
 		main.buff_manager.apply_buff(self, "bloodthirst", 50, 2, self)
 		print("[Skill] %s [钢铁直架] 获得1层嗜血成性" % character_name)

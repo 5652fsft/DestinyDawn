@@ -471,11 +471,6 @@ func handle_attack():
 				if other is CharacterBody2D and is_enemy(other) and other.hp > 0:
 					if valid_attack_cells.has(other.grid_layer.local_to_map(other.grid_layer.to_local(other.global_position))):
 						rpc("perform_attack", other.get_path())
-						if _get_extra_attacks() > 0:
-							_consume_extra_attack()
-						else:
-							GlobalGameData.character_attack_used_num += 1
-							GlobalGameData.character_attack_used[name] = true
 						main.unselect_character(self)
 						main.check_attack()
 						return
@@ -509,6 +504,15 @@ func perform_attack(target_path: NodePath):
 	target.rpc("take_damage", effective_attack)
 	print("[Combat] %s → %s 造成 %d 点伤害" % [name, target.name, effective_attack])
 	
+	if multiplayer.is_server():
+		var killed = target.hp <= 0 and not target.visible
+		if killed:
+			pass  # Generic kill reward already reset attack_used
+		elif _get_extra_attacks() > 0:
+			_consume_extra_attack()
+		else:
+			GlobalGameData.character_attack_used_num += 1
+			GlobalGameData.character_attack_used[name] = true
 	# 同步动画（所有客户端）
 	rpc_id(0, "_play_attack_animation", target_path)
 
