@@ -95,13 +95,19 @@ layout_mode = 2
 [node name="PassiveNameLabel" type="Label" parent="ScrollContainer/VBox/PassiveBox/PassiveVBox"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 18
 
 [node name="PassiveDescLabel" type="Label" parent="ScrollContainer/VBox/PassiveBox/PassiveVBox"]
 layout_mode = 2
 autowrap_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 14
+
+[node name="PassiveStatusLabel" type="Label" parent="ScrollContainer/VBox/PassiveBox/PassiveVBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 16
+text = "常驻"
 
 [node name="SkillHeader" type="HSeparator" parent="ScrollContainer/VBox"]
 layout_mode = 2
@@ -121,7 +127,7 @@ layout_mode = 2
 [node name="SkillNameLabel" type="Label" parent="ScrollContainer/VBox/SkillBox/SkillVBox"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 18
 
 [node name="SkillDescLabel" type="Label" parent="ScrollContainer/VBox/SkillBox/SkillVBox"]
 layout_mode = 2
@@ -132,4 +138,4 @@ theme_override_font_sizes/font_size = 14
 [node name="CooldownLabel" type="Label" parent="ScrollContainer/VBox/SkillBox/SkillVBox"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 16

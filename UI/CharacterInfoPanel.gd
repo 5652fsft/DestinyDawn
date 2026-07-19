@@ -17,6 +17,7 @@ const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 @onready var passive_box = $ScrollContainer/VBox/PassiveBox
 @onready var passive_name = $ScrollContainer/VBox/PassiveBox/PassiveVBox/PassiveNameLabel
 @onready var passive_desc = $ScrollContainer/VBox/PassiveBox/PassiveVBox/PassiveDescLabel
+@onready var passive_status = $ScrollContainer/VBox/PassiveBox/PassiveVBox/PassiveStatusLabel
 
 @onready var skill_header = $ScrollContainer/VBox/SkillHeader
 @onready var skill_label = $ScrollContainer/VBox/SkillLabel
