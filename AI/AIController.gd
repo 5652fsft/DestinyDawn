@@ -195,9 +195,18 @@ func _execute_move(chara: Node, cell: Vector2i):
 	var target_local = gl.map_to_local(cell)
 	var world_pos = gl.to_global(target_local)
 
+	# 确保角色可见 + 还原调制
+	if not chara.visible:
+		chara.show()
+		_log("%s 不可见，已强制显示" % chara.character_name, "Move")
+	if chara.has_node("Sprite2D"):
+		var spr = chara.get_node("Sprite2D")
+		spr.modulate = Color.WHITE
+
 	# 直接设置位置 + target_world（move_toward_target 看到 dist=0 就不动）
 	chara.global_position = world_pos
 	chara.target_world = world_pos
+	chara.velocity = Vector2.ZERO
 	GlobalGameData.character_move_used[chara.name] = true
 	GlobalGameData.character_move_used_num += 1
 	_log("%s 移动到 (%d, %d)，位置 %s" % [chara.character_name, cell.x, cell.y, world_pos], "Move")
