@@ -11,7 +11,7 @@
 
 ```gdscript
 if not multiplayer.is_server():
-    return  # 仅服务端执行
+	return  # 仅服务端执行
 ```
 
 ## RPC 注解模式
@@ -103,9 +103,9 @@ Server: _execute_play_card()
 Server: draw_for_new_turn()
   → deck_manager.draw_cards(1/2, count)            # RPC authority call_local
   → sync_all_card_state()
-     → for pid in [1,2]:
-         rpc_id(0, "_sync_hand", pid, hand)
-         rpc_id(0, "_sync_energy", pid, energy)
+	 → for pid in [1,2]:
+		 rpc_id(0, "_sync_hand", pid, hand)
+		 rpc_id(0, "_sync_energy", pid, energy)
 ```
 
 ---
@@ -122,18 +122,18 @@ Host: _ready()
 
 Client connects:
   → Host: _on_client_joined(id)
-     → rpc_id(id, "_request_client_setup")   # 请求客户端编队/卡组
-     → re-init card systems
-     → spawn host chars
+	 → rpc_id(id, "_request_client_setup")   # 请求客户端编队/卡组
+	 → re-init card systems
+	 → spawn host chars
 
   → Client: receives _request_client_setup
-     → rpc_id(1, "_client_send_setup", team, deck)
+	 → rpc_id(1, "_client_send_setup", team, deck)
 
   → Host: receives _client_send_setup
-     → GlobalGameData.client_team = team
-     → deck_manager.init_player(2, deck)     # 使用客户端卡组
-     → _spawn_client_characters(id)          # 生成 ClientCharacter_0/1/2
-     → rpc("advance_turn_phase")            # 开始游戏
+	 → GlobalGameData.client_team = team
+	 → deck_manager.init_player(2, deck)     # 使用客户端卡组
+	 → _spawn_client_characters(id)          # 生成 ClientCharacter_0/1/2
+	 → rpc("advance_turn_phase")            # 开始游戏
 ```
 
 ## 生成角色规则

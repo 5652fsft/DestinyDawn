@@ -11,7 +11,6 @@ func _ready():
 	move_points = 4
 	attack_range = 2
 	attack = 16
-	affinity = { attack_bonus = 0.0, heal_bonus = 0.0, shield_bonus = 0.0, debuff_bonus = 0.25 }
 
 	passive_skill = BaseSkill.new()
 	passive_skill.skill_name = "数据篡改"

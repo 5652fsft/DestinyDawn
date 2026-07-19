@@ -60,12 +60,6 @@ var _is_hovered: bool = false
 var _fb_origin_y: float = 0.0
 var _base_sprite_scale: Vector2 = Vector2.ONE
 var shield: int = 0
-var affinity: Dictionary = {
-	attack_bonus = 0.0,
-	heal_bonus = 0.0,
-	shield_bonus = 0.0,
-	debuff_bonus = 0.0,
-}
 var buffs: Dictionary = {}  # {"buff_id": [{"value": int, "remaining": int}, ...]}
 
 func get_buffs(buff_id: String) -> Array:

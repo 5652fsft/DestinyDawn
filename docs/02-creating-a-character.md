@@ -20,16 +20,16 @@
 
 ```gdscript
 "newchar": {
-    "name":"角色名",           # 中文显示名
-    "hp":80,                   # 基础生命值
-    "move":5,                  # 移动力（格数）
-    "atk":16,                  # 基础攻击力
-    "range":2,                 # 攻击射程（格数）
-    "skill":"技能名",          # 主动技能名称
-    "skill_desc":"技能描述",   # 主动技能描述文本
-    "skill_cd":3,              # 主动技能冷却（回合）
-    "passive":"被动名",        # 被动技能名称
-    "passive_desc":"被动描述"   # 被动技能描述文本
+	"name":"角色名",           # 中文显示名
+	"hp":80,                   # 基础生命值
+	"move":5,                  # 移动力（格数）
+	"atk":16,                  # 基础攻击力
+	"range":2,                 # 攻击射程（格数）
+	"skill":"技能名",          # 主动技能名称
+	"skill_desc":"技能描述",   # 主动技能描述文本
+	"skill_cd":3,              # 主动技能冷却（回合）
+	"passive":"被动名",        # 被动技能名称
+	"passive_desc":"被动描述"   # 被动技能描述文本
 }
 ```
 
@@ -52,55 +52,49 @@ func _ready():
     attack = 16
     attack_range = 2
     move_points = 5
-    affinity = {
-        attack_bonus = 0.0,    # 攻击卡加成 (0.15 = +15%)
-        heal_bonus = 0.0,      # 治疗卡加成
-        shield_bonus = 0.0,    # 护盾卡加成
-        debuff_bonus = 0.0,    # 减益卡加成
-    }
 
-    # 2. 调用父类 _ready（必须放在属性设置之后）
-    super()
+	# 2. 调用父类 _ready（必须放在属性设置之后）
+	super()
 
-    # 3. 设置显示名（必须放在 super() 之后）
-    character_name = "角色名"
+	# 3. 设置显示名（必须放在 super() 之后）
+	character_name = "角色名"
 
-    # 4. 创建被动技能
-    passive_skill = BaseSkill.new()
-    passive_skill.skill_name = "被动名"
-    passive_skill.description = "被动描述"
-    passive_skill.is_passive = true
+	# 4. 创建被动技能
+	passive_skill = BaseSkill.new()
+	passive_skill.skill_name = "被动名"
+	passive_skill.description = "被动描述"
+	passive_skill.is_passive = true
 
-    # 5. 创建主动技能
-    active_skill = BaseSkill.new()
-    active_skill.skill_name = "技能名"
-    active_skill.description = "技能描述"
-    active_skill.cooldown = 3
-    active_skill.target_type = BaseSkill.SkillTarget.ENEMY_SINGLE
-    # 可选: ALLY_SINGLE / SELF / NONE
-    active_skill.is_passive = false
+	# 5. 创建主动技能
+	active_skill = BaseSkill.new()
+	active_skill.skill_name = "技能名"
+	active_skill.description = "技能描述"
+	active_skill.cooldown = 3
+	active_skill.target_type = BaseSkill.SkillTarget.ENEMY_SINGLE
+	# 可选: ALLY_SINGLE / SELF / NONE
+	active_skill.is_passive = false
 
 # 主动技能执行入口（必须实现）
 func use_active_skill(target: Node) -> bool:
-    return SkillEffect.execute_active(self, active_skill, target, main)
+	return SkillEffect.execute_active(self, active_skill, target, main)
 
 # 被动 — 受击减伤（如果被动影响受伤）
 @rpc("any_peer", "call_local", "reliable")
 func take_damage(damage: int):
-    var modified = SkillEffect.get_passive_modifier(self, "incoming_damage", damage)
-    super(modified)
+	var modified = SkillEffect.get_passive_modifier(self, "incoming_damage", damage)
+	super(modified)
 
 # 被动 — 攻击增强（如果被动影响输出）
 @rpc("any_peer", "call_local", "reliable")
 func perform_attack(target_path: NodePath):
-    super(target_path)
-    # 额外逻辑（如 SilverWolf 的 50% 附加减益）
+	super(target_path)
+	# 额外逻辑（如 SilverWolf 的 50% 附加减益）
 ```
 
 ### 角色属性设置顺序（重要）
 
 ```
-max_hp → hp → attack → attack_range → move_points → affinity → super() → character_name
+max_hp → hp → attack → attack_range → move_points → super() → character_name
 ```
 
 > `_ready()` 中 `super()` 之前设置 `max_hp` 和 `hp`，`super()` 之后设置 `character_name`，因为 `_register_character()` 依赖 `character_name`。
@@ -150,8 +144,8 @@ replication_interval = 0.0
 
 ```
 Assets/Sprites/Characters/
-├ newchar_Blue.png          # 蓝方阵营（Host 用）
-└ newchar_Red.png           # 红方阵营（Client 用）
+├ newchar_Blue.png          # 蓝方阵营（我方角色用）
+└ newchar_Red.png           # 红方阵营（敌方角色用）
 
 Assets/Sprites/Standee/
 └ newchar_Standee.png       # 编队立绘 (240×144)
@@ -173,12 +167,12 @@ const CHARACTER_NEWCHAR = preload("res://Characters/NewChar/NewChar.tscn")
 
 ```gdscript
 var map = {
-    "bronya": CHARACTER_BRONYA,
-    "seele": CHARACTER_SEELE,
-    "elaina": CHARACTER_ELAINA,
-    "firefly": CHARACTER_FIREFLY,
-    "silverwolf": CHARACTER_SILVERWOLF,
-    "newchar": CHARACTER_NEWCHAR,  # ← 添加
+	"bronya": CHARACTER_BRONYA,
+	"seele": CHARACTER_SEELE,
+	"elaina": CHARACTER_ELAINA,
+	"firefly": CHARACTER_FIREFLY,
+	"silverwolf": CHARACTER_SILVERWOLF,
+	"newchar": CHARACTER_NEWCHAR,  # ← 添加
 }
 ```
 
@@ -196,21 +190,21 @@ var map = {
 
 ```gdscript
 "角色名":  # 对应 character_name
-    _newchar_active(character, target)
-    return true
+	_newchar_active(character, target)
+	return true
 ```
 
 实现函数：
 
 ```gdscript
 static func _newchar_active(character: Node, target: Node):
-    # 示例：造成伤害
-    target.rpc("take_damage", 25)
-    # 示例：施加 Buff
-    var bm = character.main.buff_manager
-    bm.apply_buff(target, "attack_buff", 10, 2)
-    # 示例：播放 VFX
-    target.rpc("_play_vfx_preset", "explosion")
+	# 示例：造成伤害
+	target.rpc("take_damage", 25)
+	# 示例：施加 Buff
+	var bm = character.main.buff_manager
+	bm.apply_buff(target, "attack_buff", 10, 2)
+	# 示例：播放 VFX
+	target.rpc("_play_vfx_preset", "explosion")
 ```
 
 ### 被动技能
@@ -221,11 +215,11 @@ static func _newchar_active(character: Node, target: Node):
 
 ```gdscript
 "角色名":
-    match modifier_key:
-        "incoming_damage":
-            return int(base_value * 0.8)  # -20%
-        "outgoing_damage":
-            return int(base_value * 1.2)  # +20%
+	match modifier_key:
+		"incoming_damage":
+			return int(base_value * 0.8)  # -20%
+		"outgoing_damage":
+			return int(base_value * 1.2)  # +20%
 ```
 
 ---

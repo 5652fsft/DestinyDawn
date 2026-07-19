@@ -2,8 +2,6 @@ class_name CardEffect
 extends Node
 
 static func _affinity_multiplier(caster: Node, key: String) -> float:
-	if caster and "affinity" in caster and key in caster.affinity:
-		return 1.0 + caster.affinity[key]
 	return 1.0
 
 static func execute(card: CardData, caster: Node, target: Node, main: Node) -> bool:

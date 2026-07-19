@@ -67,27 +67,27 @@ node.add_theme_stylebox_override("panel", bg)
 
 ```gdscript
 func _setup_button(btn: Button):
-    btn.pivot_offset = btn.size * 0.5
-    btn.mouse_entered.connect(_on_btn_enter.bind(btn))
-    btn.mouse_exited.connect(_on_btn_exit.bind(btn))
-    btn.button_down.connect(_on_btn_down.bind(btn))
-    btn.button_up.connect(_on_btn_up.bind(btn))
+	btn.pivot_offset = btn.size * 0.5
+	btn.mouse_entered.connect(_on_btn_enter.bind(btn))
+	btn.mouse_exited.connect(_on_btn_exit.bind(btn))
+	btn.button_down.connect(_on_btn_down.bind(btn))
+	btn.button_up.connect(_on_btn_up.bind(btn))
 
 func _on_btn_enter(btn):
-    var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-    t.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.1)
+	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.1)
 
 func _on_btn_exit(btn):
-    var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-    t.tween_property(btn, "scale", Vector2(1, 1), 0.1)
+	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_property(btn, "scale", Vector2(1, 1), 0.1)
 
 func _on_btn_down(btn):
-    var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-    t.tween_property(btn, "scale", Vector2(0.97, 0.97), 0.05)
+	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_property(btn, "scale", Vector2(0.97, 0.97), 0.05)
 
 func _on_btn_up(btn):
-    var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-    t.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.05)
+	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.05)
 ```
 
 ### 按钮样式

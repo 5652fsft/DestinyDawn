@@ -18,16 +18,16 @@
 
 ```gdscript
 _create_card(
-    "card_new_id",                # id: 全局唯一标识符
-    "显示名称",                    # name: 卡牌名称
-    CardData.CardType.ATTACK,     # type: 卡牌类型
-    2,                            # cost: 能量消耗
-    CardData.TargetType.ENEMY_SINGLE, # target_type: 目标类型
-    "描述文本",                    # desc: 卡牌描述
-    CardData.EffectType.DAMAGE,   # effect_type: 效果类型
-    25,                           # effect_value: 效果数值
-    1,                            # effect_duration: 持续回合数（默认1）
-    0,                            # effect_radius: 范围半径（默认0）
+	"card_new_id",                # id: 全局唯一标识符
+	"显示名称",                    # name: 卡牌名称
+	CardData.CardType.ATTACK,     # type: 卡牌类型
+	2,                            # cost: 能量消耗
+	CardData.TargetType.ENEMY_SINGLE, # target_type: 目标类型
+	"描述文本",                    # desc: 卡牌描述
+	CardData.EffectType.DAMAGE,   # effect_type: 效果类型
+	25,                           # effect_value: 效果数值
+	1,                            # effect_duration: 持续回合数（默认1）
+	0,                            # effect_radius: 范围半径（默认0）
 )
 ```
 
@@ -88,17 +88,6 @@ _create_card(
 | `SWAP` | 交换位置 | — |
 | `LINEAR_AOE` | 线性范围伤害 | value=伤害量 |
 
-### 亲和力加成
-
-以下效果会受角色 `affinity` 影响：
-
-| 亲和力 | 影响效果 |
-|---|---|
-| `attack_bonus` | DAMAGE, AOE_DAMAGE, BUFF_ATTACK |
-| `heal_bonus` | HEAL, AOE_HEAL |
-| `shield_bonus` | SHIELD |
-| `debuff_bonus` | DEBUFF_ATTACK, DEBUFF_MOVE |
-
 ### 添加新效果类型
 
 如果需要全新的效果类型：
@@ -110,18 +99,18 @@ _create_card(
 ```gdscript
 # CardData.gd
 enum EffectType {
-    ...
-    MY_NEW_EFFECT,
+	...
+	MY_NEW_EFFECT,
 }
 
 # CardEffect.gd — execute() 中
 CardData.EffectType.MY_NEW_EFFECT:
-    _execute_my_new_effect(card, caster, target, main)
+	_execute_my_new_effect(card, caster, target, main)
 
 # CardEffect.gd — 实现
 static func _execute_my_new_effect(card: CardData, caster: Node, target: Node, main: Node):
-    # 实现逻辑
-    pass
+	# 实现逻辑
+	pass
 ```
 
 ---

@@ -4,18 +4,18 @@
 
 ```gdscript
 const DATA = {
-    "<character_id>": {             # 字符串键，全小写英文
-        "name":        "<中文名>",   # 显示用中文名
-        "hp":          <int>,       # 基础生命值
-        "move":        <int>,       # 移动力（格数）
-        "atk":         <int>,       # 基础攻击力
-        "range":       <int>,       # 攻击射程（格数）
-        "skill":       "<技能名>",   # 主动技能名称
-        "skill_desc":  "<技能描述>", # 主动技能描述文本
-        "skill_cd":    <int>,       # 主动技能冷却回合
-        "passive":     "<被动名>",   # 被动技能名称
-        "passive_desc":"<被动描述>", # 被动技能描述文本
-    },
+	"<character_id>": {             # 字符串键，全小写英文
+		"name":        "<中文名>",   # 显示用中文名
+		"hp":          <int>,       # 基础生命值
+		"move":        <int>,       # 移动力（格数）
+		"atk":         <int>,       # 基础攻击力
+		"range":       <int>,       # 攻击射程（格数）
+		"skill":       "<技能名>",   # 主动技能名称
+		"skill_desc":  "<技能描述>", # 主动技能描述文本
+		"skill_cd":    <int>,       # 主动技能冷却回合
+		"passive":     "<被动名>",   # 被动技能名称
+		"passive_desc":"<被动描述>", # 被动技能描述文本
+	},
 }
 ```
 
@@ -37,16 +37,16 @@ const DATA = {
 
 ```gdscript
 _create_card(
-    id: String,                    # "card_xxx"
-    name: String,                  # 中文显示名
-    type: CardType,                # ATTACK(0) / HEAL(1) / BUFF(2) / DEBUFF(3) / DISPLACE(4) / SHIELD(5) / TACTICAL(6)
-    cost: int,                     # 能量消耗 (0~10)
-    target_type: TargetType,       # 见下方
-    desc: String,                  # 卡牌描述
-    effect_type: EffectType,       # 见下方
-    effect_value: int,             # 主要数值
-    effect_duration: int = 1,      # 持续回合 (Buff/DoT/HoT)
-    effect_radius: int = 0,        # AOE 半径 (格数)
+	id: String,                    # "card_xxx"
+	name: String,                  # 中文显示名
+	type: CardType,                # ATTACK(0) / HEAL(1) / BUFF(2) / DEBUFF(3) / DISPLACE(4) / SHIELD(5) / TACTICAL(6)
+	cost: int,                     # 能量消耗 (0~10)
+	target_type: TargetType,       # 见下方
+	desc: String,                  # 卡牌描述
+	effect_type: EffectType,       # 见下方
+	effect_value: int,             # 主要数值
+	effect_duration: int = 1,      # 持续回合 (Buff/DoT/HoT)
+	effect_radius: int = 0,        # AOE 半径 (格数)
 )
 ```
 
@@ -119,9 +119,9 @@ Buff 条目结构：
 
 ```gdscript
 {
-    "value": int,         # 数值
-    "remaining": int,     # 剩余回合
-    "source_path": NodePath,  # 来源角色
+	"value": int,         # 数值
+	"remaining": int,     # 剩余回合
+	"source_path": NodePath,  # 来源角色
 }
 ```
 
@@ -148,15 +148,15 @@ var current_cooldown: int = 0      # 运行时：0 = 可用
 
 ```gdscript
 var battle_stats: Dictionary = {
-    host_damage_dealt: 0,       # Host 造成的总伤害
-    host_healing_done: 0,       # Host 的总治疗量
-    host_cards_played: 0,       # Host 使用的卡牌数
-    host_kills: 0,              # Host 的击杀数
-    client_damage_dealt: 0,     # Client 造成的总伤害
-    client_healing_done: 0,     # Client 的总治疗量
-    client_cards_played: 0,     # Client 使用的卡牌数
-    client_kills: 0,            # Client 的击杀数
-    turns_taken: 0,             # 总回合数
+	host_damage_dealt: 0,       # Host 造成的总伤害
+	host_healing_done: 0,       # Host 的总治疗量
+	host_cards_played: 0,       # Host 使用的卡牌数
+	host_kills: 0,              # Host 的击杀数
+	client_damage_dealt: 0,     # Client 造成的总伤害
+	client_healing_done: 0,     # Client 的总治疗量
+	client_cards_played: 0,     # Client 使用的卡牌数
+	client_kills: 0,            # Client 的击杀数
+	turns_taken: 0,             # 总回合数
 }
 ```
 
@@ -166,14 +166,14 @@ var battle_stats: Dictionary = {
 
 ```gdscript
 var host_birth_point = [
-    Vector2(-252, -37),     # Host 角色 0 出生点
-    Vector2(-252, 404),     # Host 角色 1 出生点
-    Vector2(252, 404),      # Host 角色 2 出生点
+	Vector2(-252, -37),     # Host 角色 0 出生点
+	Vector2(-252, 404),     # Host 角色 1 出生点
+	Vector2(252, 404),      # Host 角色 2 出生点
 ]
 var client_birth_point = [
-    Vector2(756, -698),     # Client 角色 0 出生点
-    Vector2(1260, -698),    # Client 角色 1 出生点
-    Vector2(1260, -257),    # Client 角色 2 出生点
+	Vector2(756, -698),     # Client 角色 0 出生点
+	Vector2(1260, -698),    # Client 角色 1 出生点
+	Vector2(1260, -257),    # Client 角色 2 出生点
 ]
 ```
 
