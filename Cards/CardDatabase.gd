@@ -87,7 +87,7 @@ static func _register_cards():
 			CardData.EffectType.CLEANSE, 0),
 
 		_create_card("card_taunt", "嘲讽", CardData.CardType.TACTICAL, 1,
-			CardData.TargetType.ENEMY_SINGLE, "嘲讽目标，使其强制攻击施法者（持续 1 回合）",
+			CardData.TargetType.ALLY_SINGLE, "赋予我方角色嘲讽状态，使敌方只能攻击该角色（持续 1 回合）",
 			CardData.EffectType.TAUNT, 1, 1),
 
 		# ========== 费用 2 — 攻击 ==========
