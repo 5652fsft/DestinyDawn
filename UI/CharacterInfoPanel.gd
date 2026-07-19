@@ -53,7 +53,8 @@ func refresh():
 	if buffed_atk != base_atk:
 		var diff = buffed_atk - base_atk
 		var sign = "+" if diff > 0 else ""
-		attack_label.text = "攻击力: %d (%s%d)" % [buffed_atk, sign, diff]
+		var color = "green" if diff > 0 else "red"
+		attack_label.text = "攻击力: %d  [color=%s]%s%d[/color]" % [base_atk, color, sign, diff]
 	else:
 		attack_label.text = "攻击力: %d" % base_atk
 
