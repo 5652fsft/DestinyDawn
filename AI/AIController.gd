@@ -161,16 +161,18 @@ func _execute_current_action():
 
 	var phase_before = GlobalGameData.current_turn_phase
 
-	_pan_to(chara)
-
 	match action.type:
 		"move":
 			_execute_move(chara, action.cell)
+			_pan_to(chara)
 		"attack":
+			_pan_to(chara)
 			_execute_attack(chara, action.target)
 		"skill":
+			_pan_to(chara)
 			_execute_skill(chara, action.target)
 		"card":
+			_pan_to(chara)
 			_execute_card(chara, action.card_id, action.get("target"))
 
 	var phase_after = GlobalGameData.current_turn_phase
