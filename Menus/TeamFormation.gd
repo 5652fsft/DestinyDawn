@@ -96,7 +96,7 @@ func _on_save_pressed():
 		$HintLabel.hide()
 		return
 	GlobalGameData.selected_team = slots.duplicate()
-	get_tree().change_scene_to_file("res://Menus/NewMainMenu.tscn")
+	get_tree().change_scene_to_file("res://Menus/MainMenu.tscn")
 
 func _on_back_pressed():
-	get_tree().change_scene_to_file("res://Menus/NewMainMenu.tscn")
+	get_tree().change_scene_to_file("res://Menus/MainMenu.tscn")

@@ -65,4 +65,4 @@ func _set_font_recursive(node: Node):
 		_set_font_recursive(child)
 
 func _on_return_pressed():
-	get_tree().change_scene_to_file("res://Menus/NewMainMenu.tscn")
+	get_tree().change_scene_to_file("res://Menus/MainMenu.tscn")
