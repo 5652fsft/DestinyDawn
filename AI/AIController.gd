@@ -182,8 +182,12 @@ func _execute_move(chara: Node, cell: Vector2i):
 	if not gl:
 		_log("%s 移动失败：无 grid_layer" % chara.character_name, "Move")
 		return
-	var world_pos = gl.to_global(gl.map_to_local(cell))
-	chara.target_world = world_pos
+
+	# 完全复制人类的移动逻辑
+	_main.start_character_move()
+	chara.is_moving = true
+	var target_local = gl.map_to_local(cell)
+	chara.target_world = gl.to_global(target_local)
 	GlobalGameData.character_move_used[chara.name] = true
 	GlobalGameData.character_move_used_num += 1
 	_log("%s 移动到 (%d, %d)" % [chara.character_name, cell.x, cell.y], "Move")
