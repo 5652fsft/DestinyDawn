@@ -8,6 +8,7 @@ const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 @onready var move_label = $MovePointsLabel
 @onready var attack_range_label = $AttackRangeLabel
 @onready var shield_label = $ShieldLabel
+@onready var action_label = $ActionLabel
 @onready var passive_label = $PassiveLabel
 @onready var passive_desc_container = $PassiveDescContainer
 @onready var buffs_container = $BuffsContainer
@@ -64,6 +65,15 @@ func refresh():
 		shield_label.text = "护盾: %d" % current_character.shield
 	else:
 		shield_label.hide()
+
+	var atk_used = GlobalGameData.character_attack_used.get(current_character.name, false)
+	var extra = current_character._get_extra_attacks() if current_character.has_method("_get_extra_attacks") else 0
+	if atk_used and extra <= 0:
+		action_label.text = "行动: 已使用"
+	elif extra > 0:
+		action_label.text = "行动: 已使用 (+%d 额外)" % extra
+	else:
+		action_label.text = "行动: 可用"
 
 	_update_passive()
 	_update_buffs()
