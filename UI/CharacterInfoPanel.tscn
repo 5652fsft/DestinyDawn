@@ -3,103 +3,133 @@
 [ext_resource type="Script" uid="uid://cac87jyl3bpqm" path="res://UI/CharacterInfoPanel.gd" id="1_50icj"]
 [ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2_6xa78"]
 
-[node name="CharacterInfoPanel" type="Panel" unique_id=872415824]
+[node name="CharacterInfoPanel" type="Panel"]
 visible = false
 offset_right = 358.0
 offset_bottom = 720.0
 script = ExtResource("1_50icj")
 
-[node name="NameLabel" type="Label" parent="." unique_id=2057045477]
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
 layout_mode = 0
-offset_left = 50.0
-offset_top = 12.0
-offset_right = 200.0
-offset_bottom = 38.0
-theme_override_fonts/font = ExtResource("2_6xa78")
-theme_override_font_sizes/font_size = 22
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 350.0
+offset_bottom = 712.0
 
-[node name="HPLabel" type="Label" parent="." unique_id=951755721]
-layout_mode = 0
-offset_left = 50.0
-offset_top = 42.0
-offset_right = 200.0
-offset_bottom = 62.0
+[node name="VBox" type="VBoxContainer" parent="ScrollContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(320, 0)
+
+[node name="NameLabel" type="Label" parent="ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 24
+
+[node name="ActionLabel" type="Label" parent="ScrollContainer/VBox"]
+layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
 
-[node name="AttackLabel" type="RichTextLabel" parent="." unique_id=124622799]
-layout_mode = 0
-offset_left = 50.0
-offset_top = 66.0
-offset_right = 300.0
-offset_bottom = 86.0
+[node name="AttrHeader" type="HSeparator" parent="ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="AttrLabel" type="Label" parent="ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 14
+text = "属性"
+
+[node name="HPLabel" type="Label" parent="ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 15
+
+[node name="AttackLabel" type="RichTextLabel" parent="ScrollContainer/VBox"]
+layout_mode = 2
 theme_override_fonts/normal_font = ExtResource("2_6xa78")
-theme_override_font_sizes/normal_font_size = 16
+theme_override_font_sizes/normal_font_size = 15
 bbcode_enabled = true
 
-[node name="MovePointsLabel" type="Label" parent="." unique_id=628581249]
-layout_mode = 0
-offset_left = 50.0
-offset_top = 90.0
-offset_right = 200.0
-offset_bottom = 110.0
+[node name="MovePointsLabel" type="Label" parent="ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 15
+
+[node name="AttackRangeLabel" type="Label" parent="ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 15
+
+[node name="ShieldLabel" type="Label" parent="ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 15
+
+[node name="BuffHeader" type="HSeparator" parent="ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="BuffLabel" type="Label" parent="ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 14
+text = "效果"
+
+[node name="BuffsContainer" type="VBoxContainer" parent="ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="PassiveHeader" type="HSeparator" parent="ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="PassiveLabel" type="Label" parent="ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 14
+text = "天赋"
+
+[node name="PassiveBox" type="Panel" parent="ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="PassiveVBox" type="VBoxContainer" parent="ScrollContainer/VBox/PassiveBox"]
+layout_mode = 2
+
+[node name="PassiveNameLabel" type="Label" parent="ScrollContainer/VBox/PassiveBox/PassiveVBox"]
+layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
 
-[node name="AttackRangeLabel" type="Label" parent="." unique_id=1517577788]
-layout_mode = 0
-offset_left = 50.0
-offset_top = 114.0
-offset_right = 200.0
-offset_bottom = 134.0
+[node name="PassiveDescLabel" type="Label" parent="ScrollContainer/VBox/PassiveBox/PassiveVBox"]
+layout_mode = 2
+autowrap_mode = 2
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 14
+
+[node name="SkillHeader" type="HSeparator" parent="ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="SkillLabel" type="Label" parent="ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 14
+text = "技能"
+
+[node name="SkillBox" type="Panel" parent="ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="SkillVBox" type="VBoxContainer" parent="ScrollContainer/VBox/SkillBox"]
+layout_mode = 2
+
+[node name="SkillNameLabel" type="Label" parent="ScrollContainer/VBox/SkillBox/SkillVBox"]
+layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
 
-[node name="ShieldLabel" type="Label" parent="." unique_id=552480616]
-layout_mode = 0
-offset_left = 50.0
-offset_top = 138.0
-offset_right = 200.0
-offset_bottom = 158.0
+[node name="SkillDescLabel" type="Label" parent="ScrollContainer/VBox/SkillBox/SkillVBox"]
+layout_mode = 2
+autowrap_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 14
 
-[node name="ActionLabel" type="Label" parent="."]
-layout_mode = 0
-offset_left = 50.0
-offset_top = 162.0
-offset_right = 300.0
-offset_bottom = 182.0
+[node name="CooldownLabel" type="Label" parent="ScrollContainer/VBox/SkillBox/SkillVBox"]
+layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
-theme_override_font_sizes/font_size = 16
-
-[node name="PassiveLabel" type="Label" parent="." unique_id=794042067]
-layout_mode = 0
-offset_left = 50.0
-offset_top = 186.0
-offset_right = 350.0
-offset_bottom = 206.0
-mouse_filter = 1
-theme_override_fonts/font = ExtResource("2_6xa78")
-theme_override_font_sizes/font_size = 16
-
-[node name="PassiveDescContainer" type="VBoxContainer" parent="." unique_id=1301482060]
-layout_mode = 0
-offset_left = 50.0
-offset_top = 210.0
-offset_right = 350.0
-offset_bottom = 244.0
-
-[node name="BuffsLabel" type="Label" parent="." unique_id=1141284376]
-layout_mode = 0
-offset_left = 50.0
-offset_top = 270.0
-offset_right = 150.0
-offset_bottom = 294.0
-
-[node name="BuffsContainer" type="VBoxContainer" parent="." unique_id=1015233750]
-layout_mode = 0
-offset_left = 50.0
-offset_top = 302.0
-offset_right = 350.0
-offset_bottom = 706.0
+theme_override_font_sizes/font_size = 14
