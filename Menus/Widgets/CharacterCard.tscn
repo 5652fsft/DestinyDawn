@@ -41,7 +41,7 @@ offset_right = 86.0
 offset_bottom = 164.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 13
-text = "HP: 80"
+text = "生命值: 80"
 
 [node name="MoveLabel" type="Label" parent="CardFront"]
 layout_mode = 0
@@ -61,7 +61,7 @@ offset_right = 86.0
 offset_bottom = 188.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 13
-text = "ATK: 15"
+text = "攻击力: 15"
 
 [node name="RangeLabel" type="Label" parent="CardFront"]
 layout_mode = 0
@@ -81,7 +81,7 @@ offset_right = 172.0
 offset_bottom = 212.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 12
-text = "技能: 护卫指令"
+text = "护卫指令"
 
 [node name="PassiveLabel" type="Label" parent="CardFront"]
 layout_mode = 0
@@ -91,7 +91,7 @@ offset_right = 172.0
 offset_bottom = 236.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 12
-text = "被动: 铁壁"
+text = "天赋·铁壁"
 
 [node name="CardBack" type="Control" parent="."]
 visible = false
@@ -124,13 +124,13 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 14
-text = "HP: 80"
+text = "生命值: 80"
 
 [node name="ATKLabel" type="Label" parent="CardBack/Scroll/VBox"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 14
-text = "ATK: 15"
+text = "攻击力: 15"
 
 [node name="MoveLabel" type="Label" parent="CardBack/Scroll/VBox"]
 layout_mode = 2
@@ -148,7 +148,7 @@ text = "射程: 1"
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 14
-text = "技能: 护卫指令"
+text = "护卫指令"
 
 [node name="SkillDescLabel" type="Label" parent="CardBack/Scroll/VBox"]
 layout_mode = 2
@@ -160,7 +160,7 @@ text = "为单个友方提供 30 点护盾 (CD: 3)"
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 14
-text = "被动: 铁壁"
+text = "天赋·铁壁"
 
 [node name="PassiveDescLabel" type="Label" parent="CardBack/Scroll/VBox"]
 layout_mode = 2

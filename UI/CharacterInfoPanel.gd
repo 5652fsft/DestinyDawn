@@ -41,7 +41,7 @@ func refresh():
 	if not current_character:
 		return
 	name_label.text = current_character.character_name
-	hp_label.text = "HP: %d / %d" % [current_character.hp, current_character.max_hp]
+	hp_label.text = "生命值: %d / %d" % [current_character.hp, current_character.max_hp]
 
 	var base_atk = current_character.attack
 	var buffed_atk = current_character.effective_attack if "effective_attack" in current_character else base_atk

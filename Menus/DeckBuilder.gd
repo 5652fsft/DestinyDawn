@@ -89,7 +89,9 @@ func _update_ui():
 	for i in range(DECK_SIZE - card_count):
 		var empty = Panel.new()
 		empty.custom_minimum_size = Vector2(120, 170)
-		empty.modulate = Color(1, 1, 1, 0.15)
+		var es = StyleBoxFlat.new()
+		es.bg_color = Color(0.12, 0.12, 0.2, 0.15)
+		empty.add_theme_stylebox_override("panel", es)
 		deck_grid.add_child(empty)
 	$VBoxContainer/DeckPanel/CountLabel.text = "%d / %d" % [deck_ids.size(), DECK_SIZE]
 	var sb = get_node_or_null("SaveButton")
