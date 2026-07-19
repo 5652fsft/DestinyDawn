@@ -22,6 +22,10 @@ func _ready():
 	bg.content_margin_top = 12
 	bg.content_margin_right = 12
 	bg.content_margin_bottom = 12
+	bg.corner_radius_top_left = 8
+	bg.corner_radius_top_right = 8
+	bg.corner_radius_bottom_right = 8
+	bg.corner_radius_bottom_left = 8
 	add_theme_stylebox_override("panel", bg)
 
 func show_for(character: Node):
