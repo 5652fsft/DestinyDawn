@@ -1,5 +1,12 @@
 extends Node2D
 
+var _Logger = null
+func _log(msg: String, category: String = "AI"):
+	if _Logger == null:
+		_Logger = load("res://Global/AILogger.gd")
+	if _Logger:
+		_Logger.log(msg, category)
+
 var selected_character = null
 var characters: Array[CharacterBody2D] = []
 var cell_occupancy: Dictionary = {}
@@ -85,7 +92,7 @@ func _setup_ai_controller():
 	var ai = load("res://AI/AIController.gd").new()
 	ai.name = "AIController"
 	add_child(ai)
-	AILogger.log("AI 控制器已创建并添加到场景", "Mode")
+	_log("AI 控制器已创建并添加到场景", "Mode")
 
 func _ready():
 	GlobalGameData.load_defaults_if_empty()
@@ -93,18 +100,18 @@ func _ready():
 	_init_vfx_manager()
 
 	if GlobalGameData.is_ai_mode:
-		AILogger.log("AI 模式初始化开始", "Mode")
+		_log("AI 模式初始化开始", "Mode")
 		_generate_ai_team_and_deck()
 		_build_team_from_selection()
 		_build_deck_from_selection()
 		_setup_player_panels()
-		AILogger.log("AI 队伍: %s, AI 卡组: %s" % [GlobalGameData.client_team, GlobalGameData.ai_deck])
+		_log("AI 队伍: %s, AI 卡组: %s" % [GlobalGameData.client_team, GlobalGameData.ai_deck])
 		for i in range(team_roster.size()):
 			_spawn_character(team_roster[i].resource_path, "HostCharacter_%d" % i, 1, GlobalGameData.host_birth_point[i])
 		for i in range(enemy_roster.size()):
 			_spawn_character(enemy_roster[i].resource_path, "ClientCharacter_%d" % i, 1, GlobalGameData.client_birth_point[i])
 		_init_player_card_systems_ai()
-		AILogger.log("双方角色已生成，卡牌系统已初始化", "Mode")
+		_log("双方角色已生成，卡牌系统已初始化", "Mode")
 		_setup_ai_controller()
 		rpc("advance_turn_phase")
 		return

@@ -1,6 +1,13 @@
 class_name AIController
 extends Node
 
+var _Logger = null
+func _log(msg: String, category: String = "AI"):
+	if _Logger == null:
+		_Logger = load("res://Global/AILogger.gd")
+	if _Logger:
+		_Logger.log(msg, category)
+
 # === 动作队列 ===
 var _action_queue: Array[Dictionary] = []
 var _action_timer: float = 0.0
@@ -24,7 +31,7 @@ func _ready():
 	_main = get_tree().current_scene
 	_energy_system = _main.get_node("EnergySystem")
 	_deck_manager = _main.get_node("DeckManager")
-	AILogger.log("AI 控制器就绪")
+	_log("AI 控制器就绪")
 
 
 func _process(_delta):
@@ -39,7 +46,7 @@ func _process(_delta):
 
 	if GlobalGameData.current_turn_phase != _current_phase:
 		if _current_phase != -1:
-			AILogger.log("阶段变化: %d -> %d，清理旧队列" % [_current_phase, GlobalGameData.current_turn_phase])
+			_log("阶段变化: %d -> %d，清理旧队列" % [_current_phase, GlobalGameData.current_turn_phase])
 		_action_queue.clear()
 		_busy = false
 		_current_phase = GlobalGameData.current_turn_phase
@@ -53,7 +60,7 @@ func _process(_delta):
 	if _action_queue.is_empty():
 		_build_action_queue()
 		if _action_queue.is_empty():
-			AILogger.log("无待执行动作，结束阶段", "EndTurn")
+			_log("无待执行动作，结束阶段", "EndTurn")
 			_end_phase()
 			return
 		_busy = true
@@ -74,20 +81,20 @@ func _build_action_queue():
 	var phase = GlobalGameData.current_turn_phase
 
 	if phase == GlobalGameData.TurnPhase.ENEMY_MOVE:
-		AILogger.log("构建移动队列，AI 存活角色: %d" % ai_chars.size(), "Queue")
+		_log("构建移动队列，AI 存活角色: %d" % ai_chars.size(), "Queue")
 		for chara in ai_chars:
 			if GlobalGameData.character_move_used.get(chara.name, false):
 				continue
 			var target = _evaluate_move_target(chara)
-			if target != null:
+			if target != Vector2i(-1, -1):
 				_action_queue.append({
 					"type": "move", "character": chara, "cell": target
 				})
 			else:
-				AILogger.log("%s 无可用移动目标" % chara.character_name)
+				_log("%s 无可用移动目标" % chara.character_name)
 
 	elif phase == GlobalGameData.TurnPhase.ENEMY_ATTACK:
-		AILogger.log("构建攻击队列，AI 存活角色: %d" % ai_chars.size(), "Queue")
+		_log("构建攻击队列，AI 存活角色: %d" % ai_chars.size(), "Queue")
 		for chara in ai_chars:
 			if _should_use_skill(chara):
 				var skill_target = _evaluate_skill_target(chara)
@@ -95,19 +102,19 @@ func _build_action_queue():
 					_action_queue.append({
 						"type": "skill", "character": chara, "target": skill_target
 					})
-					AILogger.log("%s 将使用技能 -> %s" % [chara.character_name, skill_target.character_name])
+					_log("%s 将使用技能 -> %s" % [chara.character_name, skill_target.character_name])
 			if _should_play_card(chara):
 				var card_action = _evaluate_best_card(chara)
-				if card_action != null:
+				if not card_action.is_empty():
 					_action_queue.append(card_action)
-					AILogger.log("%s 将使用卡牌: %s" % [chara.character_name, card_action.get("card_id", "?")])
+					_log("%s 将使用卡牌: %s" % [chara.character_name, card_action.get("card_id", "?")])
 			if not GlobalGameData.character_attack_used.get(chara.name, false):
 				var attack_target = _evaluate_attack_target(chara)
 				if attack_target != null:
 					_action_queue.append({
 						"type": "attack", "character": chara, "target": attack_target
 					})
-					AILogger.log("%s 将攻击 -> %s" % [chara.character_name, attack_target.character_name])
+					_log("%s 将攻击 -> %s" % [chara.character_name, attack_target.character_name])
 
 
 # ==================== 动作执行 ====================
@@ -121,14 +128,16 @@ func _execute_current_action():
 	var chara = action.get("character")
 
 	if not is_instance_valid(chara) or chara.hp <= 0:
-		AILogger.log("跳过动作：角色已死亡或无效", "Execute")
+		_log("跳过动作：角色已死亡或无效", "Execute")
 		if _action_queue.is_empty():
 			_busy = false
-			_end_phase()
+			_current_phase = -1
 		else:
 			_busy = true
 			_action_timer = ACTION_DELAY * 0.3
 		return
+
+	var phase_before = GlobalGameData.current_turn_phase
 
 	match action.type:
 		"move":
@@ -140,10 +149,11 @@ func _execute_current_action():
 		"card":
 			_execute_card(chara, action.card_id, action.get("target"))
 
+	var phase_after = GlobalGameData.current_turn_phase
+
 	if _action_queue.is_empty():
 		_busy = false
-		var phase = GlobalGameData.current_turn_phase
-		if _is_ai_phase():
+		if phase_before == phase_after and _is_ai_phase():
 			_end_phase()
 	else:
 		_busy = true
@@ -153,30 +163,30 @@ func _execute_current_action():
 func _execute_move(chara: Node, cell: Vector2i):
 	var gl = chara.grid_layer
 	if not gl:
-		AILogger.log("%s 移动失败：无 grid_layer" % chara.character_name, "Move")
+		_log("%s 移动失败：无 grid_layer" % chara.character_name, "Move")
 		return
 	var world_pos = gl.to_global(gl.map_to_local(cell))
 	chara.target_world = world_pos
 	GlobalGameData.character_move_used[chara.name] = true
 	GlobalGameData.character_move_used_num += 1
-	AILogger.log("%s 移动到 (%d, %d)" % [chara.character_name, cell.x, cell.y], "Move")
+	_log("%s 移动到 (%d, %d)" % [chara.character_name, cell.x, cell.y], "Move")
 	_main.check_move()
 
 
 func _execute_attack(chara: Node, target: Node):
 	if not is_instance_valid(target) or target.hp <= 0:
-		AILogger.log("%s 攻击目标无效" % chara.character_name, "Attack")
+		_log("%s 攻击目标无效" % chara.character_name, "Attack")
 		return
-	AILogger.log("%s 攻击 -> %s" % [chara.character_name, target.character_name], "Attack")
+	_log("%s 攻击 -> %s" % [chara.character_name, target.character_name], "Attack")
 	chara.perform_attack(target.get_path())
 	_main.check_attack()
 
 
 func _execute_skill(chara: Node, target: Node):
 	if not is_instance_valid(target) or target.hp <= 0:
-		AILogger.log("%s 技能目标无效" % chara.character_name, "Skill")
+		_log("%s 技能目标无效" % chara.character_name, "Skill")
 		return
-	AILogger.log("%s 使用技能 -> %s" % [chara.character_name, target.character_name], "Skill")
+	_log("%s 使用技能 -> %s" % [chara.character_name, target.character_name], "Skill")
 	var prev_selected = _main.selected_character
 	_main.selected_character = chara
 	chara.use_active_skill(target)
@@ -193,7 +203,7 @@ func _execute_card(chara: Node, card_id: String, target: Node):
 	var target_path = ""
 	if target != null and is_instance_valid(target):
 		target_path = target.get_path()
-	AILogger.log("%s 使用卡牌 %s，目标: %s" % [chara.character_name, card_id, target_path if target_path else "无"], "Card")
+	_log("%s 使用卡牌 %s，目标: %s" % [chara.character_name, card_id, target_path if target_path else "无"], "Card")
 	_main._execute_play_card(2, card_id, target_path)
 
 
@@ -202,20 +212,19 @@ func _execute_card(chara: Node, card_id: String, target: Node):
 func _evaluate_move_target(chara: Node) -> Vector2i:
 	var gl = chara.grid_layer
 	if not gl:
-		return null
+		return Vector2i(-1, -1)
 	var start = chara.get_current_cell()
 	if start == Vector2i(-1, -1):
-		return null
+		return Vector2i(-1, -1)
 
 	var max_move = chara.effective_move_points
 	var reachable = _bfs_reachable(chara, max_move)
 	if reachable.is_empty():
-		return null
+		return Vector2i(-1, -1)
 
 	var nearest_enemy = _find_nearest_enemy(chara)
 	if not nearest_enemy:
-		var fallback = _pick_farthest_from_start(reachable, start)
-		return fallback if fallback != null else start
+		return _pick_farthest_from_start(reachable, start)
 
 	var enemy_cell = nearest_enemy.get_current_cell()
 	if enemy_cell == Vector2i(-1, -1):
@@ -467,7 +476,7 @@ func _evaluate_best_card(chara: Node) -> Dictionary:
 			}
 
 	if best_score >= 20:
-		AILogger.log("最佳卡牌 %s 评分: %d" % [best_action.get("card_id", "?"), best_score], "CardEval")
+		_log("最佳卡牌 %s 评分: %d" % [best_action.get("card_id", "?"), best_score], "CardEval")
 		return best_action
 	return {}
 
@@ -551,7 +560,7 @@ func _score_card(card: CardData, chara: Node, target: Node) -> int:
 # ==================== 辅助函数 ====================
 
 func _end_phase():
-	AILogger.log("AI 结束当前阶段，调用 advance_turn_phase", "EndTurn")
+	_log("AI 结束当前阶段，调用 advance_turn_phase", "EndTurn")
 	_main.unselect_character(null, true)
 	_main.rpc("advance_turn_phase")
 
