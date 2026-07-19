@@ -670,6 +670,10 @@ func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn)
 		selected_character = null
 		character_info_panel.hide()
 		skill_panel.hide()
+	# 首次进入移动阶段时提示先后手
+	if phase == GlobalGameData.TurnPhase.PLAYER_MOVE and GlobalGameData.turn_has_been_drawn:
+		var is_my_turn = host_turn == GlobalGameData.is_host
+		show_toast("你先手" if is_my_turn else "对方先手", 2.0)
 	update_ui_turn_indicator()
 
 func update_ui_turn_indicator():
