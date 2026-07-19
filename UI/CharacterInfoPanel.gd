@@ -14,10 +14,7 @@ const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 
 @onready var passive_header = $ScrollContainer/VBox/PassiveHeader
 @onready var passive_label = $ScrollContainer/VBox/PassiveLabel
-@onready var passive_box = $ScrollContainer/VBox/PassiveBox
-@onready var passive_name = $ScrollContainer/VBox/PassiveBox/PassiveVBox/PassiveNameLabel
-@onready var passive_desc = $ScrollContainer/VBox/PassiveBox/PassiveVBox/PassiveDescLabel
-@onready var passive_status = $ScrollContainer/VBox/PassiveBox/PassiveVBox/PassiveStatusLabel
+@onready var passive_panel = $ScrollContainer/VBox/PassiveSkillPanel
 
 var current_character: Node = null
 
@@ -25,14 +22,7 @@ func _ready():
 	var bg = StyleBoxFlat.new()
 	bg.bg_color = Color(0.08, 0.08, 0.15, 0.85)
 	add_theme_stylebox_override("panel", bg)
-
-	var skill_bg = StyleBoxFlat.new()
-	skill_bg.bg_color = Color(0.08, 0.08, 0.15, 0.85)
-	skill_bg.content_margin_left = 12
-	skill_bg.content_margin_top = 12
-	skill_bg.content_margin_right = 12
-	skill_bg.content_margin_bottom = 12
-	passive_box.add_theme_stylebox_override("panel", skill_bg)
+	passive_panel.get_node("VBoxContainer/UseButton").hide()
 
 func show_for(character: Node):
 	if not character:
@@ -92,15 +82,16 @@ func refresh():
 func _update_passive():
 	if "passive_skill" in current_character and current_character.passive_skill:
 		var ps = current_character.passive_skill
-		passive_name.text = ps.skill_name
-		passive_desc.text = ps.description
+		passive_panel.get_node("VBoxContainer/SkillNameLabel").text = ps.skill_name
+		passive_panel.get_node("VBoxContainer/SkillDescLabel").text = ps.description
+		passive_panel.get_node("VBoxContainer/CooldownLabel").text = "常驻"
 		passive_header.show()
 		passive_label.show()
-		passive_box.show()
+		passive_panel.show()
 	else:
 		passive_header.hide()
 		passive_label.hide()
-		passive_box.hide()
+		passive_panel.hide()
 
 func _update_buffs():
 	for child in buffs_container.get_children():

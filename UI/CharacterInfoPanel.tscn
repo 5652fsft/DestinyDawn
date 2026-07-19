@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cac87jyl3bpqm" path="res://UI/CharacterInfoPanel.gd" id="1_50icj"]
 [ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2_6xa78"]
+[ext_resource type="PackedScene" uid="uid://b4hqxvb38t0ya" path="res://UI/SkillPanel.tscn" id="3_ps"]
 
 [node name="CharacterInfoPanel" type="Panel" unique_id=93908048]
 visible = false
@@ -87,25 +88,6 @@ theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 14
 text = "天赋"
 
-[node name="PassiveBox" type="Panel" parent="ScrollContainer/VBox" unique_id=644261710]
+[node name="PassiveSkillPanel" parent="ScrollContainer/VBox" instance=ExtResource("3_ps")]
 layout_mode = 2
-
-[node name="PassiveVBox" type="VBoxContainer" parent="ScrollContainer/VBox/PassiveBox" unique_id=750891706]
-layout_mode = 2
-
-[node name="PassiveNameLabel" type="Label" parent="ScrollContainer/VBox/PassiveBox/PassiveVBox" unique_id=619135771]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_6xa78")
-theme_override_font_sizes/font_size = 18
-
-[node name="PassiveDescLabel" type="Label" parent="ScrollContainer/VBox/PassiveBox/PassiveVBox" unique_id=618664424]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_6xa78")
-theme_override_font_sizes/font_size = 14
-autowrap_mode = 2
-
-[node name="PassiveStatusLabel" type="Label" parent="ScrollContainer/VBox/PassiveBox/PassiveVBox" unique_id=309929466]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_6xa78")
-theme_override_font_sizes/font_size = 16
-text = "常驻"
+custom_minimum_size = Vector2(0, 130)
