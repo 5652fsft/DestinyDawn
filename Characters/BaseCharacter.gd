@@ -612,6 +612,12 @@ func take_damage(damage: int):
 	if hp <= 0:
 		hide()
 		collision_layer = 0
+		# 击杀再动：攻击者重置行动状态
+		if main and main.last_attacker and main.last_attacker.hp > 0:
+			var killer = main.last_attacker
+			if GlobalGameData.character_attack_used.has(killer.name):
+				GlobalGameData.character_attack_used[killer.name] = false
+				GlobalGameData.character_attack_used_num -= 1
 		main.unregister_character(self)
 		if multiplayer.is_server():
 			var killer_key = "client_kills" if is_host else "host_kills"
