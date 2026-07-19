@@ -717,11 +717,12 @@ func move_toward_target():
 	else:
 		global_position = target_world
 		velocity = Vector2.ZERO
+		if is_moving:
+			if grid_layer:
+				var local_pos = grid_layer.to_local(global_position)
+				var cell = grid_layer.local_to_map(local_pos)
+				print("[Move] %s 到达格子 (%d, %d)" % [name, cell.x, cell.y])
 		is_moving = false
-		if grid_layer:
-			var local_pos = grid_layer.to_local(global_position)
-			var cell = grid_layer.local_to_map(local_pos)
-			print("[Move] %s 到达格子 (%d, %d)" % [name, cell.x, cell.y])
 		if is_multiplayer_authority() and multiplayer.has_multiplayer_peer():
 			rpc("_sync_position", global_position)
 		main.end_character_move()
