@@ -56,5 +56,8 @@ func _input(event):
 func _process(delta):
 	var prev_zoom = zoom
 	zoom = lerp(zoom, Vector2(_zoom_target, _zoom_target), 8 * delta)
-	if _zoom_anchor != Vector2.ZERO and prev_zoom != zoom:
-		position += _zoom_anchor - get_global_mouse_position()
+	if _zoom_anchor != Vector2.ZERO:
+		if abs(zoom.x - _zoom_target) > 0.001:
+			position += _zoom_anchor - get_global_mouse_position()
+		else:
+			_zoom_anchor = Vector2.ZERO
