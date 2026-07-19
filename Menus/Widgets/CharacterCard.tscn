@@ -123,6 +123,30 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 14
 text = "技能: 护卫指令"
+autowrap_mode = 1
+
+[node name="SkillDescLabel" type="Label" parent="CardBack/Scroll/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2")
+theme_override_font_sizes/font_size = 12
+modulate = Color(0.8, 0.8, 0.9)
+text = "为单个友方提供 30 点护盾 (CD: 3)"
+autowrap_mode = 1
+
+[node name="PassiveLabel" type="Label" parent="CardBack/Scroll/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2")
+theme_override_font_sizes/font_size = 14
+text = "被动: 铁壁"
+autowrap_mode = 1
+
+[node name="PassiveDescLabel" type="Label" parent="CardBack/Scroll/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2")
+theme_override_font_sizes/font_size = 12
+modulate = Color(0.8, 0.8, 0.9)
+text = "受到伤害 -20%（HP<50% 时 -35%）"
+autowrap_mode = 1
 
 [node name="InfoButton" type="Button" parent="."]
 layout_mode = 0
