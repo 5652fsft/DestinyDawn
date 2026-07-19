@@ -78,10 +78,12 @@ func _build_deck_from_selection():
 func _generate_ai_team_and_deck():
 	var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster"]
 	all_chars.shuffle()
-	GlobalGameData.client_team = all_chars.slice(0, 3)
+	GlobalGameData.client_team = []
+	GlobalGameData.client_team.assign(all_chars.slice(0, 3))
 	var all_cards = CardDatabase.get_all_card_ids()
 	all_cards.shuffle()
-	GlobalGameData.ai_deck = all_cards.slice(0, 8)
+	GlobalGameData.ai_deck = []
+	GlobalGameData.ai_deck.assign(all_cards.slice(0, 8))
 
 func _init_player_card_systems_ai():
 	deck_manager.init_player(1, GlobalGameData.selected_deck.duplicate())

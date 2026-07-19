@@ -165,12 +165,14 @@ func _generate_ai_team_and_deck():
 	# 随机队伍：从 6 个角色中选 3 个不重复的
 	var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster"]
 	all_chars.shuffle()
-	GlobalGameData.client_team = all_chars.slice(0, 3)
+	GlobalGameData.client_team = []
+	GlobalGameData.client_team.assign(all_chars.slice(0, 3))
 
 	# 随机卡组：从 30 张卡中选 8 张不重复的
 	var all_cards = CardDatabase.get_all_card_ids()
 	all_cards.shuffle()
-	GlobalGameData.ai_deck = all_cards.slice(0, 8)
+	GlobalGameData.ai_deck = []
+	GlobalGameData.ai_deck.assign(all_cards.slice(0, 8))
 ```
 
 **`_init_player_card_systems_ai()`**：
@@ -744,7 +746,8 @@ func _generate_ai_team_and_deck():
 	# 新增角色在这里追加：所有角色必须有对应的 CharacterData 注册
 	# var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster", "new_character_id"]
 	all_chars.shuffle()
-	GlobalGameData.client_team = all_chars.slice(0, 3)
+	GlobalGameData.client_team = []
+	GlobalGameData.client_team.assign(all_chars.slice(0, 3))
 ```
 
 ### 8.2 可能需要更新的地方
