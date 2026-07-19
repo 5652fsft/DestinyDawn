@@ -2,6 +2,7 @@ extends Control
 
 const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 const CardTheme = preload("res://UI/CardTheme.gd")
+const CharData = preload("res://Global/CharacterData.gd")
 
 const CARD_SCENE = preload("res://Menus/Widgets/CharacterCard.tscn")
 
@@ -15,8 +16,8 @@ func _ready():
 
 func _build_roster():
 	var grid = $RosterScroll/RosterGrid
-	for cid in CharacterData.get_all_ids():
-		var data = CharacterData.get(cid)
+	for cid in CharData.DATA:
+		var data = CharData.DATA[cid]
 		var card = CARD_SCENE.instantiate()
 		card.setup(cid, data)
 		card.clicked.connect(_on_card_clicked)
@@ -44,7 +45,7 @@ func _build_slot_uis():
 	for i in range(3):
 		if i < slots.size():
 			var cid = slots[i]
-			var data = CharacterData.get(cid)
+			var data = CharData.DATA[cid]
 			var slot = Panel.new()
 			slot.custom_minimum_size = Vector2(220, 80)
 			var p = StyleBoxFlat.new()

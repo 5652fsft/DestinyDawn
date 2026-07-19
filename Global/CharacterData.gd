@@ -1,6 +1,4 @@
-class_name CharacterData
-
-static var data = {
+const DATA = {
 	"bronya":    {"name":"布洛妮娅", "hp":80,  "move":5, "atk":15, "range":1,
 		"skill":"护卫指令", "skill_desc":"为单个友方提供 30 点护盾", "skill_cd":3,
 		"passive":"铁壁", "passive_desc":"受到伤害 -20%（HP<50% 时 -35%）"},
@@ -19,10 +17,10 @@ static var data = {
 }
 
 static func get(id: String) -> Dictionary:
-	return data.get(id, {})
+	return DATA.get(id, {})
 
 static func get_all_ids() -> Array[String]:
 	var ids: Array[String] = []
-	for k in data:
+	for k in DATA:
 		ids.append(k)
 	return ids
