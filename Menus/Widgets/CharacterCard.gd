@@ -19,12 +19,15 @@ func setup(id: String, data: Dictionary):
 	$CardFront/HPLabel.text = "HP: %d" % data.hp
 	$CardFront/ATKLabel.text = "ATK: %d" % data.atk
 	$CardFront/MoveLabel.text = "移动: %d" % data.move
+	$CardFront/RangeLabel.text = "射程: %d" % data.get("range", 1)
 	$CardFront/SkillLabel.text = "技能: %s" % data.skill
+	$CardFront/PassiveLabel.text = "被动: %s" % data.get("passive", "")
 
 	$CardBack/Scroll/VBox/NameLabel.text = data.name
 	$CardBack/Scroll/VBox/HPLabel.text = "HP: %d" % data.hp
 	$CardBack/Scroll/VBox/ATKLabel.text = "ATK: %d" % data.atk
 	$CardBack/Scroll/VBox/MoveLabel.text = "移动: %d" % data.move
+	$CardBack/Scroll/VBox/RangeLabel.text = "射程: %d" % data.get("range", 1)
 	$CardBack/Scroll/VBox/SkillLabel.text = "技能: %s" % data.skill
 	$CardBack/Scroll/VBox/SkillLabel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	$CardBack/Scroll/VBox/SkillDescLabel.text = "%s (CD: %d)" % [data.get("skill_desc", ""), data.get("skill_cd", 0)]
@@ -89,7 +92,7 @@ func set_team_status(in_team: bool):
 	_in_team = in_team
 	if _flipped:
 		return
-	modulate = Color(1, 1, 1, 1) if in_team else Color(CardTheme.DISABLED_ALPHA, CardTheme.DISABLED_ALPHA, CardTheme.DISABLED_ALPHA, 1)
+	modulate = Color(1, 1, 1, 1) if not in_team else Color(CardTheme.DISABLED_ALPHA, CardTheme.DISABLED_ALPHA, CardTheme.DISABLED_ALPHA, 1)
 
 func _on_hover_enter():
 	if _hover_tween: _hover_tween.kill()
@@ -129,4 +132,4 @@ func _swap_face():
 	if _flipped:
 		modulate = Color.WHITE
 	else:
-		modulate = Color(1, 1, 1, 1) if _in_team else Color(CardTheme.DISABLED_ALPHA, CardTheme.DISABLED_ALPHA, CardTheme.DISABLED_ALPHA, 1)
+		modulate = Color(1, 1, 1, 1) if not _in_team else Color(CardTheme.DISABLED_ALPHA, CardTheme.DISABLED_ALPHA, CardTheme.DISABLED_ALPHA, 1)
