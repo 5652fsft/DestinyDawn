@@ -85,6 +85,14 @@ player_side = "Client"
 
 [node name="Toast" parent="UI" unique_id=132693243 instance=ExtResource("13_p4fma")]
 layout_mode = 3
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -350.0
+offset_top = 0.0
+offset_right = 350.0
+offset_bottom = 124.0
+grow_horizontal = 2
 
 [node name="BattleResult" parent="UI" unique_id=398861919 instance=ExtResource("14_p4fma")]
 

@@ -1,15 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://brurwg5mxwbym"]
+[gd_scene format=3 uid="uid://brurwg5mxwbym"]
 
 [ext_resource type="Script" uid="uid://cac87jyl3bpqm" path="res://UI/CharacterInfoPanel.gd" id="1_50icj"]
 [ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2_6xa78"]
 
-[node name="CharacterInfoPanel" type="Panel"]
+[node name="CharacterInfoPanel" type="Panel" unique_id=872415824]
 visible = false
 offset_right = 358.0
 offset_bottom = 720.0
 script = ExtResource("1_50icj")
 
-[node name="NameLabel" type="Label" parent="."]
+[node name="NameLabel" type="Label" parent="." unique_id=2057045477]
 layout_mode = 0
 offset_left = 50.0
 offset_top = 12.0
@@ -18,7 +18,7 @@ offset_bottom = 38.0
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 22
 
-[node name="HPLabel" type="Label" parent="."]
+[node name="HPLabel" type="Label" parent="." unique_id=951755721]
 layout_mode = 0
 offset_left = 50.0
 offset_top = 42.0
@@ -27,17 +27,17 @@ offset_bottom = 62.0
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
 
-[node name="AttackLabel" type="RichTextLabel" parent="."]
+[node name="AttackLabel" type="RichTextLabel" parent="." unique_id=124622799]
 layout_mode = 0
 offset_left = 50.0
 offset_top = 66.0
 offset_right = 300.0
 offset_bottom = 86.0
-bbcode_enabled = true
 theme_override_fonts/normal_font = ExtResource("2_6xa78")
 theme_override_font_sizes/normal_font_size = 16
+bbcode_enabled = true
 
-[node name="MovePointsLabel" type="Label" parent="."]
+[node name="MovePointsLabel" type="Label" parent="." unique_id=628581249]
 layout_mode = 0
 offset_left = 50.0
 offset_top = 90.0
@@ -46,7 +46,7 @@ offset_bottom = 110.0
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
 
-[node name="AttackRangeLabel" type="Label" parent="."]
+[node name="AttackRangeLabel" type="Label" parent="." unique_id=1517577788]
 layout_mode = 0
 offset_left = 50.0
 offset_top = 114.0
@@ -55,7 +55,7 @@ offset_bottom = 134.0
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
 
-[node name="ShieldLabel" type="Label" parent="."]
+[node name="ShieldLabel" type="Label" parent="." unique_id=552480616]
 layout_mode = 0
 offset_left = 50.0
 offset_top = 138.0
@@ -64,37 +64,36 @@ offset_bottom = 158.0
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
 
-[node name="PassiveLabel" type="Label" parent="."]
+[node name="PassiveLabel" type="Label" parent="." unique_id=794042067]
 layout_mode = 0
 offset_left = 50.0
 offset_top = 164.0
 offset_right = 350.0
 offset_bottom = 184.0
+mouse_filter = 1
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
-mouse_filter = 1
 
-[node name="PassiveDescContainer" type="VBoxContainer" parent="."]
+[node name="PassiveDescContainer" type="VBoxContainer" parent="." unique_id=1301482060]
 layout_mode = 0
 offset_left = 50.0
 offset_top = 186.0
 offset_right = 350.0
 offset_bottom = 220.0
-mouse_filter = 1
 
-[node name="BuffsLabel" type="Label" parent="."]
+[node name="BuffsLabel" type="Label" parent="." unique_id=1141284376]
 layout_mode = 0
 offset_left = 50.0
-offset_top = 226.0
+offset_top = 246.0
 offset_right = 150.0
-offset_bottom = 246.0
+offset_bottom = 270.0
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
 text = "Buff"
 
-[node name="BuffsContainer" type="VBoxContainer" parent="."]
+[node name="BuffsContainer" type="VBoxContainer" parent="." unique_id=1015233750]
 layout_mode = 0
 offset_left = 50.0
-offset_top = 276.0
+offset_top = 278.0
 offset_right = 350.0
-offset_bottom = 700.0
+offset_bottom = 682.0

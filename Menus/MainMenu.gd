@@ -20,10 +20,8 @@ func _center_button_pivots():
 			btn.pivot_offset = btn.size * 0.5
 
 func _update_status():
-	var team = GlobalGameData.selected_team
-	var deck = GlobalGameData.selected_deck
-	$VBoxContainer/TeamButton.text = "编队管理 (%d/3)" % team.size()
-	$VBoxContainer/DeckButton.text = "卡组构筑 (%d/8)" % deck.size()
+	$VBoxContainer/TeamButton.text = "编队管理"
+	$VBoxContainer/DeckButton.text = "卡组构筑"
 
 func _on_btn_enter(btn):
 	var tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
