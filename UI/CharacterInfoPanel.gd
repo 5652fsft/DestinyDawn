@@ -32,10 +32,15 @@ func _ready():
 	var bg = StyleBoxFlat.new()
 	bg.bg_color = Color(0.08, 0.08, 0.15, 0.85)
 	add_theme_stylebox_override("panel", bg)
-	# 内部容器透明
-	var no_bg = StyleBoxEmpty.new()
-	passive_box.add_theme_stylebox_override("panel", no_bg)
-	skill_box.add_theme_stylebox_override("panel", no_bg)
+
+	var skill_bg = StyleBoxFlat.new()
+	skill_bg.bg_color = Color(0.08, 0.08, 0.15, 0.85)
+	skill_bg.content_margin_left = 12
+	skill_bg.content_margin_top = 12
+	skill_bg.content_margin_right = 12
+	skill_bg.content_margin_bottom = 12
+	passive_box.add_theme_stylebox_override("panel", skill_bg)
+	skill_box.add_theme_stylebox_override("panel", skill_bg)
 
 func show_for(character: Node):
 	if not character:

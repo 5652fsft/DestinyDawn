@@ -3,139 +3,140 @@
 [ext_resource type="Script" uid="uid://cac87jyl3bpqm" path="res://UI/CharacterInfoPanel.gd" id="1_50icj"]
 [ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2_6xa78"]
 
-[node name="CharacterInfoPanel" type="Panel"]
+[node name="CharacterInfoPanel" type="Panel" unique_id=93908048]
 visible = false
 offset_right = 358.0
 offset_bottom = 720.0
 script = ExtResource("1_50icj")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="."]
+[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=201581606]
 layout_mode = 0
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 350.0
 offset_bottom = 712.0
 
-[node name="VBox" type="VBoxContainer" parent="ScrollContainer"]
-layout_mode = 2
+[node name="VBox" type="VBoxContainer" parent="ScrollContainer" unique_id=2008776170]
 custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+theme_override_constants/separation = 4
 
-[node name="NameLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="NameLabel" type="Label" parent="ScrollContainer/VBox" unique_id=2126478299]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 24
 
-[node name="ActionLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="ActionLabel" type="Label" parent="ScrollContainer/VBox" unique_id=2080329322]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
 
-[node name="AttrHeader" type="HSeparator" parent="ScrollContainer/VBox"]
+[node name="AttrHeader" type="HSeparator" parent="ScrollContainer/VBox" unique_id=1944907109]
 layout_mode = 2
 
-[node name="AttrLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="AttrLabel" type="Label" parent="ScrollContainer/VBox" unique_id=1294174511]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 14
 text = "属性"
 
-[node name="HPLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="HPLabel" type="Label" parent="ScrollContainer/VBox" unique_id=128034402]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
-[node name="AttackLabel" type="RichTextLabel" parent="ScrollContainer/VBox"]
+[node name="AttackLabel" type="RichTextLabel" parent="ScrollContainer/VBox" unique_id=1190980293]
 layout_mode = 2
 theme_override_fonts/normal_font = ExtResource("2_6xa78")
 theme_override_font_sizes/normal_font_size = 15
 bbcode_enabled = true
 
-[node name="MovePointsLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="MovePointsLabel" type="Label" parent="ScrollContainer/VBox" unique_id=1488241115]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
-[node name="AttackRangeLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="AttackRangeLabel" type="Label" parent="ScrollContainer/VBox" unique_id=1736359476]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
-[node name="ShieldLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="ShieldLabel" type="Label" parent="ScrollContainer/VBox" unique_id=1191566387]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
-[node name="BuffHeader" type="HSeparator" parent="ScrollContainer/VBox"]
+[node name="BuffHeader" type="HSeparator" parent="ScrollContainer/VBox" unique_id=906687461]
 layout_mode = 2
 
-[node name="BuffLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="BuffLabel" type="Label" parent="ScrollContainer/VBox" unique_id=1037400563]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 14
 text = "效果"
 
-[node name="BuffsContainer" type="VBoxContainer" parent="ScrollContainer/VBox"]
+[node name="BuffsContainer" type="VBoxContainer" parent="ScrollContainer/VBox" unique_id=852220230]
 layout_mode = 2
 
-[node name="PassiveHeader" type="HSeparator" parent="ScrollContainer/VBox"]
+[node name="PassiveHeader" type="HSeparator" parent="ScrollContainer/VBox" unique_id=1972069507]
 layout_mode = 2
 
-[node name="PassiveLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="PassiveLabel" type="Label" parent="ScrollContainer/VBox" unique_id=1658349110]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 14
 text = "天赋"
 
-[node name="PassiveBox" type="Panel" parent="ScrollContainer/VBox"]
+[node name="PassiveBox" type="Panel" parent="ScrollContainer/VBox" unique_id=644261710]
 layout_mode = 2
 
-[node name="PassiveVBox" type="VBoxContainer" parent="ScrollContainer/VBox/PassiveBox"]
-layout_mode = 2
+[node name="PassiveVBox" type="VBoxContainer" parent="ScrollContainer/VBox/PassiveBox" unique_id=750891706]
+layout_mode = 0
 
-[node name="PassiveNameLabel" type="Label" parent="ScrollContainer/VBox/PassiveBox/PassiveVBox"]
+[node name="PassiveNameLabel" type="Label" parent="ScrollContainer/VBox/PassiveBox/PassiveVBox" unique_id=619135771]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 18
 
-[node name="PassiveDescLabel" type="Label" parent="ScrollContainer/VBox/PassiveBox/PassiveVBox"]
+[node name="PassiveDescLabel" type="Label" parent="ScrollContainer/VBox/PassiveBox/PassiveVBox" unique_id=618664424]
 layout_mode = 2
-autowrap_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 14
+autowrap_mode = 2
 
-[node name="PassiveStatusLabel" type="Label" parent="ScrollContainer/VBox/PassiveBox/PassiveVBox"]
+[node name="PassiveStatusLabel" type="Label" parent="ScrollContainer/VBox/PassiveBox/PassiveVBox" unique_id=309929466]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
 text = "常驻"
 
-[node name="SkillHeader" type="HSeparator" parent="ScrollContainer/VBox"]
+[node name="SkillHeader" type="HSeparator" parent="ScrollContainer/VBox" unique_id=1703853654]
 layout_mode = 2
 
-[node name="SkillLabel" type="Label" parent="ScrollContainer/VBox"]
+[node name="SkillLabel" type="Label" parent="ScrollContainer/VBox" unique_id=1267597280]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 14
 text = "技能"
 
-[node name="SkillBox" type="Panel" parent="ScrollContainer/VBox"]
+[node name="SkillBox" type="Panel" parent="ScrollContainer/VBox" unique_id=175316234]
 layout_mode = 2
 
-[node name="SkillVBox" type="VBoxContainer" parent="ScrollContainer/VBox/SkillBox"]
-layout_mode = 2
+[node name="SkillVBox" type="VBoxContainer" parent="ScrollContainer/VBox/SkillBox" unique_id=316582156]
+layout_mode = 0
 
-[node name="SkillNameLabel" type="Label" parent="ScrollContainer/VBox/SkillBox/SkillVBox"]
+[node name="SkillNameLabel" type="Label" parent="ScrollContainer/VBox/SkillBox/SkillVBox" unique_id=40990969]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 18
 
-[node name="SkillDescLabel" type="Label" parent="ScrollContainer/VBox/SkillBox/SkillVBox"]
+[node name="SkillDescLabel" type="Label" parent="ScrollContainer/VBox/SkillBox/SkillVBox" unique_id=950826432]
 layout_mode = 2
-autowrap_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 14
+autowrap_mode = 2
 
-[node name="CooldownLabel" type="Label" parent="ScrollContainer/VBox/SkillBox/SkillVBox"]
+[node name="CooldownLabel" type="Label" parent="ScrollContainer/VBox/SkillBox/SkillVBox" unique_id=1534894862]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
