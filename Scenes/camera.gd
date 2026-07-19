@@ -29,10 +29,14 @@ func shake(intensity: float = 5.0, duration: float = 0.15):
 func _input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN and scaleNum > 0.4:
+			var mouse_world = get_global_mouse_position()
 			scaleNum -= 0.05
+			position += mouse_world - get_global_mouse_position()
 			startMousePosition = Vector2.ZERO
 		elif event.button_index == MOUSE_BUTTON_WHEEL_UP and scaleNum < 1.0:
+			var mouse_world = get_global_mouse_position()
 			scaleNum += 0.05
+			position += mouse_world - get_global_mouse_position()
 			startMousePosition = Vector2.ZERO
 		if event.button_index == MOUSE_BUTTON_RIGHT:
 			if event.is_pressed():
