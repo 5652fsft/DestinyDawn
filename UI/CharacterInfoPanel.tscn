@@ -22,31 +22,37 @@ layout_mode = 2
 
 [node name="NameLabel" type="Label" parent="ScrollContainer/VBox" unique_id=539442598]
 layout_mode = 2
+modulate = Color(1, 1, 1)
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 24
 
 [node name="ActionLabel" type="Label" parent="ScrollContainer/VBox" unique_id=160994237]
 layout_mode = 2
+modulate = Color(1, 1, 1)
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
 
 [node name="AttrHeader" type="HSeparator" parent="ScrollContainer/VBox" unique_id=544481999]
 layout_mode = 2
+modulate = Color(1, 1, 1, 0.4)
 
 [node name="AttrLabel" type="Label" parent="ScrollContainer/VBox" unique_id=1008443157]
 layout_mode = 2
+modulate = Color(1, 1, 1)
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 14
 text = "属性"
 
 [node name="HPLabel" type="Label" parent="ScrollContainer/VBox" unique_id=1056265313]
 layout_mode = 2
+modulate = Color(1, 1, 1)
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
 [node name="AttackLabel" type="RichTextLabel" parent="ScrollContainer/VBox" unique_id=1812238725]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 22)
+modulate = Color(1, 1, 1)
 theme_override_fonts/normal_font = ExtResource("2_6xa78")
 theme_override_font_sizes/normal_font_size = 15
 bbcode_enabled = true
@@ -55,24 +61,29 @@ text = "攻击力"
 
 [node name="MovePointsLabel" type="Label" parent="ScrollContainer/VBox" unique_id=1950372560]
 layout_mode = 2
+modulate = Color(1, 1, 1)
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
 [node name="AttackRangeLabel" type="Label" parent="ScrollContainer/VBox" unique_id=299935244]
 layout_mode = 2
+modulate = Color(1, 1, 1)
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
 [node name="ShieldLabel" type="Label" parent="ScrollContainer/VBox" unique_id=383931468]
 layout_mode = 2
+modulate = Color(1, 1, 1)
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
 [node name="BuffHeader" type="HSeparator" parent="ScrollContainer/VBox" unique_id=1239085440]
 layout_mode = 2
+modulate = Color(1, 1, 1, 0.4)
 
 [node name="BuffLabel" type="Label" parent="ScrollContainer/VBox" unique_id=637662349]
 layout_mode = 2
+modulate = Color(1, 1, 1)
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 14
 text = "效果"
