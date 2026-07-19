@@ -46,10 +46,12 @@ theme_override_font_sizes/font_size = 15
 
 [node name="AttackLabel" type="RichTextLabel" parent="ScrollContainer/VBox" unique_id=1812238725]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 22)
 theme_override_fonts/normal_font = ExtResource("2_6xa78")
 theme_override_font_sizes/normal_font_size = 15
 bbcode_enabled = true
 scroll_active = false
+text = "攻击力"
 
 [node name="MovePointsLabel" type="Label" parent="ScrollContainer/VBox" unique_id=1950372560]
 layout_mode = 2
