@@ -58,9 +58,9 @@ text = "0 / 8"
 
 [node name="DeckGrid" type="GridContainer" parent="VBoxContainer/DeckPanel" unique_id=986033589]
 layout_mode = 0
-offset_left = 80.0
+offset_left = 24.0
 offset_top = 36.0
-offset_right = 1240.0
+offset_right = 1176.0
 offset_bottom = 220.0
 size_flags_vertical = 3
 columns = 8
@@ -83,10 +83,10 @@ text = "卡牌库"
 
 [node name="PoolScroll" type="ScrollContainer" parent="VBoxContainer/CardPool" unique_id=1627362687]
 layout_mode = 0
-offset_left = 40.0
-offset_top = 50.0
-offset_right = 1200.0
-offset_bottom = 310.0
+offset_left = 50.0
+offset_top = 55.0
+offset_right = -20.0
+offset_bottom = -20.0
 size_flags_vertical = 3
 
 [node name="GridContainer" type="GridContainer" parent="VBoxContainer/CardPool/PoolScroll" unique_id=1119728354]
