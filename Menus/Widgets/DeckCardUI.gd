@@ -19,10 +19,12 @@ func setup(cid: String, name_text: String, cost: int, type_text: String, desc: S
 	$DescLabel.text = desc
 	$TypeLabel.text = type_text
 	_base_scale = scale
+	pivot_offset = size * 0.5
 
 func _ready():
 	mouse_entered.connect(_on_hover_enter)
 	mouse_exited.connect(_on_hover_exit)
+	pivot_offset = size * 0.5
 	# 样式
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color(0.12, 0.12, 0.2, 1.0)
@@ -36,7 +38,6 @@ func _ready():
 func _gui_input(event: InputEvent):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
-			_drag_offset = get_local_mouse_position()
 			_is_dragging = true
 		elif _is_dragging:
 			_is_dragging = false
@@ -44,7 +45,7 @@ func _gui_input(event: InputEvent):
 
 func _process(_delta):
 	if _is_dragging and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		global_position = get_global_mouse_position() - _drag_offset * scale
+		global_position = get_global_mouse_position() - size * 0.5
 		z_index = 100
 
 func _drop_card():

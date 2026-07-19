@@ -14,7 +14,7 @@ func _ready():
 	_update_ui()
 
 func _build_pool():
-	var grid = $HBoxContainer/CardPool/PoolScroll/GridContainer
+	var grid = $VBoxContainer/CardPool/PoolScroll/GridContainer
 	for cid in CardDatabase.get_all_card_ids():
 		var data = CardDatabase.get_card(cid)
 		if not data: continue
@@ -48,7 +48,7 @@ func _update_ui():
 	for cid in pool_widgets:
 		pool_widgets[cid].set_in_deck_mode(cid in deck_ids)
 	# 重建出战卡组
-	var deck_grid = $HBoxContainer/DeckPanel/DeckScroll/DeckGrid
+	var deck_grid = $VBoxContainer/DeckPanel/DeckGrid
 	for c in deck_grid.get_children():
 		c.queue_free()
 	for cid in deck_ids:
@@ -67,7 +67,7 @@ func _update_ui():
 		empty.modulate = Color(1, 1, 1, 0.15)
 		deck_grid.add_child(empty)
 	# 更新计数
-	$HBoxContainer/DeckPanel/CountLabel.text = "%d / %d" % [deck_ids.size(), DECK_SIZE]
+	$VBoxContainer/DeckPanel/CountLabel.text = "%d / %d" % [deck_ids.size(), DECK_SIZE]
 	$SaveButton.disabled = deck_ids.size() < DECK_SIZE
 
 func _on_save_pressed():
