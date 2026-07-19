@@ -11,9 +11,6 @@ func _ready():
 
 func _setup_return_button():
 	var btn = $VBoxContainer/ReturnButton
-	call_deferred(func():
-		btn.pivot_offset = btn.size * 0.5
-	)
 	btn.mouse_entered.connect(_on_btn_enter.bind(btn))
 	btn.mouse_exited.connect(_on_btn_exit.bind(btn))
 	btn.button_down.connect(_on_btn_down.bind(btn))
@@ -36,6 +33,7 @@ func _on_btn_up(btn):
 	t.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.05)
 
 func show_result(is_winner: bool, stats: Dictionary):
+	$VBoxContainer/ReturnButton.pivot_offset = $VBoxContainer/ReturnButton.size * 0.5
 	$VBoxContainer/TitleLabel.text = "胜 利" if is_winner else "败 北"
 	$VBoxContainer/TitleLabel.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2) if is_winner else Color(1.0, 0.3, 0.3))
 	$VBoxContainer/TitleLabel.add_theme_font_override("font", FONT)
