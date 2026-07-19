@@ -463,6 +463,7 @@ func _sync_hand(player_id: int, hand: Array):
 	if player_id == my_pid:
 		var typed: Array[String] = []
 		typed.assign(hand)
+		print("[Hand] _sync_hand: player=%d, cards=%s" % [player_id, str(typed)])
 		hand_panel.play_draw_animation(typed)
 
 func _on_skill_used(skill: BaseSkill, target_type: int):

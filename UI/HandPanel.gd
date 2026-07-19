@@ -11,9 +11,12 @@ const TARGET_GAP: float = 120.0
 @onready var card_scene: PackedScene = preload("res://UI/CardUI.tscn")
 
 func clear():
+	var n = card_container.get_child_count()
 	for child in card_container.get_children():
 		child.queue_free()
 	card_uis.clear()
+	if n > 0:
+		print("[Hand] clear: removed %d children" % n)
 
 func play_draw_animation(hand: Array[String]):
 	set_hand(hand)
@@ -22,10 +25,11 @@ func set_hand(card_ids: Array[String]):
 	clear()
 	for cid in card_ids:
 		var data = CardDatabase.get_card(cid)
-		if data:
+		if not data:
+			push_error("HandPanel: CardDatabase.get_card returned null for: " + cid)
+		else:
 			_add_card(data)
-	if card_uis.is_empty() and not card_ids.is_empty():
-		push_error("HandPanel: set_hand produced 0 cards from " + str(card_ids.size()) + " IDs")
+	print("[Hand] set_hand: ids=%d, card_uis=%d" % [card_ids.size(), card_uis.size()])
 	_layout_cards()
 
 func remove_card_via_data(data: CardData) -> bool:
@@ -43,6 +47,9 @@ func remove_card_via_data(data: CardData) -> bool:
 
 func _add_card(data: CardData):
 	var instance = card_scene.instantiate()
+	if not instance:
+		push_error("HandPanel: card_scene.instantiate returned null!")
+		return
 	card_container.add_child(instance)
 	instance.setup(data)
 	instance.pivot_offset = instance.size * 0.5
