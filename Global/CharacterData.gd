@@ -16,9 +16,6 @@ const DATA = {
 		"passive":"数据篡改", "passive_desc":"攻击时 50% 概率附加随机减益"},
 }
 
-static func get(id: String) -> Dictionary:
-	return DATA.get(id, {})
-
 static func get_all_ids() -> Array[String]:
 	var ids: Array[String] = []
 	for k in DATA:
