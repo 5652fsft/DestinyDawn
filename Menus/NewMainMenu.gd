@@ -2,17 +2,35 @@ extends Control
 
 const FONT = preload("res://Assets/Fronts/SourceHanSerifCN-Heavy-4.otf")
 
-@onready var team_status = $VBoxContainer/TeamStatus
-@onready var deck_status = $VBoxContainer/DeckStatus
-
 func _ready():
+	for btn in [$TeamButton, $DeckButton, $HostButton, $JoinButton, $SettingsButton, $QuitButton]:
+		btn.mouse_entered.connect(_on_btn_enter.bind(btn))
+		btn.mouse_exited.connect(_on_btn_exit.bind(btn))
+		btn.button_down.connect(_on_btn_down.bind(btn))
+		btn.button_up.connect(_on_btn_up.bind(btn))
 	_update_status()
 
 func _update_status():
-	var team_count = GlobalGameData.selected_team.size()
-	var deck_count = GlobalGameData.selected_deck.size()
-	team_status.text = "编队: %d/3 名角色" % team_count if team_count > 0 else "编队: 未配置"
-	deck_status.text = "卡组: %d 张牌" % deck_count if deck_count > 0 else "卡组: 未配置"
+	var team = GlobalGameData.selected_team
+	var deck = GlobalGameData.selected_deck
+	$TeamButton.text = "编队管理 (%d/3)" % team.size() if team.size() > 0 else "编队管理 (未配置)"
+	$DeckButton.text = "卡组构筑 (%d/8)" % deck.size() if deck.size() > 0 else "卡组构筑 (未配置)"
+
+func _on_btn_enter(btn):
+	var tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.1)
+
+func _on_btn_exit(btn):
+	var tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(btn, "scale", Vector2(1, 1), 0.1)
+
+func _on_btn_down(btn):
+	var tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(btn, "scale", Vector2(0.97, 0.97), 0.05)
+
+func _on_btn_up(btn):
+	var tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.05)
 
 func _on_team_pressed():
 	get_tree().change_scene_to_file("res://Menus/TeamFormation.tscn")
@@ -50,7 +68,6 @@ func _on_settings_pressed():
 func _on_settings_close():
 	GlobalGameData.player_name = $SettingsPanel/NameEdit.text
 	$SettingsPanel.hide()
-	_update_status()
 
 func _on_quit_pressed():
 	get_tree().quit()
