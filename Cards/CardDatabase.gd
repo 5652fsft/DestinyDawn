@@ -50,7 +50,7 @@ static func _register_cards():
 			CardData.EffectType.BUFF_ATTACK, 8, 2),
 
 		_create_card("card_fortify", "铁壁防御", CardData.CardType.BUFF, 1,
-			CardData.TargetType.ALLY_SINGLE, "友方获得 +8 防御（持续 2 回合）",
+			CardData.TargetType.ALLY_SINGLE, "友方获得护甲 +8（减少受到的伤害，持续 2 回合）",
 			CardData.EffectType.BUFF_DEFENSE, 8, 2),
 
 		_create_card("card_haste", "加速", CardData.CardType.BUFF, 1,
@@ -126,7 +126,7 @@ static func _register_cards():
 
 		# ========== 费用 2 — Buff/Debuff ==========
 		_create_card("card_iron_wall", "铁壁形态", CardData.CardType.BUFF, 2,
-			CardData.TargetType.SELF, "获得 +12 防御（持续 3 回合）",
+			CardData.TargetType.SELF, "获得护甲 +12（减少受到的伤害，持续 3 回合）",
 			CardData.EffectType.BUFF_DEFENSE, 12, 3),
 
 		_create_card("card_disarm", "时停", CardData.CardType.DEBUFF, 2,

@@ -602,6 +602,15 @@ func take_damage(damage: int):
 		damage = damage * (100 + mark_pct) / 100
 		print("[Buff] %s 被标记，额外承受 %d%% 伤害！" % [name, mark_pct])
 	
+	# 防御减免：defense_buff 为正数减伤，负数易伤
+	var def_val = buff_manager.get_total(self, "defense_buff") if buff_manager else 0
+	if def_val != 0:
+		damage = max(1, damage - def_val)
+		if def_val > 0:
+			print("[Buff] %s 防御减免 %d 点伤害" % [name, def_val])
+		else:
+			print("[Buff] %s 易伤额外承受 %d 点伤害" % [name, -def_val])
+	
 	var absorbed = min(shield, damage)
 	shield -= absorbed
 	damage -= absorbed
