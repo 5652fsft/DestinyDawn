@@ -192,6 +192,17 @@ func _execute_move(chara: Node, cell: Vector2i):
 		_log("%s 移动失败：无 grid_layer" % chara.character_name, "Move")
 		return
 
+	# 防重叠：目标格子被占用时找最近空闲格子
+	if _main.is_cell_occupied(cell, chara):
+		var start = chara.get_current_cell()
+		var free = _find_nearest_free_cell(chara, cell, start)
+		if free != Vector2i(-1, -1):
+			_log("%s 原目标 (%d,%d) 被占用，改到 (%d,%d)" % [chara.character_name, cell.x, cell.y, free.x, free.y], "Move")
+			cell = free
+		else:
+			_log("%s 目标 (%d,%d) 被占用且无可用邻格，跳过移动" % [chara.character_name, cell.x, cell.y], "Move")
+			return
+
 	var target_local = gl.map_to_local(cell)
 	var world_pos = gl.to_global(target_local)
 
@@ -211,6 +222,27 @@ func _execute_move(chara: Node, cell: Vector2i):
 	GlobalGameData.character_move_used_num += 1
 	_log("%s 移动到 (%d, %d)，位置 %s" % [chara.character_name, cell.x, cell.y, world_pos], "Move")
 	_main.check_move()
+
+
+# ==================== 防重叠 ====================
+
+func _find_nearest_free_cell(chara: Node, target: Vector2i, start: Vector2i) -> Vector2i:
+	var visited: Dictionary = {}
+	visited[target] = true
+	var queue = [target]
+	while queue.size() > 0:
+		var cur = queue.pop_front()
+		if not _main.is_cell_occupied(cur, chara):
+			var cost = chara.get_move_cost(cur)
+			if cost > 0:
+				return cur
+		for d in _hex_dirs:
+			var n = cur + d
+			if visited.has(n):
+				continue
+			visited[n] = true
+			queue.append(n)
+	return Vector2i(-1, -1)
 
 
 func _execute_attack(chara: Node, target: Node):
