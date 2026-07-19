@@ -708,6 +708,14 @@ func _check_hover():
 func _process(delta):
 	_check_hover()
 	if not multiplayer or not multiplayer.has_multiplayer_peer():
+		if GlobalGameData.is_ai_mode:
+			if name.begins_with("Host"):
+				if get_current_phase() == "Move":
+					handle_move()
+				elif get_current_phase() == "Attack":
+					handle_attack()
+			move_toward_target()
+			return
 		move_toward_target()
 		return
 	if not is_multiplayer_authority():
