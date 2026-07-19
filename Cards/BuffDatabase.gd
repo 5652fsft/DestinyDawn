@@ -47,4 +47,9 @@ static func _all_buffs() -> Dictionary:
 	b.category = BuffData.Category.SPECIAL; b.is_harmful = true; b.max_stacks = 1
 	out["mark"] = b
 
+	b = BuffData.new()
+	b.id = "bloodthirst"; b.name = "嗜血成性"; b.type = BuffData.BuffType.ATTACK_BUFF
+	b.category = BuffData.Category.SPECIAL; b.is_harmful = false; b.max_stacks = 3
+	out["bloodthirst"] = b
+
 	return out

@@ -46,12 +46,12 @@ var active_skill: BaseSkill
 var passive_skill: BaseSkill
 
 func _ready():
-    # 1. 设置角色属性（在 super() 之前）
-    max_hp = 80
-    hp = 80
-    attack = 16
-    attack_range = 2
-    move_points = 5
+	# 1. 设置角色属性（在 super() 之前）
+	max_hp = 80
+	hp = 80
+	attack = 16
+	attack_range = 2
+	move_points = 5
 
 	# 2. 调用父类 _ready（必须放在属性设置之后）
 	super()
@@ -141,6 +141,8 @@ replication_interval = 0.0
 ---
 
 ## D) 素材准备
+
+素材源目录：`C:\Users\10932\Documents\5652\DestinyDawn\character\`（阵营贴图）和 `C:\Users\10932\Documents\5652\DestinyDawn\standee\`（立绘）
 
 ```
 Assets/Sprites/Characters/

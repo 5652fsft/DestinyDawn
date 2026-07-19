@@ -29,6 +29,7 @@ const CHARACTER_SEELE = preload("res://Characters/Seele/Seele.tscn")
 const CHARACTER_ELAINA = preload("res://Characters/Elaina/Elaina.tscn")
 const CHARACTER_FIREFLY = preload("res://Characters/Firefly/Firefly.tscn")
 const CHARACTER_SILVERWOLF = preload("res://Characters/SilverWolf/SilverWolf.tscn")
+const CHARACTER_HAMSTER = preload("res://Characters/Hamster/Hamster.tscn")
 
 var team_roster: Array[PackedScene] = []
 var enemy_roster: Array[PackedScene] = []
@@ -44,7 +45,7 @@ func _build_team_from_selection():
 	var map = {
 		"bronya": CHARACTER_BRONYA, "seele": CHARACTER_SEELE,
 		"elaina": CHARACTER_ELAINA, "firefly": CHARACTER_FIREFLY,
-		"silverwolf": CHARACTER_SILVERWOLF,
+		"silverwolf": CHARACTER_SILVERWOLF, "hamster": CHARACTER_HAMSTER,
 	}
 	if not GlobalGameData.selected_team.is_empty():
 		for cid in GlobalGameData.selected_team:
@@ -385,8 +386,9 @@ func _on_target_selected(target: Node):
 		selected_character.use_active_skill(target)
 		if not selected_character.active_skill: return
 		selected_character.active_skill.current_cooldown = selected_character.active_skill.cooldown
-		GlobalGameData.character_attack_used[selected_character.name] = true
-		GlobalGameData.character_attack_used_num += 1
+		if not selected_character.has_method("_consumes_attack_on_skill") or selected_character._consumes_attack_on_skill():
+			GlobalGameData.character_attack_used[selected_character.name] = true
+			GlobalGameData.character_attack_used_num += 1
 		skill_panel._update_cooldown()
 		cancel_targeting()
 		show_toast("释放 [%s]" % skill_name, 1.0)

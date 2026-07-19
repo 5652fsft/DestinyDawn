@@ -18,6 +18,8 @@ static func execute_active(character: Node, skill: BaseSkill, target: Node, main
 			return _firefly_active(character, target, main)
 		"银狼":
 			return _silverwolf_active(character, target, main)
+		"芝士仓鼠":
+			return _hamster_active(character, target, main)
 		_:
 			push_warning("未知角色技能: ", char_name)
 			return false
@@ -138,4 +140,10 @@ static func _silverwolf_active(character: Node, target: Node, main: Node) -> boo
 		bm.apply_buff(target, "attack_debuff", -8, 3, character)
 		bm.apply_buff(target, "move_debuff", -2, 3, character)
 	print("[Skill] %s [系统入侵] → %s 虚弱+迟缓 3 回合" % [character.character_name, target.name])
+	return true
+
+# === 芝士仓鼠 主动：动作如潮 ===
+static func _hamster_active(character: Node, target: Node, main: Node) -> bool:
+	print("[Skill] %s [动作如潮] 获得额外行动" % character.character_name)
+	character.rpc("_play_vfx_preset", "heal")
 	return true

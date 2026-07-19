@@ -636,6 +636,9 @@ var effective_attack: int:
 		if buff_manager:
 			base += buff_manager.get_total(self, "attack_buff")
 			base += buff_manager.get_total(self, "attack_debuff")
+			var bt = buff_manager.get_total(self, "bloodthirst")
+			if bt > 0:
+				base += int(attack * bt / 100.0)
 		return max(0, base)
 
 var effective_move_points: int:
