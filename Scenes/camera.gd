@@ -1,6 +1,6 @@
 extends Camera2D
 
-var scaleNum: float = 1
+var scaleNum: float = 0.4
 var isDrag: bool = false
 var startMousePosition: Vector2 = Vector2.ZERO
 var startCameraPosition: Vector2 = Vector2.ZERO
@@ -28,11 +28,11 @@ func shake(intensity: float = 5.0, duration: float = 0.15):
 
 func _input(event):
 	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN and scaleNum > 0.5:
-			scaleNum -= 0.1
+		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN and scaleNum > 0.4:
+			scaleNum -= 0.05
 			startMousePosition = Vector2.ZERO
-		elif event.button_index == MOUSE_BUTTON_WHEEL_UP and scaleNum < 1.8:
-			scaleNum += 0.1
+		elif event.button_index == MOUSE_BUTTON_WHEEL_UP and scaleNum < 1.0:
+			scaleNum += 0.05
 			startMousePosition = Vector2.ZERO
 		if event.button_index == MOUSE_BUTTON_RIGHT:
 			if event.is_pressed():
