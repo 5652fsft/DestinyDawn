@@ -251,7 +251,6 @@ func unselect_character(chara: CharacterBody2D, unselect_all = false):
 		character_info_panel.hide()
 		skill_panel.hide()
 		passive_skill_panel.hide()
-			passive_skill_panel.hide()
 	else:
 		chara.is_selected = false
 		selected_character = null
