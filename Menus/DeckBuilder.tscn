@@ -60,11 +60,11 @@ text = "0 / 8"
 layout_mode = 0
 offset_left = 80.0
 offset_top = 36.0
-offset_right = 1160.0
+offset_right = 1240.0
 offset_bottom = 220.0
 size_flags_vertical = 3
 columns = 8
-theme_override_constants/hseparation = 24
+theme_override_constants/hseparation = 16
 
 [node name="CardPool" type="Panel" parent="VBoxContainer" unique_id=1097901601]
 clip_contents = true
