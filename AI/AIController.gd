@@ -19,6 +19,7 @@ const ACTION_DELAY: float = 0.5
 var _main: Node2D = null
 var _energy_system: Node = null
 var _deck_manager: Node = null
+var _camera: Node2D = null
 
 # 六边形邻居方向（奇数列偏移）
 var _hex_dirs: Array[Vector2i] = [
@@ -31,7 +32,17 @@ func _ready():
 	_main = get_tree().current_scene
 	_energy_system = _main.get_node("EnergySystem")
 	_deck_manager = _main.get_node("DeckManager")
+	_camera = _main.get_node("Camera")
 	_log("AI 控制器就绪")
+
+
+func _pan_to(chara: Node):
+	if not _camera or not chara:
+		return
+	if _camera.has_method("is_tweening") and _camera.is_tweening():
+		return
+	var tw = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(_camera, "position", chara.position, 0.4)
 
 
 func _process(_delta):
@@ -138,6 +149,8 @@ func _execute_current_action():
 		return
 
 	var phase_before = GlobalGameData.current_turn_phase
+
+	_pan_to(chara)
 
 	match action.type:
 		"move":
