@@ -80,8 +80,12 @@ func _process(_delta):
 
 func _is_ai_phase() -> bool:
 	var phase = GlobalGameData.current_turn_phase
-	return phase == GlobalGameData.TurnPhase.ENEMY_MOVE \
-		or phase == GlobalGameData.TurnPhase.ENEMY_ATTACK
+	if GlobalGameData.is_host_turn:
+		return phase == GlobalGameData.TurnPhase.ENEMY_MOVE \
+			or phase == GlobalGameData.TurnPhase.ENEMY_ATTACK
+	else:
+		return phase == GlobalGameData.TurnPhase.PLAYER_MOVE \
+			or phase == GlobalGameData.TurnPhase.PLAYER_ATTACK
 
 
 # ==================== 动作队列构建 ====================
