@@ -4,12 +4,13 @@ var active_skill: BaseSkill
 var passive_skill: BaseSkill
 
 func _ready():
-	max_hp = 90
+	max_hp = 65
 	super()
 	character_name = "银狼"
-	hp = 90
-	move_points = 6
+	hp = 65
+	move_points = 4
 	attack_range = 2
+	attack = 16
 	affinity = { attack_bonus = 0.0, heal_bonus = 0.0, shield_bonus = 0.0, debuff_bonus = 0.25 }
 
 	passive_skill = BaseSkill.new()

@@ -5,7 +5,7 @@ extends CharacterBody2D
 const click_layer: int = 2
 const speed: float = 1200.0
 @export var character_name: String = "Character"
-@export var move_points: int = 6
+@export var move_points: int = 4
 @export var max_hp: int = 100
 var _hp: int = 100
 var hp: int:
@@ -17,7 +17,7 @@ var hp: int:
 			main._update_character_info_panel(self)
 		if floating_bar:
 			floating_bar.refresh()
-@export var attack: int = 20
+@export var attack: int = 16
 @export var attack_range: int = 2  # 默认近战，1格
 
 # === 节点引用 ===

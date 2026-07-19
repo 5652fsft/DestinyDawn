@@ -7,13 +7,13 @@ var last_target_hp: int = -1
 var last_target_max_hp: int = -1
 
 func _ready():
-	max_hp = 90
-	hp = 90
+	max_hp = 65
+	hp = 65
 	super()
 	character_name = "希儿"
-	hp = 90
-	max_hp = 90
-	move_points = 5
+	hp = 65
+	move_points = 4
+	attack = 18
 
 	passive_skill = BaseSkill.new()
 	passive_skill.skill_name = "暗影突袭"
