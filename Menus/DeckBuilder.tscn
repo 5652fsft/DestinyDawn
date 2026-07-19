@@ -9,6 +9,8 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1")
 
 [node name="Title" type="Label" parent="." unique_id=1693817160]
@@ -56,12 +58,12 @@ text = "0 / 8"
 
 [node name="DeckGrid" type="GridContainer" parent="VBoxContainer/DeckPanel" unique_id=986033589]
 layout_mode = 0
-offset_left = 10.0
+offset_left = 30.0
 offset_top = 36.0
-offset_right = 1190.0
+offset_right = 1160.0
 offset_bottom = 220.0
-columns = 8
 size_flags_vertical = 3
+columns = 8
 
 [node name="CardPool" type="Panel" parent="VBoxContainer" unique_id=1097901601]
 clip_contents = true
@@ -80,13 +82,14 @@ text = "卡牌库"
 
 [node name="PoolScroll" type="ScrollContainer" parent="VBoxContainer/CardPool" unique_id=1627362687]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 36.0
-offset_right = -10.0
-offset_bottom = -10.0
+offset_left = 30.0
+offset_top = 40.0
+offset_right = 1160.0
+offset_bottom = 310.0
 size_flags_vertical = 3
 
 [node name="GridContainer" type="GridContainer" parent="VBoxContainer/CardPool/PoolScroll" unique_id=1119728354]
+layout_mode = 2
 columns = 8
 
 [node name="BackButton" type="Button" parent="." unique_id=1070243980]
@@ -117,6 +120,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_right = 164.41699
 offset_bottom = 3.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("3")
 expand_mode = 1

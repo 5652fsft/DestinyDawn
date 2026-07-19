@@ -25,6 +25,7 @@ func _ready():
 	mouse_entered.connect(_on_hover_enter)
 	mouse_exited.connect(_on_hover_exit)
 	pivot_offset = size * 0.5
+	z_index = 5
 	# 样式
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color(0.12, 0.12, 0.2, 1.0)
@@ -46,10 +47,10 @@ func _gui_input(event: InputEvent):
 func _process(_delta):
 	if _is_dragging and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		global_position = get_global_mouse_position() - size * 0.5
-		z_index = 100
+		z_index = 50
 
 func _drop_card():
-	z_index = 0
+	z_index = 5
 	var deck_panel = get_node_or_null("/root/DeckBuilder/HBoxContainer/DeckPanel/DeckScroll/DeckGrid")
 	var pool_scroll = get_node_or_null("/root/DeckBuilder/HBoxContainer/CardPool/PoolScroll/GridContainer")
 	
@@ -97,7 +98,7 @@ func set_in_deck_mode(in_deck: bool):
 func _on_hover_enter():
 	if _hover_tween:
 		_hover_tween.kill()
-	z_index = 10
+	z_index = 20
 	_hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	_hover_tween.tween_property(self, "scale", _base_scale * 1.15, 0.12)
 	_hover_tween.parallel().tween_property(self, "self_modulate", Color(1, 1, 0.9), 0.12)
@@ -105,7 +106,7 @@ func _on_hover_enter():
 func _on_hover_exit():
 	if _hover_tween:
 		_hover_tween.kill()
-	z_index = 0
+	z_index = 5
 	_hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	_hover_tween.tween_property(self, "scale", _base_scale, 0.12)
 	_hover_tween.parallel().tween_property(self, "self_modulate", Color.WHITE, 0.12)

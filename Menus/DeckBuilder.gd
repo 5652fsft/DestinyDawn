@@ -10,29 +10,21 @@ var deck_ids: Array[String] = []
 var pool_widgets: Dictionary = {}  # card_id -> DeckCardUI
 
 func _ready():
-	print("[DeckBuilder] _ready start")
 	_build_pool()
 	_update_ui()
-	print("[DeckBuilder] _ready end, pool size: " + str(pool_widgets.size()))
 
 func _build_pool():
 	var grid = $VBoxContainer/CardPool/PoolScroll/GridContainer
 	if not grid:
-		print("[DeckBuilder] ERROR: GridContainer not found!")
 		return
-	var ids = CardDatabase.get_all_card_ids()
-	print("[DeckBuilder] Building pool with " + str(ids.size()) + " cards")
-	for cid in ids:
+	for cid in CardDatabase.get_all_card_ids():
 		var data = CardDatabase.get_card(cid)
-		if not data:
-			print("[DeckBuilder] No data for: " + cid)
-			continue
+		if not data: continue
 		var w = CARD_SCENE.instantiate()
 		w.setup(cid, data.card_name, data.cost, TYPE_NAMES.get(data.card_type, "?"), data.description)
 		w.card_added.connect(_on_card_added)
 		grid.add_child(w)
 		pool_widgets[cid] = w
-	print("[DeckBuilder] Pool built, widgets: " + str(pool_widgets.size()))
 
 func _on_card_added(cid: String):
 	if deck_ids.size() >= DECK_SIZE:
@@ -59,9 +51,6 @@ func _update_ui():
 		pool_widgets[cid].set_in_deck_mode(cid in deck_ids)
 	# 重建出战卡组
 	var deck_grid = $VBoxContainer/DeckPanel/DeckGrid
-	if not deck_grid:
-		print("[DeckBuilder] ERROR: DeckGrid not found!")
-		return
 	for c in deck_grid.get_children():
 		c.queue_free()
 	for cid in deck_ids:
