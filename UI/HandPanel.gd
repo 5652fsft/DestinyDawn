@@ -109,19 +109,11 @@ func _layout_cards():
 
 		if card.has_meta("_entrance"):
 			card.remove_meta("_entrance")
-			var start_pos = target_pos + Vector2(0, 40)
-			if card.has_meta("_fly_start"):
-				start_pos = card.get_meta("_fly_start")
-				card.remove_meta("_fly_start")
+			card.scale = Vector2.ONE
+			card.modulate.a = 1.0
 
-			card.position = start_pos
-			card.scale = Vector2.ZERO
-			card.modulate.a = 0.0
-
-			var tw = card.create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			var tw = card.create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 			card.set_meta("_tw", tw)
-			tw.tween_property(card, "scale", Vector2.ONE, 0.25)
-			tw.tween_property(card, "modulate:a", 1.0, 0.15)
 			tw.tween_property(card, "position", target_pos, 0.3)
 			tw.tween_property(card, "rotation", target_rot, 0.3)
 		else:
