@@ -466,22 +466,7 @@ func _execute_play_card(player_id: int, card_id: String, target_path: String):
 	var target: Node = null
 	if target_path and not target_path.is_empty():
 		target = get_node_or_null(target_path)
-	var caster: Node = null
 	var player_name = "玩家1(Host)" if player_id == 1 else "玩家2(Client)"
-	# 优先用选中的角色作为施法者
-	if selected_character and selected_character.hp > 0:
-		caster = selected_character
-	if not caster:
-		if player_id == 1:
-			for c in GlobalGameData.host_characters:
-				if c.hp > 0:
-					caster = c
-					break
-		else:
-			for c in GlobalGameData.client_characters:
-				if c.hp > 0:
-					caster = c
-					break
 
 	print("[Card] %s 使用 [%s]，目标: %s" % [player_name, card_data.card_name, target.name if target else "无"])
 
@@ -489,7 +474,7 @@ func _execute_play_card(player_id: int, card_id: String, target_path: String):
 	var stat_key = "host_cards_played" if player_id == 1 else "client_cards_played"
 	GlobalGameData.battle_stats[stat_key] += 1
 
-	CardEffect.execute(card_data, caster, target, self)
+	CardEffect.execute(card_data, target, self)
 	var hand = deck_manager.get_hand(player_id)
 	var energy = energy_system.get_energy(player_id)
 	if multiplayer.has_multiplayer_peer():
