@@ -687,6 +687,8 @@ func reset_character_state() -> void:
 	for c in characters:
 		GlobalGameData.character_move_used[c.name] = false
 		GlobalGameData.character_attack_used[c.name] = false
+		if "_extra_attacks" in c:
+			c._extra_attacks = 0
 		if "active_skill" in c and c.active_skill and c.active_skill.current_cooldown > 0:
 			c.active_skill.current_cooldown -= 1
 

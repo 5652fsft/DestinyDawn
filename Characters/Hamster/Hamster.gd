@@ -10,7 +10,7 @@ func _ready():
 	character_name = "芝士仓鼠"
 	hp = 38
 	attack = 26
-	attack_range = 4
+	attack_range = 3
 	move_points = 6
 
 	passive_skill = BaseSkill.new()
