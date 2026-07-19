@@ -56,8 +56,10 @@ static func execute(card: CardData, caster: Node, target: Node, main: Node) -> b
 		CardData.EffectType.AOE_HEAL:
 			return _execute_aoe_heal(card, target, main, caster)
 		CardData.EffectType.CHAIN_DAMAGE:
-			return _execute_chain_damage(card, target, main)
+			return _execute_chain_damage(card, target, main, caster)
 		CardData.EffectType.DAMAGE_OVER_TIME:
+			if card.id == "card_poison_blade":
+				return _execute_poison_blade(card, target, caster)
 			return _apply_temp_buff(target, "poison", card.effect_value, card.effect_duration)
 		CardData.EffectType.HEAL_OVER_TIME:
 			return _apply_temp_buff(target, "regen", card.effect_value, card.effect_duration)
@@ -96,15 +98,17 @@ static func _execute_reckoning(card: CardData, target: Node, main: Node, caster:
 
 # 火球术：20 伤害 + 灼烧 2 回合（每回合 5 点）
 static func _execute_fireball(card: CardData, target: Node, main: Node, caster: Node = null) -> bool:
-	if target and target.has_method("take_damage"):
-		_rpc_take_damage(target, card.effect_value)
+	if not target or not target.has_method("take_damage"):
+		return false
+	_rpc_take_damage(target, card.effect_value)
 	_apply_temp_buff(target, "burn", 5, 2)
 	return true
 
 # 冰晶碎片：8 伤害 + 迟缓 1 回合
 static func _execute_ice_shard(card: CardData, target: Node, caster: Node = null) -> bool:
-	if target and target.has_method("take_damage"):
-		_rpc_take_damage(target, card.effect_value)
+	if not target or not target.has_method("take_damage"):
+		return false
+	_rpc_take_damage(target, card.effect_value)
 	_apply_temp_buff(target, "move_debuff", -2, 1)
 	return true
 
@@ -121,17 +125,18 @@ static func _execute_heal(card: CardData, target: Node, caster: Node = null) -> 
 		target.hp = min(target.max_hp, target.hp + heal_amount)
 	return true
 
-# 生命分流：治疗 15，若目标满血则额外抽 1 张牌
+# 生命分流：治疗 12，若目标满血则额外抽 1 张牌
 static func _execute_life_split(card: CardData, target: Node, caster: Node, main: Node) -> bool:
 	if not target or not "hp" in target or not "max_hp" in target:
 		return false
 	if target.hp >= target.max_hp:
-		if main and main.has_method("draw_extra_card"):
-			main.draw_extra_card(caster, 1)
-			if main.has_method("show_toast"):
-				main.show_toast("[生命分流] 目标满血，额外抽 1 张牌", 1.5)
+		if not main or not main.has_method("draw_extra_card"):
+			return false
+		main.draw_extra_card(caster, 1)
+		if main.has_method("show_toast"):
+			main.show_toast("[生命分流] 目标满血，额外抽 1 张牌", 1.5)
 		return true
-	var heal_amount = min(card.effect_value, target.max_hp - target.hp)
+	var heal_amount = min(int(card.effect_value * _affinity_multiplier(caster, "heal_bonus")), target.max_hp - target.hp)
 	if heal_amount <= 0:
 		return false
 	if target.has_method("rpc"):
@@ -185,11 +190,19 @@ static func _execute_debuff_attack(card: CardData, target: Node, caster: Node = 
 static func _execute_debuff_move(card: CardData, target: Node, caster: Node = null) -> bool:
 	return _apply_temp_buff(target, "move_debuff", -int(card.effect_value * _affinity_multiplier(caster, "debuff_bonus")), card.effect_duration)
 
-# 冰冻术：15 伤害 + 迟缓 2 回合
+# 冰冻术：12 伤害 + 迟缓 2 回合
 static func _execute_frostbite(card: CardData, target: Node, caster: Node = null) -> bool:
 	if target and target.has_method("take_damage"):
-		_rpc_take_damage(target, 15)
+		_rpc_take_damage(target, 12)
 	_apply_temp_buff(target, "move_debuff", -card.effect_value, card.effect_duration)
+	return true
+
+# 毒刃：4 伤害 + 中毒 3 回合
+static func _execute_poison_blade(card: CardData, target: Node, caster: Node = null) -> bool:
+	if not target or not target.has_method("take_damage"):
+		return false
+	_rpc_take_damage(target, 4)
+	_apply_temp_buff(target, "poison", card.effect_value, card.effect_duration)
 	return true
 
 static func _apply_temp_buff(target: Node, buff_key: String, value: int, duration: int) -> bool:
@@ -250,10 +263,10 @@ static func _execute_draw_card(card: CardData, caster: Node, main: Node) -> bool
 	main.draw_extra_card(caster, card.effect_value)
 	return true
 
-# 法力汲取：8 伤害 + 抽 1 张牌
+# 法力汲取：6 伤害 + 抽 1 张牌
 static func _execute_siphon(card: CardData, target: Node, caster: Node, main: Node) -> bool:
 	if target and target.has_method("take_damage"):
-		_rpc_take_damage(target, 8)
+		_rpc_take_damage(target, 6)
 	if main and main.has_method("draw_extra_card"):
 		main.draw_extra_card(caster, 1)
 	return true
@@ -321,10 +334,12 @@ static func _rpc_take_damage(node: Node, amount: int):
 	else:
 		node.take_damage(amount)
 
-static func _execute_chain_damage(card: CardData, primary: Node, main: Node) -> bool:
-	if not primary or not main:
+static func _execute_chain_damage(card: CardData, primary: Node, main: Node, caster: Node) -> bool:
+	if not primary or not main or not caster:
 		return false
-	var is_caster_host = _is_host_side(primary)
+	# 主要目标受到全额伤害
+	_rpc_take_damage(primary, card.effect_value)
+	var is_caster_host = _is_host_side(caster)
 	var hit: Array = [primary]
 	var remaining = 3
 	var current = primary
@@ -335,7 +350,7 @@ static func _execute_chain_damage(card: CardData, primary: Node, main: Node) -> 
 			if c in hit:
 				continue
 			if _is_host_side(c) == is_caster_host:
-				continue  # 跳过友方
+				continue
 			var d = current.global_position.distance_to(c.global_position)
 			if d < nearest_dist and d <= 200.0:
 				nearest = c
@@ -347,7 +362,7 @@ static func _execute_chain_damage(card: CardData, primary: Node, main: Node) -> 
 		hit.append(nearest)
 		current = nearest
 		remaining -= 1
-	return hit.size() > 1
+	return true
 
 static func _execute_linear_aoe(card: CardData, target: Node, main: Node, caster: Node) -> bool:
 	if not target or not main or not caster:
@@ -378,8 +393,10 @@ static func _execute_swap(card: CardData, target: Node, main: Node, caster: Node
 	target.global_position = caster_pos
 	if target.has_method("move_toward_target"):
 		target.target_world = caster_pos
-	caster.rpc("_play_vfx_preset", "entrance")
-	target.rpc("_play_vfx_preset", "entrance")
+	if caster.has_method("rpc"):
+		caster.rpc("_play_vfx_preset", "entrance")
+	if target.has_method("rpc"):
+		target.rpc("_play_vfx_preset", "entrance")
 	return true
 
 static func _execute_cleanse(target: Node) -> bool:

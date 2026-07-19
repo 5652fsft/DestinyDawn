@@ -52,4 +52,9 @@ static func _all_buffs() -> Dictionary:
 	b.category = BuffData.Category.SPECIAL; b.is_harmful = false; b.max_stacks = 3
 	out["bloodthirst"] = b
 
+	b = BuffData.new()
+	b.id = "taunt"; b.name = "嘲讽"; b.type = BuffData.BuffType.ATTACK_DEBUFF
+	b.category = BuffData.Category.SPECIAL; b.is_harmful = true; b.max_stacks = 1
+	out["taunt"] = b
+
 	return out
