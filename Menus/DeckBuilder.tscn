@@ -10,10 +10,15 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1")
 
-[node name="BgSprite" type="Sprite2D" parent="."]
+[node name="BgSprite" type="TextureRect" parent="."]
+offset_left = -82.0
+offset_top = 0.0
+offset_right = 1362.0
+offset_bottom = 723.0
 texture = ExtResource("3")
-centered = false
+stretch_mode = 0
 z_index = -1
+mouse_filter = 2
 
 [node name="Title" type="Label" parent="."]
 offset_left = 40.0
@@ -24,15 +29,6 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 24
 text = "卡组构筑"
 
-[node name="HintLabel" type="Label" parent="."]
-offset_left = 400.0
-offset_top = 16.0
-offset_right = 880.0
-offset_bottom = 44.0
-theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 18
-horizontal_alignment = 1
-
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 offset_left = 40.0
 offset_top = 50.0
@@ -40,11 +36,12 @@ offset_right = 1240.0
 offset_bottom = 620.0
 
 [node name="DeckPanel" type="Panel" parent="VBoxContainer"]
-custom_minimum_size = Vector2(0, 240)
+layout_mode = 2
+custom_minimum_size = Vector2(0, 230)
 size_flags_horizontal = 3
 clip_contents = true
 
-[node name="DeckLabel" type="Label" parent="VBoxContainer/DeckPanel"]
+[node name="Label" type="Label" parent="VBoxContainer/DeckPanel"]
 offset_left = 10.0
 offset_top = 6.0
 offset_right = 200.0
@@ -64,12 +61,13 @@ text = "0 / 8"
 
 [node name="DeckGrid" type="GridContainer" parent="VBoxContainer/DeckPanel"]
 offset_left = 10.0
-offset_top = 40.0
+offset_top = 36.0
 offset_right = 1190.0
-offset_bottom = 230.0
+offset_bottom = 220.0
 columns = 8
 
 [node name="CardPool" type="Panel" parent="VBoxContainer"]
+layout_mode = 2
 size_flags_fill = true
 clip_contents = true
 
@@ -85,8 +83,8 @@ text = "卡牌库"
 [node name="PoolScroll" type="ScrollContainer" parent="VBoxContainer/CardPool"]
 offset_left = 10.0
 offset_top = 36.0
-offset_right = 1190.0
-offset_bottom = 360.0
+offset_right = -10.0
+offset_bottom = -10.0
 
 [node name="GridContainer" type="GridContainer" parent="VBoxContainer/CardPool/PoolScroll"]
 columns = 8
