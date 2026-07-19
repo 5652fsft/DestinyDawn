@@ -109,19 +109,26 @@ func _on_card_double_clicked(cid: String):
 	_show_toast("已自动配置到卡槽 %d" % deck_ids.size())
 
 func _show_toast(msg: String):
-	$HintLabel.text = msg
-	$HintLabel.show()
-	$HintLabel.modulate.a = 1.0
+	var label = Label.new()
+	label.text = msg
+	label.add_theme_font_override("font", FONT)
+	label.add_theme_font_size_override("font_size", 18)
+	label.horizontal_alignment = 1
+	label.modulate = Color(1, 1, 0.85, 1)
+	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
+	label.add_theme_constant_override("shadow_offset_x", 2)
+	label.add_theme_constant_override("shadow_offset_y", 2)
+	label.position = Vector2(400, 16)
+	add_child(label)
 	var tw = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	tw.tween_property($HintLabel, "modulate:a", 0.0, 0.35).set_delay(1.2)
-	tw.finished.connect(func(): $HintLabel.hide())
+	tw.tween_property(label, "modulate:a", 0.0, 0.35).set_delay(1.2)
+	tw.finished.connect(func():
+		if is_instance_valid(label): label.queue_free())
 
 func _on_save_pressed():
 	if deck_ids.size() < DECK_SIZE:
-		$HintLabel.text = "请选择 %d 张卡牌" % DECK_SIZE
-		$HintLabel.show()
-		await get_tree().create_timer(1.5).timeout
-		$HintLabel.hide()
+		_show_toast("请选择 %d 张卡牌" % DECK_SIZE)
+		return
 		return
 	GlobalGameData.selected_deck = deck_ids.duplicate()
 	get_tree().change_scene_to_file("res://Menus/NewMainMenu.tscn")
