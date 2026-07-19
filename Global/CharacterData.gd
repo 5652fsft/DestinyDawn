@@ -14,7 +14,7 @@ const DATA = {
 	"silverwolf":{"name":"银狼",    "hp":55,  "move":5, "atk":16, "range":2,
 		"skill":"系统入侵", "skill_desc":"目标虚弱 + 迟缓各 3 回合", "skill_cd":4,
 		"passive":"数据篡改", "passive_desc":"攻击时 50% 概率附加随机减益"},
-	"hamster":   {"name":"芝士仓鼠","hp":45,  "move":6, "atk":22, "range":4,
+	"hamster":   {"name":"芝士仓鼠","hp":38,  "move":6, "atk":26, "range":4,
 		"skill":"动作如潮", "skill_desc":"立即获得 1 次额外行动", "skill_cd":3,
 		"passive":"钢铁直架", "passive_desc":"消灭敌方后获得 1 次额外行动，攻击力 +50%（可叠加 3 层）"},
 }
