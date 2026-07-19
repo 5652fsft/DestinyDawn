@@ -47,6 +47,7 @@ func _ready():
 func _reset_scale():
 	scale = Vector2(CardTheme.DECK_BASE_SCALE, CardTheme.DECK_BASE_SCALE)
 	_base_scale = scale
+	_on_hover_exit()
 
 func _gui_input(event: InputEvent):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:

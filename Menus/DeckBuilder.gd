@@ -65,6 +65,13 @@ func _update_ui():
 	for c in to_free:
 		deck_grid.remove_child(c)
 		c.queue_free()
+	# 确保现有卡牌scale正确
+	for c in deck_grid.get_children():
+		if "card_id" in c and c.has_method("_reset_scale"):
+			c._reset_scale()
+			if c.card_id in deck_ids:
+				c.set_in_deck_mode(true)
+	# 添加缺失的卡牌（到末尾）
 	for cid in deck_ids:
 		if cid in existing_ids: continue
 		var data = CardDatabase.get_card(cid)
