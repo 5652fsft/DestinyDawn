@@ -204,7 +204,7 @@ func get_move_cost(cell: Vector2i) -> int:
 	match tile_name:
 		"grass", "normal": return 1
 		"water": return 2
-		"mountain": return 3
+		"mountain": return -1
 		"wall": return -1
 		_: return 1
 
@@ -610,6 +610,8 @@ func take_damage(damage: int):
 		GlobalGameData.battle_stats[key] += damage
 		print("[Combat] %s 受到 %d 点伤害，剩余 HP: %d" % [name, damage, hp])
 	if hp <= 0:
+		if not visible:
+			return
 		hide()
 		collision_layer = 0
 		# 击杀再动：攻击者重置行动状态
