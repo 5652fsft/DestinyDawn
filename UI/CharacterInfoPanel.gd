@@ -19,13 +19,6 @@ const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 @onready var passive_desc = $ScrollContainer/VBox/PassiveBox/PassiveVBox/PassiveDescLabel
 @onready var passive_status = $ScrollContainer/VBox/PassiveBox/PassiveVBox/PassiveStatusLabel
 
-@onready var skill_header = $ScrollContainer/VBox/SkillHeader
-@onready var skill_label = $ScrollContainer/VBox/SkillLabel
-@onready var skill_box = $ScrollContainer/VBox/SkillBox
-@onready var skill_name = $ScrollContainer/VBox/SkillBox/SkillVBox/SkillNameLabel
-@onready var skill_desc = $ScrollContainer/VBox/SkillBox/SkillVBox/SkillDescLabel
-@onready var cooldown_label = $ScrollContainer/VBox/SkillBox/SkillVBox/CooldownLabel
-
 var current_character: Node = null
 
 func _ready():
@@ -40,7 +33,6 @@ func _ready():
 	skill_bg.content_margin_right = 12
 	skill_bg.content_margin_bottom = 12
 	passive_box.add_theme_stylebox_override("panel", skill_bg)
-	skill_box.add_theme_stylebox_override("panel", skill_bg)
 
 func show_for(character: Node):
 	if not character:
@@ -94,26 +86,10 @@ func refresh():
 	else:
 		shield_label.hide()
 
-	_update_skills()
+	_update_passive()
 	_update_buffs()
 
-func _update_skills():
-	# 主动技能
-	if "active_skill" in current_character and current_character.active_skill:
-		var sk = current_character.active_skill
-		skill_name.text = sk.skill_name
-		skill_desc.text = sk.description
-		var cd = sk.current_cooldown
-		cooldown_label.text = "冷却: %d 回合" % cd if cd > 0 else "就绪"
-		skill_header.show()
-		skill_label.show()
-		skill_box.show()
-	else:
-		skill_header.hide()
-		skill_label.hide()
-		skill_box.hide()
-
-	# 被动技能
+func _update_passive():
 	if "passive_skill" in current_character and current_character.passive_skill:
 		var ps = current_character.passive_skill
 		passive_name.text = ps.skill_name
