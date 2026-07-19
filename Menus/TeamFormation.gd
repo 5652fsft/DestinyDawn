@@ -22,6 +22,21 @@ func _build_roster():
 		card.selected.connect(_on_character_selected)
 		grid.add_child(card)
 		cards[cid] = card
+	# 检查 slot sprite 是否加载了图片
+	_refresh_slot_sprites()
+
+func _refresh_slot_sprites():
+	for i in range(3):
+		var slot = get_node_or_null("Slot%d" % (i + 1))
+		if not slot: continue
+		var spr = slot.get_node_or_null("Sprite")
+		if not spr: continue
+		if i < slots.size():
+			var cid = slots[i]
+			var tex = load("res://Assets/Sprites/Characters/%s_Blue.png" % cid)
+			if tex: spr.texture = tex
+		else:
+			spr.texture = null
 
 func _on_character_selected(cid: String):
 	if slots.size() >= 3:
@@ -73,20 +88,10 @@ func _update_slots():
 			var cid = slots[i]
 			label.text = CHARACTERS[cid]["name"]
 			remove_btn.show()
-			# 加载角色图片到 slot sprite
-			var slot = get_node_or_null("Slot%d" % (i + 1))
-			if slot:
-				var spr = slot.get_node_or_null("Sprite")
-				if spr:
-					var tex = load("res://Assets/Sprites/Characters/%s_Blue.png" % cid)
-					if tex: spr.texture = tex
 		else:
 			label.text = "空"
 			remove_btn.hide()
-			var slot = get_node_or_null("Slot%d" % (i + 1))
-			if slot:
-				var spr = slot.get_node_or_null("Sprite")
-				if spr: spr.texture = null
+	_refresh_slot_sprites()
 
 func _on_save_pressed():
 	if slots.size() != 3:
