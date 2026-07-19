@@ -36,6 +36,7 @@ var default_deck: Array[String] = []
 
 var last_attacker: Node = null
 var skill_overlays: Array[Node] = []
+var _turn_toast_shown: bool = false
 
 func _build_team_from_selection():
 	team_roster.clear()
@@ -379,6 +380,7 @@ func _on_target_selected(target: Node):
 		cancel_targeting()
 	elif selected_character and selected_character.has_method("use_active_skill") and selected_character.active_skill:
 		selected_character.use_active_skill(target)
+		if not selected_character.active_skill: return
 		selected_character.active_skill.current_cooldown = selected_character.active_skill.cooldown
 		GlobalGameData.character_attack_used[selected_character.name] = true
 		GlobalGameData.character_attack_used_num += 1
@@ -670,10 +672,14 @@ func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn)
 		selected_character = null
 		character_info_panel.hide()
 		skill_panel.hide()
-	# 首次进入移动阶段时提示先后手
-	if phase == GlobalGameData.TurnPhase.PLAYER_MOVE and GlobalGameData.turn_has_been_drawn:
+	# 回合提示
+	if phase == GlobalGameData.TurnPhase.PLAYER_MOVE or phase == GlobalGameData.TurnPhase.ENEMY_MOVE:
 		var is_my_turn = host_turn == GlobalGameData.is_host
-		show_toast("你先手" if is_my_turn else "对方先手", 2.0)
+		if not _turn_toast_shown:
+			show_toast("你先手" if is_my_turn else "对方先手", 2.0)
+			_turn_toast_shown = true
+		else:
+			show_toast("我方回合" if is_my_turn else "敌方回合", 1.5)
 	update_ui_turn_indicator()
 
 func update_ui_turn_indicator():
