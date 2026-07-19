@@ -2,6 +2,7 @@ extends "res://Characters/BaseCharacter.gd"
 
 var active_skill: BaseSkill
 var passive_skill: BaseSkill
+var _extra_attacks: int = 0
 
 func _ready():
 	max_hp = 38
@@ -29,6 +30,12 @@ func use_active_skill(target: Node) -> bool:
 
 func _consumes_attack_on_skill() -> bool:
 	return false
+
+func _get_extra_attacks() -> int:
+	return _extra_attacks
+
+func _consume_extra_attack():
+	_extra_attacks -= 1
 
 func perform_attack(target_path: NodePath):
 	super(target_path)

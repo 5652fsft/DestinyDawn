@@ -144,6 +144,8 @@ static func _silverwolf_active(character: Node, target: Node, main: Node) -> boo
 
 # === 芝士仓鼠 主动：动作如潮 ===
 static func _hamster_active(character: Node, target: Node, main: Node) -> bool:
+	if "_extra_attacks" in character:
+		character._extra_attacks += 1
 	print("[Skill] %s [动作如潮] 获得额外行动" % character.character_name)
 	character.rpc("_play_vfx_preset", "heal")
 	return true

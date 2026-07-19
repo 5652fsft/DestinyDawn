@@ -461,17 +461,21 @@ func handle_attack():
 		# 情况2：已选中，点击敌人 → 攻击
 		if is_selected:
 			if GlobalGameData.character_attack_used.get(name, false):
-				main.show_toast("该角色本回合已行动")
-				print("[Warn] %s 本回合已行动" % name)
-				main.unselect_character(self)
-				return
+				if _get_extra_attacks() <= 0:
+					main.show_toast("该角色本回合已行动")
+					print("[Warn] %s 本回合已行动" % name)
+					main.unselect_character(self)
+					return
 			for r in results:
 				var other = r.collider
 				if other is CharacterBody2D and is_enemy(other) and other.hp > 0:
 					if valid_attack_cells.has(other.grid_layer.local_to_map(other.grid_layer.to_local(other.global_position))):
 						rpc("perform_attack", other.get_path())
-						GlobalGameData.character_attack_used_num += 1
-						GlobalGameData.character_attack_used[name] = true
+						if _get_extra_attacks() > 0:
+							_consume_extra_attack()
+						else:
+							GlobalGameData.character_attack_used_num += 1
+							GlobalGameData.character_attack_used[name] = true
 						main.unselect_character(self)
 						main.check_attack()
 						return
@@ -481,6 +485,12 @@ func handle_attack():
 						return
 			# 点击空地 → 取消选中
 			main.unselect_character(self)
+
+func _get_extra_attacks() -> int:
+	return 0
+
+func _consume_extra_attack():
+	pass
 
 @rpc("any_peer", "call_local", "reliable")
 func perform_attack(target_path: NodePath):

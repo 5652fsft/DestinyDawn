@@ -70,11 +70,12 @@ func _update_cooldown():
 			use_button.disabled = true
 			use_button.text = "移动阶段不可用"
 			return
-	# 是否已攻击/使用技能
+	# 是否已攻击/使用技能 — 除非技能不消耗行动次数
 	if current_character and GlobalGameData.character_attack_used.get(current_character.name, false):
-		use_button.disabled = true
-		use_button.text = "本回合已行动"
-		return
+		if not current_character.has_method("_consumes_attack_on_skill") or current_character._consumes_attack_on_skill():
+			use_button.disabled = true
+			use_button.text = "本回合已行动"
+			return
 	use_button.disabled = false
 	use_button.text = "使用技能"
 

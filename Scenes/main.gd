@@ -384,15 +384,7 @@ func _on_target_selected(target: Node):
 	elif selected_character and selected_character.has_method("use_active_skill") and selected_character.active_skill:
 		var skill_name = selected_character.active_skill.skill_name
 		selected_character.use_active_skill(target)
-		if not selected_character.active_skill: return
-		selected_character.active_skill.current_cooldown = selected_character.active_skill.cooldown
-		if not selected_character.has_method("_consumes_attack_on_skill") or selected_character._consumes_attack_on_skill():
-			GlobalGameData.character_attack_used[selected_character.name] = true
-			GlobalGameData.character_attack_used_num += 1
-		skill_panel._update_cooldown()
-		cancel_targeting()
-		show_toast("释放 [%s]" % skill_name, 1.0)
-		check_attack()
+		_active_skill_post_exec(selected_character.active_skill)
 
 func _target_play_card(card_data: CardData, target: Node):
 	var target_path = ""
@@ -478,6 +470,7 @@ func _on_skill_used(skill: BaseSkill, target_type: int):
 	match target_type:
 		BaseSkill.SkillTarget.NONE, BaseSkill.SkillTarget.SELF:
 			selected_character.use_active_skill(selected_character)
+			_active_skill_post_exec(skill)
 			_update_skill_button()
 		BaseSkill.SkillTarget.ALLY_SINGLE:
 			pending_card_data = null
@@ -489,6 +482,22 @@ func _on_skill_used(skill: BaseSkill, target_type: int):
 			is_targeting = true
 			highlight_skill_targets()
 			_update_skill_button()
+
+func _active_skill_post_exec(skill: BaseSkill):
+	if not selected_character or not skill:
+		return
+	if selected_character.active_skill:
+		selected_character.active_skill.current_cooldown = selected_character.active_skill.cooldown
+		if not selected_character.has_method("_consumes_attack_on_skill") or selected_character._consumes_attack_on_skill():
+			GlobalGameData.character_attack_used[selected_character.name] = true
+			GlobalGameData.character_attack_used_num += 1
+	skill_panel._update_cooldown()
+	var main = get_tree().current_scene
+	if selected_character.has_method("hide_attack_range"):
+		selected_character.hide_attack_range()
+	show_toast("释放 [%s]" % skill.skill_name, 1.0)
+	check_attack()
+	cancel_targeting()
 
 func _make_hex_overlay(color: Color, r: float = 68.0) -> Polygon2D:
 	var hex = Polygon2D.new()
