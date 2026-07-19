@@ -129,7 +129,7 @@ func _ready():
 		global_position = aligned_pos
 		target_world = aligned_pos
 		velocity = Vector2.ZERO
-		print("[Move] %s 出生点 → 格子 (%d, %d)" % [name, cell.x, cell.y])
+		print("[Move] %s 出生位置 (%.0f, %.0f) → 格子 (%d, %d)" % [name, global_position.x, global_position.y, cell.x, cell.y])
 
 	_update_sprite_texture()
 
@@ -718,10 +718,7 @@ func move_toward_target():
 		global_position = target_world
 		velocity = Vector2.ZERO
 		if is_moving:
-			if grid_layer:
-				var local_pos = grid_layer.to_local(global_position)
-				var cell = grid_layer.local_to_map(local_pos)
-				print("[Move] %s 到达格子 (%d, %d)" % [name, cell.x, cell.y])
+			print("[Move] %s 到达位置 (%.0f, %.0f)" % [name, global_position.x, global_position.y])
 		is_moving = false
 		if is_multiplayer_authority() and multiplayer.has_multiplayer_peer():
 			rpc("_sync_position", global_position)
