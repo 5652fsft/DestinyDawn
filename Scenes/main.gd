@@ -862,7 +862,7 @@ func _update_character_info_panel(chara):
 func _update_passive_panel(chara):
 	if not passive_skill_panel:
 		return
-	if "passive_skill" in chara and chara.passive_skill:
+	if "passive_skill" in chara and chara.passive_skill and character_info_panel.visible:
 		var ps = chara.passive_skill
 		passive_skill_panel.get_node("VBoxContainer/SkillNameLabel").text = "天赋·%s" % ps.skill_name
 		passive_skill_panel.get_node("VBoxContainer/SkillDescLabel").text = ps.description
