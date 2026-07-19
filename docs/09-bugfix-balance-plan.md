@@ -45,7 +45,7 @@
 ```gdscript
 # main.gd reset_character_state() 中追加：
 if "_extra_attacks" in c:
-    c._extra_attacks = 0
+	c._extra_attacks = 0
 ```
 
 ### 2.2 芝士仓鼠射程削弱
@@ -347,3 +347,31 @@ docs: add cost-strength correlation principle to docs/06
 | `selected_character` 作为施法者可能为空 | 卡牌无法释放 | 增加 fallback：如果 `selected_character` 为空则使用第一个存活角色 |
 | 平衡调整使部分关卡过难/过易 | 游戏体验下降 | 调整后需至少进行 3 局 AI 对战测试 |
 | `taunt` 的 AI 逻辑可能过于复杂 | 开发成本高 | 暂缓实现，先修复其他卡牌；taunt 作为 AI 后续迭代 |
+
+---
+
+## 八、行动次数 Bug 修复 ✅ 已修复
+
+### 8.1 击杀奖励使 attack_used_num 递减
+
+**根因**：`BaseCharacter.take_damage()` 在击杀奖励中同时执行了两件事：
+1. ✅ `character_attack_used[killer] = false` — 重置杀手行动状态（正确）
+2. ❌ `character_attack_used_num -= 1` — 递减全局计数器（错误）
+
+`perform_attack()` 中击杀分支（`killed == true`）执行 `pass`，不递补计数器。两者叠加使每次
+击杀后 `attack_used_num` 净减 1，导致 `check_attack()` 的 `attack_used_num >= my_count`
+条件迟迟无法满足，剩余角色可以无限行动。
+
+**修复**：删除 `take_damage()` 中的 `attack_used_num -= 1`，击杀奖励仅重置 `attack_used`。
+
+**影响**：
+- 每次击杀后杀手获得 1 次免费额外行动（设计意图）
+- `attack_used_num` 不再因击杀而减少
+- `check_attack()` 计算正确，剩余角色不能无限行动
+
+### 8.2 属性栏显示剩余行动次数
+
+在 `UI/CharacterInfoPanel.tscn` 新增 `ActionLabel` 节点，显示：
+- `行动: 可用` — 尚未行动
+- `行动: 已使用` — 本回合已行动
+- `行动: 已使用 (+N 额外)` — 已行动但有额外行动次数（芝士仓鼠）
