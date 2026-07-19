@@ -87,9 +87,7 @@ offset_bottom = -10.0
 size_flags_vertical = 3
 
 [node name="GridContainer" type="GridContainer" parent="VBoxContainer/CardPool/PoolScroll" unique_id=1119728354]
-layout_mode = 2
 columns = 8
-size_flags_vertical = 3
 
 [node name="BackButton" type="Button" parent="." unique_id=1070243980]
 layout_mode = 0
