@@ -109,10 +109,11 @@ func _sync_host_setup(team_ids: Array, deck_ids: Array):
 
 @rpc("any_peer", "reliable")
 func _client_send_setup(team_ids: Array, deck_ids: Array):
+	var sender_id = multiplayer.get_remote_sender_id()
 	GlobalGameData.client_team = team_ids
-	# 游戏开始后不再覆盖玩家2的卡组，避免重置手牌
 	if deck_manager and not deck_ids.is_empty() and GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.NONE:
 		deck_manager.init_player(2, deck_ids)
+	call_deferred("_spawn_client_characters", sender_id)
 
 func _init_buff_manager():
 	var bm = Node.new()
@@ -130,23 +131,21 @@ func _init_vfx_manager():
 
 func _on_client_joined(id: int):
 	print("[Net] 客户端 %d 加入" % id)
-	# 客户端加入后，请求其编队和卡组
+	# 请求客户端的编队和卡组
 	rpc_id(id, "_request_client_setup")
-	# 先使用 Host 的编队初始化卡组并生成 Host 角色
+	# 生成 Host 角色
 	_build_team_from_selection()
 	_build_deck_from_selection()
 	_init_player_card_systems()
 	for i in range(team_roster.size()):
 		rpc_id(id, "_spawn_character_remote", team_roster[i].resource_path, "HostCharacter_%d" % i, multiplayer.get_unique_id(), GlobalGameData.host_birth_point[i])
-	# 延迟等客户端回应后生成客户端角色
-	call_deferred("_deferred_spawn_client_characters", id)
 
 @rpc("any_peer", "reliable")
 func _request_client_setup():
 	# 客户端收到后发送自己的编队和卡组
 	rpc_id(1, "_client_send_setup", GlobalGameData.selected_team, GlobalGameData.selected_deck)
 
-func _deferred_spawn_client_characters(id: int):
+func _spawn_client_characters(id: int):
 	_build_team_from_selection()
 	for i in range(enemy_roster.size()):
 		_spawn_character(enemy_roster[i].resource_path, "Client%dCharacter_%d" % [id, i], id, GlobalGameData.client_birth_point[i])
