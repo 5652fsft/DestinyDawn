@@ -11,7 +11,9 @@ func _ready():
 
 func _setup_return_button():
 	var btn = $VBoxContainer/ReturnButton
-	btn.pivot_offset = btn.size * 0.5
+	call_deferred(func():
+		btn.pivot_offset = btn.size * 0.5
+	)
 	btn.mouse_entered.connect(_on_btn_enter.bind(btn))
 	btn.mouse_exited.connect(_on_btn_exit.bind(btn))
 	btn.button_down.connect(_on_btn_down.bind(btn))
