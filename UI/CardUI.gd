@@ -26,19 +26,19 @@ func _ready():
 	_base_scale = scale
 
 	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.2, 0.3, 0.5, 0.9)
-	style.corner_radius_top_left = 14
-	style.corner_radius_top_right = 14
-	style.corner_radius_bottom_left = 14
-	style.corner_radius_bottom_right = 14
+	style.bg_color = CardTheme.COST_BG
+	style.corner_radius_top_left = CardTheme.COST_RADIUS
+	style.corner_radius_top_right = CardTheme.COST_RADIUS
+	style.corner_radius_bottom_left = CardTheme.COST_RADIUS
+	style.corner_radius_bottom_right = CardTheme.COST_RADIUS
 	cost_circle.add_theme_stylebox_override("panel", style)
 
 	var panel_style = StyleBoxFlat.new()
-	panel_style.bg_color = Color(0.12, 0.12, 0.2, 1.0)
-	panel_style.corner_radius_top_left = 8
-	panel_style.corner_radius_top_right = 8
-	panel_style.corner_radius_bottom_left = 8
-	panel_style.corner_radius_bottom_right = 8
+	panel_style.bg_color = CardTheme.CARD_BG
+	panel_style.corner_radius_top_left = CardTheme.CARD_BORDER_RADIUS
+	panel_style.corner_radius_top_right = CardTheme.CARD_BORDER_RADIUS
+	panel_style.corner_radius_bottom_left = CardTheme.CARD_BORDER_RADIUS
+	panel_style.corner_radius_bottom_right = CardTheme.CARD_BORDER_RADIUS
 	panel_style.shadow_size = 0
 	add_theme_stylebox_override("panel", panel_style)
 
@@ -125,8 +125,8 @@ func _on_hover_enter():
 	_saved_z = z_index
 	z_index = 10
 	_hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_hover_tween.tween_property(self, "scale", _base_scale * 1.35, 0.12)
-	_hover_tween.parallel().tween_property(self, "self_modulate", Color(1, 1, 0.85), 0.12)
+	_hover_tween.tween_property(self, "scale", _base_scale * CardTheme.HOVER_SCALE, CardTheme.HOVER_TWEEN_SEC)
+	_hover_tween.parallel().tween_property(self, "self_modulate", CardTheme.HOVER_MODULATE, CardTheme.HOVER_TWEEN_SEC)
 
 	var panel_style = StyleBoxFlat.new()
 	panel_style.bg_color = Color(0.15, 0.15, 0.25, 1.0)
@@ -134,9 +134,9 @@ func _on_hover_enter():
 	panel_style.corner_radius_top_right = 8
 	panel_style.corner_radius_bottom_left = 8
 	panel_style.corner_radius_bottom_right = 8
-	panel_style.shadow_size = 16
-	panel_style.shadow_color = Color(0, 0, 0, 0.5)
-	panel_style.shadow_offset = Vector2(4, 4)
+	panel_style.shadow_size = CardTheme.HOVER_SHADOW_SIZE
+	panel_style.shadow_color = CardTheme.HOVER_SHADOW_COLOR
+	panel_style.shadow_offset = CardTheme.HOVER_SHADOW_OFFSET
 	add_theme_stylebox_override("panel", panel_style)
 
 func _on_hover_exit():
@@ -144,8 +144,8 @@ func _on_hover_exit():
 		_hover_tween.kill()
 	z_index = _saved_z
 	_hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_hover_tween.tween_property(self, "scale", _base_scale, 0.12)
-	_hover_tween.parallel().tween_property(self, "self_modulate", Color.WHITE, 0.12)
+	_hover_tween.tween_property(self, "scale", _base_scale, CardTheme.HOVER_TWEEN_SEC)
+	_hover_tween.parallel().tween_property(self, "self_modulate", Color.WHITE, CardTheme.HOVER_TWEEN_SEC)
 
 	var panel_style = StyleBoxFlat.new()
 	panel_style.bg_color = Color(0.12, 0.12, 0.2, 1.0)
