@@ -221,7 +221,6 @@ func _execute_move(chara: Node, cell: Vector2i):
 	GlobalGameData.character_move_used[chara.name] = true
 	GlobalGameData.character_move_used_num += 1
 	_log("%s 移动到 (%d, %d)，位置 %s" % [chara.character_name, cell.x, cell.y, world_pos], "Move")
-	_main.check_move()
 
 
 # ==================== 防重叠 ====================
