@@ -1,3 +1,5 @@
+class_name CharacterData
+
 const DATA = {
 	"bronya":    {"name":"布洛妮娅", "hp":68,  "move":5, "atk":15, "range":1,
 		"skill":"护卫指令", "skill_desc":"为友方单体提供 30 点护盾", "skill_cd":3,
