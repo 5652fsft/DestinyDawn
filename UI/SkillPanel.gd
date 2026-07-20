@@ -15,7 +15,7 @@ signal skill_cancelled()
 @onready var cooldown_label = $VBoxContainer/CooldownLabel
 
 func _ready():
-	ButtonTheme.apply_battle(use_button)
+	ButtonTheme.apply_menu(use_button)
 	ButtonTheme.set_font(use_button, 18)
 	use_button.pressed.connect(_on_use_button_pressed)
 	var bg = StyleBoxFlat.new()
