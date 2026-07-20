@@ -8,9 +8,12 @@ static func to_bbcode(t: String) -> String:
 		var line = lines[i]
 		if line.begins_with("##"):
 			line = line.trim_prefix("#").trim_prefix("#").trim_prefix(" ").trim_prefix("#").trim_prefix(" ")
-			line = "[b][u]%s[/u][/b]" % line
+			line = "[b][u][font_size=22]%s[/font_size][/u][/b]" % line
+		elif line.begins_with("###"):
+			line = line.trim_prefix("#").trim_prefix("#").trim_prefix("#").trim_prefix(" ")
+			line = "[b][u][font_size=18]%s[/font_size][/u][/b]" % line
 		elif line.begins_with("**") and line.ends_with("**"):
-			line = "[b]%s[/b]" % line.trim_prefix("**").trim_suffix("**")
+			line = "[b][font_size=17]%s[/font_size][/b]" % line.trim_prefix("**").trim_suffix("**")
 		elif line.begins_with("- "):
 			line = "  •  %s" % line.trim_prefix("- ")
 		elif line.begins_with("|"):
@@ -21,6 +24,6 @@ static func to_bbcode(t: String) -> String:
 		if bold_start >= 0:
 			var bold_end = line.find("**", bold_start + 2)
 			if bold_end >= 0:
-				line = line.left(bold_start) + "[b]" + line.substr(bold_start + 2, bold_end - bold_start - 2) + "[/b]" + line.substr(bold_end + 2)
+				line = line.left(bold_start) + "[b][font_size=17]" + line.substr(bold_start + 2, bold_end - bold_start - 2) + "[/font_size][/b]" + line.substr(bold_end + 2)
 		lines[i] = line
 	return "\n".join(lines)
