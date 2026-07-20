@@ -49,13 +49,14 @@ func _on_ai_battle_pressed():
 	get_tree().change_scene_to_file("res://Scenes/scene.tscn")
 
 func _on_guide_pressed():
+	var text = ""
 	var file = FileAccess.open("res://README.md", FileAccess.READ)
 	if file:
-		var text = file.get_as_text()
+		text = file.get_as_text()
 		file.close()
-		$GuideDialog/GuideText.text = text
 	else:
-		$GuideDialog/GuideText.text = "无法加载游戏指南文件"
+		text = "游戏指南文件未找到。\n请访问 GitHub 仓库查看最新指南：\nhttps://github.com/5652fsft/DestinyDawn"
+	$GuideDialog/GuideText.text = text
 	$GuideDialog.popup_centered()
 
 func _on_quit_pressed():
