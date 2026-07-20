@@ -9,8 +9,6 @@ const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 @onready var move_label = $ScrollContainer/VBox/MovePointsLabel
 @onready var attack_range_label = $ScrollContainer/VBox/AttackRangeLabel
 @onready var shield_label = $ScrollContainer/VBox/ShieldLabel
-@onready var move_button = $MoveButton
-@onready var attack_button = $AttackButton
 @onready var buff_header = $ScrollContainer/VBox/BuffHeader
 @onready var buff_label = $ScrollContainer/VBox/BuffLabel
 @onready var buffs_container = $ScrollContainer/VBox/BuffsContainer
@@ -21,52 +19,6 @@ func _ready():
 	var bg = StyleBoxFlat.new()
 	bg.bg_color = Color(0.08, 0.08, 0.15, 0.85)
 	add_theme_stylebox_override("panel", bg)
-	move_button.pressed.connect(_on_move_pressed)
-	attack_button.pressed.connect(_on_attack_pressed)
-	for btn in [move_button, attack_button]:
-		btn.pivot_offset = btn.size * 0.5
-		btn.mouse_entered.connect(_on_btn_enter.bind(btn))
-		btn.mouse_exited.connect(_on_btn_exit.bind(btn))
-		btn.button_down.connect(_on_btn_down.bind(btn))
-		btn.button_up.connect(_on_btn_up.bind(btn))
-
-func _on_btn_enter(btn):
-	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	t.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.1)
-
-func _on_btn_exit(btn):
-	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	t.tween_property(btn, "scale", Vector2(1, 1), 0.1)
-
-func _on_btn_down(btn):
-	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	t.tween_property(btn, "scale", Vector2(0.97, 0.97), 0.05)
-
-func _on_btn_up(btn):
-	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	t.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.05)
-
-func _on_move_pressed():
-	if not current_character:
-		return
-	var main = get_tree().current_scene
-	if not main:
-		return
-	main.is_attack_mode = false
-	main.is_move_mode = true
-	current_character.hide_attack_range()
-	current_character.show_move_range()
-
-func _on_attack_pressed():
-	if not current_character:
-		return
-	var main = get_tree().current_scene
-	if not main:
-		return
-	main.is_move_mode = false
-	main.is_attack_mode = true
-	current_character.hide_move_range()
-	current_character.show_attack_range()
 
 func show_for(character: Node):
 	if not character:
@@ -129,10 +81,6 @@ func refresh():
 		shield_label.text = "护盾: %d" % current_character.shield
 	else:
 		shield_label.hide()
-
-	move_button.disabled = move_used or viewing_enemy
-	var atk_used2 = GlobalGameData.character_attack_used.get(current_character.name, false)
-	attack_button.disabled = (atk_used2 and extra <= 0) or viewing_enemy
 
 	_update_buffs()
 
