@@ -28,10 +28,7 @@ func _on_host_pressed():
 	get_tree().change_scene_to_file("res://Scenes/scene.tscn")
 
 func _on_join_pressed():
-	$IPDialog.popup_centered()
-
-func _on_ip_confirm():
-	var ip = $IPDialog/IPLineEdit.text
+	var ip = GlobalGameData.server_ip
 	if ip.is_empty():
 		ip = "127.0.0.1"
 	var peer = ENetMultiplayerPeer.new()
@@ -43,11 +40,7 @@ func _on_ip_confirm():
 	get_tree().change_scene_to_file("res://Scenes/scene.tscn")
 
 func _on_settings_pressed():
-	$SettingsPanel.show()
-
-func _on_settings_close():
-	GlobalGameData.player_name = $SettingsPanel/NameEdit.text
-	$SettingsPanel.hide()
+	get_tree().change_scene_to_file("res://Menus/SettingsScene.tscn")
 
 func _on_ai_battle_pressed():
 	GlobalGameData.load_defaults_if_empty()
@@ -56,13 +49,6 @@ func _on_ai_battle_pressed():
 	get_tree().change_scene_to_file("res://Scenes/scene.tscn")
 
 func _on_guide_pressed():
-	var file = FileAccess.open("res://README.md", FileAccess.READ)
-	if file:
-		var text = file.get_as_text()
-		file.close()
-		$GuideDialog/GuideText.text = text
-	else:
-		$GuideDialog/GuideText.text = "无法加载游戏指南文件"
 	$GuideDialog.popup_centered()
 
 func _on_quit_pressed():

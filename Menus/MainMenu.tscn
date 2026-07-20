@@ -88,67 +88,34 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
 text = "退出"
 
-[node name="IPDialog" type="AcceptDialog" parent="." unique_id=1805752148]
-size = Vector2i(300, 150)
-dialog_text = "输入服务器 IP 地址"
-
 [node name="GuideDialog" type="AcceptDialog" parent="."]
-size = Vector2i(900, 600)
+size = Vector2i(960, 680)
 title = "Destiny Dawn — 命运破晓 游戏指南"
-dialog_text = ""
 
-[node name="GuideText" type="RichTextLabel" parent="GuideDialog"]
+[node name="GuidePanel" type="Panel" parent="GuideDialog"]
 layout_mode = 0
-offset_left = 16
-offset_top = 16
-offset_right = 884
-offset_bottom = 584
+offset_left = 12
+offset_top = 12
+offset_right = 948
+offset_bottom = 640
+theme_override_styles/panel = null
+
+[node name="GuideScroll" type="ScrollContainer" parent="GuideDialog/GuidePanel"]
+layout_mode = 0
+offset_left = 8
+offset_top = 8
+offset_right = 928
+offset_bottom = 620
+
+[node name="GuideText" type="RichTextLabel" parent="GuideDialog/GuidePanel/GuideScroll"]
+layout_mode = 2
+custom_minimum_size = Vector2(900, 0)
+theme_override_fonts/normal_font = ExtResource("2")
+theme_override_font_sizes/normal_font_size = 15
+theme_override_colors/default_color = Color(1, 1, 1, 0.9)
 bbcode_enabled = false
-scroll_active = true
+scroll_active = false
 text = "加载中..."
-
-[node name="IPLineEdit" type="LineEdit" parent="IPDialog" unique_id=1997694547]
-offset_left = 20.0
-offset_top = 50.0
-offset_right = 250.0
-offset_bottom = 80.0
-text = "127.0.0.1"
-
-[node name="SettingsPanel" type="Panel" parent="." unique_id=1539130649]
-visible = false
-layout_mode = 0
-offset_left = 340.0
-offset_top = 200.0
-offset_right = 940.0
-offset_bottom = 500.0
-
-[node name="NameLabel" type="Label" parent="SettingsPanel" unique_id=549707044]
-layout_mode = 0
-offset_left = 30.0
-offset_top = 30.0
-offset_right = 200.0
-offset_bottom = 60.0
-theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 18
-text = "玩家名称:"
-
-[node name="NameEdit" type="LineEdit" parent="SettingsPanel" unique_id=1175379029]
-layout_mode = 0
-offset_left = 160.0
-offset_top = 30.0
-offset_right = 330.0
-offset_bottom = 60.0
-text = "玩家"
-
-[node name="CloseButton" type="Button" parent="SettingsPanel" unique_id=78177486]
-layout_mode = 0
-offset_left = 200.0
-offset_top = 220.0
-offset_right = 330.0
-offset_bottom = 260.0
-theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 18
-text = "关闭"
 
 [node name="BgSprite" type="TextureRect" parent="." unique_id=789046125]
 z_index = -1
@@ -170,5 +137,3 @@ expand_mode = 1
 [connection signal="pressed" from="VBoxContainer/GuideButton" to="." method="_on_guide_pressed"]
 [connection signal="pressed" from="VBoxContainer/SettingsButton" to="." method="_on_settings_pressed"]
 [connection signal="pressed" from="VBoxContainer/QuitButton" to="." method="_on_quit_pressed"]
-[connection signal="confirmed" from="IPDialog" to="." method="_on_ip_confirm"]
-[connection signal="pressed" from="SettingsPanel/CloseButton" to="." method="_on_settings_close"]
