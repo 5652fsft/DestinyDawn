@@ -402,7 +402,7 @@ func handle_move():
 			if is_enemy(clicked_character):
 				if not main.is_attack_mode:
 					main.select_character(clicked_character, true)
-			else:
+			elif clicked_character != self and not main.is_attack_mode:
 				main.select_character(clicked_character)
 		elif is_selected and main.is_move_mode:
 			if GlobalGameData.character_move_used.get(name, false):
@@ -458,6 +458,7 @@ func handle_attack():
 		
 		# 情况2：已选中且攻击模式，点击敌人 → 攻击
 		if is_selected and main.is_attack_mode:
+			print("[Debug] handle_attack: attack_mode active, checking click")
 			var clicked_enemy = null
 			for r in results:
 				var other = r.collider
@@ -465,6 +466,7 @@ func handle_attack():
 					clicked_enemy = other
 					break
 			if clicked_enemy:
+				print("[Debug] handle_attack: clicked_enemy = %s" % clicked_enemy.character_name)
 				if GlobalGameData.character_attack_used.get(name, false) and _get_extra_attacks() <= 0:
 					main.unselect_character(self)
 					return
