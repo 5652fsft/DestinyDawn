@@ -249,6 +249,11 @@ func _execute_attack(chara: Node, target: Node):
 	if not is_instance_valid(target) or target.hp <= 0:
 		_log("%s 攻击目标无效" % chara.character_name, "Attack")
 		return
+	if GlobalGameData.character_attack_used.get(chara.name, false):
+		var extra = chara._get_extra_attacks() if chara.has_method("_get_extra_attacks") else 0
+		if extra <= 0:
+			_log("%s 已无行动次数，跳过攻击" % chara.character_name, "Attack")
+			return
 	_log("%s 攻击 -> %s" % [chara.character_name, target.character_name], "Attack")
 	chara.perform_attack(target.get_path())
 	_main.check_attack()
