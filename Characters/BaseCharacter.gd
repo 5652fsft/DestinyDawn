@@ -163,6 +163,7 @@ func _update_sprite_texture():
 		return
 	var script_path = get_script().get_path()
 	var char_id = script_path.get_file().get_basename()
+	char_id = char_id[0].to_upper() + char_id.substr(1)
 	var is_host_side = name.begins_with("Host")
 	var is_friendly = is_host_side == GlobalGameData.is_host
 	var suffix = "_Blue.png" if is_friendly else "_Red.png"
