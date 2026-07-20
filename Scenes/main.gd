@@ -146,7 +146,7 @@ func _ready():
 func _setup_action_buttons():
 	for btn in [move_button, attack_button]:
 		ButtonTheme.apply_battle(btn)
-		ButtonTheme.set_font(btn, 16)
+		ButtonTheme.set_font(btn, 18)
 	move_button.text = "移动"
 	attack_button.text = "普通攻击"
 	move_button.pressed.connect(_on_move_pressed)

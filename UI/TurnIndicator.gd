@@ -8,7 +8,7 @@ func _ready():
 	hide()
 	ButtonTheme.apply_menu(end_turn_button)
 	ButtonTheme.set_font(end_turn_button, 20)
-	end_turn_button.text = "结束阶段"
+	end_turn_button.text = "结束回合"
 	end_turn_button.pressed.connect(_on_EndTurnButton_pressed)
 
 func _is_my_turn() -> bool:
