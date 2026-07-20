@@ -130,8 +130,6 @@ func refresh():
 	else:
 		shield_label.hide()
 
-	var main_node = get_tree().current_scene
-	var viewing_enemy = main_node.is_viewing_enemy if main_node else false
 	move_button.disabled = move_used or viewing_enemy
 	var atk_used2 = GlobalGameData.character_attack_used.get(current_character.name, false)
 	attack_button.disabled = (atk_used2 and extra <= 0) or viewing_enemy
