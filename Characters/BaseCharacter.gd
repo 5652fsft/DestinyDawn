@@ -400,14 +400,11 @@ func handle_move():
 			main.select_character(self)
 		elif clicked_character:
 			if is_enemy(clicked_character):
-				if is_selected and not GlobalGameData.character_attack_used.get(name, false):
-					# 有选中角色且未攻击 → 视为攻击
-					pass  # handle_attack 会处理
-				elif not is_selected:
+				if not main.is_attack_mode:
 					main.select_character(clicked_character, true)
 			else:
 				main.select_character(clicked_character)
-		elif is_selected:
+		elif is_selected and main.is_move_mode:
 			if GlobalGameData.character_move_used.get(name, false):
 				main.show_toast("该角色本回合已移动")
 				return
@@ -459,8 +456,8 @@ func handle_attack():
 					main.unselect_character(self)
 				return
 		
-		# 情况2：已选中，点击敌人 → 攻击（已行动则查看属性）
-		if is_selected:
+		# 情况2：已选中且攻击模式，点击敌人 → 攻击
+		if is_selected and main.is_attack_mode:
 			var clicked_enemy = null
 			for r in results:
 				var other = r.collider
@@ -469,18 +466,18 @@ func handle_attack():
 					break
 			if clicked_enemy:
 				if GlobalGameData.character_attack_used.get(name, false) and _get_extra_attacks() <= 0:
-					main.select_character(clicked_enemy, true)
+					main.unselect_character(self)
 					return
 				if valid_attack_cells.has(clicked_enemy.grid_layer.local_to_map(clicked_enemy.grid_layer.to_local(clicked_enemy.global_position))):
 					rpc("perform_attack", clicked_enemy.get_path())
 					if _get_extra_attacks() > 0:
-							_consume_extra_attack()
-						elif not GlobalGameData.character_attack_used.get(name, false):
-							GlobalGameData.character_attack_used[name] = true
-							GlobalGameData.character_attack_used_num += 1
-						main.unselect_character(self)
-						main.check_attack()
-						return
+						_consume_extra_attack()
+					elif not GlobalGameData.character_attack_used.get(name, false):
+						GlobalGameData.character_attack_used[name] = true
+						GlobalGameData.character_attack_used_num += 1
+					main.unselect_character(self)
+					main.check_attack()
+					return
 					else:
 						main.show_toast("超出攻击范围")
 						print("[Warn] %s 目标超出攻击范围！" % name)

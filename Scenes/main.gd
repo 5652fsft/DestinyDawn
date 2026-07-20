@@ -11,6 +11,8 @@ var selected_character = null
 var characters: Array[CharacterBody2D] = []
 var cell_occupancy: Dictionary = {}
 var is_any_character_moving: bool = false
+var is_move_mode: bool = false
+var is_attack_mode: bool = false
 var is_viewing_enemy: bool = false
 
 # === 卡牌系统 ===
@@ -29,6 +31,8 @@ var buff_manager: Node = null
 var vfx_manager: Node = null
 @onready var skill_panel = $UI/SkillPanel
 @onready var passive_skill_panel = $UI/PassiveSkillPanel
+@onready var move_button = $UI/MoveButton
+@onready var attack_button = $UI/AttackButton
 @onready var host_player_panel = $UI/HostPlayerPanel
 @onready var client_player_panel = $UI/ClientPlayerPanel
 @onready var toast = $UI/Toast
@@ -135,6 +139,61 @@ func _ready():
 			rpc("advance_turn_phase")
 	else:
 		pass
+	
+	_setup_action_buttons()
+
+func _setup_action_buttons():
+	for btn in [move_button, attack_button]:
+		var b = btn
+		call_deferred(func(): b.pivot_offset = b.size * 0.5)
+		b.mouse_entered.connect(_on_action_btn_enter.bind(b))
+		b.mouse_exited.connect(_on_action_btn_exit.bind(b))
+		b.button_down.connect(_on_action_btn_down.bind(b))
+		b.button_up.connect(_on_action_btn_up.bind(b))
+	move_button.pressed.connect(_on_move_pressed)
+	attack_button.pressed.connect(_on_attack_pressed)
+
+func _on_action_btn_enter(btn):
+	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.1)
+
+func _on_action_btn_exit(btn):
+	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_property(btn, "scale", Vector2(1, 1), 0.1)
+
+func _on_action_btn_down(btn):
+	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_property(btn, "scale", Vector2(0.97, 0.97), 0.05)
+
+func _on_action_btn_up(btn):
+	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.05)
+
+func _on_move_pressed():
+	if not selected_character:
+		return
+	if GlobalGameData.character_move_used.get(selected_character.name, false):
+		show_toast("该角色本回合已移动")
+		return
+	is_attack_mode = false
+	is_move_mode = true
+	selected_character.hide_attack_range()
+	selected_character.show_move_range()
+	show_toast("点击格子移动")
+
+func _on_attack_pressed():
+	if not selected_character:
+		return
+	if GlobalGameData.character_attack_used.get(selected_character.name, false):
+		var extra = selected_character._get_extra_attacks() if selected_character.has_method("_get_extra_attacks") else 0
+		if extra <= 0:
+			show_toast("该角色本回合已行动")
+			return
+	is_move_mode = false
+	is_attack_mode = true
+	selected_character.hide_move_range()
+	selected_character.show_attack_range()
+	show_toast("点击敌人攻击")
 
 func _spawn_character(scene_path: String, char_name: String, authority: int, pos: Vector2):
 	var scene = load(scene_path)
@@ -237,10 +296,14 @@ func select_character(chara: CharacterBody2D, enemy_view: bool = false):
 		selected_character.is_selected = false
 		selected_character = null
 		character_info_panel.hide()
+	is_move_mode = false
+	is_attack_mode = false
 	is_viewing_enemy = enemy_view
 	selected_character = chara
 	chara.is_selected = true
 	character_info_panel.show_for(chara)
+	move_button.visible = not enemy_view
+	attack_button.visible = not enemy_view
 	if enemy_view:
 		skill_panel.hide()
 		passive_skill_panel.hide()
@@ -253,17 +316,25 @@ func unselect_character(chara: CharacterBody2D, unselect_all = false):
 		if selected_character != null:
 			selected_character.is_selected = false
 			selected_character = null
+		is_move_mode = false
+		is_attack_mode = false
 		is_viewing_enemy = false
 		character_info_panel.hide()
 		skill_panel.hide()
 		passive_skill_panel.hide()
+		move_button.hide()
+		attack_button.hide()
 	else:
 		chara.is_selected = false
 		selected_character = null
+		is_move_mode = false
+		is_attack_mode = false
 		is_viewing_enemy = false
 		character_info_panel.hide()
 		skill_panel.hide()
 		passive_skill_panel.hide()
+		move_button.hide()
+		attack_button.hide()
 	
 func is_cell_occupied(cell: Vector2i, except_chara = null) -> bool:
 	cell_occupancy.clear()
@@ -739,6 +810,9 @@ func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn,
 		selected_character = null
 		character_info_panel.hide()
 		skill_panel.hide()
+		passive_skill_panel.hide()
+		move_button.hide()
+		attack_button.hide()
 	if phase == GlobalGameData.TurnPhase.GAME_OVER:
 		show_battle_result()
 		return
