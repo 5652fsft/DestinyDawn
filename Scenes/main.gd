@@ -836,9 +836,7 @@ func check_attack() -> void:
 	if total_remaining <= 0:
 		print("[Phase] 所有角色行动次数已耗尽，点击结束回合进入下一阶段")
 		if toast and toast.has_method("show_message"):
-			toast.show_message("所有角色已行动，点击结束回合", 2.0)
-		print("[Phase] 攻击次数耗尽，进入下一阶段")
-		rpc("advance_turn_phase")
+			toast.show_message("所有角色行动次数已耗尽，点击结束回合", 2.0)
 
 func check_victory() -> bool:
 	if not GlobalGameData.turn_has_been_drawn:

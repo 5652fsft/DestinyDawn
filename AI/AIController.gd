@@ -264,7 +264,6 @@ func _execute_attack(chara: Node, target: Node):
 		else:
 			GlobalGameData.character_attack_used[chara.name] = true
 			GlobalGameData.character_attack_used_num += 1
-	_main.check_attack()
 
 
 func _execute_skill(chara: Node, target: Node):
@@ -280,7 +279,6 @@ func _execute_skill(chara: Node, target: Node):
 		if not GlobalGameData.character_attack_used.get(chara.name, false):
 			GlobalGameData.character_attack_used[chara.name] = true
 			GlobalGameData.character_attack_used_num += 1
-	_main.check_attack()
 
 
 func _execute_card(chara: Node, card_id: String, target: Node):
