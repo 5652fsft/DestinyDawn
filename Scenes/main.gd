@@ -120,6 +120,7 @@ func _ready():
 			_spawn_character(enemy_roster[i].resource_path, "ClientCharacter_%d" % i, 1, GlobalGameData.client_birth_point[i])
 		_init_player_card_systems_ai()
 		_log("双方角色已生成，卡牌系统已初始化", "Mode")
+		_setup_action_buttons()
 		_setup_ai_controller()
 		rpc("advance_turn_phase")
 		return
