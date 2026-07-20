@@ -59,7 +59,9 @@ func refresh():
 		attack_label.text = "攻击力: %d" % base_atk
 
 	var move_pts = current_character.effective_move_points if "effective_move_points" in current_character else current_character.move_points
-	move_label.text = "移动范围: %d" % move_pts
+	var move_used = GlobalGameData.character_move_used.get(current_character.name, false)
+	var move_remaining = 0 if move_used else 1
+	move_label.text = "移动范围: %d (剩余 %d)" % [move_pts, move_remaining]
 
 	var atk_range = current_character.attack_range if "attack_range" in current_character else 1
 	attack_range_label.text = "攻击范围: %d" % atk_range

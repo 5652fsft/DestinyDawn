@@ -5,11 +5,9 @@ var is_ai_mode: bool = false
 
 enum TurnPhase {
 	NONE,
-	START_ROUND,        # 抽先手
-	PLAYER_MOVE,        # 先手移动
-	PLAYER_ATTACK,      # 先手攻击
-	ENEMY_MOVE,         # 后手移动
-	ENEMY_ATTACK,       # 后手攻击
+	START_ROUND,
+	PLAYER_TURN,         # 先手方回合（移动+攻击合并）
+	ENEMY_TURN,          # 后手方回合（移动+攻击合并）
 	GAME_OVER
 }
 

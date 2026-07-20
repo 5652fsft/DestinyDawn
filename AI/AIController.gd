@@ -79,21 +79,12 @@ func _process(_delta):
 
 
 func _is_ai_phase() -> bool:
-	return _is_ai_move_phase() or _is_ai_attack_phase()
+	return _is_ai_turn()
 
-func _is_ai_move_phase() -> bool:
+func _is_ai_turn() -> bool:
 	var phase = GlobalGameData.current_turn_phase
-	if GlobalGameData.is_host_turn:
-		return phase == GlobalGameData.TurnPhase.ENEMY_MOVE
-	else:
-		return phase == GlobalGameData.TurnPhase.PLAYER_MOVE
-
-func _is_ai_attack_phase() -> bool:
-	var phase = GlobalGameData.current_turn_phase
-	if GlobalGameData.is_host_turn:
-		return phase == GlobalGameData.TurnPhase.ENEMY_ATTACK
-	else:
-		return phase == GlobalGameData.TurnPhase.PLAYER_ATTACK
+	return phase == GlobalGameData.TurnPhase.ENEMY_TURN \
+		or phase == GlobalGameData.TurnPhase.PLAYER_TURN
 
 
 # ==================== 动作队列构建 ====================
@@ -102,41 +93,41 @@ func _build_action_queue():
 	_action_queue.clear()
 	var ai_chars = _get_ai_alive()
 
-	if _is_ai_move_phase():
-		_log("构建移动队列，AI 存活角色: %d" % ai_chars.size(), "Queue")
-		for chara in ai_chars:
-			if GlobalGameData.character_move_used.get(chara.name, false):
-				continue
-			var target = _evaluate_move_target(chara)
-			if target != Vector2i(-1, -1):
-				_action_queue.append({
-					"type": "move", "character": chara, "cell": target
-				})
-			else:
-				_log("%s 无可用移动目标" % chara.character_name)
+	# 移动队列
+	_log("构建移动队列，AI 存活角色: %d" % ai_chars.size(), "Queue")
+	for chara in ai_chars:
+		if GlobalGameData.character_move_used.get(chara.name, false):
+			continue
+		var target = _evaluate_move_target(chara)
+		if target != Vector2i(-1, -1):
+			_action_queue.append({
+				"type": "move", "character": chara, "cell": target
+			})
+		else:
+			_log("%s 无可用移动目标" % chara.character_name)
 
-	elif _is_ai_attack_phase():
-		_log("构建攻击队列，AI 存活角色: %d" % ai_chars.size(), "Queue")
-		for chara in ai_chars:
-			if _should_use_skill(chara):
-				var skill_target = _evaluate_skill_target(chara)
-				if skill_target != null and is_instance_valid(skill_target) and skill_target.hp > 0:
-					_action_queue.append({
-						"type": "skill", "character": chara, "target": skill_target
-					})
-					_log("%s 将使用技能 -> %s" % [chara.character_name, skill_target.character_name])
-			if _should_play_card(chara):
-				var card_action = _evaluate_best_card(chara)
-				if not card_action.is_empty():
-					_action_queue.append(card_action)
-					_log("%s 将使用卡牌: %s" % [chara.character_name, card_action.get("card_id", "?")])
-			if not GlobalGameData.character_attack_used.get(chara.name, false) or (chara.has_method("_get_extra_attacks") and chara._get_extra_attacks() > 0):
-				var attack_target = _evaluate_attack_target(chara)
-				if attack_target != null:
-					_action_queue.append({
-						"type": "attack", "character": chara, "target": attack_target
-					})
-					_log("%s 将攻击 -> %s" % [chara.character_name, attack_target.character_name])
+	# 攻击/技能/卡牌队列
+	_log("构建攻击队列，AI 存活角色: %d" % ai_chars.size(), "Queue")
+	for chara in ai_chars:
+		if _should_use_skill(chara):
+			var skill_target = _evaluate_skill_target(chara)
+			if skill_target != null and is_instance_valid(skill_target) and skill_target.hp > 0:
+				_action_queue.append({
+					"type": "skill", "character": chara, "target": skill_target
+				})
+				_log("%s 将使用技能 -> %s" % [chara.character_name, skill_target.character_name])
+		if _should_play_card(chara):
+			var card_action = _evaluate_best_card(chara)
+			if not card_action.is_empty():
+				_action_queue.append(card_action)
+				_log("%s 将使用卡牌: %s" % [chara.character_name, card_action.get("card_id", "?")])
+		if not GlobalGameData.character_attack_used.get(chara.name, false) or (chara.has_method("_get_extra_attacks") and chara._get_extra_attacks() > 0):
+			var attack_target = _evaluate_attack_target(chara)
+			if attack_target != null:
+				_action_queue.append({
+					"type": "attack", "character": chara, "target": attack_target
+				})
+				_log("%s 将攻击 -> %s" % [chara.character_name, attack_target.character_name])
 
 
 # ==================== 动作执行 ====================

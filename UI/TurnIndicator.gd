@@ -13,15 +13,15 @@ func _ready():
 func _is_my_turn() -> bool:
 	var phase = GlobalGameData.current_turn_phase
 	match phase:
-		GlobalGameData.TurnPhase.PLAYER_MOVE, GlobalGameData.TurnPhase.PLAYER_ATTACK:
+		GlobalGameData.TurnPhase.PLAYER_TURN:
 			return GlobalGameData.is_host_turn == GlobalGameData.is_host
-		GlobalGameData.TurnPhase.ENEMY_MOVE, GlobalGameData.TurnPhase.ENEMY_ATTACK:
+		GlobalGameData.TurnPhase.ENEMY_TURN:
 			return GlobalGameData.is_host_turn != GlobalGameData.is_host
 	return false
 
 func _is_attack_phase() -> bool:
 	var phase = GlobalGameData.current_turn_phase
-	return phase == GlobalGameData.TurnPhase.PLAYER_ATTACK or phase == GlobalGameData.TurnPhase.ENEMY_ATTACK
+	return phase == GlobalGameData.TurnPhase.PLAYER_TURN or phase == GlobalGameData.TurnPhase.ENEMY_TURN
 
 func update_turn_display():
 	var phase = GlobalGameData.current_turn_phase
@@ -30,7 +30,7 @@ func update_turn_display():
 		show()
 		end_turn_button.hide()
 	elif _is_my_turn():
-		turn_label.text = "你的回合-攻击阶段" if _is_attack_phase() else "你的回合-移动阶段"
+		turn_label.text = "你的回合"
 		show()
 		end_turn_button.show()
 		end_turn_button.disabled = false

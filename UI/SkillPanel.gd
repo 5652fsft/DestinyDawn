@@ -70,9 +70,9 @@ func _update_cooldown():
 	# 阶段判断：仅攻击阶段可使用技能
 	if current_character and current_character.has_method("get_current_phase"):
 		var phase = current_character.get_current_phase()
-		if phase != "Attack":
+		if phase != "Active":
 			use_button.disabled = true
-			use_button.text = "移动阶段不可用"
+			use_button.text = "不符合当前阶段"
 			return
 	# 是否已攻击/使用技能 — 除非技能不消耗行动次数
 	if current_character and GlobalGameData.character_attack_used.get(current_character.name, false):

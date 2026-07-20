@@ -418,7 +418,7 @@ func cancel_targeting():
 	_clear_skill_overlays()
 	_update_skill_button()
 	# 恢复攻击范围高亮（攻击阶段且角色仍选中）
-	if selected_character and selected_character.get_current_phase() == "Attack" and not GlobalGameData.character_attack_used.get(selected_character.name, false):
+	if selected_character and selected_character.get_current_phase() == "Active" and not GlobalGameData.character_attack_used.get(selected_character.name, false):
 		selected_character.show_attack_range()
 
 func _on_target_selected(target: Node):
@@ -611,9 +611,9 @@ func _get_character_cell(chara: Node) -> Vector2i:
 func get_current_player_id() -> int:
 	var phase = GlobalGameData.current_turn_phase
 	match phase:
-		GlobalGameData.TurnPhase.PLAYER_MOVE, GlobalGameData.TurnPhase.PLAYER_ATTACK:
+		GlobalGameData.TurnPhase.PLAYER_TURN:
 			return 1 if GlobalGameData.is_host_turn else 2
-		GlobalGameData.TurnPhase.ENEMY_MOVE, GlobalGameData.TurnPhase.ENEMY_ATTACK:
+		GlobalGameData.TurnPhase.ENEMY_TURN:
 			return 2 if GlobalGameData.is_host_turn else 1
 	return -1
 
@@ -709,18 +709,12 @@ func advance_turn_phase():
 			start_new_round()
 		
 		GlobalGameData.TurnPhase.START_ROUND:
-			GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.PLAYER_MOVE
+			GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.PLAYER_TURN
 		
-		GlobalGameData.TurnPhase.PLAYER_MOVE:
-			GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.PLAYER_ATTACK
+		GlobalGameData.TurnPhase.PLAYER_TURN:
+			GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.ENEMY_TURN
 		
-		GlobalGameData.TurnPhase.PLAYER_ATTACK:
-			GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.ENEMY_MOVE
-		
-		GlobalGameData.TurnPhase.ENEMY_MOVE:
-			GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.ENEMY_ATTACK
-		
-		GlobalGameData.TurnPhase.ENEMY_ATTACK:
+		GlobalGameData.TurnPhase.ENEMY_TURN:
 			GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.START_ROUND
 			start_new_round()
 	
@@ -741,8 +735,8 @@ func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn,
 		show_battle_result()
 		return
 	# 回合提示
-	if phase == GlobalGameData.TurnPhase.PLAYER_MOVE or phase == GlobalGameData.TurnPhase.ENEMY_MOVE:
-		var is_enemy_phase = phase == GlobalGameData.TurnPhase.ENEMY_MOVE
+	if phase == GlobalGameData.TurnPhase.PLAYER_TURN or phase == GlobalGameData.TurnPhase.ENEMY_TURN:
+		var is_enemy_phase = phase == GlobalGameData.TurnPhase.ENEMY_TURN
 		var is_my_turn = (host_turn == GlobalGameData.is_host) != is_enemy_phase
 		if not _turn_toast_shown:
 			show_toast("我方先手" if is_my_turn else "对方先手", 2.0)
@@ -808,22 +802,21 @@ func _is_player_turn(check_host: bool) -> bool:
 	var phase = GlobalGameData.current_turn_phase
 	var is_host_turn = GlobalGameData.is_host_turn
 	match phase:
-		GlobalGameData.TurnPhase.PLAYER_MOVE, GlobalGameData.TurnPhase.PLAYER_ATTACK:
+		GlobalGameData.TurnPhase.PLAYER_TURN:
 			return is_host_turn == check_host
-		GlobalGameData.TurnPhase.ENEMY_MOVE, GlobalGameData.TurnPhase.ENEMY_ATTACK:
+		GlobalGameData.TurnPhase.ENEMY_TURN:
 			return is_host_turn != check_host
 	return false
 	
 func check_move() -> void:
-	var my_count = 0
+	var total_remaining = 0
 	for c in characters:
 		if c.name.begins_with("Host") != GlobalGameData.is_host:
 			continue
-		my_count += 1
-	if GlobalGameData.character_move_used_num >= my_count:
-		GlobalGameData.character_move_used_num = 0
-		print("[Phase] 移动次数耗尽，进入下一阶段")
-		rpc("advance_turn_phase")
+		var used = GlobalGameData.character_move_used.get(c.name, false)
+		total_remaining += 0 if used else 1
+	if total_remaining <= 0:
+		print("[Phase] 所有角色已移动，点击结束回合")
 		
 func check_attack() -> void:
 	var total_remaining = 0
@@ -878,8 +871,8 @@ func _update_passive_panel(chara):
 func is_my_turn() -> bool:
 	var phase = GlobalGameData.current_turn_phase
 	match phase:
-		GlobalGameData.TurnPhase.PLAYER_MOVE, GlobalGameData.TurnPhase.PLAYER_ATTACK:
+		GlobalGameData.TurnPhase.PLAYER_TURN:
 			return GlobalGameData.is_host_turn == GlobalGameData.is_host
-		GlobalGameData.TurnPhase.ENEMY_MOVE, GlobalGameData.TurnPhase.ENEMY_ATTACK:
+		GlobalGameData.TurnPhase.ENEMY_TURN:
 			return GlobalGameData.is_host_turn != GlobalGameData.is_host
 	return false

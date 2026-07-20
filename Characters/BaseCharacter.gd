@@ -357,14 +357,10 @@ func get_current_phase() -> String:
 	var phase = GlobalGameData.current_turn_phase
 	var char_is_host = name.begins_with("Host")
 	match phase:
-		GlobalGameData.TurnPhase.PLAYER_MOVE:
-			return "Move" if char_is_host == GlobalGameData.is_host_turn else "Wait"
-		GlobalGameData.TurnPhase.PLAYER_ATTACK:
-			return "Attack" if char_is_host == GlobalGameData.is_host_turn else "Wait"
-		GlobalGameData.TurnPhase.ENEMY_MOVE:
-			return "Move" if char_is_host != GlobalGameData.is_host_turn else "Wait"
-		GlobalGameData.TurnPhase.ENEMY_ATTACK:
-			return "Attack" if char_is_host != GlobalGameData.is_host_turn else "Wait"
+		GlobalGameData.TurnPhase.PLAYER_TURN:
+			return "Active" if char_is_host == GlobalGameData.is_host_turn else "Wait"
+		GlobalGameData.TurnPhase.ENEMY_TURN:
+			return "Active" if char_is_host != GlobalGameData.is_host_turn else "Wait"
 		_:
 			return "Invalid"
 
@@ -502,7 +498,9 @@ func perform_attack(target_path: NodePath):
 	if not target or not target is CharacterBody2D:
 		return
 	
-	if get_current_phase() != "Attack":
+	if get_current_phase() != "Active":
+		return
+	if GlobalGameData.character_attack_used.get(name, false) and _get_extra_attacks() <= 0:
 		return
 		
 	if main:
@@ -710,9 +708,8 @@ func _process(delta):
 	if not multiplayer or not multiplayer.has_multiplayer_peer():
 		if GlobalGameData.is_ai_mode:
 			if name.begins_with("Host"):
-				if get_current_phase() == "Move":
+				if get_current_phase() == "Active":
 					handle_move()
-				elif get_current_phase() == "Attack":
 					handle_attack()
 			move_toward_target()
 			return
@@ -723,9 +720,8 @@ func _process(delta):
 	if name.begins_with("Host") != GlobalGameData.is_host:
 		return
 	
-	if get_current_phase() == "Move":
+	if get_current_phase() == "Active":
 		handle_move()
-	elif get_current_phase() == "Attack":
 		handle_attack()
 
 	move_toward_target()
