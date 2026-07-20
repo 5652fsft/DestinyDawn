@@ -468,7 +468,8 @@ func handle_attack():
 				if GlobalGameData.character_attack_used.get(name, false) and _get_extra_attacks() <= 0:
 					main.unselect_character(self)
 					return
-				if valid_attack_cells.has(clicked_enemy.grid_layer.local_to_map(clicked_enemy.grid_layer.to_local(clicked_enemy.global_position))):
+				var enemy_cell = clicked_enemy.grid_layer.local_to_map(clicked_enemy.grid_layer.to_local(clicked_enemy.global_position))
+				if valid_attack_cells.has(enemy_cell):
 					rpc("perform_attack", clicked_enemy.get_path())
 					if _get_extra_attacks() > 0:
 						_consume_extra_attack()
@@ -477,12 +478,10 @@ func handle_attack():
 						GlobalGameData.character_attack_used_num += 1
 					main.unselect_character(self)
 					main.check_attack()
-					return
 				else:
 					main.show_toast("超出攻击范围")
 					print("[Warn] %s 目标超出攻击范围！" % name)
-					return
-			# 点击空地 → 取消选中
+				return
 			main.unselect_character(self)
 
 func _get_extra_attacks() -> int:
