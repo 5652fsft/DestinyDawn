@@ -1,11 +1,12 @@
 extends Control
 
-@onready var guide_text = $VBoxContainer/ScrollContainer/GuideText
+@onready var guide_text = $GuideText
+@onready var back_btn = $BackButton
 
 func _ready():
-	ButtonTheme.apply_menu($VBoxContainer/BackButton)
-	ButtonTheme.set_font($VBoxContainer/BackButton, 20)
-	$VBoxContainer/BackButton.pressed.connect(_on_back_pressed)
+	ButtonTheme.apply_menu(back_btn)
+	ButtonTheme.set_font(back_btn, 20)
+	back_btn.pressed.connect(_on_back_pressed)
 	_load_guide()
 
 func _load_guide():
@@ -16,7 +17,6 @@ func _load_guide():
 		file.close()
 	else:
 		text = "游戏指南文件未找到。\n请访问 GitHub 仓库查看最新指南：\nhttps://github.com/5652fsft/DestinyDawn"
-	guide_text.bbcode_enabled = true
 	guide_text.text = MarkdownConverter.to_bbcode(text)
 
 func _on_back_pressed():

@@ -22,34 +22,34 @@ mouse_filter = 2
 texture = ExtResource("3")
 expand_mode = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="Title" type="Label" parent="."]
 layout_mode = 0
 offset_left = 40.0
 offset_top = 20.0
-offset_right = 1240.0
-offset_bottom = 700.0
-
-[node name="Title" type="Label" parent="VBoxContainer"]
-layout_mode = 2
+offset_right = 300.0
+offset_bottom = 56.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 28
 text = "游戏指南"
 
-[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
-layout_mode = 2
-custom_minimum_size = Vector2(0, 580)
-
-[node name="GuideText" type="RichTextLabel" parent="VBoxContainer/ScrollContainer"]
-layout_mode = 2
-custom_minimum_size = Vector2(1160, 0)
+[node name="GuideText" type="RichTextLabel" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 70.0
+offset_right = 1240.0
+offset_bottom = 680.0
 theme_override_fonts/normal_font = ExtResource("2")
 theme_override_fonts/bold_font = ExtResource("2")
 theme_override_font_sizes/normal_font_size = 15
-scroll_active = false
+scroll_active = true
 bbcode_enabled = true
 
-[node name="BackButton" type="Button" parent="VBoxContainer"]
-layout_mode = 2
+[node name="BackButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 690.0
+offset_right = 160.0
+offset_bottom = 730.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
 text = "返回"
