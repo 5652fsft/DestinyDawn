@@ -242,9 +242,8 @@ func _init_vfx_manager():
 
 func _on_client_joined(id: int):
 	print("[Net] 客户端 %d 加入" % id)
-	# 请求客户端的编队和卡组
+	rpc_id(id, "_sync_opponent_name", GlobalGameData.player_name)
 	rpc_id(id, "_request_client_setup")
-	# 生成 Host 角色
 	_build_team_from_selection()
 	_build_deck_from_selection()
 	_init_player_card_systems()
@@ -252,8 +251,17 @@ func _on_client_joined(id: int):
 		rpc_id(id, "_spawn_character_remote", team_roster[i].resource_path, "HostCharacter_%d" % i, multiplayer.get_unique_id(), GlobalGameData.host_birth_point[i])
 
 @rpc("any_peer", "reliable")
+func _sync_opponent_name(name: String):
+	GlobalGameData.opponent_name = name
+	print("[Net] 对方名称: %s" % name)
+	# 刷新玩家面板名称
+	for p in [$UI/HostPlayerPanel, $UI/ClientPlayerPanel]:
+		if p and p.has_method("refresh_name"):
+			p.refresh_name()
+
+@rpc("any_peer", "reliable")
 func _request_client_setup():
-	# 客户端收到后发送自己的编队和卡组
+	rpc_id(1, "_sync_opponent_name", GlobalGameData.player_name)
 	rpc_id(1, "_client_send_setup", GlobalGameData.selected_team, GlobalGameData.selected_deck)
 
 func _spawn_client_characters(id: int):

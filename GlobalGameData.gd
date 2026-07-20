@@ -33,6 +33,7 @@ const DEFAULT_DECK: Array[String] = [
 var selected_team: Array[String] = []    # 编队：角色ID列表
 var selected_deck: Array[String] = []    # 卡组：卡牌ID列表
 var player_name: String = "玩家"
+var opponent_name: String = "对手"
 var server_ip: String = "127.0.0.1"
 
 func load_defaults_if_empty():

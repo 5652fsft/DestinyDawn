@@ -7,10 +7,7 @@ extends Panel
 @onready var energy_dots: HBoxContainer = $VBoxContainer/FactionRow/EnergyDots
 
 func _ready():
-	if player_side == "Host":
-		player_name_label.text = GlobalGameData.player_name
-	else:
-		player_name_label.text = "AI" if GlobalGameData.is_ai_mode else "Client"
+	refresh_name()
 
 	for dot in energy_dots.get_children():
 		var style = StyleBoxFlat.new()
@@ -36,6 +33,16 @@ func _ready():
 	var blink_tween = create_tween().set_loops()
 	blink_tween.tween_property(turn_highlight, "modulate:a", 0.0, 1.5)
 	blink_tween.tween_property(turn_highlight, "modulate:a", 1.0, 1.5)
+
+func refresh_name():
+	var is_local = (player_side == "Host") == GlobalGameData.is_host
+	if is_local:
+		player_name_label.text = GlobalGameData.player_name
+	else:
+		if GlobalGameData.is_ai_mode:
+			player_name_label.text = "AI"
+		else:
+			player_name_label.text = GlobalGameData.opponent_name
 
 func refresh(is_my_turn: bool, energy: int = -1):
 	turn_highlight.visible = is_my_turn
