@@ -53,9 +53,9 @@ func _on_guide_pressed():
 	if file:
 		var text = file.get_as_text()
 		file.close()
-		$GuideDialog/GuidePanel/GuideScroll/GuideText.text = text
+		$GuideDialog/GuideText.text = text
 	else:
-		$GuideDialog/GuidePanel/GuideScroll/GuideText.text = "无法加载游戏指南文件"
+		$GuideDialog/GuideText.text = "无法加载游戏指南文件"
 	$GuideDialog.popup_centered()
 
 func _on_quit_pressed():

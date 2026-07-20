@@ -92,28 +92,15 @@ text = "退出"
 size = Vector2i(960, 680)
 title = "Destiny Dawn — 命运破晓 游戏指南"
 
-[node name="GuidePanel" type="Panel" parent="GuideDialog"]
+[node name="GuideText" type="RichTextLabel" parent="GuideDialog"]
 layout_mode = 0
-offset_left = 12
-offset_top = 12
-offset_right = 948
+offset_left = 16
+offset_top = 16
+offset_right = 944
 offset_bottom = 640
-theme_override_styles/panel = null
-
-[node name="GuideScroll" type="ScrollContainer" parent="GuideDialog/GuidePanel"]
-layout_mode = 0
-offset_left = 8
-offset_top = 8
-offset_right = 928
-offset_bottom = 620
-
-[node name="GuideText" type="RichTextLabel" parent="GuideDialog/GuidePanel/GuideScroll"]
-layout_mode = 2
-custom_minimum_size = Vector2(900, 0)
 theme_override_fonts/normal_font = ExtResource("2")
 theme_override_font_sizes/normal_font_size = 15
-bbcode_enabled = false
-scroll_active = false
+scroll_active = true
 text = "加载中..."
 
 [node name="BgSprite" type="TextureRect" parent="." unique_id=789046125]
