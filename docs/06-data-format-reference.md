@@ -127,6 +127,61 @@ Buff 条目结构：
 
 ---
 
+## 卡牌数值参考
+
+### 费用-强度映射
+
+| 费用 | 预期总价值 | 说明 |
+|---|---|---|
+| 0 | 20-30 效果值 | 带代价的高收益 |
+| 1 | 20-35 效果值 | 单体低费卡 |
+| 2 | 30-50 效果值 | 单体中费卡 |
+| 3 | 45-70 效果值 | 高费复合/AOE 卡 |
+
+### 全卡牌数值
+
+| ID | 费用 | 效果 | 定位 |
+|---|---|---|---|
+| `overload` | 0 | +2能量，自伤5 | 能量加速 |
+| `ice_shard` | 1 | 8伤害+迟缓1回合 | 伤害+控制 |
+| `siphon` | 1 | 6伤害+抽1 | 伤害+发育 |
+| `poison_blade` | 1 | 4伤害+中毒6×3回合 | DOT 消耗 |
+| `reckoning` | 1 | 6×buff数伤害 | 针对 buff 手 |
+| `small_heal` | 1 | 10治疗 | 廉价治疗 |
+| `life_split` | 1 | 12治疗+满血抽1 | 条件收益 |
+| `regen` | 1 | HOT 5×3回合 | 持续恢复 |
+| `shield_overload` | 1 | 8护盾/翻倍 | 条件护盾 |
+| `strength` | 1 | ATK+8,2回合 | 攻击 buff |
+| `fortify` | 1 | DEF+8,2回合 | 防御 buff |
+| `haste` | 1 | MOVE+3,2回合 | 机动 buff |
+| `double_edge` | 1 | ATK+10, DEF-5,2回合自 | 风险收益 |
+| `weakness` | 1 | ATK-6,2回合 | 攻击 debuff |
+| `slow` | 1 | MOVE-2,1回合 | 机动 debuff |
+| `mark` | 1 | +50%受伤,2回合 | 伤害加深 |
+| `hemorrhage` | 1 | DOT 7×3回合 | 纯消耗 |
+| `draw` | 1 | 抽1 | 过牌 |
+| `cleanse` | 1 | 移除减益 | 解 debuff |
+| `taunt` | 1 | 赋予我方角色嘲讽 | 嘲讽控制 |
+| `fireball` | 2 | 20伤害+灼烧5×2回合 | 持续伤害 |
+| `aim` | 2 | 28伤害 | 爆发 |
+| `frostbite` | 2 | 12伤害+迟缓2回合 | 伤害+长控制 |
+| `shadowstep` | 2 | 传送+12伤害 | 机动+伤害 |
+| `heal` | 2 | 20治疗 | 单体治疗 |
+| `heal_wave` | 2 | AOE 10治疗 | 群体治疗 |
+| `shield` | 2 | 16护盾 | 保护 |
+| `ice_shield` | 2 | 18护盾 | 强护盾 |
+| `iron_wall` | 2 | DEF+12,3回合自 | 自坦克 |
+| `disarm` | 2 | ATK-8,3回合 | 长 debuff |
+| `echo` | 2 | 抽2 | 大量过牌 |
+| `firestorm` | 3 | 范围1内24伤害 | 集中 AOE |
+| `arrow_rain` | 3 | 范围2内16伤害 | 大范围 AOE |
+| `chain_lightning` | 3 | 20+链式 | 链式伤害 |
+| `mass_heal` | 3 | AOE 14治疗 | 群奶 |
+
+新增卡牌时数值必须符合费用-强度映射，同费用卡牌必须有不同定位。
+
+---
+
 ## Skill 数据 — `Skills/BaseSkill.gd`
 
 ```gdscript
@@ -229,44 +284,4 @@ var character_attack_used_num: int = 0       # 已使用的攻击次数
 - **位移（传送）**：额外 +8 效果值
 - **自伤代价**：1 点自伤 ≈ -3 效果值
 - **灼烧/中毒（DOT）**：每回合价值 × 0.7（延迟收益折扣）
-
-### 全卡牌数据参考
-
-| ID | 费用 | 类型 | 效果 | 定位 |
-|---|---|---|---|---|
-| `overload` | 0 | 战术 | +2能量，自伤5 | 能量加速 |
-| `ice_shard` | 1 | 攻击 | 8伤害+迟缓1回合 | 伤害+控制 |
-| `siphon` | 1 | 攻击 | 6伤害+抽1 | 伤害+发育 |
-| `poison_blade` | 1 | 攻击 | 4伤害+中毒6×3回合 | DOT 消耗 |
-| `reckoning` | 1 | 攻击 | 6×buff数伤害 | 针对 buff 手 |
-| `small_heal` | 1 | 治疗 | 10治疗 | 廉价治疗 |
-| `life_split` | 1 | 治疗 | 12治疗+满血抽1 | 条件收益 |
-| `regen` | 1 | 治疗 | HOT 5×3回合 | 持续恢复 |
-| `shield_overload` | 1 | 护盾 | 8护盾/翻倍 | 条件护盾 |
-| `strength` | 1 | 强化 | ATK+8,2回合 | 攻击 buff |
-| `fortify` | 1 | 强化 | DEF+8,2回合 | 防御 buff |
-| `haste` | 1 | 强化 | MOVE+3,2回合 | 机动 buff |
-| `double_edge` | 1 | 强化 | ATK+10, DEF-5,2回合自 | 风险收益 |
-| `weakness` | 1 | 弱化 | ATK-6,2回合 | 攻击 debuff |
-| `slow` | 1 | 弱化 | MOVE-2,1回合 | 机动 debuff |
-| `mark` | 1 | 弱化 | +50%受伤,2回合 | 伤害加深 |
-| `hemorrhage` | 1 | 弱化 | DOT 7×3回合 | 纯消耗 |
-| `draw` | 1 | 战术 | 抽1 | 过牌 |
-| `cleanse` | 1 | 战术 | 移除减益 | 解 debuff |
-| `taunt` | 1 | 战术 | 赋予我方角色嘲讽 | 嘲讽控制 |
-| `fireball` | 2 | 攻击 | 20伤害+灼烧5×2回合 | 持续伤害 |
-| `aim` | 2 | 攻击 | 28伤害 | 爆发 |
-| `frostbite` | 2 | 攻击 | 12伤害+迟缓2回合 | 伤害+长控制 |
-| `shadowstep` | 2 | 位移 | 传送+12伤害 | 机动+伤害 |
-| `heal` | 2 | 治疗 | 20治疗 | 单体治疗 |
-| `heal_wave` | 2 | 治疗 | AOE 10治疗 | 群体治疗 |
-| `shield` | 2 | 护盾 | 16护盾 | 保护 |
-| `ice_shield` | 2 | 护盾 | 18护盾 | 强护盾 |
-| `iron_wall` | 2 | 强化 | DEF+12,3回合自 | 自坦克 |
-| `disarm` | 2 | 弱化 | ATK-8,3回合 | 长 debuff |
-| `echo` | 2 | 战术 | 抽2 | 大量过牌 |
-| `firestorm` | 3 | 攻击 | 范围1内24伤害 | 集中 AOE |
-| `arrow_rain` | 3 | 攻击 | 范围2内16伤害 | 大范围 AOE |
-| `chain_lightning` | 3 | 攻击 | 20+链式 | 链式伤害 |
-| `mass_heal` | 3 | 治疗 | AOE 14治疗 | 群奶 |
 ```
