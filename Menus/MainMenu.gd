@@ -4,7 +4,7 @@ const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 
 func _ready():
 	GlobalGameData.load_defaults_if_empty()
-	var buttons = [$VBoxContainer/TeamButton, $VBoxContainer/DeckButton, $VBoxContainer/HostButton, $VBoxContainer/JoinButton, $VBoxContainer/AIBattleButton, $VBoxContainer/SettingsButton, $VBoxContainer/QuitButton]
+	var buttons = [$VBoxContainer/TeamButton, $VBoxContainer/DeckButton, $VBoxContainer/HostButton, $VBoxContainer/JoinButton, $VBoxContainer/AIBattleButton, $VBoxContainer/GuideButton, $VBoxContainer/SettingsButton, $VBoxContainer/QuitButton]
 	for btn in buttons:
 		btn.mouse_entered.connect(_on_btn_enter.bind(btn))
 		btn.mouse_exited.connect(_on_btn_exit.bind(btn))
@@ -15,7 +15,7 @@ func _ready():
 	_update_status()
 
 func _center_button_pivots():
-	for btn in [$VBoxContainer/TeamButton, $VBoxContainer/DeckButton, $VBoxContainer/HostButton, $VBoxContainer/JoinButton, $VBoxContainer/AIBattleButton, $VBoxContainer/SettingsButton, $VBoxContainer/QuitButton]:
+	for btn in [$VBoxContainer/TeamButton, $VBoxContainer/DeckButton, $VBoxContainer/HostButton, $VBoxContainer/JoinButton, $VBoxContainer/AIBattleButton, $VBoxContainer/GuideButton, $VBoxContainer/SettingsButton, $VBoxContainer/QuitButton]:
 		if is_instance_valid(btn):
 			btn.pivot_offset = btn.size * 0.5
 
@@ -81,6 +81,16 @@ func _on_ai_battle_pressed():
 	GlobalGameData.is_host = true
 	GlobalGameData.is_ai_mode = true
 	get_tree().change_scene_to_file("res://Scenes/scene.tscn")
+
+func _on_guide_pressed():
+	var file = FileAccess.open("res://README.md", FileAccess.READ)
+	if file:
+		var text = file.get_as_text()
+		file.close()
+		$GuideDialog/GuideText.text = text
+	else:
+		$GuideDialog/GuideText.text = "无法加载游戏指南文件"
+	$GuideDialog.popup_centered()
 
 func _on_quit_pressed():
 	get_tree().quit()

@@ -70,6 +70,12 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
 text = "单机人机"
 
+[node name="GuideButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2")
+theme_override_font_sizes/font_size = 20
+text = "游戏指南"
+
 [node name="SettingsButton" type="Button" parent="VBoxContainer" unique_id=212186731]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
@@ -85,6 +91,21 @@ text = "退出"
 [node name="IPDialog" type="AcceptDialog" parent="." unique_id=1805752148]
 size = Vector2i(300, 150)
 dialog_text = "输入服务器 IP 地址"
+
+[node name="GuideDialog" type="AcceptDialog" parent="."]
+size = Vector2i(900, 600)
+title = "Destiny Dawn — 命运破晓 游戏指南"
+dialog_text = ""
+
+[node name="GuideText" type="RichTextLabel" parent="GuideDialog"]
+layout_mode = 0
+offset_left = 16
+offset_top = 16
+offset_right = 884
+offset_bottom = 584
+bbcode_enabled = false
+scroll_active = true
+text = "加载中..."
 
 [node name="IPLineEdit" type="LineEdit" parent="IPDialog" unique_id=1997694547]
 offset_left = 20.0
@@ -146,6 +167,7 @@ expand_mode = 1
 [connection signal="pressed" from="VBoxContainer/HostButton" to="." method="_on_host_pressed"]
 [connection signal="pressed" from="VBoxContainer/JoinButton" to="." method="_on_join_pressed"]
 [connection signal="pressed" from="VBoxContainer/AIBattleButton" to="." method="_on_ai_battle_pressed"]
+[connection signal="pressed" from="VBoxContainer/GuideButton" to="." method="_on_guide_pressed"]
 [connection signal="pressed" from="VBoxContainer/SettingsButton" to="." method="_on_settings_pressed"]
 [connection signal="pressed" from="VBoxContainer/QuitButton" to="." method="_on_quit_pressed"]
 [connection signal="confirmed" from="IPDialog" to="." method="_on_ip_confirm"]
