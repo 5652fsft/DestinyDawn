@@ -541,6 +541,7 @@ func _active_skill_post_exec(skill: BaseSkill):
 		selected_character.hide_attack_range()
 	show_toast("释放 [%s]" % skill.skill_name, 1.0)
 	check_attack()
+	character_info_panel.refresh()
 	cancel_targeting()
 
 func _make_hex_overlay(color: Color, r: float = 68.0) -> Polygon2D:
