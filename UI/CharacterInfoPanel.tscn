@@ -82,12 +82,14 @@ layout_mode = 2
 
 [node name="MoveButton" type="Button" parent="ScrollContainer/VBox"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 36)
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
 text = "移动"
 
 [node name="AttackButton" type="Button" parent="ScrollContainer/VBox"]
 layout_mode = 2
+custom_minimum_size = Vector2(0, 36)
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
 text = "普通攻击"

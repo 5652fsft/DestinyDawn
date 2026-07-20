@@ -11,6 +11,8 @@ const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 @onready var shield_label = $ScrollContainer/VBox/ShieldLabel
 @onready var move_button = $ScrollContainer/VBox/MoveButton
 @onready var attack_button = $ScrollContainer/VBox/AttackButton
+@onready var buff_header = $ScrollContainer/VBox/BuffHeader
+@onready var buff_label = $ScrollContainer/VBox/BuffLabel
 @onready var buffs_container = $ScrollContainer/VBox/BuffsContainer
 
 var current_character: Node = null
@@ -21,6 +23,28 @@ func _ready():
 	add_theme_stylebox_override("panel", bg)
 	move_button.pressed.connect(_on_move_pressed)
 	attack_button.pressed.connect(_on_attack_pressed)
+	for btn in [move_button, attack_button]:
+		btn.pivot_offset = btn.size * 0.5
+		btn.mouse_entered.connect(_on_btn_enter.bind(btn))
+		btn.mouse_exited.connect(_on_btn_exit.bind(btn))
+		btn.button_down.connect(_on_btn_down.bind(btn))
+		btn.button_up.connect(_on_btn_up.bind(btn))
+
+func _on_btn_enter(btn):
+	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.1)
+
+func _on_btn_exit(btn):
+	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_property(btn, "scale", Vector2(1, 1), 0.1)
+
+func _on_btn_down(btn):
+	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_property(btn, "scale", Vector2(0.97, 0.97), 0.05)
+
+func _on_btn_up(btn):
+	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.05)
 
 func _on_move_pressed():
 	if not current_character:
@@ -65,7 +89,15 @@ func _disconnect_buffs():
 func refresh():
 	if not current_character:
 		return
-	name_label.text = current_character.character_name
+	var main_node = get_tree().current_scene
+	var viewing_enemy = main_node.is_viewing_enemy if main_node else false
+
+	if viewing_enemy:
+		name_label.text = "敌方·%s" % current_character.character_name
+		modulate = Color(1.0, 0.85, 0.85)
+	else:
+		name_label.text = current_character.character_name
+		modulate = Color(1, 1, 1)
 
 	var atk_used = GlobalGameData.character_attack_used.get(current_character.name, false)
 	var extra = current_character._get_extra_attacks() if current_character.has_method("_get_extra_attacks") else 0
@@ -109,13 +141,20 @@ func refresh():
 func _update_buffs():
 	for child in buffs_container.get_children():
 		child.queue_free()
-	if not current_character or not "buffs" in current_character:
+	if not current_character or not "buffs" in current_character or current_character.buffs.is_empty():
+		var placeholder = Label.new()
+		placeholder.add_theme_font_size_override("font_size", 14)
+		placeholder.add_theme_font_override("font", FONT)
+		placeholder.text = "暂无效果"
+		placeholder.modulate = Color(1, 1, 1, 0.5)
+		buffs_container.add_child(placeholder)
+		buff_header.hide()
+		buff_label.hide()
 		return
-	var buf = current_character.buffs
-	if buf.is_empty():
-		return
-	for key in buf:
-		var list = buf[key]
+	buff_header.show()
+	buff_label.show()
+	for key in current_character.buffs:
+		var list = current_character.buffs[key]
 		for entry in list:
 			var label = Label.new()
 			label.add_theme_font_size_override("font_size", 14)
