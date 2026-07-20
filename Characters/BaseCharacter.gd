@@ -506,9 +506,7 @@ func perform_attack(target_path: NodePath):
 	
 	if multiplayer.is_server():
 		var killed = target.hp <= 0 and not target.visible
-		if killed:
-			pass  # Generic kill reward already reset attack_used
-		elif _get_extra_attacks() > 0:
+		if _get_extra_attacks() > 0:
 			_consume_extra_attack()
 		else:
 			GlobalGameData.character_attack_used_num += 1
@@ -631,11 +629,6 @@ func take_damage(damage: int):
 			return
 		hide()
 		collision_layer = 0
-		# 击杀再动：攻击者重置行动状态
-		if main and main.last_attacker and main.last_attacker.hp > 0:
-			var killer = main.last_attacker
-			if GlobalGameData.character_attack_used.has(killer.name):
-				GlobalGameData.character_attack_used[killer.name] = false
 		main.unregister_character(self)
 		if multiplayer.is_server():
 			var killer_key = "client_kills" if is_host else "host_kills"

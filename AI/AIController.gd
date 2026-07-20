@@ -130,7 +130,7 @@ func _build_action_queue():
 				if not card_action.is_empty():
 					_action_queue.append(card_action)
 					_log("%s 将使用卡牌: %s" % [chara.character_name, card_action.get("card_id", "?")])
-			if not GlobalGameData.character_attack_used.get(chara.name, false):
+			if not GlobalGameData.character_attack_used.get(chara.name, false) or (chara.has_method("_get_extra_attacks") and chara._get_extra_attacks() > 0):
 				var attack_target = _evaluate_attack_target(chara)
 				if attack_target != null:
 					_action_queue.append({
