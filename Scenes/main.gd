@@ -514,7 +514,7 @@ func _on_target_selected(target: Node):
 			show_toast("该卡牌只能对自己使用")
 			cancel_targeting()
 			return
-		var player_name = "玩家1(Host)" if GlobalGameData.is_host else "玩家2(Client)"
+		var player_name = GlobalGameData.player_name if GlobalGameData.is_host else ("AI" if GlobalGameData.is_ai_mode else "Client")
 		print("[Info] %s 对 %s 使用 [%s]" % [player_name, target.name, card_data.card_name])
 		_target_play_card(card_data, target)
 		hand_panel.remove_card_via_data(card_data)
@@ -553,7 +553,7 @@ func _execute_play_card(player_id: int, card_id: String, target_path: String):
 	var target: Node = null
 	if target_path and not target_path.is_empty():
 		target = get_node_or_null(target_path)
-	var player_name = "玩家1(Host)" if player_id == 1 else "玩家2(Client)"
+	var player_name = GlobalGameData.player_name if player_id == 1 else ("AI" if GlobalGameData.is_ai_mode else "Client")
 
 	print("[Card] %s 使用 [%s]，目标: %s" % [player_name, card_data.card_name, target.name if target else "无"])
 

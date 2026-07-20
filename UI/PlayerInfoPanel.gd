@@ -7,7 +7,10 @@ extends Panel
 @onready var energy_dots: HBoxContainer = $VBoxContainer/FactionRow/EnergyDots
 
 func _ready():
-	player_name_label.text = player_side
+	if player_side == "Host":
+		player_name_label.text = GlobalGameData.player_name
+	else:
+		player_name_label.text = "AI" if GlobalGameData.is_ai_mode else "Client"
 
 	for dot in energy_dots.get_children():
 		var style = StyleBoxFlat.new()
