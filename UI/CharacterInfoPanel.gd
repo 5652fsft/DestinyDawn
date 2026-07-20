@@ -9,6 +9,8 @@ const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 @onready var move_label = $ScrollContainer/VBox/MovePointsLabel
 @onready var attack_range_label = $ScrollContainer/VBox/AttackRangeLabel
 @onready var shield_label = $ScrollContainer/VBox/ShieldLabel
+@onready var move_button = $ScrollContainer/VBox/MoveButton
+@onready var attack_button = $ScrollContainer/VBox/AttackButton
 @onready var buffs_container = $ScrollContainer/VBox/BuffsContainer
 
 var current_character: Node = null
@@ -17,6 +19,30 @@ func _ready():
 	var bg = StyleBoxFlat.new()
 	bg.bg_color = Color(0.08, 0.08, 0.15, 0.85)
 	add_theme_stylebox_override("panel", bg)
+	move_button.pressed.connect(_on_move_pressed)
+	attack_button.pressed.connect(_on_attack_pressed)
+
+func _on_move_pressed():
+	if not current_character:
+		return
+	var main = get_tree().current_scene
+	if not main:
+		return
+	main.is_attack_mode = false
+	main.is_move_mode = true
+	current_character.hide_attack_range()
+	current_character.show_move_range()
+
+func _on_attack_pressed():
+	if not current_character:
+		return
+	var main = get_tree().current_scene
+	if not main:
+		return
+	main.is_move_mode = false
+	main.is_attack_mode = true
+	current_character.hide_move_range()
+	current_character.show_attack_range()
 
 func show_for(character: Node):
 	if not character:
@@ -71,6 +97,12 @@ func refresh():
 		shield_label.text = "护盾: %d" % current_character.shield
 	else:
 		shield_label.hide()
+
+	var move_used = GlobalGameData.character_move_used.get(current_character.name, false)
+	move_button.disabled = move_used
+	var atk_used = GlobalGameData.character_attack_used.get(current_character.name, false)
+	var extra = current_character._get_extra_attacks() if current_character.has_method("_get_extra_attacks") else 0
+	attack_button.disabled = atk_used and extra <= 0
 
 	_update_buffs()
 

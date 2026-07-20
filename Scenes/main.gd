@@ -11,6 +11,8 @@ var selected_character = null
 var characters: Array[CharacterBody2D] = []
 var cell_occupancy: Dictionary = {}
 var is_any_character_moving: bool = false
+var is_move_mode: bool = false      # 点击格子 = 移动
+var is_attack_mode: bool = false    # 点击敌人 = 攻击
 
 # === 卡牌系统 ===
 var pending_card_data: CardData = null
@@ -236,6 +238,8 @@ func select_character(chara: CharacterBody2D):
 		selected_character.is_selected = false
 		selected_character = null
 		character_info_panel.hide()
+	is_move_mode = false
+	is_attack_mode = false
 	selected_character = chara
 	chara.is_selected = true
 	character_info_panel.show_for(chara)
@@ -247,12 +251,16 @@ func unselect_character(chara: CharacterBody2D, unselect_all = false):
 		if selected_character != null:
 			selected_character.is_selected = false
 			selected_character = null
+		is_move_mode = false
+		is_attack_mode = false
 		character_info_panel.hide()
 		skill_panel.hide()
 		passive_skill_panel.hide()
 	else:
 		chara.is_selected = false
 		selected_character = null
+		is_move_mode = false
+		is_attack_mode = false
 		character_info_panel.hide()
 		skill_panel.hide()
 		passive_skill_panel.hide()

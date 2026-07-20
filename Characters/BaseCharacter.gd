@@ -76,13 +76,8 @@ var is_selected: bool = false:
 		sprite.modulate = Color.WHITE if not value else Color.YELLOW
 		if floating_bar:
 			floating_bar.show_selected(value)
-		if value and get_current_phase() == "Move" and not GlobalGameData.character_move_used.get(name, false):
-			show_move_range()
-		elif not value and get_current_phase() == "Move":
+		if not value:
 			hide_move_range()
-		elif value and get_current_phase() == "Attack" and not GlobalGameData.character_attack_used.get(name, false):
-			show_attack_range()
-		elif not value and get_current_phase() == "Attack":
 			hide_attack_range()
 
 func _enter_tree():
@@ -400,7 +395,7 @@ func handle_move():
 		if clicked_on_self:
 			main.select_character(self)
 	
-		elif is_selected:
+		elif is_selected and main.is_move_mode:
 			if GlobalGameData.character_move_used.get(name, false):
 				main.show_toast("该角色本回合已移动")
 				print("[Warn] 本回合已移动！")
@@ -428,6 +423,8 @@ func handle_move():
 				print("[Move] %s → (%d, %d) 消耗 %d" % [name, cell_coord.x, cell_coord.y, valid_move_cells[cell_coord]])
 				GlobalGameData.character_move_used[name] = true
 				GlobalGameData.character_move_used_num += 1
+			main.is_move_mode = false
+			hide_move_range()
 			main.unselect_character(self)
 			main.check_move()
 	
@@ -455,7 +452,7 @@ func handle_attack():
 				return
 		
 		# 情况2：已选中，点击敌人 → 攻击
-		if is_selected:
+		if is_selected and main.is_attack_mode:
 			if GlobalGameData.character_attack_used.get(name, false):
 				if _get_extra_attacks() <= 0:
 					main.show_toast("该角色本回合已行动")

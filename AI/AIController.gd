@@ -82,9 +82,11 @@ func _is_ai_phase() -> bool:
 	return _is_ai_turn()
 
 func _is_ai_turn() -> bool:
-	var phase = GlobalGameData.current_turn_phase
-	return phase == GlobalGameData.TurnPhase.ENEMY_TURN \
-		or phase == GlobalGameData.TurnPhase.PLAYER_TURN
+	# AI 在 AI 自己控制的那一方回合才行动
+	if GlobalGameData.is_host_turn:
+		return GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.ENEMY_TURN
+	else:
+		return GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.PLAYER_TURN
 
 
 # ==================== 动作队列构建 ====================
