@@ -32,8 +32,9 @@ func perform_attack(target_path: NodePath):
 	var target = get_node_or_null(target_path)
 	if not target or not target is CharacterBody2D:
 		return
-	if get_current_phase() != "Attack":
+	if get_current_phase() != "Active":
 		return
+	if GlobalGameData.character_attack_used.get(name, false) and _get_extra_attacks() <= 0:
 
 	last_target_hp = target.hp
 	last_target_max_hp = target.max_hp
