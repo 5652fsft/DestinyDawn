@@ -471,6 +471,12 @@ func handle_attack():
 				if other is CharacterBody2D and is_enemy(other) and other.hp > 0:
 					if valid_attack_cells.has(other.grid_layer.local_to_map(other.grid_layer.to_local(other.global_position))):
 						rpc("perform_attack", other.get_path())
+						# 确保行动次数消耗（perform_attack 内部可能因 multiplayer 判断跳过）
+						if _get_extra_attacks() > 0:
+							_consume_extra_attack()
+						elif not GlobalGameData.character_attack_used.get(name, false):
+							GlobalGameData.character_attack_used[name] = true
+							GlobalGameData.character_attack_used_num += 1
 						main.unselect_character(self)
 						main.check_attack()
 						return

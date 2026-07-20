@@ -256,6 +256,14 @@ func _execute_attack(chara: Node, target: Node):
 			return
 	_log("%s 攻击 -> %s" % [chara.character_name, target.character_name], "Attack")
 	chara.perform_attack(target.get_path())
+	# 确保行动次数消耗（perform_attack 内部可能因 multiplayer 判断跳过）
+	if not GlobalGameData.character_attack_used.get(chara.name, false):
+		var extra = chara._get_extra_attacks() if chara.has_method("_get_extra_attacks") else 0
+		if extra > 0:
+			chara._consume_extra_attack()
+		else:
+			GlobalGameData.character_attack_used[chara.name] = true
+			GlobalGameData.character_attack_used_num += 1
 	_main.check_attack()
 
 
@@ -267,7 +275,9 @@ func _execute_skill(chara: Node, target: Node):
 	chara.use_active_skill(target)
 	if chara.active_skill:
 		chara.active_skill.current_cooldown = chara.active_skill.cooldown
-		if not chara.has_method("_consumes_attack_on_skill") or chara._consumes_attack_on_skill():
+	# 确保行动次数消耗
+	if not chara.has_method("_consumes_attack_on_skill") or chara._consumes_attack_on_skill():
+		if not GlobalGameData.character_attack_used.get(chara.name, false):
 			GlobalGameData.character_attack_used[chara.name] = true
 			GlobalGameData.character_attack_used_num += 1
 	_main.check_attack()
