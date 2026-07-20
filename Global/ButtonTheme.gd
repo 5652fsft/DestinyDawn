@@ -1,3 +1,4 @@
+class_name ButtonTheme
 extends Node
 
 const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
