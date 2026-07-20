@@ -385,15 +385,21 @@ func handle_move():
 		
 		var results = space_state.intersect_point(query)
 		var clicked_on_self = false
+		var clicked_enemy: CharacterBody2D = null
 		for r in results:
-			if r.collider == self and not is_selected:
+			var col = r.collider
+			if col == self and not is_selected:
 				clicked_on_self = true
 				break
-			elif r.collider == self:
+			elif col == self:
 				main.unselect_character(self)
+			elif col is CharacterBody2D and col.hp > 0 and is_enemy(col) and not main.is_attack_mode:
+				clicked_enemy = col
 		
 		if clicked_on_self:
 			main.select_character(self)
+		elif clicked_enemy and not is_selected:
+			main.select_character(clicked_enemy, true)
 	
 		elif is_selected and main.is_move_mode:
 			if GlobalGameData.character_move_used.get(name, false):

@@ -68,18 +68,6 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
-[node name="MoveButton" type="Button" parent="ScrollContainer/VBox"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_6xa78")
-theme_override_font_sizes/font_size = 16
-text = "移动"
-
-[node name="AttackButton" type="Button" parent="ScrollContainer/VBox"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_6xa78")
-theme_override_font_sizes/font_size = 16
-text = "普通攻击"
-
 [node name="BuffHeader" type="HSeparator" parent="ScrollContainer/VBox" unique_id=1239085440]
 layout_mode = 2
 
@@ -91,3 +79,15 @@ text = "效果"
 
 [node name="BuffsContainer" type="VBoxContainer" parent="ScrollContainer/VBox" unique_id=1082733770]
 layout_mode = 2
+
+[node name="MoveButton" type="Button" parent="ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 16
+text = "移动"
+
+[node name="AttackButton" type="Button" parent="ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_6xa78")
+theme_override_font_sizes/font_size = 16
+text = "普通攻击"

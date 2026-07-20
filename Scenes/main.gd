@@ -11,8 +11,9 @@ var selected_character = null
 var characters: Array[CharacterBody2D] = []
 var cell_occupancy: Dictionary = {}
 var is_any_character_moving: bool = false
-var is_move_mode: bool = false      # 点击格子 = 移动
-var is_attack_mode: bool = false    # 点击敌人 = 攻击
+var is_move_mode: bool = false
+var is_attack_mode: bool = false
+var is_viewing_enemy: bool = false
 
 # === 卡牌系统 ===
 var pending_card_data: CardData = null
@@ -229,10 +230,10 @@ func unregister_character(chara: CharacterBody2D):
 	if multiplayer.is_server() and check_victory():
 		rpc("advance_turn_phase")
 			
-func select_character(chara: CharacterBody2D):
-	if chara.name.begins_with("Host") != GlobalGameData.is_host:
-		return
+func select_character(chara: CharacterBody2D, enemy_view: bool = false):
 	if chara.hp <= 0:
+		return
+	if not enemy_view and chara.name.begins_with("Host") != GlobalGameData.is_host:
 		return
 	if selected_character != null:
 		selected_character.is_selected = false
@@ -240,11 +241,16 @@ func select_character(chara: CharacterBody2D):
 		character_info_panel.hide()
 	is_move_mode = false
 	is_attack_mode = false
+	is_viewing_enemy = enemy_view
 	selected_character = chara
 	chara.is_selected = true
 	character_info_panel.show_for(chara)
-	skill_panel.show_for(chara)
-	_update_passive_panel(chara)
+	if enemy_view:
+		skill_panel.hide()
+		passive_skill_panel.hide()
+	else:
+		skill_panel.show_for(chara)
+		_update_passive_panel(chara)
 
 func unselect_character(chara: CharacterBody2D, unselect_all = false):
 	if unselect_all:
