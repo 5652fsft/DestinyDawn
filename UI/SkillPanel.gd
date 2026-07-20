@@ -15,6 +15,8 @@ signal skill_cancelled()
 @onready var cooldown_label = $VBoxContainer/CooldownLabel
 
 func _ready():
+	ButtonTheme.apply_battle(use_button)
+	ButtonTheme.set_font(use_button, 18)
 	use_button.pressed.connect(_on_use_button_pressed)
 	var bg = StyleBoxFlat.new()
 	bg.bg_color = Color(0.08, 0.08, 0.15, 0.85)
@@ -63,18 +65,15 @@ func _update_cooldown():
 	cooldown_label.text = "冷却: %d 回合" % cd if cd > 0 else "就绪"
 	if _targeting:
 		return
-	# 冷却判断
 	if cd > 0:
 		use_button.disabled = true
 		return
-	# 阶段判断：仅攻击阶段可使用技能
 	if current_character and current_character.has_method("get_current_phase"):
 		var phase = current_character.get_current_phase()
 		if phase != "Active":
 			use_button.disabled = true
 			use_button.text = "不符合当前阶段"
 			return
-	# 是否已攻击/使用技能 — 除非技能不消耗行动次数
 	if current_character and GlobalGameData.character_attack_used.get(current_character.name, false):
 		if not current_character.has_method("_consumes_attack_on_skill") or current_character._consumes_attack_on_skill():
 			use_button.disabled = true

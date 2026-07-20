@@ -1,4 +1,3 @@
-# res://UI/TurnIndicator.gd
 extends Control
 
 @onready var turn_label = $MarginContainer/VBoxContainer/TurnLabel
@@ -6,8 +5,10 @@ extends Control
 @onready var main: Node2D = get_tree().current_scene
 
 func _ready():
-	pass
 	hide()
+	ButtonTheme.apply_battle(end_turn_button)
+	ButtonTheme.set_font(end_turn_button, 20)
+	end_turn_button.text = "结束阶段"
 	end_turn_button.pressed.connect(_on_EndTurnButton_pressed)
 
 func _is_my_turn() -> bool:
@@ -18,10 +19,6 @@ func _is_my_turn() -> bool:
 		GlobalGameData.TurnPhase.ENEMY_TURN:
 			return GlobalGameData.is_host_turn != GlobalGameData.is_host
 	return false
-
-func _is_attack_phase() -> bool:
-	var phase = GlobalGameData.current_turn_phase
-	return phase == GlobalGameData.TurnPhase.PLAYER_TURN or phase == GlobalGameData.TurnPhase.ENEMY_TURN
 
 func update_turn_display():
 	var phase = GlobalGameData.current_turn_phase
@@ -44,12 +41,8 @@ func update_turn_display():
 
 func _on_EndTurnButton_pressed():
 	main.unselect_character(null, true)
-	
 	if _is_my_turn():
 		print("[Info] 结束当前阶段，进入下一阶段")
 		main.rpc("advance_turn_phase")
 	else:
 		print("[Info] 不是你的回合")
-
-	
-	

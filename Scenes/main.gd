@@ -145,35 +145,10 @@ func _ready():
 
 func _setup_action_buttons():
 	for btn in [move_button, attack_button]:
-		var b = btn
-		b.resized.connect(_on_action_btn_resized.bind(b), 4)
-		b.mouse_entered.connect(_on_action_btn_enter.bind(b))
-		b.mouse_exited.connect(_on_action_btn_exit.bind(b))
-		b.button_down.connect(_on_action_btn_down.bind(b))
-		b.button_up.connect(_on_action_btn_up.bind(b))
-		# 可用：浅蓝；禁用：灰色无悬停
-		var normal_style = StyleBoxFlat.new()
-		normal_style.bg_color = Color(0.2, 0.45, 0.8, 0.9)
-		normal_style.corner_radius_top_left = 8
-		normal_style.corner_radius_top_right = 8
-		normal_style.corner_radius_bottom_right = 8
-		normal_style.corner_radius_bottom_left = 8
-		var hover_style = StyleBoxFlat.new()
-		hover_style.bg_color = Color(0.3, 0.55, 0.9, 0.95)
-		hover_style.corner_radius_top_left = 8
-		hover_style.corner_radius_top_right = 8
-		hover_style.corner_radius_bottom_right = 8
-		hover_style.corner_radius_bottom_left = 8
-		var disabled_style = StyleBoxFlat.new()
-		disabled_style.bg_color = Color(0.25, 0.25, 0.25, 0.6)
-		disabled_style.corner_radius_top_left = 8
-		disabled_style.corner_radius_top_right = 8
-		disabled_style.corner_radius_bottom_right = 8
-		disabled_style.corner_radius_bottom_left = 8
-		b.add_theme_stylebox_override("normal", normal_style)
-		b.add_theme_stylebox_override("hover", hover_style)
-		b.add_theme_stylebox_override("pressed", normal_style)
-		b.add_theme_stylebox_override("disabled", disabled_style)
+		ButtonTheme.apply_battle(btn)
+		ButtonTheme.set_font(btn, 16)
+	move_button.text = "移动"
+	attack_button.text = "普通攻击"
 	move_button.pressed.connect(_on_move_pressed)
 	attack_button.pressed.connect(_on_attack_pressed)
 
@@ -184,33 +159,6 @@ func _update_action_buttons(chara):
 	var atk_used = GlobalGameData.character_attack_used.get(chara.name, false)
 	var extra = chara._get_extra_attacks() if chara.has_method("_get_extra_attacks") else 0
 	attack_button.disabled = atk_used and extra <= 0
-
-func _on_action_btn_resized(btn):
-	btn.pivot_offset = btn.size * 0.5
-
-func _on_action_btn_enter(btn):
-	if btn.disabled:
-		return
-	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	t.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.1)
-
-func _on_action_btn_exit(btn):
-	if btn.disabled:
-		return
-	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	t.tween_property(btn, "scale", Vector2(1, 1), 0.1)
-
-func _on_action_btn_down(btn):
-	if btn.disabled:
-		return
-	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	t.tween_property(btn, "scale", Vector2(0.97, 0.97), 0.05)
-
-func _on_action_btn_up(btn):
-	if btn.disabled:
-		return
-	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	t.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.05)
 
 func _on_move_pressed():
 	if not selected_character:
