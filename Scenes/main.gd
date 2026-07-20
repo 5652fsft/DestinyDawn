@@ -145,13 +145,16 @@ func _ready():
 func _setup_action_buttons():
 	for btn in [move_button, attack_button]:
 		var b = btn
-		call_deferred(func(): b.pivot_offset = b.size * 0.5)
+		b.resized.connect(_on_action_btn_resized.bind(b), 4)
 		b.mouse_entered.connect(_on_action_btn_enter.bind(b))
 		b.mouse_exited.connect(_on_action_btn_exit.bind(b))
 		b.button_down.connect(_on_action_btn_down.bind(b))
 		b.button_up.connect(_on_action_btn_up.bind(b))
 	move_button.pressed.connect(_on_move_pressed)
 	attack_button.pressed.connect(_on_attack_pressed)
+
+func _on_action_btn_resized(btn):
+	btn.pivot_offset = btn.size * 0.5
 
 func _on_action_btn_enter(btn):
 	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
