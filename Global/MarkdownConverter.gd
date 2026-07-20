@@ -6,7 +6,10 @@ static func to_bbcode(t: String) -> String:
 	var lines = t.split("\n")
 	for i in range(lines.size()):
 		var line = lines[i]
-		if line.begins_with("##"):
+		if line.begins_with("# "):
+			line = line.trim_prefix("# ").trim_prefix("#")
+			line = "[b][u][font_size=26]%s[/font_size][/u][/b]" % line
+		elif line.begins_with("##"):
 			line = line.trim_prefix("#").trim_prefix("#").trim_prefix(" ").trim_prefix("#").trim_prefix(" ")
 			line = "[b][u][font_size=22]%s[/font_size][/u][/b]" % line
 		elif line.begins_with("###"):

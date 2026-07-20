@@ -88,22 +88,6 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
 text = "退出"
 
-[node name="GuideDialog" type="AcceptDialog" parent="."]
-size = Vector2i(960, 680)
-title = "Destiny Dawn — 命运破晓 游戏指南"
-
-[node name="GuideText" type="RichTextLabel" parent="GuideDialog"]
-layout_mode = 0
-offset_left = 16
-offset_top = 16
-offset_right = 944
-offset_bottom = 640
-theme_override_fonts/normal_font = ExtResource("2")
-theme_override_fonts/bold_font = ExtResource("2")
-theme_override_font_sizes/normal_font_size = 15
-scroll_active = true
-text = "加载中..."
-
 [node name="BgSprite" type="TextureRect" parent="." unique_id=789046125]
 z_index = -1
 layout_mode = 1
