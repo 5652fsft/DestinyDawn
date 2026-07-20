@@ -501,10 +501,7 @@ func perform_attack(target_path: NodePath):
 		
 	if main:
 		main.last_attacker = self
-	if multiplayer.has_multiplayer_peer():
-		target.rpc("take_damage", effective_attack)
-	else:
-		target.take_damage(effective_attack)
+	target.take_damage(effective_attack)
 	print("[Combat] %s → %s 造成 %d 点伤害" % [name, target.name, effective_attack])
 	
 	if multiplayer.is_server():
