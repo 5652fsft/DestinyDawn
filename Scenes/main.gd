@@ -826,14 +826,17 @@ func check_move() -> void:
 		rpc("advance_turn_phase")
 		
 func check_attack() -> void:
-	var my_count = 0
+	var total_remaining = 0
 	for c in characters:
 		if c.name.begins_with("Host") != GlobalGameData.is_host:
 			continue
-		my_count += 1
-	if GlobalGameData.character_attack_used_num >= my_count:
-		GlobalGameData.character_attack_used_num = 0
-		print("[Phase] 所有角色已行动，点击结束回合进入下一阶段")
+		var used = GlobalGameData.character_attack_used.get(c.name, false)
+		var extra = c._get_extra_attacks() if c.has_method("_get_extra_attacks") else 0
+		total_remaining += (0 if used else 1) + extra
+	if total_remaining <= 0:
+		print("[Phase] 所有角色行动次数已耗尽，点击结束回合进入下一阶段")
+		if toast and toast.has_method("show_message"):
+			toast.show_message("所有角色已行动，点击结束回合", 2.0)
 		print("[Phase] 攻击次数耗尽，进入下一阶段")
 		rpc("advance_turn_phase")
 
