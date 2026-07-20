@@ -5,10 +5,10 @@ var passive_skill: BaseSkill
 var _extra_attacks: int = 0
 
 func _ready():
-	max_hp = 38
+	max_hp = 48
 	super()
 	character_name = "芝士仓鼠"
-	hp = 38
+	hp = 48
 	attack = 26
 	attack_range = 3
 	move_points = 6

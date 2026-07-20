@@ -5,10 +5,10 @@ var passive_skill: BaseSkill
 var _burn_armor_used: bool = false
 
 func _ready():
-	max_hp = 76
+	max_hp = 85
 	super()
 	character_name = "流萤"
-	hp = 76
+	hp = 85
 	attack = 14
 	attack_range = 1
 	move_points = 5

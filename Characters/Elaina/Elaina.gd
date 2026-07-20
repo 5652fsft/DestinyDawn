@@ -5,10 +5,10 @@ var passive_skill: BaseSkill
 var magic_combo: int = 0
 
 func _ready():
-	max_hp = 50
+	max_hp = 60
 	super()
 	character_name = "伊蕾娜"
-	hp = 50
+	hp = 60
 	attack = 20
 	attack_range = 3
 	move_points = 5
