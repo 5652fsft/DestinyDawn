@@ -61,12 +61,9 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
 text = "保存"
-mouse_entered.connect(_on_save_pressed)
-pressed.connect(_on_save_pressed)
 
 [node name="BackButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
 text = "返回"
-pressed.connect(_on_back_pressed)
