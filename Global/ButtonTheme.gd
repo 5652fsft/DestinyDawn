@@ -4,24 +4,34 @@ const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 
 # 主菜单按钮样式（悬停/点击缩放动画，无背景色变化）
 static func apply_menu(btn: Button):
-	btn.pivot_offset = Vector2.ZERO
-	btn.resized.connect(_pivot_center.bind(btn), 4)
+	btn.resized.connect(_pivot_center.bind(btn))
 	btn.mouse_entered.connect(_enter.bind(btn))
 	btn.mouse_exited.connect(_exit.bind(btn))
 	btn.button_down.connect(_down.bind(btn))
 	btn.button_up.connect(_up.bind(btn))
+	# 立即尝试设置轴心（若尺寸已确定）
+	if btn.size.x > 0 and btn.size.y > 0:
+		btn.pivot_offset = btn.size * 0.5
 
 # 战斗内按钮样式（浅蓝/灰色背景 + 8px 圆角 + 缩放动画）
 static func apply_battle(btn: Button):
 	apply_menu(btn)
 	var blue = StyleBoxFlat.new()
 	blue.bg_color = Color(0.2, 0.45, 0.8, 0.9)
+	blue.content_margin_left = 0
+	blue.content_margin_top = 0
+	blue.content_margin_right = 0
+	blue.content_margin_bottom = 0
 	blue.corner_radius_top_left = 8
 	blue.corner_radius_top_right = 8
 	blue.corner_radius_bottom_right = 8
 	blue.corner_radius_bottom_left = 8
 	var gray = StyleBoxFlat.new()
 	gray.bg_color = Color(0.25, 0.25, 0.25, 0.6)
+	gray.content_margin_left = 0
+	gray.content_margin_top = 0
+	gray.content_margin_right = 0
+	gray.content_margin_bottom = 0
 	gray.corner_radius_top_left = 8
 	gray.corner_radius_top_right = 8
 	gray.corner_radius_bottom_right = 8
@@ -39,7 +49,8 @@ static func set_font(btn: Button, size: int = 18):
 # === 内部回调 ===
 
 static func _pivot_center(btn):
-	btn.pivot_offset = btn.size * 0.5
+	if btn.size.x > 0 and btn.size.y > 0:
+		btn.pivot_offset = btn.size * 0.5
 
 static func _enter(btn):
 	if btn.disabled:
