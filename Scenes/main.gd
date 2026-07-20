@@ -150,6 +150,16 @@ func _setup_action_buttons():
 		b.mouse_exited.connect(_on_action_btn_exit.bind(b))
 		b.button_down.connect(_on_action_btn_down.bind(b))
 		b.button_up.connect(_on_action_btn_up.bind(b))
+		# 圆角+深色背景，与 SkillPanel 一致
+		var style = StyleBoxFlat.new()
+		style.bg_color = Color(0.08, 0.08, 0.15, 0.85)
+		style.corner_radius_top_left = 8
+		style.corner_radius_top_right = 8
+		style.corner_radius_bottom_right = 8
+		style.corner_radius_bottom_left = 8
+		b.add_theme_stylebox_override("normal", style)
+		b.add_theme_stylebox_override("hover", style)
+		b.add_theme_stylebox_override("pressed", style)
 	move_button.pressed.connect(_on_move_pressed)
 	attack_button.pressed.connect(_on_attack_pressed)
 
@@ -174,6 +184,10 @@ func _on_action_btn_up(btn):
 
 func _on_move_pressed():
 	if not selected_character:
+		print("[Warn] 移动按钮：selected_character 为空")
+		return
+	if selected_character.get_current_phase() != "Active":
+		print("[Warn] 移动按钮：不在 Active 阶段")
 		return
 	if GlobalGameData.character_move_used.get(selected_character.name, false):
 		show_toast("该角色本回合已移动")
@@ -183,9 +197,14 @@ func _on_move_pressed():
 	selected_character.hide_attack_range()
 	selected_character.show_move_range()
 	show_toast("点击格子移动")
+	print("[Input] 进入移动模式")
 
 func _on_attack_pressed():
 	if not selected_character:
+		print("[Warn] 攻击按钮：selected_character 为空")
+		return
+	if selected_character.get_current_phase() != "Active":
+		print("[Warn] 攻击按钮：不在 Active 阶段")
 		return
 	if GlobalGameData.character_attack_used.get(selected_character.name, false):
 		var extra = selected_character._get_extra_attacks() if selected_character.has_method("_get_extra_attacks") else 0
@@ -197,6 +216,7 @@ func _on_attack_pressed():
 	selected_character.hide_move_range()
 	selected_character.show_attack_range()
 	show_toast("点击敌人攻击")
+	print("[Input] 进入攻击模式")
 
 func _spawn_character(scene_path: String, char_name: String, authority: int, pos: Vector2):
 	var scene = load(scene_path)
