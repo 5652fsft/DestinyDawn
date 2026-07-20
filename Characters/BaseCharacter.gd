@@ -510,13 +510,6 @@ func perform_attack(target_path: NodePath):
 	target.take_damage(effective_attack)
 	print("[Combat] %s → %s 造成 %d 点伤害" % [name, target.name, effective_attack])
 	
-	if multiplayer.is_server():
-		var killed = target.hp <= 0 and not target.visible
-		if _get_extra_attacks() > 0:
-			_consume_extra_attack()
-		else:
-			GlobalGameData.character_attack_used_num += 1
-			GlobalGameData.character_attack_used[name] = true
 	# 同步动画（所有客户端）
 	rpc_id(0, "_play_attack_animation", target_path)
 
