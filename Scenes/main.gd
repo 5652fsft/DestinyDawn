@@ -176,6 +176,14 @@ func _setup_action_buttons():
 	move_button.pressed.connect(_on_move_pressed)
 	attack_button.pressed.connect(_on_attack_pressed)
 
+func _update_action_buttons(chara):
+	if not chara:
+		return
+	move_button.disabled = GlobalGameData.character_move_used.get(chara.name, false)
+	var atk_used = GlobalGameData.character_attack_used.get(chara.name, false)
+	var extra = chara._get_extra_attacks() if chara.has_method("_get_extra_attacks") else 0
+	attack_button.disabled = atk_used and extra <= 0
+
 func _on_action_btn_resized(btn):
 	btn.pivot_offset = btn.size * 0.5
 
@@ -348,6 +356,7 @@ func select_character(chara: CharacterBody2D, enemy_view: bool = false):
 	character_info_panel.show_for(chara)
 	move_button.visible = not enemy_view
 	attack_button.visible = not enemy_view
+	_update_action_buttons(chara)
 	if enemy_view:
 		skill_panel.hide()
 		passive_skill_panel.hide()
@@ -980,6 +989,7 @@ func _update_character_info_panel(chara):
 	if character_info_panel and character_info_panel.current_character == chara:
 		character_info_panel.refresh()
 		_update_passive_panel(chara)
+		_update_action_buttons(chara)
 
 func _update_passive_panel(chara):
 	if not passive_skill_panel:
