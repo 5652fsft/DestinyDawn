@@ -13,33 +13,9 @@ static func apply_menu(btn: Button):
 	if btn.size.x > 0 and btn.size.y > 0:
 		btn.pivot_offset = btn.size * 0.5
 
-# 战斗内按钮样式（浅蓝/灰色背景 + 8px 圆角 + 缩放动画）
+# 战斗内按钮样式（保留默认 Button padding，通过 modulate 实现禁用效果）
 static func apply_battle(btn: Button):
 	apply_menu(btn)
-	var blue = StyleBoxFlat.new()
-	blue.bg_color = Color(0.2, 0.45, 0.8, 0.9)
-	blue.content_margin_left = 0
-	blue.content_margin_top = 0
-	blue.content_margin_right = 0
-	blue.content_margin_bottom = 0
-	blue.corner_radius_top_left = 8
-	blue.corner_radius_top_right = 8
-	blue.corner_radius_bottom_right = 8
-	blue.corner_radius_bottom_left = 8
-	var gray = StyleBoxFlat.new()
-	gray.bg_color = Color(0.25, 0.25, 0.25, 0.6)
-	gray.content_margin_left = 0
-	gray.content_margin_top = 0
-	gray.content_margin_right = 0
-	gray.content_margin_bottom = 0
-	gray.corner_radius_top_left = 8
-	gray.corner_radius_top_right = 8
-	gray.corner_radius_bottom_right = 8
-	gray.corner_radius_bottom_left = 8
-	btn.add_theme_stylebox_override("normal", blue)
-	btn.add_theme_stylebox_override("hover", blue)
-	btn.add_theme_stylebox_override("pressed", blue)
-	btn.add_theme_stylebox_override("disabled", gray)
 
 static func set_font(btn: Button, size: int = 18):
 	if not btn.has_theme_font_override("font"):

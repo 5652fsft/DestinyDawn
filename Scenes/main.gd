@@ -156,9 +156,11 @@ func _update_action_buttons(chara):
 	if not chara:
 		return
 	move_button.disabled = GlobalGameData.character_move_used.get(chara.name, false)
+	move_button.modulate = Color(1, 1, 1, 0.5) if move_button.disabled else Color(1, 1, 1)
 	var atk_used = GlobalGameData.character_attack_used.get(chara.name, false)
 	var extra = chara._get_extra_attacks() if chara.has_method("_get_extra_attacks") else 0
 	attack_button.disabled = atk_used and extra <= 0
+	attack_button.modulate = Color(1, 1, 1, 0.5) if attack_button.disabled else Color(1, 1, 1)
 
 func _on_move_pressed():
 	if not selected_character:
