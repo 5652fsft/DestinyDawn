@@ -150,16 +150,29 @@ func _setup_action_buttons():
 		b.mouse_exited.connect(_on_action_btn_exit.bind(b))
 		b.button_down.connect(_on_action_btn_down.bind(b))
 		b.button_up.connect(_on_action_btn_up.bind(b))
-		# 圆角+深色背景，与 SkillPanel 一致
-		var style = StyleBoxFlat.new()
-		style.bg_color = Color(0.08, 0.08, 0.15, 0.85)
-		style.corner_radius_top_left = 8
-		style.corner_radius_top_right = 8
-		style.corner_radius_bottom_right = 8
-		style.corner_radius_bottom_left = 8
-		b.add_theme_stylebox_override("normal", style)
-		b.add_theme_stylebox_override("hover", style)
-		b.add_theme_stylebox_override("pressed", style)
+		# 可用：浅蓝；禁用：灰色无悬停
+		var normal_style = StyleBoxFlat.new()
+		normal_style.bg_color = Color(0.2, 0.45, 0.8, 0.9)
+		normal_style.corner_radius_top_left = 8
+		normal_style.corner_radius_top_right = 8
+		normal_style.corner_radius_bottom_right = 8
+		normal_style.corner_radius_bottom_left = 8
+		var hover_style = StyleBoxFlat.new()
+		hover_style.bg_color = Color(0.3, 0.55, 0.9, 0.95)
+		hover_style.corner_radius_top_left = 8
+		hover_style.corner_radius_top_right = 8
+		hover_style.corner_radius_bottom_right = 8
+		hover_style.corner_radius_bottom_left = 8
+		var disabled_style = StyleBoxFlat.new()
+		disabled_style.bg_color = Color(0.25, 0.25, 0.25, 0.6)
+		disabled_style.corner_radius_top_left = 8
+		disabled_style.corner_radius_top_right = 8
+		disabled_style.corner_radius_bottom_right = 8
+		disabled_style.corner_radius_bottom_left = 8
+		b.add_theme_stylebox_override("normal", normal_style)
+		b.add_theme_stylebox_override("hover", hover_style)
+		b.add_theme_stylebox_override("pressed", normal_style)
+		b.add_theme_stylebox_override("disabled", disabled_style)
 	move_button.pressed.connect(_on_move_pressed)
 	attack_button.pressed.connect(_on_attack_pressed)
 
@@ -167,18 +180,26 @@ func _on_action_btn_resized(btn):
 	btn.pivot_offset = btn.size * 0.5
 
 func _on_action_btn_enter(btn):
+	if btn.disabled:
+		return
 	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	t.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.1)
 
 func _on_action_btn_exit(btn):
+	if btn.disabled:
+		return
 	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	t.tween_property(btn, "scale", Vector2(1, 1), 0.1)
 
 func _on_action_btn_down(btn):
+	if btn.disabled:
+		return
 	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	t.tween_property(btn, "scale", Vector2(0.97, 0.97), 0.05)
 
 func _on_action_btn_up(btn):
+	if btn.disabled:
+		return
 	var t = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	t.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.05)
 
