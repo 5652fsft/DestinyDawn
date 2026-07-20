@@ -14,7 +14,7 @@
 
 ```gdscript
 "新角色名":
-    return _xxx_skill_strategy(chara)
+	return _xxx_skill_strategy(chara)
 ```
 
 策略模板：
