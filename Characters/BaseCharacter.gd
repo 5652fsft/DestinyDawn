@@ -385,26 +385,17 @@ func handle_move():
 		
 		var results = space_state.intersect_point(query)
 		var clicked_on_self = false
-		var clicked_character: CharacterBody2D = null
+		
 		for r in results:
-			var col = r.collider
-			if col == self and not is_selected:
+			if r.collider == self and not is_selected:
 				clicked_on_self = true
 				break
-			elif col == self:
+			elif r.collider == self:
 				main.unselect_character(self)
-				break
-			elif col is CharacterBody2D and col.hp > 0:
-				clicked_character = col
+				return
 		
 		if clicked_on_self:
 			main.select_character(self)
-		elif clicked_character:
-			if is_enemy(clicked_character):
-				if not main.is_attack_mode:
-					main.select_character(clicked_character, true)
-			elif clicked_character != self and not main.is_attack_mode:
-				main.select_character(clicked_character)
 		elif is_selected and main.is_move_mode:
 			if GlobalGameData.character_move_used.get(name, false):
 				main.show_toast("该角色本回合已移动")
