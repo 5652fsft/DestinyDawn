@@ -478,10 +478,10 @@ func handle_attack():
 					main.unselect_character(self)
 					main.check_attack()
 					return
-					else:
-						main.show_toast("超出攻击范围")
-						print("[Warn] %s 目标超出攻击范围！" % name)
-						return
+				else:
+					main.show_toast("超出攻击范围")
+					print("[Warn] %s 目标超出攻击范围！" % name)
+					return
 			# 点击空地 → 取消选中
 			main.unselect_character(self)
 
