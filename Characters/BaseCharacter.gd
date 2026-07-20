@@ -393,6 +393,7 @@ func handle_move():
 				break
 			elif col == self:
 				main.unselect_character(self)
+				break
 			elif col is CharacterBody2D and col.hp > 0:
 				clicked_character = col
 		
@@ -447,18 +448,9 @@ func handle_attack():
 		
 		var results = space_state.intersect_point(query)
 		
-		# 情况1：点击自己 → 选中
-		for r in results:
-			if r.collider == self:
-				if not is_selected:
-					main.select_character(self)
-				else:
-					main.unselect_character(self)
-				return
+		# 在 attack 模式中跳过所有非 enemy 点击（交给 handle_move 处理）
 		
-		# 情况2：已选中且攻击模式，点击敌人 → 攻击
 		if is_selected and main.is_attack_mode:
-			print("[Debug] handle_attack: attack_mode active, checking click")
 			var clicked_enemy = null
 			for r in results:
 				var other = r.collider
@@ -466,7 +458,6 @@ func handle_attack():
 					clicked_enemy = other
 					break
 			if clicked_enemy:
-				print("[Debug] handle_attack: clicked_enemy = %s" % clicked_enemy.character_name)
 				if GlobalGameData.character_attack_used.get(name, false) and _get_extra_attacks() <= 0:
 					main.unselect_character(self)
 					return

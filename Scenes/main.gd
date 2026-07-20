@@ -14,6 +14,7 @@ var is_any_character_moving: bool = false
 var is_move_mode: bool = false
 var is_attack_mode: bool = false
 var is_viewing_enemy: bool = false
+var _hand_hidden: bool = false
 
 # === 卡牌系统 ===
 var pending_card_data: CardData = null
@@ -392,6 +393,13 @@ func _input(event: InputEvent):
 		if is_targeting:
 			_try_select_target(event.position)
 			get_viewport().set_input_as_handled()
+	if event is InputEventKey and event.keycode == KEY_F and event.pressed and not event.echo:
+		_hand_hidden = not _hand_hidden
+		hand_panel.visible = not _hand_hidden
+		if _hand_hidden:
+			show_toast("卡牌已收起，按 F 恢复", 2.0)
+		else:
+			show_toast("卡牌已展开，按 F 收起", 2.0)
 
 func _unhandled_input(event: InputEvent):
 	if not is_targeting:
