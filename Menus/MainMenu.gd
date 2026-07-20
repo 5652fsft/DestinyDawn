@@ -56,41 +56,9 @@ func _on_guide_pressed():
 		file.close()
 	else:
 		text = "游戏指南文件未找到。\n请访问 GitHub 仓库查看最新指南：\nhttps://github.com/5652fsft/DestinyDawn"
-	# 简单 Markdown → BBCode 转换
-	text = _md_to_bbcode(text)
 	$GuideDialog/GuideText.bbcode_enabled = true
-	$GuideDialog/GuideText.text = text
+	$GuideDialog/GuideText.text = MarkdownConverter.to_bbcode(text)
 	$GuideDialog.popup_centered()
-
-# 简单的 Markdown → BBCode 转换（覆盖常用元素）
-func _md_to_bbcode(t: String) -> String:
-	var lines = t.split("\n")
-	for i in range(lines.size()):
-		var line = lines[i]
-		# 标题行
-		if line.begins_with("##"):
-			line = line.trim_prefix("#").trim_prefix("#").trim_prefix(" ").trim_prefix("#").trim_prefix(" ")
-			line = "[b][u]%s[/u][/b]" % line
-		# 加粗段落
-		elif line.begins_with("**") and line.ends_with("**"):
-			line = "[b]%s[/b]" % line.trim_prefix("**").trim_suffix("**")
-		# 列表项
-		elif line.begins_with("- "):
-			line = "  •  %s" % line.trim_prefix("- ")
-		# 表格行
-		elif line.begins_with("|"):
-			line = line.replace("|", "  ")
-		# 分隔线
-		elif line.begins_with("---"):
-			line = "─" * 30
-		# 行内 **text** 转 [b]text[/b]
-		var bold_start = line.find("**")
-		if bold_start >= 0:
-			var bold_end = line.find("**", bold_start + 2)
-			if bold_end >= 0:
-				line = line.left(bold_start) + "[b]" + line.substr(bold_start + 2, bold_end - bold_start - 2) + "[/b]" + line.substr(bold_end + 2)
-		lines[i] = line
-	return "\n".join(lines)
 
 func _on_quit_pressed():
 	get_tree().quit()
