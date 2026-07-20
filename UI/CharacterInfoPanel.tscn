@@ -80,16 +80,22 @@ text = "效果"
 [node name="BuffsContainer" type="VBoxContainer" parent="ScrollContainer/VBox" unique_id=1082733770]
 layout_mode = 2
 
-[node name="MoveButton" type="Button" parent="ScrollContainer/VBox"]
-layout_mode = 2
-custom_minimum_size = Vector2(0, 36)
+[node name="MoveButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 470.0
+offset_right = 180.0
+offset_bottom = 510.0
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
 text = "移动"
 
-[node name="AttackButton" type="Button" parent="ScrollContainer/VBox"]
-layout_mode = 2
-custom_minimum_size = Vector2(0, 36)
+[node name="AttackButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 190.0
+offset_top = 470.0
+offset_right = 340.0
+offset_bottom = 510.0
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
 text = "普通攻击"
