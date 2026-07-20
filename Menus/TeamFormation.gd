@@ -63,8 +63,7 @@ func _build_slot_uis():
 			container.add_child(slot)
 
 			var spr = TextureRect.new()
-			var cid_cap = cid[0].to_upper() + cid.substr(1)
-			spr.texture = load("res://Assets/Sprites/Standee/%s_Standee.png" % cid_cap)
+			spr.texture = load("res://Assets/Sprites/Standee/%s_Standee.png" % CharacterData.get_sprite_id(cid))
 			spr.expand_mode = 1
 			spr.stretch_mode = 5
 			spr.size = Vector2(80, 48)

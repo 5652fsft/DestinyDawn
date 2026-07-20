@@ -14,8 +14,7 @@ signal clicked(cid: String)
 
 func setup(id: String, data: Dictionary):
 	char_id = id
-	var cap_id = id[0].to_upper() + id.substr(1)
-	$CardFront/PortraitRect.texture = load("res://Assets/Sprites/Standee/%s_Standee.png" % cap_id)
+	$CardFront/PortraitRect.texture = load("res://Assets/Sprites/Standee/%s_Standee.png" % CharacterData.get_sprite_id(id))
 	$CardFront/NameLabel.text = data.name
 	$CardFront/HPLabel.text = "生命值: %d" % data.hp
 	$CardFront/ATKLabel.text = "攻击力: %d" % data.atk

@@ -24,3 +24,9 @@ static func get_all_ids() -> Array[String]:
 	for k in DATA:
 		ids.append(k)
 	return ids
+
+# 角色 ID → 图片文件名首字母大写映射
+static func get_sprite_id(id: String) -> String:
+	match id:
+		"silverwolf": return "SilverWolf"
+		_: return id[0].to_upper() + id.substr(1)
