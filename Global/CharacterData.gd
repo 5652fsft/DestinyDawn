@@ -21,6 +21,9 @@ const DATA = {
 		"passive":"钢铁直架", "passive_desc":"消灭敌方后获得 1 次额外行动，获得一层 [嗜血成性]，效果为攻击力 +50%，持续两回合，最多可叠加 3 层"},
 }
 
+static func get_data(id: String) -> Dictionary:
+	return DATA.get(id, {})
+
 static func get_all_ids() -> Array[String]:
 	var ids: Array[String] = []
 	for k in DATA:

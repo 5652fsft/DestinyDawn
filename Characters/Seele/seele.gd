@@ -7,22 +7,22 @@ var last_target_hp: int = -1
 var last_target_max_hp: int = -1
 
 func _ready():
-	max_hp = 65
-	hp = 65
+	var _cd = CharacterData.get_data("seele")
+	max_hp = _cd.hp
 	super()
-	character_name = "希儿"
-	hp = 65
-	move_points = 6
-	attack = 18
+	character_name = _cd.name
+	hp = _cd.hp
+	move_points = _cd.move
+	attack = _cd.atk
 
 	passive_skill = BaseSkill.new()
-	passive_skill.skill_name = "暗影突袭"
-	passive_skill.description = "攻击满血敌人时伤害 +50%"
+	passive_skill.skill_name = _cd.passive
+	passive_skill.description = _cd.passive_desc
 	passive_skill.is_passive = true
 
 	active_skill = BaseSkill.new()
-	active_skill.skill_name = "相位突进"
-	active_skill.description = "瞬移至 10 格范围内选定的单体目标旁并发动 1.2 倍强化攻击"
+	active_skill.skill_name = _cd.skill
+	active_skill.description = _cd.skill_desc
 	active_skill.cooldown = 3
 	active_skill.skill_range = 10
 	active_skill.target_type = BaseSkill.SkillTarget.ENEMY_SINGLE

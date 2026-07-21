@@ -5,22 +5,23 @@ var passive_skill: BaseSkill
 var _burn_armor_used: bool = false
 
 func _ready():
-	max_hp = 85
+	var _cd = CharacterData.get_data("firefly")
+	max_hp = _cd.hp
 	super()
-	character_name = "流萤"
-	hp = 85
-	attack = 14
-	attack_range = 1
-	move_points = 5
+	character_name = _cd.name
+	hp = _cd.hp
+	attack = _cd.atk
+	attack_range = _cd.range
+	move_points = _cd.move
 
 	passive_skill = BaseSkill.new()
-	passive_skill.skill_name = "燃烧装甲"
-	passive_skill.description = "每回合首次受击50%概率反击灼烧"
+	passive_skill.skill_name = _cd.passive
+	passive_skill.description = _cd.passive_desc
 	passive_skill.is_passive = true
 
 	active_skill = BaseSkill.new()
-	active_skill.skill_name = "烈焰冲锋"
-	active_skill.description = "对 6 格范围内目标造成 25 点伤害并附加灼烧 2 回合"
+	active_skill.skill_name = _cd.skill
+	active_skill.description = _cd.skill_desc
 	active_skill.cooldown = 3
 	active_skill.skill_range = 6
 	active_skill.target_type = BaseSkill.SkillTarget.ENEMY_SINGLE

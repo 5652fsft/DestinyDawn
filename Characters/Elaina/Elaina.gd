@@ -4,23 +4,24 @@ var active_skill: BaseSkill
 var passive_skill: BaseSkill
 
 func _ready():
-	max_hp = 60
+	var _cd = CharacterData.get_data("elaina")
+	max_hp = _cd.hp
 	super()
-	character_name = "伊蕾娜"
-	hp = 60
-	attack = 20
-	attack_range = 3
-	move_points = 5
+	character_name = _cd.name
+	hp = _cd.hp
+	attack = _cd.atk
+	attack_range = _cd.range
+	move_points = _cd.move
 	attack_sfx = "attack_magic"
 
 	passive_skill = BaseSkill.new()
-	passive_skill.skill_name = "魔力共鸣"
-	passive_skill.description = "使用攻击/减益卡牌时，获得一层 [魔力充盈]，攻击力 +15%，持续 2 回合，最多可叠加 3 层"
+	passive_skill.skill_name = _cd.passive
+	passive_skill.description = _cd.passive_desc
 	passive_skill.is_passive = true
 
 	active_skill = BaseSkill.new()
-	active_skill.skill_name = "星尘爆裂"
-	active_skill.description = "对 6 格范围内目标及周围 1 格敌人造成 35 点伤害"
+	active_skill.skill_name = _cd.skill
+	active_skill.description = _cd.skill_desc
 	active_skill.cooldown = 4
 	active_skill.skill_range = 6
 	active_skill.target_type = BaseSkill.SkillTarget.ENEMY_SINGLE

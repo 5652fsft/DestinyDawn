@@ -5,23 +5,24 @@ var passive_skill: BaseSkill
 var _extra_attacks: int = 0
 
 func _ready():
-	max_hp = 48
+	var _cd = CharacterData.get_data("hamster")
+	max_hp = _cd.hp
 	super()
-	character_name = "芝士仓鼠"
-	hp = 48
-	attack = 26
-	attack_range = 3
-	move_points = 6
+	character_name = _cd.name
+	hp = _cd.hp
+	attack = _cd.atk
+	attack_range = _cd.range
+	move_points = _cd.move
 	attack_sfx = "attack_gun"
 
 	passive_skill = BaseSkill.new()
-	passive_skill.skill_name = "钢铁直架"
-	passive_skill.description = "消灭敌方后获得1次额外行动，攻击力+50%（可叠加3层）"
+	passive_skill.skill_name = _cd.passive
+	passive_skill.description = _cd.passive_desc
 	passive_skill.is_passive = true
 
 	active_skill = BaseSkill.new()
-	active_skill.skill_name = "动作如潮"
-	active_skill.description = "立即获得 1 次额外行动"
+	active_skill.skill_name = _cd.skill
+	active_skill.description = _cd.skill_desc
 	active_skill.cooldown = 3
 	active_skill.skill_range = 0
 	active_skill.target_type = BaseSkill.SkillTarget.SELF

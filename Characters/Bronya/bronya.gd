@@ -4,22 +4,23 @@ var active_skill: BaseSkill
 var passive_skill: BaseSkill
 
 func _ready():
-	max_hp = 68
+	var _cd = CharacterData.get_data("bronya")
+	max_hp = _cd.hp
 	super()
-	character_name = "布洛妮娅"
-	hp = 68
-	move_points = 5
-	attack = 15
+	character_name = _cd.name
+	hp = _cd.hp
+	move_points = _cd.move
+	attack = _cd.atk
 	attack_sfx = "attack_gun"
 
 	passive_skill = BaseSkill.new()
-	passive_skill.skill_name = "铁壁"
-	passive_skill.description = "受到伤害 -20%（HP<50% 时 -35%）"
+	passive_skill.skill_name = _cd.passive
+	passive_skill.description = _cd.passive_desc
 	passive_skill.is_passive = true
 
 	active_skill = BaseSkill.new()
-	active_skill.skill_name = "护卫指令"
-	active_skill.description = "为友方单体提供 30 点护盾"
+	active_skill.skill_name = _cd.skill
+	active_skill.description = _cd.skill_desc
 	active_skill.cooldown = 3
 	active_skill.skill_range = 0
 	active_skill.target_type = BaseSkill.SkillTarget.ALLY_SINGLE

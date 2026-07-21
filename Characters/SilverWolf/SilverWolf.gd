@@ -4,23 +4,24 @@ var active_skill: BaseSkill
 var passive_skill: BaseSkill
 
 func _ready():
-	max_hp = 65
+	var _cd = CharacterData.get_data("silverwolf")
+	max_hp = _cd.hp
 	super()
-	character_name = "银狼"
-	hp = 65
-	move_points = 4
-	attack_range = 2
-	attack = 16
+	character_name = _cd.name
+	hp = _cd.hp
+	move_points = _cd.move
+	attack_range = _cd.range
+	attack = _cd.atk
 	attack_sfx = "attack_digital"
 
 	passive_skill = BaseSkill.new()
-	passive_skill.skill_name = "数据篡改"
-	passive_skill.description = "攻击时50%概率附加随机减益"
+	passive_skill.skill_name = _cd.passive
+	passive_skill.description = _cd.passive_desc
 	passive_skill.is_passive = true
 
 	active_skill = BaseSkill.new()
-	active_skill.skill_name = "系统入侵"
-	active_skill.description = "目标虚弱 + 迟缓各 3 回合"
+	active_skill.skill_name = _cd.skill
+	active_skill.description = _cd.skill_desc
 	active_skill.cooldown = 4
 	active_skill.skill_range = 0
 	active_skill.target_type = BaseSkill.SkillTarget.ENEMY_SINGLE
