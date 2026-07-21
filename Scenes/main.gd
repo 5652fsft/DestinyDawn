@@ -351,6 +351,7 @@ func select_character(chara: CharacterBody2D, enemy_view: bool = false):
 		is_viewing_enemy = enemy_view
 	selected_character = chara
 	chara.is_selected = true
+	if _am: _am.play_sfx("click")
 	character_info_panel.show_for(chara)
 	move_button.visible = not enemy_view
 	attack_button.visible = not enemy_view
@@ -438,6 +439,7 @@ func _input(event: InputEvent):
 			return
 		_hand_hidden = not _hand_hidden
 		hand_panel.visible = not _hand_hidden
+		if _am: _am.play_sfx("deck_select")
 		if _hand_hidden:
 			show_toast("卡牌已收起，按 F 恢复", 2.0)
 		else:
@@ -652,6 +654,8 @@ func _sync_hand(player_id: int, hand: Array):
 		var typed: Array[String] = []
 		typed.assign(hand)
 		hand_panel.play_draw_animation(typed)
+		if _am and GlobalGameData.turn_has_been_drawn:
+			_am.play_sfx("card_play")
 
 func _on_skill_used(skill: BaseSkill, target_type: int):
 	if not selected_character or not skill:

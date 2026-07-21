@@ -218,6 +218,7 @@ func _execute_move(chara: Node, cell: Vector2i):
 	chara.global_position = world_pos
 	chara.target_world = world_pos
 	chara.velocity = Vector2.ZERO
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("move", chara)
 	GlobalGameData.character_move_used[chara.name] = true
 	GlobalGameData.character_move_used_num += 1
 	_log("%s 移动到 (%d, %d)，位置 %s" % [chara.character_name, cell.x, cell.y, world_pos], "Move")
