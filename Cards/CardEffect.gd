@@ -5,6 +5,8 @@ static func execute(card: CardData, target: Node, main: Node) -> bool:
 	if not card or not main:
 		return false
 
+	_apply_magic_resonance(card, main)
+
 	match card.effect_type:
 		CardData.EffectType.DAMAGE:
 			if card.id == "card_reckoning":
@@ -398,6 +400,35 @@ static func _rpc_take_damage(node: Node, amount: int):
 		node.rpc("take_damage", amount)
 	else:
 		node.take_damage(amount)
+
+static func _apply_magic_resonance(card: CardData, main: Node):
+	var attack_types = [
+		CardData.EffectType.DAMAGE, CardData.EffectType.AOE_DAMAGE,
+		CardData.EffectType.CHAIN_DAMAGE, CardData.EffectType.DAMAGE_OVER_TIME,
+		CardData.EffectType.LINEAR_AOE
+	]
+	var debuff_types = [
+		CardData.EffectType.DEBUFF_ATTACK, CardData.EffectType.DEBUFF_MOVE,
+		CardData.EffectType.MARK, CardData.EffectType.TAUNT
+	]
+	if not (card.effect_type in attack_types or card.effect_type in debuff_types):
+		return
+	if not "characters" in main:
+		return
+	for c in main.characters:
+		if not c or not c.has_method("get_buffs"):
+			continue
+		if not c.name.begins_with("Host"):
+			continue
+		if c.character_name != "伊蕾娜":
+			continue
+		if c.hp <= 0:
+			continue
+		var bm = main.get_node_or_null("BuffManager")
+		if bm and bm.has_method("apply_buff"):
+			bm.apply_buff(c, "magic_flow", 15, 99)
+			print("[Passive] %s [魔力充盈] 获得一层攻击力 +15%%" % c.character_name)
+		return
 
 static func _execute_cleanse(target: Node) -> bool:
 	if not target:
