@@ -103,15 +103,17 @@ enum EffectType {
 	MY_NEW_EFFECT,
 }
 
-# CardEffect.gd — execute() 中
+# CardEffect.gd — execute() 的 match 中添加
 CardData.EffectType.MY_NEW_EFFECT:
-	_execute_my_new_effect(card, caster, target, main)
+	_execute_my_new_effect(card, target, main)
 
 # CardEffect.gd — 实现
-static func _execute_my_new_effect(card: CardData, caster: Node, target: Node, main: Node):
+static func _execute_my_new_effect(card: CardData, target: Node, main: Node):
 	# 实现逻辑
 	pass
 ```
+
+> `caster` 参数已废弃，所有卡牌由玩家直接释放到目标，新增效果函数无需 `caster` 参数。
 
 ---
 

@@ -74,10 +74,13 @@ Server: advance_turn_phase()
   → Client: _sync_turn_phase() updates local state + UI
 ```
 
-### 角色状态同步
+### 角色行动状态同步（合并阶段）
+
+**游戏不分独立的移动阶段和攻击阶段**。每个角色在回合内可执行 1 次移动 + 1 次攻击/技能，顺序自由决定；卡牌由玩家独立释放，不消耗角色的行动次数。角色行动状态由 `GlobalGameData.character_move_used` / `character_attack_used` 追踪：
 
 | 状态 | RPC | 频率 |
 |---|---|---|
+| 行动标记 | `rpc("_sync_character_action", {name, action_type, has_moved, has_attacked})` | 每次移动/攻击/技能后 |
 | HP | `rpc_id(0, "_sync_hp", hp)` | take_damage / heal 后 |
 | Shield | `rpc_id(0, "_sync_shield", shield)` | shield 变化后 |
 | Buffs | `target.rpc("_sync_buffs", packed)` | BuffManager 每次变更后 |

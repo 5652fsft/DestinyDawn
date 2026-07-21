@@ -1,298 +1,284 @@
-# Destiny Dawn QuickStart Guide
+# Destiny Dawn 游戏项目 — AI快速导览
 
-**开发者：5652 | Godot 4.7 | 版本 v0.3.0**
-
----
-
-## 🚀 快速开始
-
-### 安装运行
-1. **要求**：Godot 4.7.1+
-2. **打开**：用 Godot 编辑器打开项目文件夹
-3. **运行**：按 F5 或点击"运行当前场景"
-
-### 基本操作
-- **鼠标左键**：选择角色、使用技能、拖拽卡牌
-- **鼠标右键**：拖拽地图视角
-- **滚轮**：缩放地图
-- **F键**：收起/展开手牌
+**目标读者**：AI大模型 | **开发者**：5652 | **引擎**：Godot 4.7.1
 
 ---
 
-## 🎮 游戏系统
+## 1. 项目概述
 
-### 六边形网格系统
-- **移动**：每回合1次，消耗移动力
-- **攻击范围**：角色射程内的敌人
-- **技能范围**：
-  - 布洛妮娅：友方单体
-  - 希儿：敌方单体
-  - 伊蕾娜：目标+周围1格（AOE）
-  - 流萤：前方1格直线
-  - 银狼：敌方单体
-  - 芝士仓鼠：自身
+Destiny Dawn 是一款基于 Godot 4.7.1 的回合制六边形战棋卡牌游戏，两名玩家各控制 3 名角色，在六角格地图上使用卡牌与技能对战。
 
-### 回合制规则
+### 核心定位
+
+| 维度 | 说明 |
+|---|---|
+| 玩法 | 回合制战棋 + 卡牌策略 |
+| 对战 | 3v3 角色对战 |
+| 模式 | LAN联机、单机人机（AI） |
+| 网络 | ENet P2P（MultiplayerAPI） |
+| 画面 | Control节点 + StyleBoxFlat手写样式（无 .theme 文件） |
+
+### 游戏流程
+
 ```
-回合开始（抽牌+恢复能量）
-  ├── 玩家回合：所有己方角色行动
-  └── 敌方回合：所有敌方角色行动
+编队(选3角色) → 卡组(选8张牌) → 开始战斗 → 回合制对战 → 胜负判定
 ```
-- 每个角色：移动1次 + 攻击/技能/卡牌1次
-- 先手顺序每回合随机决定
-
-### 能量系统
-- 每回合自动恢复2点能量
-- 能量上限10点
-- 0费卡牌「能量过载」可快速获得能量（自伤5）
 
 ---
 
-## 🎯 角色技能详解
+## 2. 文档导航 — AI阅读顺序
 
-### 布洛妮娅 — 护卫型
-- **技能：护卫指令**（冷却3回合）
-  - **范围**：友方单体
-  - **效果**：提供30点护盾
-  - **特点**：团队守护，保护残血队友
+> AI应当**先读本文档**快速了解项目全貌，再根据开发任务查阅对应文档。
 
-- **天赋：铁壁**
-  - 受到伤害-20%；生命低于50%时-35%
-
-### 希儿 — 刺客型
-- **技能：相位突进**（冷却3回合）
-  - **范围**：敌方单体
-  - **效果**：瞬移至目标旁+1.2倍强化攻击
-  - **特点**：高机动性，切入后排
-
-- **天赋：暗影突袭**
-  - 攻击满血敌人时伤害+50%
-
-### 伊蕾娜 — 法师型
-- **技能：星尘爆裂**（冷却4回合）
-  - **范围**：目标+周围1格（AOE）
-  - **效果**：35伤害+范围打击
-  - **特点**：远程炮台，AOE专家
-
-- **天赋：魔力共鸣**
-  - 使用攻击/减益卡牌时获得[魔力充盈]（攻击力+15%，最多3层）
-
-### 流萤 — 坦克型
-- **技能：烈焰冲锋**（冷却3回合）
-  - **范围**：前方1格直线
-  - **效果**：25伤害+灼烧2回合
-  - **特点**：前排坦克，灼烧反击
-
-- **天赋：燃烧装甲**
-  - 每回合首次受击有50%概率反击灼烧
-
-### 银狼 — 干扰型
-- **技能：系统入侵**（冷却4回合）
-  - **范围**：敌方单体
-  - **效果**：目标虚弱+迟缓各3回合
-  - **特点**：减益大师，控制专家
-
-- **天赋：数据篡改**
-  - 攻击时有50%概率附加随机减益
-
-### 芝士仓鼠 — 狙击型
-- **技能：动作如潮**（冷却3回合）
-  - **范围**：自身
-  - **效果**：立即获得1次额外行动
-  - **特点**：唯一拥有额外行动技能
-
-- **天赋：钢铁直架**
-  - 消灭敌人后获得1次额外行动+1层嗜血（攻击力+50%持续2回合，最多3层）
-
----
-
-## 🃏 卡牌系统
-
-### 费用机制
-- 使用卡牌消耗能量
-- 每回合+2能量，上限10点
-- 0费卡牌可快速积累能量
-
-### 卡牌类型
-| 类型 | 说明 | 示例 |
+| 文档 | 内容 | 何时查阅 |
 |---|---|---|
-| 攻击 | 对敌人造成伤害 | 火球术、瞄准射击 |
-| 治疗 | 恢复友方生命 | 治愈之光 |
-| 护盾 | 提供一次性吸收 | 护盾屏障 |
-| 强化 | 提升友方属性 | 力量强化 |
-| 弱化 | 降低敌方属性 | 各种debuff |
-| 位移 | 改变位置 | 暗影步 |
-| 战术 | 特殊效果 | 谋略、能量过载 |
-
-### 关键卡牌
-- **瞄准射击**：2费，28伤害（最高单体爆发）
-- **闪电链**：3费，20伤害+链式跳跃
-- **惩戒**：1费，伤害=6×目标buff数
-- **能量过载**：0费，+2能量，自伤5
+| **01-quickstart.md** ← 先读 | 项目总览、架构概览、规范汇总 | 初次了解、全局参考 |
+| **02-creating-a-character.md** | 新增角色的完整流程与规范 | 创建/修改角色时 |
+| **03-creating-a-card.md** | 新增卡牌的完整流程与类型定义 | 创建/修改卡牌时 |
+| **04-creating-ui.md** | UI主题、按钮、场景布局规范 | 创建/修改UI时 |
+| **05-rpc-conventions.md** | 网络同步、RPC模式、同步流程 | 涉及网络同步时 |
+| **06-data-format-reference.md** | 所有数据结构的精确格式 | 操作数据时速查 |
+| **07-git-conventions.md** | Git分支策略、提交规范 | 提交代码时 |
+| **08-ai-mode.md** | AI模式维护、新增角色AI更新 | 修改AI逻辑时 |
+| **09-audio-system.md** | 音效系统架构、集成点 | 涉及音效时 |
 
 ---
 
-## ⚔️ 战斗策略
+## 3. 项目架构概览
 
-### 基础原则
-1. **能量管理**：合理使用0费卡牌积累能量
-2. **编队搭配**：坦克+输出+辅助的组合
-3. **地形利用**：不同地形消耗不同移动力
-4. **技能时机**：把握技能释放的最佳时机
-
-### 角色定位
-- **坦克**（流萤）：承受伤害，保护队友
-- **输出**（希儿、伊蕾娜、芝士仓鼠）：造成伤害
-- **辅助**（布洛妮娅）：提供护盾和增益
-- **控制**（银狼）：施加减益和控制效果
-
-### 芝士仓鼠特殊机制
-- **唯一拥有击杀再动奖励**
-- **血量极低但伤害最高**
-- **保护己方或优先击杀是关键**
-
----
-
-## 🌐 网络对战
-
-### 局域联机
-- **创建房间**：LAN创建游戏
-- **加入房间**：LAN加入游戏，输入主机IP
-- **实时同步**：所有行动实时同步
-
-### 房间管理
-- 最大支持2人对战
-- 自动处理断线重连
-- 状态同步优化，减少延迟
-
----
-
-## 🎨 动态背景系统
-
-### 背景选项
-- 布洛妮娅 & 希儿主题背景
-- 伊蕾娜主题背景
-- 静态背景
-
-### 特色功能
-- **场景切换**：背景无缝继续播放
-- **战斗模式**：进入战斗时自动隐藏背景
-- **恢复机制**：退出战斗后自动恢复背景
-
----
-
-## 🐛 技术架构
-
-### 核心系统
-- **六边形网格**：基于TileMapLayer的高效渲染
-- **回合制**：完整的状态机管理
-- **卡牌系统**：数据驱动的效果系统
-- **AI系统**：基于评分的智能决策
-- **网络同步**：ENet P2P低延迟通信
-
-### 性能优化
-- **对象池**：特效对象复用
-- **状态差分**：只同步变化的状态
-- **视频优化**：单例背景管理器
-
-### 开发信息
-- **引擎**：Godot 4.7.1
-- **语言**：GDScript
-- **网络**：ENet
-- **视频**：Theora编码
-- **开发者**：5652
-
----
-
-## 💡 快速提示
-
-1. **优先保护芝士仓鼠**：它是团队核心输出
-2. **合理利用技能范围**：AOE技能对密集敌人效果更佳
-3. **注意能量管理**：不要浪费0费卡牌的积累机会
-4. **利用地形优势**：高地和掩体可以提供战术优势
-5. **编队多样化**：避免全选同一类型角色
-
----
-
-## 📁 项目结构
+### 3.1 目录结构
 
 ```
 destiny-dawn/
 ├ Assets/
-│  ├ Fonts/                    # SourceHanSerifCN 字体文件
+│  ├ Fonts/                    # SourceHanSerifCN 字体
 │  └ Sprites/
 │     ├ Characters/            # 角色阵营贴图 (*_Blue.png / *_Red.png)
-│     ├ Standee/               # 角色立绘 (240×144, *_Standee.png)
-│     └ menubg.jpg             # 主菜单/UI 背景
+│     ├ Standee/               # 立绘 (240x144, *_Standee.png)
+│     └ menubg.jpg             # 背景图
 ├ Cards/
-│  ├ CardData.gd               # CardData 资源类 + EffectType/TargetType/CardType 枚举
-│  ├ CardDatabase.gd           # 所有卡牌注册 + get_card / get_all_card_ids
-│  └ CardEffect.gd             # 卡牌效果执行器 (execute + 所有效果函数)
-├ Characters/
-│  ├ BaseCharacter.gd          # 角色基类 (CharacterBody2D)
-│  ├ FloatingBar.gd/.tscn      # 血条/护盾/选中指示器
-│  ├ Bronya/                   # 布洛妮娅
-│  ├ Seele/                    # 希儿
-│  ├ Elaina/                   # 伊蕾娜
-│  ├ Firefly/                  # 流萤
-│  └ SilverWolf/               # 银狼
+│  ├ CardData.gd               # 卡牌数据资源类 + 枚举定义
+│  ├ CardDatabase.gd           # 卡牌注册与查询
+│  ├ CardEffect.gd             # 卡牌效果执行器
+│  ├ BuffData.gd               # Buff 数据资源类（class_name BuffData）
+│  └ BuffDatabase.gd           # Buff 注册表（class_name BuffDatabase）
+├ Characters/                  # 各角色目录（Bronya/Seele/Elaina/Firefly/SilverWolf/Hamster）
+│  ├ BaseCharacter.gd          # 角色基类
+│  └ FloatingBar.gd/.tscn      # 血条/护盾
 ├ Global/
-│  ├ CharacterData.gd          # 角色数据字典 (单数据源)
-│  ├ DeckManager.gd            # 卡组/手牌管理
-│  ├ EnergySystem.gd           # 能量系统
-│  ├ BuffManager.gd            # Buff 管理器
-│  └ BuffDatabase.gd           # Buff 注册表
-├ GlobalGameData.gd            # Autoload: 全局状态、编队、统计
+│  ├ BackgroundManager.gd      # 动态背景管理器（Autoload）
+│  ├ BackgroundSingleton.gd    # 背景单例（Autoload）
+│  ├ SingletonMenuBackground.gd/.tscn # 单例背景场景
+│  ├ AudioManager.gd           # 音效/音乐管理器（Autoload）
+│  ├ ButtonTheme.gd            # 按钮主题（Autoload）
+│  ├ CharacterData.gd          # 角色数据字典
+│  ├ DeckManager.gd            # 卡组/手牌管理（场景子节点，非Autoload）
+│  ├ EnergySystem.gd           # 能量系统（场景子节点，非Autoload）
+│  ├ VFXManager.gd             # 特效管理器
+│  ├ AILogger.gd               # AI日志工具
+│  └ MarkdownConverter.gd      # Markdown 转换工具
+├ GlobalGameData.gd            # 全局状态单例（Autoload）
+├ AI/
+│  └ AIController.gd           # AI控制器
+├ Effects/
+│  └ FloatingNumber.gd/.tscn   # 浮动数字效果
 ├ Menus/
-│  ├ MainMenu.tscn/.gd         # 主菜单 (LAN 创建/加入/设置/退出)
-│  ├ TeamFormation.tscn/.gd    # 编队管理 (左列表右槽位)
-│  ├ DeckBuilder.tscn/.gd      # 卡组构筑 (牌库+8卡槽)
+│  ├ MainMenu.tscn/.gd         # 主菜单
+│  ├ TeamFormation.tscn/.gd    # 编队管理
+│  ├ DeckBuilder.tscn/.gd      # 卡组构筑
+│  ├ SettingsScene.tscn/.gd    # 设置界面
+│  ├ GuideScene.tscn/.gd       # 游戏指南
 │  └ Widgets/
-│     ├ CharacterCard.tscn/.gd # 角色卡片 (立绘+翻转详情)
-│     ├ DeckCardUI.tscn/.gd    # 卡牌卡片 (费用+名称+类型+描述)
-│     ├ DeckCardWidget.tscn/.gd# 简化版卡牌组件
-│     └ CharacterCard.tscn/.gd # 编队选人卡片
+│     ├ CharacterCard.tscn/.gd # 角色卡片组件
+│     └ DeckCardUI.tscn/.gd    # 卡牌卡片组件
 ├ Scenes/
 │  ├ scene.tscn                # 主战斗场景
-│  ├ main.gd                   # 战斗主逻辑 (turn system, RPCs, spawning)
-│  └ camera.gd                 # 摄像机 (拖拽+缩放)
+│  ├ main.gd                   # 战斗主逻辑
+│  └ camera.gd                 # 摄像机控制
 ├ Skills/
-│  ├ BaseSkill.gd              # BaseSkill 资源类 (skill_name/description/cooldown/target_type)
-│  └ SkillEffect.gd            # 技能效果分发器 (execute_active / get_passive_modifier)
+│  ├ BaseSkill.gd              # 技能资源类
+│  └ SkillEffect.gd            # 技能效果执行器
 ├ UI/
+│  ├ Theme/GameTheme.tres      # UI 主题文件
 │  ├ BattleResult.tscn/.gd     # 结算界面
-│  ├ CardTheme.gd              # 卡牌共用样式常量
-│  ├ CardUI.tscn/.gd           # 战斗手牌卡牌 UI
-│  ├ CharacterInfoPanel.tscn/.gd # 角色详情面板
-│  ├ HandPanel.tscn/.gd        # 手牌 Panel (扇形展示)
+│  ├ CardUI.tscn/.gd           # 战斗手牌卡片
+│  ├ CardTheme.gd              # 卡牌样式常量
+│  ├ HandPanel.tscn/.gd        # 手牌面板
 │  ├ SkillPanel.tscn/.gd       # 技能按钮面板
-│  ├ Toast.tscn/.gd            # Toast 提示系统
-│  └ PlayerInfoPanel.tscn/.gd  # 玩家信息面板
-├ project.godot                # Godot 项目配置
-└ docs/                        # 文档目录
+│  ├ CharacterInfoPanel.tscn/.gd # 角色详情面板
+│  ├ PlayerInfoPanel.tscn/.gd  # 玩家信息面板
+│  ├ TurnIndicator.tscn/.gd    # 回合指示器
+│  └ Toast.tscn/.gd            # 提示系统
+└ docs/                        # 本文档目录
 ```
 
-### Autoload (全局单例)
+### 3.2 Autoload 单例
 
 | 脚本 | 用途 |
 |---|---|
-| `GlobalGameData.gd` | 全局状态、编队、回合、战斗统计 |
-| `BackgroundManager.gd` | 背景管理和切换 |
-| `AudioManager.gd` | 音效和音乐管理 |
-| `DeckManager.gd` | 卡组/手牌管理 |
-| `BuffManager.gd` | Buff 管理器 |
-| `BuffDatabase.gd` | Buff ID 注册与元数据 |
+| `GlobalGameData.gd` | 全局状态：回合、编队、战斗统计、音量设置 |
+| `BackgroundManager.gd` | 动态背景切换与持久化 |
+| `BackgroundSingleton.gd` | 背景单例管理（跨场景保持背景实例） |
+| `AudioManager.gd` | BGM/SFX播放与音量控制 |
+| `ButtonTheme.gd` | 全局按钮主题与动效 |
+
+> 注意：`DeckManager`、`EnergySystem`、`BuffManager` 不是 Autoload，它们是战斗场景 `scene.tscn` 的子节点，由 `main.gd` 的 `@onready` 变量引用。
+
+### 3.3 战斗场景节点结构
+
+```
+scene.tscn (Node2D) — main.gd
+├ Camera (Camera2D)              — 视角控制（camera.gd，支持拖拽+缩放）
+├ Map/
+│  ├ Ground (TileMapLayer)       — 地形网格
+│  └ Highlight (TileMapLayer)    — 高亮显示（移动/攻击范围）
+├ Characters (Node2D)            — 角色容器（MultiplayerSpawner 自动生成）
+├ MultiplayerSpawner             — 网络生成器
+├ EnergySystem (Node)            — 能量系统（EnergySystem.gd）
+├ DeckManager (Node)             — 卡牌管理（DeckManager.gd）
+├ UI (CanvasLayer)
+│  ├ CharacterInfoPanel          — 角色属性面板
+│  ├ PassiveSkillPanel           — 被动技能面板
+│  ├ TurnIndicator               — 回合指示器+结束回合按钮
+│  ├ HandPanel                   — 手牌面板
+│  ├ SkillPanel                  — 技能按钮面板
+│  ├ HostPlayerPanel             — 主机玩家信息
+│  ├ ClientPlayerPanel           — 客户端玩家信息
+│  ├ Toast                       — 提示系统
+│  ├ BattleResult                — 结算界面
+│  ├ MoveButton                  — 移动按钮
+│  └ AttackButton                — 普通攻击按钮
+└ main.gd                        — 战斗主控制器（回合管理+RPC+角色生成）
+```
 
 ---
 
-## 🚀 运行方式
+## 4. 核心设计约束
 
-- **单机调试**: 打开 MainMenu.tscn 为主场景，点击"创建主机"进入战斗（默认双方都用默认编队/卡组）
-- **LAN 联机**: 一台点"创建主机"，另一台输入 IP 点"加入"
-- **主场景**: `project.godot` 中 `run/main_scene="res://Menus/MainMenu.tscn"`
+> 以下为整个项目通用的约束，所有新开发不得违反。
+
+### 4.1 卡牌系统约束
+- **无施法者概念**：卡牌由玩家直接从手牌释放到目标，`CardEffect.gd` 中 `caster` 参数已废弃（始终为当前选中角色或队伍中第一个存活角色），新增卡牌效果时无需关心
+- **无亲和力系统**：`_affinity_multiplier()` 已废弃，始终返回 1.0
+- 卡牌通过 `_create_card()` 在 `CardDatabase.gd` 中注册
+
+### 4.2 回合系统约束
+- **无独立的移动/攻击阶段**：每个角色在回合内可移动 1 次 + 攻击/技能 1 次，顺序由玩家自由决定；卡牌由玩家独立释放，不消耗角色的行动次数
+- 回合流程：`START_ROUND → PLAYER_TURN → ENEMY_TURN → 循环`
+- 先手顺序每回合随机决定
+- 必须点击"结束回合"按钮手动推进到对方回合
+
+### 4.3 地形系统约束
+- 地形类型：平原（消耗1）、森林（消耗2）
+- **山地不可通行**，不能移动到山地格上
+- 所有格子的移动力消耗不能为负数
+
+### 4.4 网络同步约束
+- **服务端权威**：所有状态变更由Host（peer 1）验证和执行
+- **RPC模式**：严格按照 `docs/05-rpc-conventions.md` 选择
+
+### 4.5 角色设计约束
+- 每个角色有唯一的 `character_name`（中文名）
+- 技能范围 `skill_range = 0` 表示无限制（全图），> 0 表示最大 hex 格数
+- 优先在角色脚本中覆写 `take_damage` / `perform_attack` 实现被动
 
 ---
 
-## 📞 支持
+## 5. 开发规范速查
 
-如有问题或建议，请联系开发者：5652
+### 5.1 开发原则
+
+- **数据驱动设计**：所有游戏数据与逻辑分离，通过数据库类统一管理
+- **模块化封装**：每个功能模块独立封装，节点间通过信号通信，避免直接引用
+- **服务端权威**：所有状态变更由Host验证执行，客户端从不主动修改游戏状态
+- **防御性编程**：所有外部数据都要验证，重要操作记录日志
+
+### 5.2 新增角色需改动文件
+
+| 文件 | 操作 |
+|---|---|
+| `Global/CharacterData.gd` | 添加数据条目 |
+| `Characters/NewChar/NewChar.gd` | 新建角色脚本（extends BaseCharacter） |
+| `Characters/NewChar/NewChar.tscn` | 新建角色场景 |
+| `Assets/Sprites/Characters/` | 添加阵营贴图（Blue/Red） |
+| `Assets/Sprites/Standee/` | 添加立绘 |
+| `Scenes/main.gd` | 添加PackedScene常量 + 编队map |
+| `Skills/SkillEffect.gd` | 实现技能逻辑 |
+| `AI/AIController.gd` | 添加技能策略分支 |
+| `Scenes/main.gd` | AI角色池添加新角色ID |
+
+### 5.2 新增卡牌需改动文件
+
+| 文件 | 操作 |
+|---|---|
+| `Cards/CardDatabase.gd` | 添加 `_create_card()` 调用 |
+| `Cards/CardEffect.gd` | 如需要新效果类型，添加实现 |
+| `Cards/CardData.gd` | 如需要新枚举值 |
+| `Scenes/main.gd` | 如需要新目标选择逻辑 |
+| `Menus/DeckBuilder.gd` | 如需要新卡牌类型名 |
+
+### 5.3 命名规范
+
+| 类型 | 规范 | 示例 |
+|---|---|---|
+| 文件名 | PascalCase | `CharacterData.gd` |
+| 变量名 | snake_case | `character_move_used` |
+| 常量 | SCREAMING_SNAKE_CASE | `DEFAULT_TEAM` |
+| 信号 | snake_case | `buffs_changed` |
+
+### 5.4 提交规范
+
+格式：`<type>: <简短描述（中文）>`
+
+| Type | 用途 |
+|---|---|
+| feat | 新功能 |
+| fix | 修复Bug |
+| refactor | 重构 |
+| style | UI变更 |
+| docs | 文档 |
+| revert | 回滚 |
+
+---
+
+## 6. 运行方式
+
+| 方式 | 说明 |
+|---|---|
+| 单机调试 | MainMenu.tscn → 创建主机（默认编队+卡组） |
+| LAN联机 | 主机点"创建游戏"，客户端输入IP点"加入" |
+| 主场景 | `project.godot` 中 `run/main_scene=res://Menus/MainMenu.tscn` |
+
+---
+
+## 7. 技术栈
+
+| 技术 | 版本/说明 |
+|---|---|
+| Godot | 4.7.1 (GDScript 2.0) |
+| 联机 | ENet (MultiplayerAPI) |
+| UI | Control + StyleBoxFlat（无theme文件） |
+| 网格 | TileMapLayer (Ground + Highlight) |
+| 视频 | Theora编码（.ogv） |
+| 字体 | SourceHanSerifCN |
+| 音效 | .ogg格式 |
+
+---
+
+## 8. 调试与性能
+
+### 日志
+```gdscript
+var Logger = load("res://Global/AILogger.gd")
+Logger.log("消息", "类别")  # 类别如 Battle/Skill/Card/Buff/Network
+```
+
+### 性能优化惯例
+- **对象池**：特效对象复用，避免频繁创建销毁
+- **状态差分**：只同步变化的状态，不传输完整数据
+- **异步加载**：资源使用 `preload()` 提前加载，避免运行时卡顿
+
+### 扩展新内容时注意
+- 新角色 → 同步更新 `AI/AIController.gd` 技能策略
+- 新Buff → 在 `Global/BuffDatabase.gd` 注册元数据
+- 新效果类型 → 在 `CardData.EffectType` 添加枚举值

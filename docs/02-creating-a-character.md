@@ -107,6 +107,18 @@ func perform_attack(target_path: NodePath):
   | 银狼 | 0 | 全图任意敌方减益 |
   | 芝士仓鼠 | 0 | 仅作用于自身（SELF 目标） |
 
+### 角色行动状态（合并阶段）
+
+游戏**不分独立的移动阶段和攻击阶段**，每个角色在回合内可执行 1 次移动 + 1 次攻击/技能，顺序由玩家自由决定；卡牌由玩家独立释放，不消耗角色的行动次数：
+
+```gdscript
+# BaseCharacter.gd 中
+var has_moved: bool = false      # 是否已移动
+var has_attacked: bool = false   # 是否已攻击/使用技能/卡牌
+```
+
+角色行动状态每回合由服务端重置。新增角色需确保 `has_moved` / `has_attacked` 正确管理。
+
 ### 角色属性设置顺序（重要）
 
 ```
