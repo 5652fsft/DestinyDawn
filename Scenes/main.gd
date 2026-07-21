@@ -587,9 +587,13 @@ func _on_target_selected(target: Node):
 		hand_panel.remove_card_via_data(card_data)
 		cancel_targeting()
 	elif selected_character and selected_character.has_method("use_active_skill") and selected_character.active_skill:
-		var skill_name = selected_character.active_skill.skill_name
+		var skill = selected_character.active_skill
+		if not SkillEffect._is_valid_target_for_skill(selected_character, skill, target):
+			show_toast("目标选择无效")
+			cancel_targeting()
+			return
 		selected_character.use_active_skill(target)
-		_active_skill_post_exec(selected_character.active_skill)
+		_active_skill_post_exec(skill)
 
 func _target_play_card(card_data: CardData, target: Node):
 	var target_path = ""

@@ -27,6 +27,10 @@ static func execute_active(character: Node, skill: BaseSkill, target: Node, main
 	if not character or not skill or skill.is_passive:
 		return false
 
+	if not _is_valid_target_for_skill(character, skill, target):
+		print("[Skill] %s 目标类型不匹配（%s）" % [character.character_name, skill.target_type])
+		return false
+
 	if skill.skill_range > 0:
 		var grid_layer = character.grid_layer
 		var char_cell = main._get_character_cell(character)
@@ -188,4 +192,18 @@ static func _hamster_active(character: Node, target: Node, main: Node) -> bool:
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("hamster_skill", character)
 	print("[Skill] %s [动作如潮] 获得额外行动" % character.character_name)
 	character.rpc("_play_vfx_preset", "heal")
+	return true
+
+static func _is_valid_target_for_skill(character: Node, skill: BaseSkill, target: Node) -> bool:
+	if not target or not character:
+		return false
+	match skill.target_type:
+		BaseSkill.SkillTarget.SELF:
+			return target == character
+		BaseSkill.SkillTarget.ALLY_SINGLE:
+			return character.name.begins_with("Host") == target.name.begins_with("Host")
+		BaseSkill.SkillTarget.ENEMY_SINGLE:
+			return character.name.begins_with("Host") != target.name.begins_with("Host")
+		BaseSkill.SkillTarget.NONE:
+			return true
 	return true
