@@ -39,7 +39,7 @@ func setup_background(path: String):
 		video_player.stream = stream
 		video_player.play()
 		print("[SingletonMenuBackground] Background loaded and playing")
-		print("[SingletonMenuBackground] Video player state - visible: ", video_player.visible, " playing: ", video_player.playing, " size: ", video_player.size)
+		print("[SingletonMenuBackground] Video player state - visible: ", video_player.visible, " is_playing: ", video_player.is_playing(), " size: ", video_player.size)
 	else:
 		print("[SingletonMenuBackground] Failed to load background")
 		video_player.hide()
@@ -58,6 +58,7 @@ static func _load_stream(path: String) -> VideoStreamTheora:
 	return stream
 
 func _on_video_finished():
+	print("[SingletonMenuBackground] Video finished, restarting")
 	video_player.play()
 
 # 获取当前背景路径

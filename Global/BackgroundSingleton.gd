@@ -71,7 +71,7 @@ func get_background_status() -> String:
 		return "No VideoPlayer"
 	if not fallback:
 		return "No Fallback"
-	return "VideoPlayer: visible=" + str(video_player.visible) + " playing=" + str(video_player.playing) + " size=" + str(video_player.size) + " Fallback: visible=" + str(fallback.visible)
+	return "VideoPlayer: visible=" + str(video_player.visible) + " is_playing=" + str(video_player.is_playing()) + " size=" + str(video_player.size) + " Fallback: visible=" + str(fallback.visible)
 
 # 确保背景实例正确创建
 func _ensure_background():
