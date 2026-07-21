@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cykt4isobq60q" path="res://Menus/DeckBuilder.gd" id="1"]
 [ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2"]
-[ext_resource type="Texture2D" uid="uid://dc37n6qm4tnj6" path="res://Assets/Sprites/menubg.jpg" id="3"]
+[ext_resource type="PackedScene" uid="uid://bm3uqpwjw8bm3" path="res://Scenes/MenuBackground.tscn" id="3"]
 
 [node name="DeckBuilder" type="Control" unique_id=995382760]
 layout_mode = 3
@@ -12,6 +12,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
+
+[node name="MenuBackground" parent="." instance=ExtResource("3")]
+z_index = -1
 
 [node name="Title" type="Label" parent="." unique_id=1693817160]
 layout_mode = 0
@@ -111,20 +114,6 @@ offset_bottom = 670.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 18
 text = "✔ 保存卡组"
-
-[node name="BgSprite" type="TextureRect" parent="." unique_id=365926252]
-z_index = -1
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = 164.41699
-offset_bottom = 3.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("3")
-expand_mode = 1
 
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="SaveButton" to="." method="_on_save_pressed"]

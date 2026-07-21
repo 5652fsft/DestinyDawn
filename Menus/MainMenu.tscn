@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dug3q744sfx6b" path="res://Menus/MainMenu.gd" id="1"]
 [ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2"]
-[ext_resource type="Texture2D" uid="uid://dc37n6qm4tnj6" path="res://Assets/Sprites/menubg.jpg" id="3"]
+[ext_resource type="PackedScene" uid="uid://bm3uqpwjw8bm3" path="res://Scenes/MenuBackground.tscn" id="3"]
 
 [node name="MainMenu" type="Control" unique_id=85425446]
 layout_mode = 3
@@ -10,6 +10,9 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1")
+
+[node name="MenuBackground" parent="." instance=ExtResource("3")]
+z_index = -1
 
 [node name="Title" type="Label" parent="." unique_id=1600905568]
 layout_mode = 0
@@ -87,18 +90,6 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
 text = "退出"
-
-[node name="BgSprite" type="TextureRect" parent="." unique_id=789046125]
-z_index = -1
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = 164.41699
-offset_bottom = 3.0
-mouse_filter = 2
-texture = ExtResource("3")
-expand_mode = 1
 
 [connection signal="pressed" from="VBoxContainer/TeamButton" to="." method="_on_team_pressed"]
 [connection signal="pressed" from="VBoxContainer/DeckButton" to="." method="_on_deck_pressed"]

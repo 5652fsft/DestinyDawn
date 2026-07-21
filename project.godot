@@ -24,6 +24,7 @@ config/icon="uid://cct4qh8lvbssb"
 GlobalGameData="*res://GlobalGameData.gd"
 AudioManager="*res://Global/AudioManager.gd"
 ButtonTheme="*res://Global/ButtonTheme.gd"
+BackgroundManager="*res://Global/BackgroundManager.gd"
 MCPRuntimeProbe="*res://addons/godot_mcp/runtime/mcp_runtime_probe.gd"
 
 [display]

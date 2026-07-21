@@ -9,6 +9,7 @@ const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 @onready var sfx_slider = $VBoxContainer/SFXSlider
 @onready var save_btn = $VBoxContainer/SaveButton
 @onready var back_btn = $VBoxContainer/BackButton
+@onready var bg_option = $VBoxContainer/BgOption
 
 func _ready():
 	GlobalGameData.load_defaults_if_empty()
@@ -28,6 +29,22 @@ func _ready():
 	master_slider.value_changed.connect(_on_master_volume_changed)
 	bgm_slider.value_changed.connect(_on_bgm_volume_changed)
 	sfx_slider.value_changed.connect(_on_sfx_volume_changed)
+	_init_bg_option()
+
+func _init_bg_option():
+	var bgs = BackgroundManager.get_available_backgrounds()
+	var idx = 0
+	for bg in bgs:
+		bg_option.add_item(bg.name, idx)
+		if bg.id == BackgroundManager.current_id:
+			bg_option.select(idx)
+		idx += 1
+	bg_option.item_selected.connect(_on_bg_selected)
+
+func _on_bg_selected(index: int):
+	var bgs = BackgroundManager.get_available_backgrounds()
+	if index >= 0 and index < bgs.size():
+		BackgroundManager.set_background(bgs[index].id)
 
 func _on_master_volume_changed(v: float):
 	var am = Engine.get_singleton("AudioManager")
