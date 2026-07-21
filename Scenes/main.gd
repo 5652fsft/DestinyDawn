@@ -10,7 +10,13 @@ func _log(msg: String, category: String = "AI"):
 var selected_character = null
 var characters: Array[CharacterBody2D] = []
 var cell_occupancy: Dictionary = {}
-var is_any_character_moving: bool = false
+var _reserved_cells: Dictionary = {}  # cell_coord -> character (移动中角色预占的格子)
+var _refresh_panel_timer: float = 0.0
+var is_any_character_moving: bool:
+	get:
+		return _move_counter > 0
+var _move_counter: int = 0
+var _move_timeout: float = 0.0
 var is_move_mode: bool = false
 var is_attack_mode: bool = false
 var is_viewing_enemy: bool = false
@@ -391,7 +397,21 @@ func unselect_character(chara: CharacterBody2D, unselect_all = false):
 		move_button.hide()
 		attack_button.hide()
 	
+func reserve_move_cell(character: Node, cell: Vector2i):
+	_reserved_cells[cell] = character
+
+func unreserve_move_cell(character: Node):
+	var keys = _reserved_cells.keys()
+	for k in keys:
+		if _reserved_cells[k] == character:
+			_reserved_cells.erase(k)
+
 func is_cell_occupied(cell: Vector2i, except_chara = null) -> bool:
+	# 检查预占格子（移动中的角色）
+	if _reserved_cells.has(cell):
+		var occupant = _reserved_cells[cell]
+		if except_chara == null or occupant != except_chara:
+			return true
 	cell_occupancy.clear()
 	for chara in characters:
 		if not chara or not chara.grid_layer:
@@ -422,10 +442,25 @@ func find_cell_occupant(cell: Vector2i, except_chara = null) -> CharacterBody2D:
 	return null
 	
 func start_character_move():
-	is_any_character_moving = true
+	_move_counter += 1
+	_move_timeout = 0.0
 
 func end_character_move():
-	is_any_character_moving = false
+	_move_counter = max(0, _move_counter - 1)
+	_move_timeout = 0.0
+
+func _process(delta):
+	if _move_counter > 0:
+		_move_timeout += delta
+		if _move_timeout > 10.0:
+			_move_counter = 0
+			_move_timeout = 0.0
+			print("[Safety] 移动计数器超时，已自动重置")
+	# 属性面板定时刷新（5次/秒）
+	_refresh_panel_timer += delta
+	if _refresh_panel_timer >= 0.2 and selected_character and character_info_panel and character_info_panel.current_character == selected_character:
+		_refresh_panel_timer = 0.0
+		character_info_panel.refresh()
 
 
 # === 卡牌系统 ===
@@ -435,6 +470,8 @@ func _input(event: InputEvent):
 		if is_targeting:
 			_try_select_target(event.position)
 			get_viewport().set_input_as_handled()
+			return
+		_try_select_character(event.position)
 	if event is InputEventKey and event.keycode == KEY_F and event.pressed and not event.echo:
 		if GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.GAME_OVER:
 			return
@@ -476,6 +513,41 @@ func _try_select_target(_pos: Vector2):
 			_on_target_selected(hit)
 			return
 	cancel_targeting()
+
+func _try_select_character(_pos: Vector2):
+	if is_targeting or is_move_mode or is_attack_mode:
+		return
+	if GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.GAME_OVER:
+		return
+	var ctrl = get_viewport().gui_get_hovered_control()
+	while ctrl:
+		if ctrl is BaseButton:
+			return
+		ctrl = ctrl.get_parent()
+	var space_state = get_world_2d().direct_space_state
+	var query = PhysicsPointQueryParameters2D.new()
+	query.position = get_global_mouse_position()
+	query.collision_mask = 2
+	var results = space_state.intersect_point(query)
+	var clicked_ally = null
+	var clicked_enemy = null
+	for r in results:
+		var hit = r.collider
+		if hit is CharacterBody2D and hit.hp > 0:
+			if _is_ally(hit):
+				clicked_ally = hit
+			else:
+				clicked_enemy = hit
+			break
+	if clicked_ally:
+		if clicked_ally.is_selected:
+			unselect_character(clicked_ally, true)
+		else:
+			select_character(clicked_ally)
+	elif clicked_enemy:
+		select_character(clicked_enemy, true)
+	elif selected_character:
+		unselect_character(selected_character, true)
 
 func on_card_played(card_data: CardData):
 	var my_pid = 1 if GlobalGameData.is_host else 2
@@ -706,6 +778,7 @@ func _active_skill_post_exec(skill: BaseSkill):
 		selected_character.hide_attack_range()
 	show_toast("释放 [%s]" % skill.skill_name, 1.0)
 	check_attack()
+	_update_action_buttons(selected_character)
 	character_info_panel.refresh()
 	cancel_targeting()
 

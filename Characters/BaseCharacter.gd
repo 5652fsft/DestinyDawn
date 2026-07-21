@@ -3,7 +3,7 @@ extends CharacterBody2D
 
 # === 属性 ===
 const click_layer: int = 2
-const speed: float = 1200.0
+const speed: float = 4800.0
 @export var character_name: String = "Character"
 @export var move_points: int = 4
 @export var max_hp: int = 100
@@ -369,7 +369,7 @@ func _is_mouse_over_ui() -> bool:
 		if ctrl.is_queued_for_deletion():
 			ctrl = ctrl.get_parent()
 			continue
-		if ctrl is CardUI or ctrl is BaseButton or ctrl is LineEdit:
+		if ctrl is BaseButton or ctrl is LineEdit:
 			return true
 		ctrl = ctrl.get_parent()
 	return false
@@ -382,62 +382,39 @@ func handle_move():
 			return
 		if main.is_any_character_moving:
 			return
+		if not is_selected or not main.is_move_mode:
+			return
+		
+		if GlobalGameData.character_move_used.get(name, false):
+			main.show_toast("该角色本回合已移动")
+			return
 		
 		var mouse_pos = get_global_mouse_position()
+		if grid_layer:
+			var local_mouse = grid_layer.to_local(mouse_pos)
+			var cell_coord: Vector2i = grid_layer.local_to_map(local_mouse)
 		
-		var space_state = get_world_2d().direct_space_state
-		var query = PhysicsPointQueryParameters2D.new()
-		query.position = mouse_pos
-		query.collision_mask = click_layer
-		
-		var results = space_state.intersect_point(query)
-		var clicked_on_self = false
-		var clicked_enemy: CharacterBody2D = null
-		
-		for r in results:
-			var col = r.collider
-			if col == self and not is_selected:
-				clicked_on_self = true
-				break
-			elif col == self:
-				main.unselect_character(self)
-				return
-			elif col is CharacterBody2D and col.hp > 0 and is_enemy(col) and not main.is_attack_mode:
-				clicked_enemy = col
-		
-		if clicked_on_self:
-			main.select_character(self)
-		elif clicked_enemy:
-			main.select_character(clicked_enemy, true)
-		elif is_selected and main.is_move_mode:
-			if GlobalGameData.character_move_used.get(name, false):
-				main.show_toast("该角色本回合已移动")
+			if not valid_move_cells.has(cell_coord):
+				main.show_toast("超出移动范围")
 				return
 			
-			if grid_layer:
-				var local_mouse = grid_layer.to_local(mouse_pos)
-				var cell_coord: Vector2i = grid_layer.local_to_map(local_mouse)
+			if main.is_cell_occupied(cell_coord, self):
+				main.show_toast("该格子已被占据")
+				return
 			
-				if not valid_move_cells.has(cell_coord):
-					main.show_toast("超出移动范围")
-					return
-				
-				if main.is_cell_occupied(cell_coord, self):
-					main.show_toast("该格子已被占据")
-					return
-				
-				main.start_character_move()
-				is_moving = true
-				if _am: _am.play_sfx("move", self)
-				
-				var target_local = grid_layer.map_to_local(cell_coord)
-				target_world = grid_layer.to_global(target_local)
-				print("[Move] %s → (%d, %d) 消耗 %d" % [name, cell_coord.x, cell_coord.y, valid_move_cells[cell_coord]])
-				GlobalGameData.character_move_used[name] = true
-				GlobalGameData.character_move_used_num += 1
-			hide_move_range()
-			main.unselect_character(self)
-			main.check_move()
+			main.start_character_move()
+			main.reserve_move_cell(self, cell_coord)
+			is_moving = true
+			if _am: _am.play_sfx("move", self)
+			
+			var target_local = grid_layer.map_to_local(cell_coord)
+			target_world = grid_layer.to_global(target_local)
+			print("[Move] %s → (%d, %d) 消耗 %d" % [name, cell_coord.x, cell_coord.y, valid_move_cells[cell_coord]])
+			GlobalGameData.character_move_used[name] = true
+			GlobalGameData.character_move_used_num += 1
+		hide_move_range()
+		main.unselect_character(self)
+		main.check_move()
 	
 func handle_attack():
 	if hp <= 0:
@@ -721,6 +698,9 @@ func _process(delta):
 					handle_attack()
 			move_toward_target()
 			return
+		if get_current_phase() == "Active":
+			handle_move()
+			handle_attack()
 		move_toward_target()
 		return
 	if not is_multiplayer_authority():
@@ -746,6 +726,7 @@ func move_toward_target():
 		is_moving = false
 		if is_multiplayer_authority() and multiplayer.has_multiplayer_peer():
 			rpc("_sync_position", global_position)
+		main.unreserve_move_cell(self)
 		main.end_character_move()
 	move_and_slide()
 

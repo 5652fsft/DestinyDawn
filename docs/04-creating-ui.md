@@ -105,15 +105,18 @@ func _on_btn_up(btn):
 1. `extends Panel`
 2. `_ready()` 中连接 `mouse_entered`/`mouse_exited`，设置 `pivot_offset`
 3. 悬停：scale → 1.35, modulate → 黄色高亮
-4. 点击：通过 `_gui_input` 捕获
+4. **拖拽释放**：鼠标左键拖拽卡牌到目标角色上释放，`_gui_input` + `_process` 管理拖拽状态；释放时调用 `main.on_card_dropped(card_data)` 触发目标选择
 5. 背景：`CardTheme.CARD_BG` + 圆角
+6. `card_data: CardData` — 卡牌数据引用
+7. 拖拽过程中创建幽灵副本（`_create_ghost`），释放后播放消失动画
 
 ### Deck Card (`Menus/Widgets/DeckCardUI.tscn/.gd`) — 构筑界面
 
 1. `extends Panel`
 2. 同上 hover/click 模式，但 scale → 1.08（`DECK_HOVER_SCALE`）
 3. `set_in_deck_mode(bool)` 控制亮/灰状态
-4. `signal clicked(cid: String)`
+4. `signal clicked(cid: String)` — 点击卡片 toggle 入组/出组
+5. **点击选牌**（无拖拽）：从牌库点击加入卡组，从卡组点击移除
 
 ### Character Card (`Menus/Widgets/CharacterCard.tscn/.gd`) — 编队界面
 
@@ -123,6 +126,7 @@ func _on_btn_up(btn):
 4. 背面：ScrollContainer + 详细属性 + 技能/天赋描述
 5. `signal clicked(cid: String)` — 点击卡片 toggle 入队/离队
 6. `set_team_status(bool)` — 控制亮/灰
+7. **点击选人**（无拖拽）：点击左侧角色卡入队，点击右侧槽位移除
 
 ---
 

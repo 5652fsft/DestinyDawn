@@ -4,7 +4,6 @@ extends Panel
 const CardTheme = preload("res://UI/CardTheme.gd")
 
 var card_data: CardData = null
-signal card_drag_started(card: CardUI)
 
 var _hover_tween: Tween = null
 var _base_scale: Vector2 = Vector2(1, 1)
@@ -78,7 +77,6 @@ func _process(delta):
 
 func _start_drag():
 	_create_ghost()
-	card_drag_started.emit(self)
 
 func _create_ghost():
 	_ghost = duplicate(2)
@@ -112,11 +110,6 @@ func _drop_card():
 					)
 				queue_free()
 				return
-	if _ghost:
-		_ghost.queue_free()
-		_ghost = null
-
-func _cleanup_ghost():
 	if _ghost:
 		_ghost.queue_free()
 		_ghost = null
