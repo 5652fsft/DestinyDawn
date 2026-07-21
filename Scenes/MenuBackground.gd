@@ -15,7 +15,6 @@ func _on_background_changed(id: String):
 	apply_background(BackgroundManager.get_current_bg_path())
 
 func apply_background(path: String):
-	print("[MenuBG] apply_background path=", path)
 	if path.is_empty():
 		video_player.hide()
 		fallback.show()
@@ -26,24 +25,18 @@ func apply_background(path: String):
 	if stream:
 		video_player.stream = stream
 		video_player.play()
-		print("[MenuBG] stream=", str(stream), " is_playing=", video_player.is_playing(), " visible=", video_player.visible, " size=", video_player.size)
 	else:
-		print("[MenuBG] FAILED to load stream")
 		video_player.hide()
 		fallback.show()
 
 static func _load_stream(path: String) -> VideoStreamTheora:
 	if not FileAccess.file_exists(path):
-		print("[MenuBG] file NOT found: ", path)
 		return null
-	print("[MenuBG] file exists: ", path)
 	# Try load() first (works for res:// in PCK and absolute paths)
 	var s = load(path)
 	if s:
-		print("[MenuBG] load() OK")
 		return s
 	# Fallback: create VideoStreamTheora and set file
-	print("[MenuBG] load() returned null, trying VideoStreamTheora.new()")
 	var stream = VideoStreamTheora.new()
 	stream.file = path
 	return stream

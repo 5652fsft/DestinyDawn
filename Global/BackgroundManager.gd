@@ -25,7 +25,6 @@ func set_background(id: String):
 				ProjectSettings.save()
 			get_tree().call_group("menu_bg", "_on_background_changed", id)
 			return
-	print("[BackgroundManager] unknown id: ", id)
 
 func get_current_bg_filename() -> String:
 	for bg in backgrounds:
@@ -41,7 +40,6 @@ func get_current_bg_path() -> String:
 		return "res://Assets/Video/" + filename
 	var exe_dir = OS.get_executable_path().get_base_dir()
 	var local = exe_dir + "/" + filename
-	print("[BG] exe_dir=", exe_dir, " local=", local, " exists=", FileAccess.file_exists(local))
 	if FileAccess.file_exists(local):
 		return local
 	return "res://Assets/Video/" + filename
