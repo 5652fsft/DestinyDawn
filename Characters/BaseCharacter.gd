@@ -424,6 +424,7 @@ func handle_move():
 				
 				main.start_character_move()
 				is_moving = true
+				if _am: _am.play_sfx("move", self)
 				
 				var target_local = grid_layer.map_to_local(cell_coord)
 				target_world = grid_layer.to_global(target_local)
@@ -730,6 +731,8 @@ func _process(delta):
 	move_toward_target()
 
 func move_toward_target():
+	if not is_moving:
+		return
 	var dist = global_position.distance_to(target_world)
 	if dist > 5:
 		velocity = global_position.direction_to(target_world) * speed
@@ -737,7 +740,6 @@ func move_toward_target():
 		global_position = target_world
 		velocity = Vector2.ZERO
 		is_moving = false
-		if _am: _am.play_sfx("move", self)
 		if is_multiplayer_authority() and multiplayer.has_multiplayer_peer():
 			rpc("_sync_position", global_position)
 		main.end_character_move()

@@ -38,7 +38,7 @@ var server_ip: String = "127.0.0.1"
 
 # 音效系统音量（0.0 ~ 1.0）
 var audio_volume_master: float = 0.8
-var audio_volume_bgm: float = 0.6
+var audio_volume_bgm: float = 0.3
 var audio_volume_sfx: float = 0.8
 
 func load_defaults_if_empty():

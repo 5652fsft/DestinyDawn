@@ -25,6 +25,7 @@ func _build_roster():
 		cards[cid] = card
 
 func _on_card_clicked(cid: String):
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("deck_select")
 	if cid in slots:
 		slots.erase(cid)
 	else:

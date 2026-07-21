@@ -30,6 +30,7 @@ func _build_pool():
 		pool_widgets[cid] = w
 
 func _on_pool_card_clicked(cid: String):
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("deck_select")
 	if cid in deck_ids:
 		deck_ids.erase(cid)
 		_update_ui()
@@ -43,6 +44,7 @@ func _on_pool_card_clicked(cid: String):
 	_show_toast("已加入卡组")
 
 func _on_deck_card_clicked(cid: String):
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("deck_select")
 	deck_ids.erase(cid)
 	_update_ui()
 	_show_toast("已移出卡组")
