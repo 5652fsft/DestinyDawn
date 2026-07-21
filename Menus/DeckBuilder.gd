@@ -16,6 +16,9 @@ func _ready():
 	$VBoxContainer/CardPool.add_theme_stylebox_override("panel", transparent)
 	_build_pool()
 	_update_ui()
+	
+	# 初始化单例背景
+	BackgroundSingleton.setup(BackgroundManager.get_current_bg_path())
 
 func _build_pool():
 	var grid = $VBoxContainer/CardPool/PoolScroll/GridContainer

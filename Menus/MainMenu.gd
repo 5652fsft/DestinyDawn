@@ -7,6 +7,9 @@ func _ready():
 		ButtonTheme.apply_menu(btn)
 		ButtonTheme.set_font(btn, 20)
 	_update_status()
+	
+	# 初始化单例背景
+	BackgroundSingleton.setup(BackgroundManager.get_current_bg_path())
 
 func _update_status():
 	$VBoxContainer/TeamButton.text = "编队管理"

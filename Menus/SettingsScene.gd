@@ -30,6 +30,9 @@ func _ready():
 	bgm_slider.value_changed.connect(_on_bgm_volume_changed)
 	sfx_slider.value_changed.connect(_on_sfx_volume_changed)
 	_init_bg_option()
+	
+	# 初始化单例背景
+	BackgroundSingleton.setup(BackgroundManager.get_current_bg_path())
 
 func _init_bg_option():
 	var bgs = BackgroundManager.get_available_backgrounds()

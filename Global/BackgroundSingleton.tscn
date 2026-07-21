@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://b8xn2a7l1xqy7"]
+
+[node name="BackgroundSingleton" type="Node"]
+script = ExtResource("1")
+
+[ext_resource type="Script" path="res://Global/BackgroundSingleton.gd" id="1"]

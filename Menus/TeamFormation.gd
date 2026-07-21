@@ -7,12 +7,15 @@ const CharData = preload("res://Global/CharacterData.gd")
 const CARD_SCENE = preload("res://Menus/Widgets/CharacterCard.tscn")
 
 var slots: Array[String] = []
-var cards: Dictionary = {}
+var cards: Dictionary = []
 
 func _ready():
 	slots = GlobalGameData.selected_team.duplicate()
 	_build_roster()
 	_update_slots()
+	
+	# 初始化单例背景
+	BackgroundSingleton.setup(BackgroundManager.get_current_bg_path())
 
 func _build_roster():
 	var grid = $RosterScroll/RosterGrid

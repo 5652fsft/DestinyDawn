@@ -8,6 +8,9 @@ func _ready():
 	ButtonTheme.set_font(back_btn, 20)
 	back_btn.pressed.connect(_on_back_pressed)
 	_load_guide()
+	
+	# 初始化单例背景
+	BackgroundSingleton.setup(BackgroundManager.get_current_bg_path())
 
 func _load_guide():
 	var text = ""
