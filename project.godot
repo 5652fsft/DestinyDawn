@@ -19,7 +19,8 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="DestinyDawn"
 run/main_scene="res://Menus/MainMenu.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
-boot_splash/image="uid://cct4qh8lvbssb"
+boot_splash/stretch_mode=0
+boot_splash/image="uid://2dneoriv6emu"
 config/icon="uid://cct4qh8lvbssb"
 
 [audio]
@@ -30,9 +31,9 @@ buses/default_bus_layout="uid://dpvo0w48xjncy"
 
 GlobalGameData="*res://GlobalGameData.gd"
 ButtonTheme="*res://Global/ButtonTheme.gd"
-MCPRuntimeProbe="*res://addons/godot_mcp/runtime/mcp_runtime_probe.gd"
 AudioManager="*res://Global/AudioManager.gd"
 BackgroundManager="*res://Global/BackgroundManager.gd"
+MCPRuntimeProbe="*res://addons/godot_mcp/runtime/mcp_runtime_probe.gd"
 
 [display]
 
