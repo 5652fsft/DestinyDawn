@@ -6,10 +6,10 @@ var fade_duration: float = 0.65
 func _ready():
 	vertical_alignment = 1
 	horizontal_alignment = 1
-	add_theme_font_size_override("font_size", 26)
-	add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))
-	add_theme_constant_override("shadow_offset_x", 1)
-	add_theme_constant_override("shadow_offset_y", 1)
+	add_theme_font_size_override("font_size", 34)
+	add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
+	add_theme_constant_override("shadow_offset_x", 2)
+	add_theme_constant_override("shadow_offset_y", 2)
 
 func show_value(value: int, is_heal: bool = false, is_shield: bool = false):
 	if is_heal:

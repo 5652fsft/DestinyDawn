@@ -63,6 +63,8 @@ node.add_theme_stylebox_override("panel", bg)
 
 ### 主菜单按钮动效（参考 `Menus/MainMenu.gd`）
 
+**现已有专门的 'ButtonTheme.gd' 管理**
+
 所有可交互按钮应统一使用以下模式：
 
 ```gdscript

@@ -20,8 +20,9 @@ func _ready():
 
 	active_skill = BaseSkill.new()
 	active_skill.skill_name = "动作如潮"
-	active_skill.description = "立即获得1次额外行动"
+	active_skill.description = "立即获得 1 次额外行动"
 	active_skill.cooldown = 3
+	active_skill.skill_range = 0
 	active_skill.target_type = BaseSkill.SkillTarget.SELF
 	active_skill.is_passive = false
 

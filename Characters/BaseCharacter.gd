@@ -46,6 +46,10 @@ var vfx_manager: Node:
 		return _vm
 var _vm: Node = null
 
+var _am:
+	get:
+		return Engine.get_singleton("AudioManager")
+
 signal buffs_changed
 
 # === 状态变量 ===
@@ -315,8 +319,6 @@ func show_attack_range():
 	for cell in valid_attack_cells.keys():
 		var enemy = main.find_cell_occupant(cell)
 		if cell != start_cell and enemy and is_enemy(enemy):
-			if highlight_layer:
-				highlight_layer.set_cell(cell, 0, Vector2i.ZERO)
 			var hex = Polygon2D.new()
 			var r = 68.0
 			var pts: PackedVector2Array = []
@@ -324,7 +326,7 @@ func show_attack_range():
 				var a = deg_to_rad(60 * k - 30)
 				pts.append(Vector2(cos(a) * r, sin(a) * r))
 			hex.polygon = pts
-			hex.color = Color(1.0, 0.15, 0.15, 0.4)
+			hex.color = Color(1.0, 0.15, 0.15, 0.45)
 			hex.z_index = 1
 			hex.name = "AttackRangeHighlight"
 			# 挂在 Sprite2D 下以跟随动画（缩放、偏移、悬停等）
@@ -489,6 +491,8 @@ func perform_attack(target_path: NodePath):
 	var target = get_node_or_null(target_path)
 	if not target or not target is CharacterBody2D:
 		return
+	if target.hp <= 0:
+		return
 	
 	if get_current_phase() != "Active":
 		return
@@ -518,6 +522,7 @@ func _play_attack_animation(target_path: NodePath):
 	lurch.tween_property(sprite, "offset:x", dir * 12.0, 0.04)
 	lurch.tween_property(sprite, "offset:x", 0.0, 0.06)
 
+	if _am: _am.play_sfx("attack", self)
 	# 攻击者白色闪烁
 	var atk_flash = create_tween().set_parallel(true)
 	atk_flash.tween_property(sprite, "self_modulate", Color(1.6, 1.6, 1.3), 0.03)
@@ -565,7 +570,7 @@ func _shake_camera(intensity: float):
 
 func _spawn_float(value: int, heal: bool = false, shield: bool = false):
 	var num = FLOATING_NUM.instantiate()
-	num.global_position = global_position + Vector2(0, -80)
+	num.global_position = global_position + Vector2(190, -220)
 	num.z_index = 100
 	get_tree().current_scene.add_child(num)
 	num.show_value(value, heal, shield)
@@ -576,6 +581,7 @@ func take_damage(damage: int):
 	if damage <= 0:
 		hp = min(max_hp, hp - damage)
 		_spawn_float(-damage, true)
+		if _am: _am.play_sfx("heal", self)
 		if multiplayer.is_server():
 			var key = "host_healing_done" if is_host else "client_healing_done"
 			GlobalGameData.battle_stats[key] += -damage
@@ -603,6 +609,7 @@ func take_damage(damage: int):
 	damage -= absorbed
 	if absorbed > 0:
 		_spawn_float(absorbed, false, true)
+		if _am: _am.play_sfx("shield", self)
 		if multiplayer.is_server():
 			print("[Combat] %s 护盾吸收 %d 点伤害，剩余护盾: %d" % [name, absorbed, shield])
 	
@@ -616,6 +623,7 @@ func take_damage(damage: int):
 	if hp <= 0:
 		if not visible:
 			return
+		if _am: _am.play_sfx("death", self)
 		hide()
 		collision_layer = 0
 		main.unregister_character(self)
@@ -643,6 +651,9 @@ var effective_attack: int:
 			var bt = buff_manager.get_total(self, "bloodthirst")
 			if bt > 0:
 				base += int(attack * bt / 100.0)
+			var mf = buff_manager.get_total(self, "magic_flow")
+			if mf > 0:
+				base += int(attack * mf / 100.0)
 		return max(0, base)
 
 var effective_move_points: int:
@@ -726,6 +737,7 @@ func move_toward_target():
 		global_position = target_world
 		velocity = Vector2.ZERO
 		is_moving = false
+		if _am: _am.play_sfx("move", self)
 		if is_multiplayer_authority() and multiplayer.has_multiplayer_peer():
 			rpc("_sync_position", global_position)
 		main.end_character_move()

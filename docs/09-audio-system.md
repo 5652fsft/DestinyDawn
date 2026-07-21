@@ -244,13 +244,13 @@ _up()     → AudioManager.play_sfx("click")
 
 ```gdscript
 const SFX_MAP: Dictionary = {
-    "click":       preload("res://Assets/Audio/SFX/click.ogg"),
-    "hover":       preload("res://Assets/Audio/SFX/hover.ogg"),
-    # ... 所有音效
+	"click":       preload("res://Assets/Audio/SFX/click.ogg"),
+	"hover":       preload("res://Assets/Audio/SFX/hover.ogg"),
+	# ... 所有音效
 }
 
 const BGM_MAP: Dictionary = {
-    "battle":      preload("res://Assets/Audio/BGM/battle.ogg"),
+	"battle":      preload("res://Assets/Audio/BGM/battle.ogg"),
 }
 ```
 

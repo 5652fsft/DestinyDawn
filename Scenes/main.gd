@@ -53,6 +53,10 @@ var last_attacker: Node = null
 var skill_overlays: Array[Node] = []
 var _turn_toast_shown: bool = false
 
+var _am:
+	get:
+		return Engine.get_singleton("_am")
+
 func _build_team_from_selection():
 	team_roster.clear()
 	enemy_roster.clear()
@@ -105,6 +109,9 @@ func _setup_ai_controller():
 
 func _ready():
 	GlobalGameData.load_defaults_if_empty()
+	if _am:
+		_am._apply_saved_volumes()
+		_am.play_bgm_random()
 	_init_buff_manager()
 	_init_vfx_manager()
 
@@ -167,14 +174,20 @@ func _on_move_pressed():
 	if not selected_character:
 		print("[Warn] 移动按钮：selected_character 为空")
 		return
+	if _am: _am.play_sfx("click")
 	if selected_character.get_current_phase() != "Active":
 		print("[Warn] 移动按钮：不在 Active 阶段")
 		return
 	if GlobalGameData.character_move_used.get(selected_character.name, false):
 		show_toast("该角色本回合已移动")
 		return
+	if is_move_mode:
+		_cancel_move_mode()
+		return
 	is_attack_mode = false
+	_reset_button_texts()
 	is_move_mode = true
+	move_button.text = "取消移动"
 	selected_character.hide_attack_range()
 	selected_character.show_move_range()
 	show_toast("点击格子移动")
@@ -184,6 +197,7 @@ func _on_attack_pressed():
 	if not selected_character:
 		print("[Warn] 攻击按钮：selected_character 为空")
 		return
+	if _am: _am.play_sfx("click")
 	if selected_character.get_current_phase() != "Active":
 		print("[Warn] 攻击按钮：不在 Active 阶段")
 		return
@@ -192,12 +206,35 @@ func _on_attack_pressed():
 		if extra <= 0:
 			show_toast("该角色本回合已行动")
 			return
+	if is_attack_mode:
+		_cancel_attack_mode()
+		return
 	is_move_mode = false
+	_reset_button_texts()
 	is_attack_mode = true
+	attack_button.text = "取消攻击"
 	selected_character.hide_move_range()
 	selected_character.show_attack_range()
 	show_toast("点击敌人攻击")
 	print("[Input] 进入攻击模式")
+
+func _cancel_move_mode():
+	is_move_mode = false
+	_reset_button_texts()
+	if selected_character and selected_character.has_method("hide_move_range"):
+		selected_character.hide_move_range()
+	show_toast("")
+
+func _cancel_attack_mode():
+	is_attack_mode = false
+	_reset_button_texts()
+	if selected_character and selected_character.has_method("hide_attack_range"):
+		selected_character.hide_attack_range()
+	show_toast("")
+
+func _reset_button_texts():
+	move_button.text = "移动"
+	attack_button.text = "普通攻击"
 
 func _spawn_character(scene_path: String, char_name: String, authority: int, pos: Vector2):
 	var scene = load(scene_path)
@@ -308,9 +345,10 @@ func select_character(chara: CharacterBody2D, enemy_view: bool = false):
 		selected_character.is_selected = false
 		selected_character = null
 		character_info_panel.hide()
-	is_move_mode = false
-	is_attack_mode = false
-	is_viewing_enemy = enemy_view
+		is_move_mode = false
+		is_attack_mode = false
+		_reset_button_texts()
+		is_viewing_enemy = enemy_view
 	selected_character = chara
 	chara.is_selected = true
 	character_info_panel.show_for(chara)
@@ -331,6 +369,7 @@ func unselect_character(chara: CharacterBody2D, unselect_all = false):
 			selected_character = null
 		is_move_mode = false
 		is_attack_mode = false
+		_reset_button_texts()
 		is_viewing_enemy = false
 		character_info_panel.hide()
 		skill_panel.hide()
@@ -342,6 +381,7 @@ func unselect_character(chara: CharacterBody2D, unselect_all = false):
 		selected_character = null
 		is_move_mode = false
 		is_attack_mode = false
+		_reset_button_texts()
 		is_viewing_enemy = false
 		character_info_panel.hide()
 		skill_panel.hide()
@@ -394,6 +434,8 @@ func _input(event: InputEvent):
 			_try_select_target(event.position)
 			get_viewport().set_input_as_handled()
 	if event is InputEventKey and event.keycode == KEY_F and event.pressed and not event.echo:
+		if GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.GAME_OVER:
+			return
 		_hand_hidden = not _hand_hidden
 		hand_panel.visible = not _hand_hidden
 		if _hand_hidden:
@@ -402,14 +444,20 @@ func _input(event: InputEvent):
 			show_toast("卡牌已展开，按 F 收起", 2.0)
 
 func _unhandled_input(event: InputEvent):
-	if not is_targeting:
-		return
-	if not is_targeting:
-		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
-		cancel_targeting()
-		get_viewport().set_input_as_handled()
-	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		if is_targeting:
+			cancel_targeting()
+			get_viewport().set_input_as_handled()
+		elif is_move_mode:
+			_cancel_move_mode()
+			get_viewport().set_input_as_handled()
+		elif is_attack_mode:
+			_cancel_attack_mode()
+			get_viewport().set_input_as_handled()
+		return
+	if not is_targeting:
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_try_select_target(event.position)
 		get_viewport().set_input_as_handled()
 
@@ -516,8 +564,8 @@ func cancel_targeting():
 	highlight_layer.clear()
 	_clear_skill_overlays()
 	_update_skill_button()
-	# 恢复攻击范围高亮（攻击阶段且角色仍选中）
-	if selected_character and selected_character.get_current_phase() == "Active" and not GlobalGameData.character_attack_used.get(selected_character.name, false):
+	# 恢复攻击范围高亮（仅当处于攻击模式且角色仍有行动次数时）
+	if selected_character and is_attack_mode and selected_character.get_current_phase() == "Active" and not GlobalGameData.character_attack_used.get(selected_character.name, false):
 		selected_character.show_attack_range()
 
 func _on_target_selected(target: Node):
@@ -572,6 +620,7 @@ func _execute_play_card(player_id: int, card_id: String, target_path: String):
 	var player_name = GlobalGameData.player_name if player_id == 1 else ("AI" if GlobalGameData.is_ai_mode else "Client")
 
 	print("[Card] %s 使用 [%s]，目标: %s" % [player_name, card_data.card_name, target.name if target else "无"])
+	if _am: _am.play_sfx("card_play")
 
 	# 战斗统计：记录卡牌使用
 	var stat_key = "host_cards_played" if player_id == 1 else "client_cards_played"
@@ -607,6 +656,8 @@ func _sync_hand(player_id: int, hand: Array):
 func _on_skill_used(skill: BaseSkill, target_type: int):
 	if not selected_character or not skill:
 		return
+	_cancel_move_mode()
+	_cancel_attack_mode()
 	# 隐藏攻击范围高亮（如果存在）
 	if selected_character.has_method("hide_attack_range"):
 		selected_character.hide_attack_range()
@@ -629,6 +680,8 @@ func _on_skill_used(skill: BaseSkill, target_type: int):
 func _active_skill_post_exec(skill: BaseSkill):
 	if not selected_character or not skill:
 		return
+	_cancel_move_mode()
+	_cancel_attack_mode()
 	if selected_character.active_skill:
 		selected_character.active_skill.current_cooldown = selected_character.active_skill.cooldown
 		if not selected_character.has_method("_consumes_attack_on_skill") or selected_character._consumes_attack_on_skill():
@@ -670,15 +723,22 @@ func highlight_skill_targets():
 	var is_ally_target = skill.target_type == BaseSkill.SkillTarget.ALLY_SINGLE
 	var targets = _get_my_characters() if is_ally_target else _get_enemy_characters()
 	var hex_color = Color(0.2, 0.4, 1.0, 0.45) if is_ally_target else Color(1.0, 0.15, 0.15, 0.45)
+	var char_cell = _get_character_cell(selected_character)
+	var reachable = {} if skill.skill_range <= 0 else SkillEffect.get_cells_in_range(selected_character.grid_layer, char_cell, skill.skill_range)
 	for c in targets:
-		if c.hp > 0:
-			var hex = _make_hex_overlay(hex_color, 68.0)
-			var spr = c.get_node_or_null("Sprite2D")
-			if spr:
-				spr.add_child(hex)
-			else:
-				c.add_child(hex)
-			skill_overlays.append(hex)
+		if c.hp <= 0:
+			continue
+		if skill.skill_range > 0:
+			var c_cell = _get_character_cell(c)
+			if not reachable.has(c_cell):
+				continue
+		var hex = _make_hex_overlay(hex_color, 68.0)
+		var spr = c.get_node_or_null("Sprite2D")
+		if spr:
+			spr.add_child(hex)
+		else:
+			c.add_child(hex)
+		skill_overlays.append(hex)
 
 func _update_player_energy():
 	_update_player_panels()
@@ -767,6 +827,9 @@ func show_battle_result():
 	var is_host_win = GlobalGameData.host_characters.any(func(c): return c.hp > 0)
 	var i_win = is_host_win if GlobalGameData.is_host else not is_host_win
 	print("[Phase] 胜利方: %s" % ("服务端" if is_host_win else "客户端"))
+	if _am:
+		_am.stop_bgm(0.5)
+		_am.play_sfx("victory" if i_win else "defeat")
 	hand_panel.hide()
 	if $UI.has_node("BattleResult"):
 		$UI/BattleResult.show_result(i_win, GlobalGameData.battle_stats)
@@ -836,8 +899,9 @@ func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn,
 	if phase == GlobalGameData.TurnPhase.GAME_OVER:
 		show_battle_result()
 		return
-	# 回合提示
 	if phase == GlobalGameData.TurnPhase.PLAYER_TURN or phase == GlobalGameData.TurnPhase.ENEMY_TURN:
+		if _am: _am.play_sfx("turn_start")
+	# 回合提示
 		var is_enemy_phase = phase == GlobalGameData.TurnPhase.ENEMY_TURN
 		var is_my_turn = (host_turn == GlobalGameData.is_host) != is_enemy_phase
 		if not _turn_toast_shown:

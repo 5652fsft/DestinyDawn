@@ -49,5 +49,7 @@ static func _down(btn):
 static func _up(btn):
 	if btn.disabled:
 		return
+	var am = Engine.get_singleton("AudioManager")
+	if am: am.play_sfx("click")
 	var t = btn.create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	t.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.05)

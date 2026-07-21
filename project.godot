@@ -22,8 +22,9 @@ config/icon="uid://cct4qh8lvbssb"
 [autoload]
 
 GlobalGameData="*res://GlobalGameData.gd"
-MCPRuntimeProbe="*res://addons/godot_mcp/runtime/mcp_runtime_probe.gd"
+AudioManager="*res://Global/AudioManager.gd"
 ButtonTheme="*res://Global/ButtonTheme.gd"
+MCPRuntimeProbe="*res://addons/godot_mcp/runtime/mcp_runtime_probe.gd"
 
 [display]
 

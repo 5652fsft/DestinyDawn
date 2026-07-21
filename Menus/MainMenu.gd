@@ -13,15 +13,17 @@ func _update_status():
 	$VBoxContainer/DeckButton.text = "卡组构筑"
 
 func _on_team_pressed():
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	get_tree().change_scene_to_file("res://Menus/TeamFormation.tscn")
 
 func _on_deck_pressed():
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	get_tree().change_scene_to_file("res://Menus/DeckBuilder.tscn")
 
 func _on_host_pressed():
 	var peer = ENetMultiplayerPeer.new()
 	if peer.create_server(1145) != OK:
-		print("[Error] 服务器启动失败")
+		print("[Error] 服务器启动失�?)
 		return
 	multiplayer.multiplayer_peer = peer
 	GlobalGameData.is_host = true
@@ -40,6 +42,7 @@ func _on_join_pressed():
 	get_tree().change_scene_to_file("res://Scenes/scene.tscn")
 
 func _on_settings_pressed():
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	get_tree().change_scene_to_file("res://Menus/SettingsScene.tscn")
 
 func _on_ai_battle_pressed():
@@ -49,7 +52,9 @@ func _on_ai_battle_pressed():
 	get_tree().change_scene_to_file("res://Scenes/scene.tscn")
 
 func _on_guide_pressed():
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	get_tree().change_scene_to_file("res://Menus/GuideScene.tscn")
 
 func _on_quit_pressed():
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	get_tree().quit()

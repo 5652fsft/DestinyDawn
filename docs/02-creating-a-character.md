@@ -70,6 +70,7 @@ func _ready():
 	active_skill.skill_name = "技能名"
 	active_skill.description = "技能描述"
 	active_skill.cooldown = 3
+	active_skill.skill_range = 0  # 0 = 不限制范围，>0 = 最大 hex 格数
 	active_skill.target_type = BaseSkill.SkillTarget.ENEMY_SINGLE
 	# 可选: ALLY_SINGLE / SELF / NONE
 	active_skill.is_passive = false
@@ -90,6 +91,21 @@ func perform_attack(target_path: NodePath):
 	super(target_path)
 	# 额外逻辑（如 SilverWolf 的 50% 附加减益）
 ```
+
+### 技能范围原则
+
+- `skill_range` 限制主动技能可选取目标的最大 hex 距离（基于六边形网格 `hex_distance` 计算）
+- 角色与目标之间的距离超过 `skill_range` 时，该目标不显示高亮且无法选中
+- `skill_range = 0` 表示无限制（如 Bronya 的全图护盾、耗鼠的自选技能）
+- 具体到每个角色的设计意图：
+  | 角色 | skill_range | 说明 |
+  |---|---|---|
+  | 布洛妮娅 | 0 | 全图任意友方均可护盾 |
+  | 希儿 | 10 | 大范围内瞬移突进（但不可全图） |
+  | 伊蕾娜 | 6 | 中程 AoE 爆发 |
+  | 流萤 | 6 | 中程突击灼烧 |
+  | 银狼 | 0 | 全图任意敌方减益 |
+  | 芝士仓鼠 | 0 | 仅作用于自身（SELF 目标） |
 
 ### 角色属性设置顺序（重要）
 

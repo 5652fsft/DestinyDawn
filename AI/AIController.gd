@@ -152,6 +152,13 @@ func _execute_current_action():
 			_action_timer = ACTION_DELAY * 0.3
 		return
 
+	var target = action.get("target")
+	if target != null and (not is_instance_valid(target) or target.hp <= 0):
+		_log("跳过动作：目标已死亡或无效", "Execute")
+		_busy = true
+		_action_timer = ACTION_DELAY * 0.3
+		return
+
 	var phase_before = GlobalGameData.current_turn_phase
 
 	match action.type:
@@ -431,21 +438,26 @@ func _should_use_skill(chara: Node) -> bool:
 
 func _evaluate_skill_target(chara: Node) -> Node:
 	var name = chara.character_name
+	var target: Node = null
 	match name:
 		"布洛妮娅":
-			return _find_lowest_hp_ally()
+			target = _find_lowest_hp_ally()
 		"希儿":
-			return _find_killable_with_bonus(chara)
+			target = _find_killable_with_bonus(chara)
 		"伊蕾娜":
-			return _find_best_aoe_target(chara)
+			target = _find_best_aoe_target(chara)
 		"流萤":
-			return _find_highest_value_enemy()
+			target = _find_highest_value_enemy()
 		"银狼":
-			return _find_highest_attack_enemy()
+			target = _find_highest_attack_enemy()
 		"芝士仓鼠":
-			return _evaluate_attack_target(chara)
+			target = _evaluate_attack_target(chara)
 		_:
 			return null
+	if target and _is_skill_out_of_range(chara, target):
+		_log("%s 技能目标 %s 超出范围" % [chara.character_name, target.character_name])
+		return null
+	return target
 
 
 func _find_lowest_hp_ally() -> Node:
@@ -502,6 +514,18 @@ func _find_lowest_hp_enemy() -> Node:
 		return null
 	enemies.sort_custom(func(a, b): return a.hp < b.hp)
 	return enemies[0]
+
+
+func _is_skill_out_of_range(chara: Node, target: Node) -> bool:
+	var skill = chara.active_skill
+	if not skill or skill.skill_range <= 0:
+		return false
+	var chara_cell = chara.get_current_cell()
+	var target_cell = target.get_current_cell()
+	if chara_cell == Vector2i(-1, -1) or target_cell == Vector2i(-1, -1):
+		return true
+	var reachable = SkillEffect.get_cells_in_range(chara.grid_layer, chara_cell, skill.skill_range)
+	return not reachable.has(target_cell)
 
 
 func _count_enemies_near(center: Node, radius: float) -> int:

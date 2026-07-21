@@ -19,8 +19,9 @@ func _ready():
 
 	active_skill = BaseSkill.new()
 	active_skill.skill_name = "系统入侵"
-	active_skill.description = "目标虚弱+迟缓各3回合"
+	active_skill.description = "目标虚弱 + 迟缓各 3 回合"
 	active_skill.cooldown = 4
+	active_skill.skill_range = 0
 	active_skill.target_type = BaseSkill.SkillTarget.ENEMY_SINGLE
 	active_skill.is_passive = false
 

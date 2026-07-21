@@ -20,8 +20,9 @@ func _ready():
 
 	active_skill = BaseSkill.new()
 	active_skill.skill_name = "烈焰冲锋"
-	active_skill.description = "造成25伤害并附加灼烧2回合"
+	active_skill.description = "对 6 格范围内目标造成 25 点伤害并附加灼烧 2 回合"
 	active_skill.cooldown = 3
+	active_skill.skill_range = 6
 	active_skill.target_type = BaseSkill.SkillTarget.ENEMY_SINGLE
 	active_skill.is_passive = false
 

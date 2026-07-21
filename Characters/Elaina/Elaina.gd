@@ -2,7 +2,6 @@ extends "res://Characters/BaseCharacter.gd"
 
 var active_skill: BaseSkill
 var passive_skill: BaseSkill
-var magic_combo: int = 0
 
 func _ready():
 	max_hp = 60
@@ -15,13 +14,14 @@ func _ready():
 
 	passive_skill = BaseSkill.new()
 	passive_skill.skill_name = "魔力共鸣"
-	passive_skill.description = "连续使用攻击/减益卡时每张伤害+15%（最多3层）"
+	passive_skill.description = "使用攻击/减益卡牌时，获得一层 [魔力充盈]，攻击力 +15%，最多可叠加 3 层"
 	passive_skill.is_passive = true
 
 	active_skill = BaseSkill.new()
 	active_skill.skill_name = "星尘爆裂"
-	active_skill.description = "对目标及周围1格敌人造成35点伤害"
+	active_skill.description = "对 6 格范围内目标及周围 1 格敌人造成 35 点伤害"
 	active_skill.cooldown = 4
+	active_skill.skill_range = 6
 	active_skill.target_type = BaseSkill.SkillTarget.ENEMY_SINGLE
 	active_skill.is_passive = false
 

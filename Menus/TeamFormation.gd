@@ -101,13 +101,15 @@ func _remove_slot(index: int):
 
 func _on_save_pressed():
 	if slots.size() != 3:
-		$HintLabel.text = "请选择 3 名角色"
+		$HintLabel.text = "请选择 3 名角�?
 		$HintLabel.show()
 		await get_tree().create_timer(1.5).timeout
 		$HintLabel.hide()
 		return
 	GlobalGameData.selected_team = slots.duplicate()
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	get_tree().change_scene_to_file("res://Menus/MainMenu.tscn")
 
 func _on_back_pressed():
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	get_tree().change_scene_to_file("res://Menus/MainMenu.tscn")

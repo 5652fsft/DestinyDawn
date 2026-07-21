@@ -11,7 +11,7 @@ func _ready():
 	hide()
 
 func show_result(is_winner: bool, stats: Dictionary):
-	$VBoxContainer/TitleLabel.text = "胜 利" if is_winner else "败 北"
+	$VBoxContainer/TitleLabel.text = "�?�? if is_winner else "�?�?
 	$VBoxContainer/TitleLabel.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2) if is_winner else Color(1.0, 0.3, 0.3))
 	$VBoxContainer/TitleLabel.add_theme_font_override("font", FONT)
 	
@@ -19,12 +19,12 @@ func show_result(is_winner: bool, stats: Dictionary):
 	var en_prefix = "client" if GlobalGameData.is_host else "host"
 	
 	$VBoxContainer/StatsContainer/MyPanel/MyDamage.text = "造成伤害: %d" % stats[my_prefix + "_damage_dealt"]
-	$VBoxContainer/StatsContainer/MyPanel/MyHeal.text = "治疗量: %d" % stats[my_prefix + "_healing_done"]
+	$VBoxContainer/StatsContainer/MyPanel/MyHeal.text = "治疗�? %d" % stats[my_prefix + "_healing_done"]
 	$VBoxContainer/StatsContainer/MyPanel/MyCards.text = "使用卡牌: %d" % stats[my_prefix + "_cards_played"]
 	$VBoxContainer/StatsContainer/MyPanel/MyKills.text = "击杀: %d" % stats[my_prefix + "_kills"]
 	
 	$VBoxContainer/StatsContainer/EnemyPanel/EnDamage.text = "造成伤害: %d" % stats[en_prefix + "_damage_dealt"]
-	$VBoxContainer/StatsContainer/EnemyPanel/EnHeal.text = "治疗量: %d" % stats[en_prefix + "_healing_done"]
+	$VBoxContainer/StatsContainer/EnemyPanel/EnHeal.text = "治疗�? %d" % stats[en_prefix + "_healing_done"]
 	$VBoxContainer/StatsContainer/EnemyPanel/EnCards.text = "使用卡牌: %d" % stats[en_prefix + "_cards_played"]
 	$VBoxContainer/StatsContainer/EnemyPanel/EnKills.text = "击杀: %d" % stats[en_prefix + "_kills"]
 	
@@ -42,4 +42,5 @@ func _set_font_recursive(node: Node):
 		_set_font_recursive(child)
 
 func _on_return_pressed():
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	get_tree().change_scene_to_file("res://Menus/MainMenu.tscn")

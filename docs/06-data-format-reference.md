@@ -19,15 +19,16 @@ const DATA = {
 }
 ```
 
-### 内置角色数据
+### 内置角色数据（此处仅为举例，不是最新版数据！）
 
-| ID | name | HP | Move | ATK | Range | Skill | Passive |
-|---|---|---|---|---|---|---|---|
-| bronya | 布洛妮娅 | 80 | 5 | 15 | 1 | 护卫指令 | 铁壁 |
-| seele | 希儿 | 65 | 6 | 18 | 1 | 相位突进 | 暗影突袭 |
-| elaina | 伊蕾娜 | 60 | 5 | 20 | 3 | 星尘爆裂 | 魔力共鸣 |
-| firefly | 流萤 | 90 | 5 | 14 | 1 | 烈焰冲锋 | 燃烧装甲 |
-| silverwolf | 银狼 | 65 | 5 | 16 | 2 | 系统入侵 | 数据篡改 |
+| ID | name | HP | Move | ATK | Range | Skill | Skill Range | Passive |
+|---|---|---|---|---|---|---|---|---|
+| bronya | 布洛妮娅 | 68 | 5 | 15 | 1 | 护卫指令 | 0 | 铁壁 |
+| seele | 希儿 | 65 | 6 | 18 | 1 | 相位突进 | 10 | 暗影突袭 |
+| elaina | 伊蕾娜 | 60 | 5 | 20 | 3 | 星尘爆裂 | 6 | 魔力共鸣 |
+| firefly | 流萤 | 85 | 5 | 14 | 1 | 烈焰冲锋 | 6 | 燃烧装甲 |
+| silverwolf | 银狼 | 65 | 5 | 16 | 2 | 系统入侵 | 0 | 数据篡改 |
+| hamster | 芝士仓鼠 | 48 | 6 | 26 | 4 | 动作如潮 | 0 | 钢铁直架 |
 
 ---
 
@@ -114,6 +115,8 @@ _create_card(
 | burn | 灼烧 | DAMAGE_OVER_TIME | MAGIC | 3 | 是 |
 | regen | 再生 | HEAL_OVER_TIME | MAGIC | 3 | 是 |
 | mark | 标记 | MARK | SPECIAL | 1 | 否 |
+| bloodthirst | 嗜血成性 | ATTACK_BUFF | SPECIAL | 3 | 否 |
+| magic_flow | 魔力充盈 | ATTACK_BUFF | SPECIAL | 3 | 否 |
 
 Buff 条目结构：
 
@@ -194,6 +197,7 @@ enum SkillTarget { NONE, SELF, ALLY_SINGLE, ENEMY_SINGLE }
 @export var cooldown: int = 0
 var current_cooldown: int = 0      # 运行时：0 = 可用
 @export var target_type: SkillTarget = SkillTarget.NONE
+@export var skill_range: int = 0      # 0 = 无限制，>0 = 最大 hex 格数
 @export var is_passive: bool = false
 ```
 
@@ -285,3 +289,50 @@ var character_attack_used_num: int = 0       # 已使用的攻击次数
 - **自伤代价**：1 点自伤 ≈ -3 效果值
 - **灼烧/中毒（DOT）**：每回合价值 × 0.7（延迟收益折扣）
 ```
+
+---
+
+## 音频系统 — `Global/AudioManager.gd`
+
+### BGM（背景音乐）
+
+| 文件名 | 说明 |
+|---|---|
+| `battle1.mp3` ~ `battle6.mp3` | 战斗 BGM 曲库，共 6 首 |
+| 播放方式 | 进入战斗时随机打乱顺序播放，每首播完自动接下一首，曲库循环 |
+
+### SFX（音效）
+
+| 文件名 | 映射用途 | 说明 |
+|---|---|---|
+| `click.ogg` | **UI 交互** | 按钮点击、菜单翻页、移动/攻击按钮点击等所有界面交互音效 |
+| `card_play.ogg` | **卡牌** | 打出卡牌时播放 |
+| `deck_select.ogg` | **卡牌** | 卡组选择时播放 |
+| `move.ogg` | **角色** | 角色在棋盘上移动时播放 |
+| `attack.ogg` | **角色** | 角色普通攻击时播放 |
+| `heal.ogg` | **角色** | 角色受到治疗时播放 |
+| `shield.ogg` | **角色** | 护盾生成时播放 |
+| `death.ogg` | **角色** | 角色阵亡时播放 |
+| `attack_sword.ogg` | **技能** | 布洛妮娅·护卫指令、希儿·相位突进、流萤·烈焰冲锋使用 |
+| `attack_digital.ogg` | **技能** | 银狼·系统入侵使用 |
+| `attack_magic.ogg` | **技能** | 伊蕾娜·星尘爆裂使用 |
+| `attack_gun.ogg` | **技能** | 芝士仓鼠·动作如潮使用 |
+| `turn_start.ogg` | **战局** | 回合开始时播放 |
+| `victory.ogg` | **战局** | 胜利时播放 |
+| `defeat.ogg` | **战局** | 败北时播放 |
+
+### 技能音效映射（`Skills/SkillEffect.gd`）
+
+| 角色 | 技能名 | 音效文件 |
+|---|---|---|
+| 布洛妮娅 | 护卫指令 | `attack_sword.ogg` |
+| 希儿 | 相位突进 | `attack_sword.ogg` |
+| 伊蕾娜 | 星尘爆裂 | `attack_magic.ogg` |
+| 流萤 | 烈焰冲锋 | `attack_sword.ogg` |
+| 银狼 | 系统入侵 | `attack_digital.ogg` |
+| 芝士仓鼠 | 动作如潮 | `attack_gun.ogg` |
+
+### 卡牌效果音效（`Cards/CardEffect.gd`）
+
+卡牌效果音效直接在 `CardEffect.gd` 各函数中通过 `play_sfx()` 指定，当前使用 `heal`、`shield`、`skill` 等通用音效，可根据需要替换或新增。
+

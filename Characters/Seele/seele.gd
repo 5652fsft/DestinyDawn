@@ -22,8 +22,9 @@ func _ready():
 
 	active_skill = BaseSkill.new()
 	active_skill.skill_name = "相位突进"
-	active_skill.description = "瞬移至目标旁并发动一次强化攻击"
+	active_skill.description = "瞬移至 10 格范围内选定的单体目标旁并发动 1.2 倍强化攻击"
 	active_skill.cooldown = 3
+	active_skill.skill_range = 10
 	active_skill.target_type = BaseSkill.SkillTarget.ENEMY_SINGLE
 	active_skill.is_passive = false
 
@@ -32,7 +33,7 @@ func perform_attack(target_path: NodePath):
 	var target = get_node_or_null(target_path)
 	if not target or not target is CharacterBody2D:
 		return
-	if get_current_phase() != "Attack":
+	if get_current_phase() != "Active":
 		return
 	
 	last_target_hp = target.hp

@@ -53,11 +53,8 @@ script = ExtResource("7_p4fma")
 [node name="CharacterInfoPanel" parent="UI" unique_id=1060276128 instance=ExtResource("4_yp48q")]
 theme = ExtResource("12_p4fma")
 
-[node name="PassiveSkillPanel" parent="UI" instance=ExtResource("10_p4fma")]
-visible = false
-offset_left = 20.0
+[node name="PassiveSkillPanel" parent="UI" unique_id=1886998702 instance=ExtResource("10_p4fma")]
 offset_top = 400.0
-offset_right = 340.0
 offset_bottom = 520.0
 mouse_filter = 1
 theme = ExtResource("12_p4fma")
@@ -108,7 +105,7 @@ grow_horizontal = 2
 
 [node name="BattleResult" parent="UI" unique_id=398861919 instance=ExtResource("14_p4fma")]
 
-[node name="MoveButton" type="Button" parent="UI"]
+[node name="MoveButton" type="Button" parent="UI" unique_id=979499745]
 visible = false
 offset_left = 20.0
 offset_top = 355.0
@@ -119,7 +116,7 @@ theme_override_fonts/font = ExtResource("15_font")
 theme_override_font_sizes/font_size = 16
 text = "移动"
 
-[node name="AttackButton" type="Button" parent="UI"]
+[node name="AttackButton" type="Button" parent="UI" unique_id=899140013]
 visible = false
 offset_left = 185.0
 offset_top = 355.0

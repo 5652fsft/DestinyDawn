@@ -23,7 +23,9 @@ func _ready():
 func _on_save_pressed():
 	GlobalGameData.player_name = name_edit.text
 	GlobalGameData.server_ip = ip_edit.text
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	get_tree().change_scene_to_file("res://Menus/MainMenu.tscn")
 
 func _on_back_pressed():
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	get_tree().change_scene_to_file("res://Menus/MainMenu.tscn")

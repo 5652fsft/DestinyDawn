@@ -18,8 +18,9 @@ func _ready():
 
 	active_skill = BaseSkill.new()
 	active_skill.skill_name = "护卫指令"
-	active_skill.description = "为友方提供 30 点护盾"
+	active_skill.description = "为友方单体提供 30 点护盾"
 	active_skill.cooldown = 3
+	active_skill.skill_range = 0
 	active_skill.target_type = BaseSkill.SkillTarget.ALLY_SINGLE
 	active_skill.is_passive = false
 
