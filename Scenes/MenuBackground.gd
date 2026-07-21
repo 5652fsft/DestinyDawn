@@ -28,12 +28,14 @@ func apply_background(path: String):
 		fallback.show()
 		return
 	
-	# 检查是否已经是同一个背景，避免重复加载
+	# 检查是否已经有视频流且是同一个背景
 	if video_player.stream and video_player.stream.resource_path == path:
-		if not video_player.playing:
-			video_player.play()
+		# 已经是同一个背景，直接显示即可，继续播放当前位置
+		video_player.show()
+		fallback.hide()
 		return
 	
+	# 新背景，需要加载
 	video_player.show()
 	fallback.hide()
 	var stream = _load_stream(path)
