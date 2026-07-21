@@ -1,108 +1,161 @@
-# 改进规划
+# 改进规划（Phase 10）
 
-## 一、游戏音效系统
-
-### 目标
-为游戏添加基本的音效反馈，提升操作手感与沉浸感。
-
-### 实现方案
-
-**技术选型**：使用 Godot 的 `AudioStreamPlayer2D` 节点，创建全局音效管理器作为 autoload。
-
-**文件结构**：
-```
-Assets/Audio/
-├── BGM/           # 背景音乐
-│   └── battle.ogg
-├── SFX/           # 音效
-│   ├── click.ogg        # 按钮点击
-│   ├── hover.ogg        # 按钮悬停
-│   ├── move.ogg         # 角色移动
-│   ├── attack.ogg       # 攻击命中
-│   ├── hit.ogg          # 受击
-│   ├── skill.ogg        # 释放技能
-│   ├── card_play.ogg    # 使用卡牌
-│   ├── heal.ogg         # 治疗
-│   ├── shield.ogg       # 护盾
-│   ├── death.ogg        # 角色阵亡
-│   ├── victory.ogg      # 胜利
-│   └── defeat.ogg       # 败北
-```
-
-**核心组件**：
-
-| 文件 | 说明 |
-|---|---|
-| `Global/AudioManager.gd` | 音效管理器（autoload），提供 `play_sfx(name)` / `play_bgm(name)` / `set_volume(v)` |
-| `project.godot` | 注册 `AudioManager` 为 autoload |
-
-**集成点**：
-
-| 触发时机 | 音效 | 集成位置 |
-|---|---|---|
-| 按钮点击 | click | `ButtonTheme._up()` 或各按钮 pressed 信号 |
-| 角色移动完成 | move | `BaseCharacter.move_toward_target()` 到达目标时 |
-| 攻击命中 | attack | `BaseCharacter.take_damage()` 中 |
-| 释放技能 | skill | `_active_skill_post_exec()` 或 `SkillEffect` 中 |
-| 卡牌释放 | card_play | `_execute_play_card()` 中 |
-| 治疗触发 | heal | `take_damage()` 当 damage < 0 时 |
-| 护盾触发 | shield | `_execute_shield()` 中 |
-| 角色阵亡 | death | `take_damage()` 当 hp <= 0 时 |
-| 战斗结算 | victory/defeat | `show_battle_result()` 中 |
-
----
-
-## 二、动态背景
+## 一、动态背景
 
 ### 目标
 主菜单、编队界面、卡组构筑、设置界面共用一个动态背景（粒子/动画效果），替代当前的静态图片。
 
 ### 实现方案
 
-**技术选型**：Godot 的 `GPUParticles2D` 或 `CPUParticles2D`，创建背景场景实例化到各个菜单。
+**技术选型**：Godot 的 `GPUParticles2D`，创建背景场景实例化到各个菜单。
 
 **文件结构**：
 ```
 Scenes/
-└── MenuBackground.tscn     # 动态背景场景
+└── MenuBackground.tscn       # 动态背景场景
 Global/
-└── MenuBackground.gd       # 背景控制脚本
+└── MenuBackground.gd         # 背景控制脚本
+Assets/
+└── Sprites/
+    └── menubg.jpg            # 保留作为回退
 ```
 
-**背景效果建议**：
-- 缓慢飘浮的光点（粒子系统）
-- 深蓝/紫色色调（与当前 UI 配色协调）
+**背景效果**：
+- 缓慢飘浮的光点（粒子系统，深蓝/紫色色调）
+- 可选：流动的星轨或能量线条
 - 低性能消耗（适合长时间显示在菜单）
 
 **集成方式**：
-在各菜单场景（MainMenu / TeamFormation / DeckBuilder / SettingsScene）中添加：
-```tscn
-[node name="MenuBackground" parent="." instance=ExtResource("menu_bg")]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-```
-
-当前背景图片 `Assets/Sprites/menubg.jpg` 可保留作为回退或图层叠加。
+在各菜单场景（MainMenu / TeamFormation / DeckBuilder / SettingsScene）中添加 MenuBackground 实例，铺满全屏（anchors_preset = 15），置于最底层。
 
 ---
 
-## 三、实施顺序
+## 二、UI 改进
+
+### 2.1 卡牌交互反馈
+
+| 改进项 | 说明 |
+|--------|------|
+| 拖拽半透明残影 | 拖拽卡牌时跟随鼠标的半透明副本，拖拽到无效区域时弹回动画 |
+| 卡牌悬停放大 | 悬停时卡牌放大 + 发光边框（已部分实现，需要补充阴影效果） |
+| 费用不足灰化 | 能量不足时卡牌灰化 + 禁用拖拽 |
+| 卡牌使用动画 | 从手牌飞向目标的抛射动画，卡牌旋转缩小消失 |
+
+### 2.2 角色信息面板
+
+| 改进项 | 说明 |
+|--------|------|
+| Buff 标签样式 | 增益/减益用颜色区分（绿色/红色），叠加层数可视化 |
+| 生命值变动动画 | 掉血/回血时数字变动动画 |
+| 行动状态指示 | 已移动/已攻击的角色用半透明或灰色遮罩标示 |
+| 选中角色高亮 | 高亮圈或光晕效果 |
+
+### 2.3 技能面板
+
+| 改进项 | 说明 |
+|--------|------|
+| 被动技能显示 | 被动技能独立区域，与主动技能区分 |
+| 冷却显示 | 技能冷却回合数可视化（圆形冷却蒙版） |
+| 技能范围预览 | 选中技能后在地图上高亮可释放范围 |
+
+### 2.4 全局 UI
+
+| 改进项 | 说明 |
+|--------|------|
+| 回合过渡动画 | 回合切换时全屏遮罩 + "玩家回合"/"敌方回合"大字提示（带淡入淡出） |
+| Toast 消息样式 | 带背景框 + 图标 + 渐入渐出动画 |
+| 鼠标指针 | 按钮/可交互元素悬停时切换为手型指针 |
+| 战斗结果界面 | 胜利/失败弹窗带统计信息 + 按钮动画 |
+
+---
+
+## 三、特效改进
+
+### 3.1 VFX 预设系统（已有框架，补充预设）
+
+当前 `_play_vfx_preset` 支持的预设：
+
+| 预设 | 效果 | 使用场景 |
+|------|------|----------|
+| `buff` | 绿色上升粒子 | 增益效果（attack_buff, defense_buff, regen, magic_flow, bloodthirst） |
+| `debuff` | 红色下降粒子 | 减益效果（attack_debuff, move_debuff, poison, burn） |
+| `heal` | 绿色十字/光晕 | 治疗类效果 |
+| `explosion` | 爆炸粒子 | AOE 伤害 |
+| `skill` | 技能特效 | 角色主动技能 |
+
+需要补充：
+
+| 新增预设 | 效果 | 使用场景 |
+|----------|------|----------|
+| `shield` | 蓝色护盾光晕 | 护盾类卡牌/技能 |
+| `death` | 消散/消失粒子 | 角色阵亡 |
+| `teleport` | 闪烁/位移拖尾 | 位移类卡牌 |
+| `card_play` | 卡牌飞出光效 | 使用卡牌时手牌到目标的轨迹 |
+| `critical` | 冲击波+震屏 | 暴击/高伤害 |
+| `victory` | 全屏庆祝粒子 | 战斗胜利 |
+| `defeat` | 全屏暗化 | 战斗败北 |
+
+### 3.2 屏幕震动
+
+- 高伤害时（>20）触发轻微屏幕震动
+- AOE 技能命中时震动
+- 使用 `Camera2D` 的 `apply_shake()` 或手动偏移 `position`
+
+### 3.3 浮动数字改进
+
+当前 `FloatingNumber.tscn` 仅有简单数字位移。需要补充：
+- 伤害数字用红色，治疗数字用绿色，暴击数字用黄色/加粗
+- 数字弹出 + 缩放动画
+- 暴击时数字带冲击波特效
+
+---
+
+## 四、交互改进
+
+### 4.1 操作优化
+
+| 改进项 | 说明 |
+|--------|------|
+| 右键取消 | 右键取消所有模式（目标选择、移动模式、攻击模式）（已实现，需补充视觉反馈） |
+| 键盘快捷键 | F 隐藏/展开手牌（已实现）、空格键结束回合、ESC 取消选中 |
+| 点击空白取消选中 | 点击地图空白区域取消当前角色选中 |
+| 自动镜头居中 | 选中角色时镜头平滑移动到角色附近 |
+
+### 4.2 目标选择优化
+
+| 改进项 | 说明 |
+|--------|------|
+| 目标高亮 | 卡牌/技能选中目标时目标角色闪烁/高亮 |
+| 无效目标提示 | 点击无效目标时显示 toast + 闪烁提示 |
+| 范围可视化 | 移动/攻击/技能范围用颜色区分（蓝=移动，红=攻击，黄=技能） |
+| 点击确认 | 点击目标时增加短暂确认动画再执行 |
+
+### 4.3 拖拽优化
+
+| 改进项 | 说明 |
+|--------|------|
+| 拖拽阈值 | 防止误触，拖动超过阈值才进入拖拽模式（已实现） |
+| 无效释放区域 | 拖拽到无效区域时弹回原位的动画 |
+| 残影样式 | 半透明卡牌跟随鼠标，阴影/发光效果 |
+
+---
+
+## 五、实施顺序
 
 | Phase | 内容 | 估算 |
-|---|---|---|
-| 1 | 创建 `AudioManager.gd` + 注册 autoload | 1h |
-| 2 | 收集/制作音效素材（可使用免费音效库） | 2h |
-| 3 | 在 `ButtonTheme` / `BaseCharacter` / `main.gd` 中集成音效调用 | 2h |
-| 4 | 创建 `MenuBackground.tscn` 粒子场景 | 1h |
-| 5 | 在各菜单场景中实例化动态背景 | 0.5h |
-| 6 | 测试 + 调优（音量平衡、性能） | 1h |
+|-------|------|------|
+| 1 | 创建 MenuBackground 粒子场景 + 集成到各菜单 | 2h |
+| 2 | VFX 预设补充（shield/death/card_play/teleport/critical/victory/defeat） | 3h |
+| 3 | 屏幕震动系统 + 浮动数字改进 | 2h |
+| 4 | UI 改进（卡牌反馈、角色面板、技能面板、Toast） | 4h |
+| 5 | 交互改进（目标选择、拖拽、键盘快捷键、范围可视化） | 3h |
+| 6 | 回合过渡动画 + 战斗结果界面 | 2h |
 
 ---
 
-## 四、依赖项
+## 六、依赖项
 
-- 音效素材不在本仓库中，需自行下载或录制后放入 `Assets/Audio/` 目录
-- 建议使用 [freesound.org](https://freesound.org) 或 [kenney.nl](https://kenney.nl) 的免费音效
 - 粒子背景无需额外素材
+- VFX 粒子效果使用 Godot 内置粒子系统，无需外部资源
+- 屏幕震动使用 Camera2D 内置功能
+- 字体已存在：`Assets/Fonts/SourceHanSerifCN-Heavy-4.otf`
