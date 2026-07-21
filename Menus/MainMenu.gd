@@ -1,4 +1,4 @@
-extends Control
+﻿extends Control
 
 func _ready():
 	GlobalGameData.load_defaults_if_empty()
@@ -23,7 +23,7 @@ func _on_deck_pressed():
 func _on_host_pressed():
 	var peer = ENetMultiplayerPeer.new()
 	if peer.create_server(1145) != OK:
-		print("[Error] 服务器启动失�?)
+		print("[Error] 服务器启动失败")
 		return
 	multiplayer.multiplayer_peer = peer
 	GlobalGameData.is_host = true

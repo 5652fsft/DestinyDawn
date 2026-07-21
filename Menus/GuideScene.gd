@@ -1,4 +1,4 @@
-extends Control
+﻿extends Control
 
 @onready var guide_text = $GuideText
 @onready var back_btn = $BackButton
@@ -16,7 +16,7 @@ func _load_guide():
 		text = file.get_as_text()
 		file.close()
 	else:
-		text = "游戏指南文件未找到。\n请访�?GitHub 仓库查看最新指南：\nhttps://github.com/5652fsft/DestinyDawn"
+		text = "游戏指南文件未找到。\n请访问 GitHub 仓库查看最新指南：\nhttps://github.com/5652fsft/DestinyDawn"
 	guide_text.text = MarkdownConverter.to_bbcode(text)
 
 func _on_back_pressed():

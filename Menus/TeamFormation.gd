@@ -1,4 +1,4 @@
-extends Control
+﻿extends Control
 
 const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 const CardTheme = preload("res://UI/CardTheme.gd")
@@ -101,7 +101,7 @@ func _remove_slot(index: int):
 
 func _on_save_pressed():
 	if slots.size() != 3:
-		$HintLabel.text = "请选择 3 名角�?
+		$HintLabel.text = "请选择 3 名角色"
 		$HintLabel.show()
 		await get_tree().create_timer(1.5).timeout
 		$HintLabel.hide()
