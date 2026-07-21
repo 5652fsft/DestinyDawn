@@ -43,4 +43,6 @@ func _set_font_recursive(node: Node):
 
 func _on_return_pressed():
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
+	# 退出战斗模式，恢复背景
+	BackgroundSingleton.exit_battle()
 	get_tree().change_scene_to_file("res://Menus/MainMenu.tscn")

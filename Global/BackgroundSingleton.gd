@@ -4,30 +4,8 @@ extends Node
 static var instance: BackgroundSingleton = null
 
 @onready var _background_instance: Node = null
-
-func _ready():
-	print("[BackgroundSingleton] _ready called, current instance: ", instance)
-	if instance == null:
-		instance = self
-		print("[BackgroundSingleton] Setting instance to: ", self)
-		# 创建背景实例
-		_create_background_instance()
-	else:
-		print("[BackgroundSingleton] Instance already exists, queueing free")
-		queue_free()
-
-# 创建背景实例
-func _create_background_instance():
-	print("[BackgroundSingleton] Creating background instance")
-	var bg_scene = preload("res://Global/SingletonMenuBackground.tscn")
-	_background_instance = bg_scene.instantiate()
-	_background_instance.add_to_group("singleton_bg")
-	# 确保在最底层，添加到场景树根节点
-	get_tree().root.call_deferred("add_child", _background_instance)
-	# 设置z_index为最低
-	_background_instance.call_deferred("set", "z_index", -1000)
-	print("[BackgroundSingleton] Background instance created: ", _background_instance)
-	print("[BackgroundSingleton] Background parent: ", _background_instance.get_parent())
+var _in_battle: bool = false
+var _last_background_path: String = ""
 
 # 设置背景
 func set_background(path: String):
@@ -45,6 +23,24 @@ func set_background(path: String):
 		_create_background_instance()
 		if _background_instance:
 			_background_instance.setup_background(path)
+
+# 进入战斗模式
+func enter_battle():
+	_in_battle = true
+	_last_background_path = get_current_background_path()
+	if _background_instance:
+		_background_instance.hide_background()
+
+# 退出战斗模式
+func exit_battle():
+	_in_battle = false
+	if _background_instance:
+		_background_instance.setup_background(_last_background_path)
+
+# 隐藏背景（战斗专用）
+func hide_background():
+	if _background_instance:
+		_background_instance.hide_background()
 
 # 获取当前背景路径
 func get_current_background_path() -> String:

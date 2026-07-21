@@ -58,9 +58,13 @@ static func _load_stream(path: String) -> VideoStreamTheora:
 	return stream
 
 func _on_video_finished():
-	print("[SingletonMenuBackground] Video finished, restarting")
 	video_player.play()
 
 # 获取当前背景路径
 func get_current_background_path() -> String:
 	return _current_background_path
+
+# 隐藏背景（战斗模式）
+func hide_background():
+	video_player.hide()
+	fallback.hide()

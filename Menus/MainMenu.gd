@@ -9,13 +9,7 @@ func _ready():
 	_update_status()
 	
 	# 初始化单例背景
-	var bg_path = BackgroundManager.get_current_bg_path()
-	print("[MainMenu] Initializing background with path: ", bg_path)
-	BackgroundSingleton.setup(bg_path)
-	
-	# 延迟检查背景状态
-	await get_tree().create_timer(0.1).timeout
-	print("[MainMenu] Background status: ", BackgroundSingleton.get_singleton().get_background_status())
+	BackgroundSingleton.setup(BackgroundManager.get_current_bg_path())
 
 func _update_status():
 	$VBoxContainer/TeamButton.text = "编队管理"
@@ -36,6 +30,8 @@ func _on_host_pressed():
 		return
 	multiplayer.multiplayer_peer = peer
 	GlobalGameData.is_host = true
+	# 进入战斗模式，隐藏背景
+	BackgroundSingleton.enter_battle()
 	get_tree().change_scene_to_file("res://Scenes/scene.tscn")
 
 func _on_join_pressed():
@@ -48,6 +44,8 @@ func _on_join_pressed():
 		return
 	multiplayer.multiplayer_peer = peer
 	GlobalGameData.is_host = false
+	# 进入战斗模式，隐藏背景
+	BackgroundSingleton.enter_battle()
 	get_tree().change_scene_to_file("res://Scenes/scene.tscn")
 
 func _on_settings_pressed():
@@ -58,6 +56,8 @@ func _on_ai_battle_pressed():
 	GlobalGameData.load_defaults_if_empty()
 	GlobalGameData.is_host = true
 	GlobalGameData.is_ai_mode = true
+	# 进入战斗模式，隐藏背景
+	BackgroundSingleton.enter_battle()
 	get_tree().change_scene_to_file("res://Scenes/scene.tscn")
 
 func _on_guide_pressed():
