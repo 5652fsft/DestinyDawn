@@ -55,7 +55,12 @@ var _turn_toast_shown: bool = false
 
 var _am:
 	get:
-		return Engine.get_singleton("AudioManager")
+		var am = Engine.get_singleton("AudioManager")
+		if not am:
+			var tree = Engine.get_main_loop()
+			if tree and tree.has_method("get_root"):
+				am = tree.get_root().get_node_or_null("AudioManager")
+		return am
 
 func _build_team_from_selection():
 	team_roster.clear()
@@ -110,11 +115,8 @@ func _setup_ai_controller():
 func _ready():
 	GlobalGameData.load_defaults_if_empty()
 	if _am:
-		print("[Audio] AudioManager found, starting BGM")
 		_am._apply_saved_volumes()
 		_am.play_bgm_random()
-	else:
-		print("[Audio] AudioManager NOT FOUND (null)")
 	_init_buff_manager()
 	_init_vfx_manager()
 

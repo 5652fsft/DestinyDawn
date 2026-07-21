@@ -1,8 +1,5 @@
 extends Node
 
-func _init():
-	print("[AudioManager] _init() called, name=" + name)
-
 const SFX_DIR = "res://Assets/Audio/SFX/"
 const BGM_DIR = "res://Assets/Audio/BGM/"
 var _bus_master: int
@@ -22,8 +19,16 @@ const BGM_TRACKS: Array[String] = ["battle1", "battle2", "battle3", "battle4", "
 var _bgm_order: Array[int] = []
 var _bgm_index: int = -1
 
+func _init():
+	# Manually register if the autoload * prefix didn't register us
+	if not Engine.get_singleton("AudioManager"):
+		Engine.register_singleton("AudioManager", self)
+
 func _ready():
-	print("[AudioManager] _ready() called")
+	var s = Engine.get_singleton("AudioManager")
+	print("[AudioManager] _ready() called, singleton=" + str(s) + ", self=" + str(self))
+	if s:
+		print("[AudioManager] same as self: " + str(s == self))
 	_bus_master = AudioServer.get_bus_index("Master")
 	_bus_bgm = max(AudioServer.get_bus_index("BGM"), 0)
 	_bus_sfx = max(AudioServer.get_bus_index("SFX"), 0)
