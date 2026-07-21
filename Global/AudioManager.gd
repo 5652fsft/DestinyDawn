@@ -154,7 +154,7 @@ func set_master_volume(v: float):
 	GlobalGameData.audio_volume_master = v
 
 func set_bgm_volume(v: float):
-	AudioServer.set_bus_volume_db(_bus_bgm, linear_to_db(v))
+	AudioServer.set_bus_volume_db(_bus_bgm, linear_to_db(v * 0.3))
 	GlobalGameData.audio_volume_bgm = v
 
 func set_sfx_volume(v: float):
