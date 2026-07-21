@@ -1,5 +1,8 @@
 extends Node
 
+func _init():
+	print("[AudioManager] _init() called, name=" + name)
+
 const SFX_DIR = "res://Assets/Audio/SFX/"
 const BGM_DIR = "res://Assets/Audio/BGM/"
 var _bus_master: int
@@ -20,6 +23,7 @@ var _bgm_order: Array[int] = []
 var _bgm_index: int = -1
 
 func _ready():
+	print("[AudioManager] _ready() called")
 	_bus_master = AudioServer.get_bus_index("Master")
 	_bus_bgm = max(AudioServer.get_bus_index("BGM"), 0)
 	_bus_sfx = max(AudioServer.get_bus_index("SFX"), 0)
