@@ -576,9 +576,12 @@ func _on_target_selected(target: Node):
 		return
 	if pending_card_data:
 		var card_data = pending_card_data
-		# SELF 目标验证：目标必须是选中的角色
 		if card_data.target_type == CardData.TargetType.SELF and target != selected_character:
 			show_toast("该卡牌只能对自己使用")
+			cancel_targeting()
+			return
+		if not _is_valid_target(card_data.target_type, _is_ally(target), target):
+			show_toast("目标选择无效")
 			cancel_targeting()
 			return
 		var player_name = GlobalGameData.player_name if GlobalGameData.is_host else ("AI" if GlobalGameData.is_ai_mode else "Client")
@@ -594,6 +597,7 @@ func _on_target_selected(target: Node):
 			return
 		selected_character.use_active_skill(target)
 		_active_skill_post_exec(skill)
+		cancel_targeting()
 
 func _target_play_card(card_data: CardData, target: Node):
 	var target_path = ""
