@@ -90,7 +90,7 @@ static func _bronya_active(character: Node, target: Node) -> bool:
 	target.shield += 30
 	if target.has_method("rpc"):
 		target.rpc("_sync_shield", target.shield)
-	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_sword", target)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("bronya_skill", target)
 	print("[Skill] %s [护卫指令] → %s 护盾 +30" % [character.character_name, target.name])
 	return true
 
@@ -132,7 +132,7 @@ static func _seele_active(character: Node, target: Node, main: Node) -> bool:
 	if target.has_method("take_damage"):
 		var bonus = int(character.attack * 1.2)
 		target.rpc("take_damage", bonus)
-		var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_sword", target)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("seele_skill", target)
 		print("[Skill] %s [相位突进] → %s 造成 %d 点伤害" % [character.character_name, target.name, bonus])
 	return true
 
@@ -153,7 +153,7 @@ static func _elaina_active(character: Node, target: Node, main: Node) -> bool:
 			if aoe_cells.has(c_cell):
 				c.rpc("take_damage", dmg)
 	target.rpc("_play_vfx_preset", "explosion")
-	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("elaina_skill", target)
 	print("[Skill] %s [星尘爆裂] → %s 及周围造成 %d 点伤害" % [character.character_name, target.name, dmg])
 	return true
 
@@ -162,7 +162,7 @@ static func _firefly_active(character: Node, target: Node, main: Node) -> bool:
 	if not target:
 		return false
 	target.rpc("take_damage", 25)
-	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_sword", target)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("firefly_skill", target)
 	var bm = main.get_node_or_null("BuffManager") if main else null
 	if bm and bm.has_method("apply_buff"):
 		bm.apply_buff(target, "burn", 5, 2, character)
@@ -177,7 +177,7 @@ static func _silverwolf_active(character: Node, target: Node, main: Node) -> boo
 	if bm and bm.has_method("apply_buff"):
 		bm.apply_buff(target, "attack_debuff", -8, 3, character)
 		bm.apply_buff(target, "move_debuff", -2, 3, character)
-	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_digital", target)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("silverwolf_skill", target)
 	print("[Skill] %s [系统入侵] → %s 虚弱+迟缓 3 回合" % [character.character_name, target.name])
 	return true
 
@@ -185,7 +185,7 @@ static func _silverwolf_active(character: Node, target: Node, main: Node) -> boo
 static func _hamster_active(character: Node, target: Node, main: Node) -> bool:
 	if "_extra_attacks" in character:
 		character._extra_attacks += 1
-	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_gun", character)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("hamster_skill", character)
 	print("[Skill] %s [动作如潮] 获得额外行动" % character.character_name)
 	character.rpc("_play_vfx_preset", "heal")
 	return true

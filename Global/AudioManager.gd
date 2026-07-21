@@ -45,6 +45,8 @@ func load_all_audio():
 		"shield", "death", "card_play", "turn_start", "victory", "defeat",
 		"deck_select",
 		"attack_sword", "attack_digital", "attack_magic", "attack_gun",
+		"bronya_skill", "seele_skill", "elaina_skill", "firefly_skill",
+		"silverwolf_skill", "hamster_skill",
 	]
 	for name in sfx_list:
 		_load_sfx(name)
