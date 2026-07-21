@@ -9,7 +9,13 @@ func _ready():
 	_update_status()
 	
 	# 初始化单例背景
-	BackgroundSingleton.setup(BackgroundManager.get_current_bg_path())
+	var bg_path = BackgroundManager.get_current_bg_path()
+	print("[MainMenu] Initializing background with path: ", bg_path)
+	BackgroundSingleton.setup(bg_path)
+	
+	# 延迟检查背景状态
+	await get_tree().create_timer(0.1).timeout
+	print("[MainMenu] Background status: ", BackgroundSingleton.get_singleton().get_background_status())
 
 func _update_status():
 	$VBoxContainer/TeamButton.text = "编队管理"

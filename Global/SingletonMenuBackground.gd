@@ -39,6 +39,7 @@ func setup_background(path: String):
 		video_player.stream = stream
 		video_player.play()
 		print("[SingletonMenuBackground] Background loaded and playing")
+		print("[SingletonMenuBackground] Video player state - visible: ", video_player.visible, " playing: ", video_player.playing, " size: ", video_player.size)
 	else:
 		print("[SingletonMenuBackground] Failed to load background")
 		video_player.hide()
