@@ -5,8 +5,6 @@ static func execute(card: CardData, target: Node, main: Node) -> bool:
 	if not card or not main:
 		return false
 
-	_try_apply_magic_flow(card, target, main)
-
 	match card.effect_type:
 		CardData.EffectType.DAMAGE:
 			if card.id == "card_reckoning":
@@ -400,25 +398,6 @@ static func _rpc_take_damage(node: Node, amount: int):
 		node.rpc("take_damage", amount)
 	else:
 		node.take_damage(amount)
-
-static func _try_apply_magic_flow(_card: CardData, _target: Node, main: Node):
-	var caster = main.selected_character if main else null
-	if not caster or caster.character_name != "伊蕾娜":
-		return
-	var attack_types = [
-		CardData.EffectType.DAMAGE, CardData.EffectType.AOE_DAMAGE,
-		CardData.EffectType.CHAIN_DAMAGE, CardData.EffectType.DAMAGE_OVER_TIME,
-		CardData.EffectType.LINEAR_AOE
-	]
-	var debuff_types = [
-		CardData.EffectType.DEBUFF_ATTACK, CardData.EffectType.DEBUFF_MOVE,
-		CardData.EffectType.MARK, CardData.EffectType.TAUNT
-	]
-	if _card.effect_type in attack_types or _card.effect_type in debuff_types:
-		var bm = main.get_node_or_null("BuffManager") if main else null
-		if bm and bm.has_method("apply_buff"):
-			bm.apply_buff(caster, "magic_flow", 15, 99)
-			print("[Passive] %s [魔力充盈] 获得一层攻击力 +15%%" % caster.character_name)
 
 static func _execute_cleanse(target: Node) -> bool:
 	if not target:
