@@ -20,8 +20,7 @@ var _bgm_order: Array[int] = []
 var _bgm_index: int = -1
 
 func _init():
-	if not Engine.get_singleton("AudioManager"):
-		Engine.register_singleton("AudioManager", self)
+	Engine.register_singleton("AudioManager", self)
 
 func _ready():
 	_bus_master = AudioServer.get_bus_index("Master")
@@ -91,7 +90,9 @@ func play_bgm(name: String):
 func play_bgm_random():
 	if _bgm_cache.is_empty():
 		return
-	_bgm_order = range(BGM_TRACKS.size())
+	_bgm_order.clear()
+	for i in range(BGM_TRACKS.size()):
+		_bgm_order.append(i)
 	_bgm_order.shuffle()
 	_bgm_index = -1
 	_play_next_bgm()
@@ -115,7 +116,9 @@ func _shuffle_and_play(first: String):
 	var idx = BGM_TRACKS.find(first)
 	if idx == -1:
 		idx = 0
-	_bgm_order = range(BGM_TRACKS.size())
+	_bgm_order.clear()
+	for i in range(BGM_TRACKS.size()):
+		_bgm_order.append(i)
 	_bgm_order.shuffle()
 	_bgm_order.erase(idx)
 	_bgm_order.insert(0, idx)
