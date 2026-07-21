@@ -1,5 +1,7 @@
 extends Control
 
+const VIDEO_CATALOG = preload("res://Global/VideoCatalog.gd")
+
 @onready var video_player: VideoStreamPlayer = $VideoPlayer
 @onready var fallback: TextureRect = $Fallback
 
@@ -17,12 +19,12 @@ func apply_background(path: String):
 		return
 	video_player.show()
 	fallback.hide()
-	var stream = load(path)
+	var stream = VIDEO_CATALOG.get_stream(path)
 	if stream:
 		video_player.stream = stream
 		video_player.play()
 	else:
-		push_warning("MenuBackground: failed to load ", path)
+		push_warning("MenuBackground: failed to get stream for ", path)
 		video_player.hide()
 		fallback.show()
 
