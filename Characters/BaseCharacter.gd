@@ -365,7 +365,10 @@ func get_current_phase() -> String:
 func _is_mouse_over_ui() -> bool:
 	var ctrl = get_viewport().gui_get_hovered_control()
 	while ctrl:
-		if ctrl is BaseButton or ctrl is LineEdit or ctrl is CardUI:
+		if ctrl is CardUI:
+			if not ctrl.is_queued_for_deletion():
+				return true
+		elif ctrl is BaseButton or ctrl is LineEdit:
 			return true
 		ctrl = ctrl.get_parent()
 	return false
