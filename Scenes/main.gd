@@ -110,8 +110,11 @@ func _setup_ai_controller():
 func _ready():
 	GlobalGameData.load_defaults_if_empty()
 	if _am:
+		print("[Audio] AudioManager found, starting BGM")
 		_am._apply_saved_volumes()
 		_am.play_bgm_random()
+	else:
+		print("[Audio] AudioManager NOT FOUND (null)")
 	_init_buff_manager()
 	_init_vfx_manager()
 
