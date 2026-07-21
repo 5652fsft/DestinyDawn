@@ -5,6 +5,10 @@ extends Control
 
 func _ready():
 	add_to_group("menu_bg")
+	# Ensure non-zero size (layout may not be ready in exported builds)
+	var vp_size = get_viewport_rect().size
+	video_player.size = vp_size
+	fallback.size = vp_size
 	apply_background(BackgroundManager.get_current_bg_path())
 
 func _on_background_changed(id: String):
