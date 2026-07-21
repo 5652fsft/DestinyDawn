@@ -27,9 +27,11 @@ func apply_background(path: String):
 		fallback.show()
 
 static func _load_stream(path: String) -> VideoStreamTheora:
-	if FileAccess.file_exists(path):
-		return load(path)
-	return null
+	if not FileAccess.file_exists(path):
+		return null
+	var stream = VideoStreamTheora.new()
+	stream.file = path
+	return stream
 
 func _on_video_finished():
 	video_player.play()
