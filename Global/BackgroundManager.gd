@@ -41,6 +41,7 @@ func get_current_bg_path() -> String:
 		return "res://Assets/Video/" + filename
 	var exe_dir = OS.get_executable_path().get_base_dir()
 	var local = exe_dir + "/" + filename
+	print("[BG] exe_dir=", exe_dir, " local=", local, " exists=", FileAccess.file_exists(local))
 	if FileAccess.file_exists(local):
 		return local
 	return "res://Assets/Video/" + filename
