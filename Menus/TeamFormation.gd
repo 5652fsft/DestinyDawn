@@ -7,7 +7,7 @@ const CharData = preload("res://Global/CharacterData.gd")
 const CARD_SCENE = preload("res://Menus/Widgets/CharacterCard.tscn")
 
 var slots: Array[String] = []
-var cards: Dictionary = []
+var cards: Dictionary = {}
 
 func _ready():
 	slots = GlobalGameData.selected_team.duplicate()
