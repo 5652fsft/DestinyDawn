@@ -20,15 +20,10 @@ var _bgm_order: Array[int] = []
 var _bgm_index: int = -1
 
 func _init():
-	# Manually register if the autoload * prefix didn't register us
 	if not Engine.get_singleton("AudioManager"):
 		Engine.register_singleton("AudioManager", self)
 
 func _ready():
-	var s = Engine.get_singleton("AudioManager")
-	print("[AudioManager] _ready() called, singleton=" + str(s) + ", self=" + str(self))
-	if s:
-		print("[AudioManager] same as self: " + str(s == self))
 	_bus_master = AudioServer.get_bus_index("Master")
 	_bus_bgm = max(AudioServer.get_bus_index("BGM"), 0)
 	_bus_sfx = max(AudioServer.get_bus_index("SFX"), 0)

@@ -55,12 +55,7 @@ var _turn_toast_shown: bool = false
 
 var _am:
 	get:
-		var am = Engine.get_singleton("AudioManager")
-		if not am:
-			var tree = Engine.get_main_loop()
-			if tree and tree.has_method("get_root"):
-				am = tree.get_root().get_node_or_null("AudioManager")
-		return am
+		return Engine.get_singleton("AudioManager")
 
 func _build_team_from_selection():
 	team_roster.clear()
