@@ -15,7 +15,7 @@ func _ready():
 
 	passive_skill = BaseSkill.new()
 	passive_skill.skill_name = "魔力共鸣"
-	passive_skill.description = "使用攻击/减益卡牌时，获得一层 [魔力充盈]，攻击力 +15%，最多可叠加 3 层"
+	passive_skill.description = "使用攻击/减益卡牌时，获得一层 [魔力充盈]，攻击力 +15%，持续 2 回合，最多可叠加 3 层"
 	passive_skill.is_passive = true
 
 	active_skill = BaseSkill.new()

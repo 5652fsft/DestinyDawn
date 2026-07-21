@@ -426,7 +426,7 @@ static func _apply_magic_resonance(card: CardData, main: Node):
 			continue
 		var bm = main.get_node_or_null("BuffManager")
 		if bm and bm.has_method("apply_buff"):
-			bm.apply_buff(c, "magic_flow", 15, 99)
+			bm.apply_buff(c, "magic_flow", 15, 2)
 			print("[Passive] %s [魔力充盈] 获得一层攻击力 +15%%" % c.character_name)
 		return
 

@@ -136,6 +136,8 @@ func _buff_desc(key: String, entry: Dictionary) -> String:
 			return "[加速] 移动力+%d（%d回合）" % [val, dur]
 		"taunt":
 			return "[嘲讽] 强制攻击（%d回合）" % [dur]
+		"magic_flow":
+			return "[魔力充盈] 攻击力+%d%%（%d回合）" % [val, dur]
 		"bloodthirst":
 			return "[嗜血成性] 攻击力+%d%%（%d回合）" % [val, dur]
 	return "%s %d（%d回合）" % [key, val, dur]

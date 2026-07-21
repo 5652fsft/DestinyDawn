@@ -9,7 +9,7 @@ const DATA = {
 		"passive":"暗影突袭", "passive_desc":"攻击满血敌人时伤害 +50%"},
 	"elaina":    {"name":"伊蕾娜",  "hp":60,  "move":5, "atk":20, "range":3,
 		"skill":"星尘爆裂", "skill_desc":"对 6 格范围内目标及周围 1 格敌人造成 35 点伤害", "skill_cd":4,
-		"passive":"魔力共鸣", "passive_desc":"使用攻击/减益卡牌时，获得一层 [魔力充盈]，攻击力 +15%，最多可叠加 3 层"},
+		"passive":"魔力共鸣", "passive_desc":"使用攻击/减益卡牌时，获得一层 [魔力充盈]，攻击力 +15%，持续 2 回合，最多可叠加 3 层"},
 	"firefly":   {"name":"流萤",    "hp":85,  "move":5, "atk":14, "range":1,
 		"skill":"烈焰冲锋", "skill_desc":"对 6 格范围内目标造成 25 点伤害并附加灼烧 2 回合", "skill_cd":3,
 		"passive":"燃烧装甲", "passive_desc":"每回合首次受击时有 50% 概率反击灼烧"},
