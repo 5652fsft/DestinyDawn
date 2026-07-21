@@ -132,7 +132,7 @@ static func _seele_active(character: Node, target: Node, main: Node) -> bool:
 	if target.has_method("take_damage"):
 		var bonus = int(character.attack * 1.2)
 		target.rpc("take_damage", bonus)
-	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("seele_skill", target)
+		var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("seele_skill", target)
 		print("[Skill] %s [相位突进] → %s 造成 %d 点伤害" % [character.character_name, target.name, bonus])
 	return true
 
