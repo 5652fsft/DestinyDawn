@@ -19,7 +19,10 @@ func _create_background_instance():
 	_background_instance = bg_scene.instantiate()
 	_background_instance.add_to_group("singleton_bg")
 	get_tree().root.add_child(_background_instance)
-	_background_instance.z_index = -100  # 确保在最底层
+	# 确保在最底层
+	_background_instance.position = Vector2.ZERO
+	_background_instance.size = get_tree().root.size
+	_background_instance.z_index = -100
 
 # 设置背景
 func set_background(path: String):
@@ -27,8 +30,11 @@ func set_background(path: String):
 	if instance != self:
 		return
 	
+	print("[BackgroundSingleton] Setting background: ", path)
 	if _background_instance:
 		_background_instance.setup_background(path)
+	else:
+		print("[BackgroundSingleton] ERROR: No background instance found")
 
 # 获取当前背景路径
 func get_current_background_path() -> String:
@@ -44,3 +50,8 @@ static func setup(path: String):
 # 获取单例
 static func get_singleton() -> BackgroundSingleton:
 	return instance
+
+# 确保背景实例正确创建
+func _ensure_background():
+	if not _background_instance:
+		_create_background_instance()

@@ -11,10 +11,12 @@ func _ready():
 	_is_ready = true
 
 func setup_background(path: String):
+	print("[SingletonMenuBackground] setup_background called with: ", path)
 	if not _is_ready:
 		await ready
 	
 	if path.is_empty():
+		print("[SingletonMenuBackground] Setting empty background")
 		video_player.hide()
 		fallback.show()
 		_current_background_path = ""
@@ -22,10 +24,12 @@ func setup_background(path: String):
 	
 	# 如果已经是同一个背景，直接显示即可
 	if _current_background_path == path:
+		print("[SingletonMenuBackground] Same background, just showing")
 		video_player.show()
 		fallback.hide()
 		return
 	
+	print("[SingletonMenuBackground] Loading new background: ", path)
 	# 新背景，需要加载
 	_current_background_path = path
 	video_player.show()
@@ -34,7 +38,9 @@ func setup_background(path: String):
 	if stream:
 		video_player.stream = stream
 		video_player.play()
+		print("[SingletonMenuBackground] Background loaded and playing")
 	else:
+		print("[SingletonMenuBackground] Failed to load background")
 		video_player.hide()
 		fallback.show()
 
