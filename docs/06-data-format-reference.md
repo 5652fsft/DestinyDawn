@@ -335,4 +335,3 @@ var character_attack_used_num: int = 0       # 已使用的攻击次数
 ### 卡牌效果音效（`Cards/CardEffect.gd`）
 
 卡牌效果音效直接在 `CardEffect.gd` 各函数中通过 `play_sfx()` 指定，当前使用 `heal`、`shield`、`skill` 等通用音效，可根据需要替换或新增。
-
