@@ -3,8 +3,8 @@ extends Node
 const SETTING_KEY = "menu_background"
 
 var backgrounds: Array[Dictionary] = [
-	{"id": "bronya_seele", "name": "布洛妮娅 & 希儿", "path": "res://Assets/Video/BronyaAndSeele1.mp4"},
-	{"id": "elaina",       "name": "伊蕾娜",           "path": "res://Assets/Video/Elaina1.mp4"},
+	{"id": "bronya_seele", "name": "布洛妮娅 & 希儿", "path": "res://Assets/Video/BronyaAndSeele1.ogv"},
+	{"id": "elaina",       "name": "伊蕾娜",           "path": "res://Assets/Video/Elaina1.ogv"},
 	{"id": "static",       "name": "静态背景",          "path": ""},
 ]
 

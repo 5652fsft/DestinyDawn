@@ -13,8 +13,8 @@
 ```
 Assets/
 └── Video/
-    ├── BronyaAndSeele1.mp4   # 背景视频 A
-    └── Elaina1.mp4           # 背景视频 B
+	├── BronyaAndSeele1.mp4   # 背景视频 A
+	└── Elaina1.mp4           # 背景视频 B
 Scenes/
 └── MenuBackground.tscn       # 动态背景场景
 Global/
@@ -190,37 +190,37 @@ var options = BackgroundManager.get_available_backgrounds()
 ```gdscript
 # 在 TurnIndicator.gd 或 main.gd 中
 func show_turn_announcement(text: String, color: Color):
-    var overlay = ColorRect.new()
-    overlay.color = Color.BLACK
-    overlay.modulate.a = 0.0
-    overlay.size = get_viewport_rect().size
-    add_child(overlay)
-    
-    var label = Label.new()
-    label.text = text
-    label.add_theme_font_size_override("font_size", 48)
-    label.add_theme_color_override("font_color", color)
-    # 初始位置在屏幕右侧外
-    label.position = Vector2(get_viewport_rect().size.x, get_viewport_rect().size.y * 0.4)
-    add_child(label)
-    
-    # 移入动画：缓出（先快后慢）
-    var tween = create_tween().set_parallel(true)
-    tween.tween_property(overlay, "modulate:a", 0.5, 0.3)
-    tween.tween_property(label, "position:x", get_viewport_rect().size.x * 0.5 - label.size.x * 0.5, 0.5)\
-        .set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-    
-    await get_tree().create_timer(1.0).timeout
-    
-    # 移出动画：缓入（先慢后快）
-    tween = create_tween().set_parallel(true)
-    tween.tween_property(overlay, "modulate:a", 0.0, 0.3)
-    tween.tween_property(label, "position:x", -label.size.x, 0.4)\
-        .set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
-    
-    await tween.finished
-    overlay.queue_free()
-    label.queue_free()
+	var overlay = ColorRect.new()
+	overlay.color = Color.BLACK
+	overlay.modulate.a = 0.0
+	overlay.size = get_viewport_rect().size
+	add_child(overlay)
+	
+	var label = Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", 48)
+	label.add_theme_color_override("font_color", color)
+	# 初始位置在屏幕右侧外
+	label.position = Vector2(get_viewport_rect().size.x, get_viewport_rect().size.y * 0.4)
+	add_child(label)
+	
+	# 移入动画：缓出（先快后慢）
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(overlay, "modulate:a", 0.5, 0.3)
+	tween.tween_property(label, "position:x", get_viewport_rect().size.x * 0.5 - label.size.x * 0.5, 0.5)\
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	
+	await get_tree().create_timer(1.0).timeout
+	
+	# 移出动画：缓入（先慢后快）
+	tween = create_tween().set_parallel(true)
+	tween.tween_property(overlay, "modulate:a", 0.0, 0.3)
+	tween.tween_property(label, "position:x", -label.size.x, 0.4)\
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	
+	await tween.finished
+	overlay.queue_free()
+	label.queue_free()
 ```
 
 ---
@@ -255,20 +255,20 @@ func show_turn_announcement(text: String, color: Color):
 ```gdscript
 # VFXManager.gd 或 BuffManager.gd 中预加载场景
 const VFX_SCENES = {
-    "explosion": preload("res://Effects/Explosion.tscn"),
-    "shield": preload("res://Effects/ShieldEffect.tscn"),
-    "death": preload("res://Effects/DeathEffect.tscn"),
-    "teleport": preload("res://Effects/TeleportEffect.tscn"),
-    "critical": preload("res://Effects/CriticalEffect.tscn"),
+	"explosion": preload("res://Effects/Explosion.tscn"),
+	"shield": preload("res://Effects/ShieldEffect.tscn"),
+	"death": preload("res://Effects/DeathEffect.tscn"),
+	"teleport": preload("res://Effects/TeleportEffect.tscn"),
+	"critical": preload("res://Effects/CriticalEffect.tscn"),
 }
 
 func play_vfx(name: String, target: Node):
-    var scene = VFX_SCENES.get(name)
-    if not scene:
-        return
-    var instance = scene.instantiate()
-    target.add_child(instance)
-    # 自动播放后清除
+	var scene = VFX_SCENES.get(name)
+	if not scene:
+		return
+	var instance = scene.instantiate()
+	target.add_child(instance)
+	# 自动播放后清除
 ```
 
 **地图范围效果**：
@@ -292,28 +292,28 @@ var shake_strength: float = 0.0
 var shake_decay: float = 5.0
 
 func apply_shake(strength: float):
-    shake_strength = strength
+	shake_strength = strength
 
 func _process(delta):
-    if shake_strength > 0:
-        offset = Vector2(
-            randf_range(-shake_strength, shake_strength),
-            randf_range(-shake_strength, shake_strength)
-        )
-        shake_strength = max(0, shake_strength - shake_decay * delta)
-    else:
-        offset = Vector2.ZERO
+	if shake_strength > 0:
+		offset = Vector2(
+			randf_range(-shake_strength, shake_strength),
+			randf_range(-shake_strength, shake_strength)
+		)
+		shake_strength = max(0, shake_strength - shake_decay * delta)
+	else:
+		offset = Vector2.ZERO
 ```
 
 **触发逻辑**（在 `BaseCharacter.take_damage()` 中）：
 
 ```gdscript
 func take_damage(damage: int):
-    ...
-    # 伤害 > 20 时触发屏幕震动
-    if damage > 20 and main and main.has_method("_apply_shake"):
-        main._apply_shake(min(damage * 0.1, 5.0))
-    ...
+	...
+	# 伤害 > 20 时触发屏幕震动
+	if damage > 20 and main and main.has_method("_apply_shake"):
+		main._apply_shake(min(damage * 0.1, 5.0))
+	...
 ```
 
 **集成方式**：
@@ -333,25 +333,25 @@ extends Node2D
 enum NumberType { DAMAGE, HEAL, CRITICAL, BUFF, DEBUFF }
 
 func show(value: int, type: NumberType):
-    var label = $Label
-    match type:
-        NumberType.DAMAGE:
-            label.text = "-%d" % value
-            label.modulate = Color.RED
-        NumberType.HEAL:
-            label.text = "+%d" % value
-            label.modulate = Color.GREEN
-        NumberType.CRITICAL:
-            label.text = "-%d!" % value
-            label.modulate = Color.YELLOW
-            label.add_theme_font_size_override("font_size", 28)  # 加粗放大
-    # 向上飘出 + 缩放 + 淡出
-    var tween = create_tween().set_parallel(true)
-    tween.tween_property(self, "position:y", position.y - 40, 0.8).set_ease(Tween.EASE_OUT)
-    tween.tween_property(self, "scale", Vector2(1.3, 1.3), 0.2).set_ease(Tween.EASE_OUT)
-    tween.tween_property(self, "modulate:a", 0.0, 0.6).set_delay(0.3)
-    await tween.finished
-    queue_free()
+	var label = $Label
+	match type:
+		NumberType.DAMAGE:
+			label.text = "-%d" % value
+			label.modulate = Color.RED
+		NumberType.HEAL:
+			label.text = "+%d" % value
+			label.modulate = Color.GREEN
+		NumberType.CRITICAL:
+			label.text = "-%d!" % value
+			label.modulate = Color.YELLOW
+			label.add_theme_font_size_override("font_size", 28)  # 加粗放大
+	# 向上飘出 + 缩放 + 淡出
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(self, "position:y", position.y - 40, 0.8).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "scale", Vector2(1.3, 1.3), 0.2).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "modulate:a", 0.0, 0.6).set_delay(0.3)
+	await tween.finished
+	queue_free()
 ```
 
 ---
@@ -381,9 +381,9 @@ func show(value: int, type: NumberType):
 CardUI._process (每帧)
   → 检测鼠标位置下是否有角色
   → 如果有：
-    → 判断是否为有效目标（卡牌 target_type 匹配）
-    → 如果是有效目标：目标显示绿色高亮圈
-    → 如果是无效目标：目标显示红色闪烁
+	→ 判断是否为有效目标（卡牌 target_type 匹配）
+	→ 如果是有效目标：目标显示绿色高亮圈
+	→ 如果是无效目标：目标显示红色闪烁
   → 如果没有：清除高亮
 ```
 
@@ -398,23 +398,23 @@ CardUI._process (每帧)
 ```gdscript
 # CardUI.gd 中，当 on_card_dropped 返回 false 时
 func _drop_card():
-    ...
-    if main.on_card_dropped(card_data):
-        # 有效释放：之前的消散动画
-        ...
-        queue_free()
-        return
-    # 无效释放：弹回动画
-    if _ghost:
-        var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-        tween.tween_property(_ghost, "position", Vector2(0, 0), 0.3)  # 飞回原位
-        tween.tween_property(_ghost, "scale", Vector2(1.0, 1.0), 0.3)
-        tween.chain().tween_property(_ghost, "modulate:a", 0.0, 0.15)
-        tween.finished.connect(func():
-            _ghost.queue_free()
-            _ghost = null
-        )
-    # 不 queue_free，留在原位（但由 _sync_hand 刷新手牌后会自然消失）
+	...
+	if main.on_card_dropped(card_data):
+		# 有效释放：之前的消散动画
+		...
+		queue_free()
+		return
+	# 无效释放：弹回动画
+	if _ghost:
+		var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(_ghost, "position", Vector2(0, 0), 0.3)  # 飞回原位
+		tween.tween_property(_ghost, "scale", Vector2(1.0, 1.0), 0.3)
+		tween.chain().tween_property(_ghost, "modulate:a", 0.0, 0.15)
+		tween.finished.connect(func():
+			_ghost.queue_free()
+			_ghost = null
+		)
+	# 不 queue_free，留在原位（但由 _sync_hand 刷新手牌后会自然消失）
 ```
 
 ---
