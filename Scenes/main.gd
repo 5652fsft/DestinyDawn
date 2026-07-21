@@ -108,6 +108,7 @@ func _setup_ai_controller():
 	_log("AI 控制器已创建并添加到场景", "Mode")
 
 func _ready():
+	GlobalGameData.reset_battle_state()
 	GlobalGameData.load_defaults_if_empty()
 	if _am:
 		_am._apply_saved_volumes()

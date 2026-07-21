@@ -47,6 +47,28 @@ func load_defaults_if_empty():
 	if selected_deck.is_empty():
 		selected_deck = DEFAULT_DECK.duplicate()
 
+func reset_battle_state():
+	current_turn_phase = TurnPhase.NONE
+	turn_has_been_drawn = false
+	is_host_turn = true
+	host_characters.clear()
+	client_characters.clear()
+	character_move_used.clear()
+	character_move_used_num = 0
+	character_attack_used.clear()
+	character_attack_used_num = 0
+	battle_stats = {
+		host_damage_dealt = 0,
+		host_healing_done = 0,
+		host_cards_played = 0,
+		host_kills = 0,
+		client_damage_dealt = 0,
+		client_healing_done = 0,
+		client_cards_played = 0,
+		client_kills = 0,
+		turns_taken = 0,
+	}
+
 # Phase 6 — 对战双方队伍（RPC 同步用）
 var host_team: Array[String] = []
 var client_team: Array[String] = []
