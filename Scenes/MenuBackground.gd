@@ -3,15 +3,23 @@ extends Control
 @onready var video_player: VideoStreamPlayer = $VideoPlayer
 @onready var fallback: TextureRect = $Fallback
 
+var _is_initializing: bool = true
+
 func _ready():
 	add_to_group("menu_bg")
 	# Ensure non-zero size (layout may not be ready in exported builds)
 	var vp_size = get_viewport_rect().size
 	video_player.size = vp_size
 	fallback.size = vp_size
+	
+	# 只在初始化时应用背景，避免重复加载
 	apply_background(BackgroundManager.get_current_bg_path())
+	_is_initializing = false
 
 func _on_background_changed(id: String):
+	# 如果正在初始化，避免重复调用
+	if _is_initializing:
+		return
 	apply_background(BackgroundManager.get_current_bg_path())
 
 func apply_background(path: String):
@@ -19,6 +27,13 @@ func apply_background(path: String):
 		video_player.hide()
 		fallback.show()
 		return
+	
+	# 检查是否已经是同一个背景，避免重复加载
+	if video_player.stream and video_player.stream.resource_path == path:
+		if not video_player.playing:
+			video_player.play()
+		return
+	
 	video_player.show()
 	fallback.hide()
 	var stream = _load_stream(path)
