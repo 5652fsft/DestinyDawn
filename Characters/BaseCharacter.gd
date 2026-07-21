@@ -19,6 +19,7 @@ var hp: int:
 			floating_bar.refresh()
 @export var attack: int = 16
 @export var attack_range: int = 2  # 默认近战，1格
+var attack_sfx: String = "attack_sword"
 
 # === 节点引用 ===
 @onready var sprite: Sprite2D = $Sprite2D
@@ -526,7 +527,7 @@ func _play_attack_animation(target_path: NodePath):
 	lurch.tween_property(sprite, "offset:x", dir * 12.0, 0.04)
 	lurch.tween_property(sprite, "offset:x", 0.0, 0.06)
 
-	if _am: _am.play_sfx("attack", self)
+	if _am: _am.play_sfx(attack_sfx, self)
 	# 攻击者白色闪烁
 	var atk_flash = create_tween().set_parallel(true)
 	atk_flash.tween_property(sprite, "self_modulate", Color(1.6, 1.6, 1.3), 0.03)

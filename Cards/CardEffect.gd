@@ -250,7 +250,7 @@ static func _execute_teleport(card: CardData, target: Node, main: Node) -> bool:
 		_rpc_take_damage(target, card.effect_value)
 	if target.has_method("rpc"):
 		target.rpc("_play_vfx_preset", "hit")
-		var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("skill", target)
+		var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
 static func _execute_swap(card: CardData, target: Node, main: Node) -> bool:
@@ -312,7 +312,7 @@ static func _execute_aoe_damage(card: CardData, target: Node, main: Node) -> boo
 			_rpc_take_damage(t, dmg)
 	if caster and caster.has_method("rpc"):
 		caster.rpc("_play_vfx_preset", "explosion")
-		var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("skill", target)
+		var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
 static func _execute_aoe_heal(card: CardData, target: Node, main: Node) -> bool:

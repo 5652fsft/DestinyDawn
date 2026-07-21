@@ -11,6 +11,7 @@ func _ready():
 	attack = 20
 	attack_range = 3
 	move_points = 5
+	attack_sfx = "attack_magic"
 
 	passive_skill = BaseSkill.new()
 	passive_skill.skill_name = "魔力共鸣"

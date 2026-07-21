@@ -11,6 +11,7 @@ func _ready():
 	move_points = 4
 	attack_range = 2
 	attack = 16
+	attack_sfx = "attack_digital"
 
 	passive_skill = BaseSkill.new()
 	passive_skill.skill_name = "数据篡改"

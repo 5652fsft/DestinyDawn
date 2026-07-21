@@ -12,6 +12,7 @@ func _ready():
 	attack = 26
 	attack_range = 3
 	move_points = 6
+	attack_sfx = "attack_gun"
 
 	passive_skill = BaseSkill.new()
 	passive_skill.skill_name = "钢铁直架"
