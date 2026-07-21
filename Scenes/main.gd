@@ -55,7 +55,7 @@ var _turn_toast_shown: bool = false
 
 var _am:
 	get:
-		return Engine.get_singleton("_am")
+		return Engine.get_singleton("AudioManager")
 
 func _build_team_from_selection():
 	team_roster.clear()
