@@ -20,6 +20,7 @@ var _main: Node2D = null
 var _energy_system: Node = null
 var _deck_manager: Node = null
 var _camera: Node2D = null
+var _camera_tween: Tween = null
 
 # 六边形邻居方向（奇数列偏移）
 var _hex_dirs: Array[Vector2i] = [
@@ -39,10 +40,11 @@ func _ready():
 func _pan_to(chara: Node):
 	if not _camera or not chara:
 		return
-	if _camera.has_method("is_tweening") and _camera.is_tweening():
-		return
-	var tw = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	tw.tween_property(_camera, "position", chara.position, 0.4)
+	if _camera_tween and _camera_tween.is_valid():
+		_camera_tween.kill()
+	_camera_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_camera_tween.tween_property(_camera, "position", chara.position, 0.4)
+	_camera_tween.finished.connect(func(): _camera_tween = null, CONNECT_ONE_SHOT)
 
 
 func _focus_on_player_characters():
@@ -57,8 +59,16 @@ func _focus_on_player_characters():
 		avg += c.global_position
 	avg /= alive.size()
 	if _camera:
-		var tw = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-		tw.tween_property(_camera, "position", avg, 0.6)
+		if _camera_tween and _camera_tween.is_valid():
+			_camera_tween.kill()
+		_camera_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		_camera_tween.tween_property(_camera, "position", avg, 0.6)
+		_camera_tween.finished.connect(func(): _camera_tween = null, CONNECT_ONE_SHOT)
+
+func stop_camera_tween():
+	if _camera_tween and _camera_tween.is_valid():
+		_camera_tween.kill()
+		_camera_tween = null
 
 
 func _process(_delta):
@@ -76,9 +86,9 @@ func _process(_delta):
 		_current_phase = GlobalGameData.current_turn_phase
 
 	if not _is_ai_phase():
-		_action_queue.clear()
-		_busy = false
-		_current_phase = -1
+		if not _action_queue.is_empty():
+			_action_queue.clear()
+			_busy = false
 		return
 
 	if _busy:

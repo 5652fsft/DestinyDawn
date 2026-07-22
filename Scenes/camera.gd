@@ -39,6 +39,9 @@ func _input(event):
 				isDrag = true
 				startMousePosition = event.position
 				startCameraPosition = position
+				var ai = get_node_or_null("../AIController")
+				if ai and ai.has_method("stop_camera_tween"):
+					ai.stop_camera_tween()
 			else:
 				isDrag = false
 				startMousePosition = Vector2.ZERO
