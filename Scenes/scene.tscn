@@ -57,7 +57,6 @@ theme = ExtResource("12_p4fma")
 [node name="PassiveSkillPanel" parent="UI" unique_id=1886998702 instance=ExtResource("10_p4fma")]
 offset_top = 400.0
 offset_bottom = 520.0
-mouse_filter = 1
 theme = ExtResource("12_p4fma")
 
 [node name="VBoxContainer" parent="UI/PassiveSkillPanel"]
