@@ -1,5 +1,7 @@
 extends Panel
 
+var _hand_was_hidden: bool = false
+
 func _ready():
 	var overlay = StyleBoxFlat.new()
 	overlay.bg_color = Color(0, 0, 0, 0.7)
@@ -15,10 +17,24 @@ func _ready():
 	ButtonTheme.apply_menu($Card/VBox/HBox/CancelButton)
 	ButtonTheme.set_font($Card/VBox/HBox/CancelButton, 22)
 
+func show():
+	var main = get_node("/root/Main")
+	if main and main.has_method("_hide_hand"):
+		_hand_was_hidden = "_hand_hidden" in main and main._hand_hidden
+		if not _hand_was_hidden:
+			main._hide_hand()
+	super.show()
+
 func _on_confirm_pressed():
 	var main = get_tree().current_scene
 	if main and main.has_method("_confirm_surrender"):
 		main._confirm_surrender()
 
 func _on_cancel_pressed():
+	if not _hand_was_hidden:
+		var main = get_node("/root/Main")
+		if main and "_hand_hidden" in main:
+			main._hand_hidden = false
+			var hand = main.get_node_or_null("UI/HandPanel")
+			if hand: hand.show()
 	hide()
