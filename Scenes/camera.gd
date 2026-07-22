@@ -33,6 +33,8 @@ func _input(event):
 			while ctrl:
 				if ctrl is ScrollContainer:
 					return
+				if ctrl is RichTextLabel and ctrl.scroll_active:
+					return
 				ctrl = ctrl.get_parent()
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN and scaleNum > 0.4:
 			scaleNum -= 0.05
