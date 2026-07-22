@@ -76,8 +76,10 @@ func _process(_delta):
 		return
 
 	if GlobalGameData.current_turn_phase != _current_phase:
-		# 轮到玩家回合时聚焦玩家角色
-		if GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.PLAYER_TURN and GlobalGameData.is_host_turn:
+		# 轮到玩家回合时聚焦玩家角色（host 先手时 PLAYER_TURN 是玩家回合，client 先手时 ENEMY_TURN 是玩家回合）
+		var is_enemy_phase = GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.ENEMY_TURN
+		var is_my_turn = (GlobalGameData.is_host_turn == GlobalGameData.is_host) != is_enemy_phase
+		if is_my_turn:
 			_focus_on_player_characters()
 		if _current_phase != -1:
 			_log("阶段变化: %d -> %d，清理旧队列" % [_current_phase, GlobalGameData.current_turn_phase])
