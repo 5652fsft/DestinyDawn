@@ -924,6 +924,12 @@ func draw_for_new_turn():
 		energy_system.restore_energy(2)
 		sync_all_card_state()
 
+# === 手牌 ===
+func _hide_hand():
+	_hand_hidden = true
+	hand_panel.visible = false
+	_deselect_all()
+
 # === 投降 ===
 func _show_surrender_dialog():
 	if _surrender_dialog:
