@@ -924,6 +924,19 @@ func draw_for_new_turn():
 		sync_all_card_state()
 
 # === 投降 ===
+func _focus_camera_on_my_characters():
+	var targets = GlobalGameData.host_characters if GlobalGameData.is_host else GlobalGameData.client_characters
+	var alive = targets.filter(func(c): return c and c.hp > 0)
+	if alive.is_empty():
+		return
+	var avg = Vector2.ZERO
+	for c in alive:
+		avg += c.global_position
+	avg /= alive.size()
+	var cam = $Camera
+	if cam:
+		var tw = cam.create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tw.tween_property(cam, "position", avg, 0.6)
 func _show_surrender_dialog():
 	if _surrender_dialog:
 		_surrender_dialog.show()
@@ -1077,6 +1090,8 @@ func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn,
 	# 回合提示
 		var is_enemy_phase = phase == GlobalGameData.TurnPhase.ENEMY_TURN
 		var is_my_turn = (host_turn == GlobalGameData.is_host) != is_enemy_phase
+		if phase == GlobalGameData.TurnPhase.PLAYER_TURN and is_my_turn:
+			_focus_camera_on_my_characters()
 	update_ui_turn_indicator()
 
 func update_ui_turn_indicator():

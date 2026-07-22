@@ -9,7 +9,6 @@ var _base_offset: Vector2 = Vector2.ZERO
 
 func _ready():
 	zoom = Vector2(scaleNum, scaleNum)
-	position.y = 200
 	_base_offset = offset
 	make_current()
 
