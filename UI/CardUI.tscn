@@ -1,75 +1,93 @@
 [gd_scene format=3 uid="uid://dhc4pen0f81bp"]
 
-[ext_resource type="Script" path="res://UI/CardUI.gd" id="1_5dp7v"]
+[ext_resource type="Script" uid="uid://c42ter5ipdo12" path="res://UI/CardUI.gd" id="1_5dp7v"]
 [ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2_spd3y"]
 
-[node name="CardUI" type="Panel"]
+[node name="CardUI" type="Panel" unique_id=1614797370]
 custom_minimum_size = Vector2(140, 200)
 size_flags_horizontal = 0
 size_flags_vertical = 0
 script = ExtResource("1_5dp7v")
 
-[node name="CostCircle" type="ColorRect" parent="." unique_id=9876543210]
+[node name="BorderOverlay" type="Panel" parent="." unique_id=1036784715]
 layout_mode = 0
-offset_left = 4.0
-offset_top = 4.0
+offset_right = 140.0
+offset_bottom = 200.0
+mouse_filter = 2
+
+[node name="CostCircle" type="Panel" parent="." unique_id=1286608618]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 8.0
 offset_right = 28.0
-offset_bottom = 28.0
-color = Color(0.2, 0.3, 0.5, 0.9)
+offset_bottom = 30.0
 mouse_filter = 1
 
-[node name="CostNumber" type="Label" parent="CostCircle" unique_id=9876543211]
+[node name="CostNumber" type="Label" parent="CostCircle" unique_id=1286608619]
 layout_mode = 0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 24.0
-offset_bottom = 24.0
-theme_override_fonts/font = ExtResource("2_spd3y")
-theme_override_font_sizes/font_size = 18
+offset_top = -2.0
+offset_right = 22.0
+offset_bottom = 22.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_spd3y")
+theme_override_font_sizes/font_size = 16
 text = "0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="TypeLabel" type="Label" parent="." unique_id=9876543212]
-layout_mode = 0
-offset_left = 0.0
-offset_top = 8.0
-offset_right = 0.0
-offset_bottom = 28.0
-anchor_right = 1.0
+[node name="TypeLabel" type="Label" parent="." unique_id=1286608620]
+layout_mode = 1
+anchors_preset = 1
 anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -57.0
+offset_top = 11.0
+offset_right = -10.0
+offset_bottom = 29.0
 grow_horizontal = 0
-theme_override_fonts/font = ExtResource("2_spd3y")
-theme_override_font_sizes/font_size = 14
-theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
-horizontal_alignment = 2
-vertical_alignment = 1
-text = "TYPE"
-
-[node name="MarginContainer" type="MarginContainer" parent="."]
-layout_mode = 0
-offset_left = 32.0
-offset_top = 32.0
-offset_right = -4.0
-offset_bottom = -4.0
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
-layout_mode = 2
-
-[node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_spd3y")
-theme_override_font_sizes/font_size = 20
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-horizontal_alignment = 1
-text = "卡牌名"
-
-[node name="DescLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-autowrap_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.3, 0.3, 0.9)
 theme_override_fonts/font = ExtResource("2_spd3y")
 theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(0.8, 0.8, 0.85, 1)
+text = "ATTACK"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="CardImage" type="TextureRect" parent="." unique_id=1258655115]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 34.0
+offset_right = 134.0
+offset_bottom = 100.0
+expand_mode = 3
+stretch_mode = 5
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1355378850]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 104.0
+offset_right = 134.0
+offset_bottom = 147.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1253363248]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=307114188]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.92, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.4)
+theme_override_constants/outline_size = 1
+theme_override_fonts/font = ExtResource("2_spd3y")
+theme_override_font_sizes/font_size = 16
+text = "卡牌名"
+horizontal_alignment = 1
+
+[node name="DescLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1729063710]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.75, 0.75, 0.8, 1)
+theme_override_fonts/font = ExtResource("2_spd3y")
+theme_override_font_sizes/font_size = 10
 text = "描述"
+autowrap_mode = 2

@@ -131,15 +131,12 @@ static func _seele_active(character: Node, target: Node, main: Node) -> bool:
 		return false
 	var target_local = character.grid_layer.map_to_local(best_cell)
 	var world_pos = character.grid_layer.to_global(target_local)
-	# 瞬间传送（不播放移动动画）
 	character.global_position = world_pos
 	character.target_world = world_pos
 	character.velocity = Vector2.ZERO
-	# 如果角色正处在移动中，先结束之前的移动
 	if character.is_moving:
 		character.is_moving = false
 		main.end_character_move()
-	# 同步位置
 	if character.has_method("rpc") and character.multiplayer.has_multiplayer_peer():
 		character.rpc("_sync_position", world_pos)
 	if target.has_method("take_damage"):
@@ -153,7 +150,7 @@ static func _seele_active(character: Node, target: Node, main: Node) -> bool:
 static func _elaina_active(character: Node, target: Node, main: Node) -> bool:
 	if not target or not main:
 		return false
-	var dmg = 35
+	var dmg = 25
 	var is_caster_host = character.name.begins_with("Host")
 	# 主要目标
 	if target.has_method("take_damage"):

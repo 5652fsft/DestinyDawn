@@ -54,7 +54,12 @@ func refresh():
 	var atk_used = GlobalGameData.character_attack_used.get(current_character.name, false)
 	var extra = current_character._get_extra_attacks() if current_character.has_method("_get_extra_attacks") else 0
 	var remaining = (0 if atk_used else 1) + extra
-	action_label.text = "剩余行动: %d" % remaining
+
+	var move_pts = current_character.effective_move_points if "effective_move_points" in current_character else current_character.move_points
+	var move_used = GlobalGameData.character_move_used.get(current_character.name, false)
+	var move_remaining = 0 if move_used else 1
+
+	action_label.text = "剩余行动: %d | 移动: %d" % [remaining, move_remaining]
 
 	hp_label.text = "生命值: %d / %d" % [current_character.hp, current_character.max_hp]
 
@@ -68,10 +73,7 @@ func refresh():
 	else:
 		attack_label.text = "攻击力: %d" % base_atk
 
-	var move_pts = current_character.effective_move_points if "effective_move_points" in current_character else current_character.move_points
-	var move_used = GlobalGameData.character_move_used.get(current_character.name, false)
-	var move_remaining = 0 if move_used else 1
-	move_label.text = "移动范围: %d (剩余 %d)" % [move_pts, move_remaining]
+	move_label.text = "移动范围: %d" % move_pts
 
 	var atk_range = current_character.attack_range if "attack_range" in current_character else 1
 	attack_range_label.text = "攻击范围: %d" % atk_range
@@ -88,11 +90,14 @@ func _update_buffs():
 	for child in buffs_container.get_children():
 		child.queue_free()
 	if not current_character or not "buffs" in current_character or current_character.buffs.is_empty():
-		var placeholder = Label.new()
-		placeholder.add_theme_font_size_override("font_size", 14)
-		placeholder.add_theme_font_override("font", FONT)
+		var placeholder = RichTextLabel.new()
+		placeholder.add_theme_font_size_override("normal_font_size", 14)
+		placeholder.add_theme_font_override("normal_font", FONT)
+		placeholder.bbcode_enabled = true
 		placeholder.text = "暂无效果"
 		placeholder.modulate = Color(1, 1, 1, 0.5)
+		placeholder.fit_content = true
+		placeholder.scroll_active = false
 		buffs_container.add_child(placeholder)
 		buff_header.hide()
 		buff_label.hide()
@@ -102,44 +107,47 @@ func _update_buffs():
 	for key in current_character.buffs:
 		var list = current_character.buffs[key]
 		for entry in list:
-			var label = Label.new()
-			label.add_theme_font_size_override("font_size", 14)
-			label.add_theme_font_override("font", FONT)
-			label.text = _buff_desc(key, entry)
-			buffs_container.add_child(label)
+			var rtl = RichTextLabel.new()
+			rtl.add_theme_font_size_override("normal_font_size", 14)
+			rtl.add_theme_font_override("normal_font", FONT)
+			rtl.bbcode_enabled = true
+			rtl.text = _buff_desc(key, entry)
+			rtl.fit_content = true
+			rtl.scroll_active = false
+			buffs_container.add_child(rtl)
 
 func _buff_desc(key: String, entry: Dictionary) -> String:
 	var dur = entry.get("remaining", 0)
 	var val = entry.get("value", 0)
 	match key:
 		"attack_buff":
-			return "[攻击强化] 攻击力+%d（%d回合）" % [val, dur]
+			return "[color=#668c66][攻击强化][/color] 攻击力+%d（%d回合）" % [val, dur]
 		"attack_debuff":
-			return "[虚弱] 攻击力-%d（%d回合）" % [val, dur]
+			return "[color=#994d4d][虚弱][/color] 攻击力-%d（%d回合）" % [val, dur]
 		"move_debuff":
-			return "[迟缓] 移动力-%d（%d回合）" % [val, dur]
+			return "[color=#8c6640][迟缓][/color] 移动力-%d（%d回合）" % [val, dur]
 		"defense_buff":
 			var abs_val = abs(val)
 			if val > 0:
-				return "[防御] 受到伤害 -%d（%d回合）" % [abs_val, dur]
+				return "[color=#59668c][防御][/color] 受到伤害 -%d（%d回合）" % [abs_val, dur]
 			else:
-				return "[易伤] 受到伤害 +%d（%d回合）" % [abs_val, dur]
+				return "[color=#994d4d][易伤][/color] 受到伤害 +%d（%d回合）" % [abs_val, dur]
 		"poison":
-			return "[中毒] 每回合-%d生命（%d回合）" % [val, dur]
+			return "[color=#804040][中毒][/color] 每回合-%d生命（%d回合）" % [val, dur]
 		"burn":
-			return "[灼烧] 每回合-%d生命（%d回合）" % [val, dur]
+			return "[color=#804040][灼烧][/color] 每回合-%d生命（%d回合）" % [val, dur]
 		"regen":
-			return "[再生] 每回合恢复+%d生命（%d回合）" % [val, dur]
+			return "[color=#598060][再生][/color] 每回合恢复+%d生命（%d回合）" % [val, dur]
 		"mark":
-			return "[标记] 受伤加深+%d%%（%d回合）" % [val, dur]
+			return "[color=#734d80][标记][/color] 受伤加深+%d%%（%d回合）" % [val, dur]
 		"extra_move":
-			return "[加速] 移动力+%d（%d回合）" % [val, dur]
+			return "[color=#4d808c][加速][/color] 移动力+%d（%d回合）" % [val, dur]
 		"taunt":
-			return "[嘲讽] 强制攻击（%d回合）" % [dur]
+			return "[color=#8c804d][嘲讽][/color] 强制攻击（%d回合）" % [dur]
 		"magic_flow":
-			return "[魔力充盈] 攻击力+%d%%（%d回合）" % [val, dur]
+			return "[color=#668066][魔力充盈][/color] 攻击力+%d%%（%d回合）" % [val, dur]
 		"bloodthirst":
-			return "[嗜血成性] 攻击力+%d%%（%d回合）" % [val, dur]
+			return "[color=#805959][嗜血成性][/color] 攻击力+%d%%（%d回合）" % [val, dur]
 	return "%s %d（%d回合）" % [key, val, dur]
 
 func _on_CloseButton_pressed():

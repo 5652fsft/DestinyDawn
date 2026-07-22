@@ -22,6 +22,9 @@ func setup(id: String, data: Dictionary):
 	$CardFront/RangeLabel.text = "射程: %d" % data.get("range", 1)
 	$CardFront/SkillLabel.text = data.skill
 	$CardFront/PassiveLabel.text = "天赋·%s" % data.get("passive", "")
+	$InfoButton.icon = preload("res://Assets/Icons/info.png")
+	$InfoButton.text = ""
+	$InfoButton.expand_icon = true
 
 	$CardBack/Scroll/VBox/NameLabel.text = data.name
 	$CardBack/Scroll/VBox/HPLabel.text = "生命值: %d" % data.hp
@@ -128,6 +131,7 @@ func _set_full_scale(s: Vector2):
 		scale = s
 
 func _on_info_pressed():
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("card_play")
 	if _flip_tween: _flip_tween.kill()
 	_flipped = not _flipped
 	_flip_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)

@@ -170,11 +170,10 @@ text = "受到伤害 -20%（HP<50% 时 -35%）"
 
 [node name="InfoButton" type="Button" parent="."]
 layout_mode = 0
-offset_left = 152.0
-offset_top = 4.0
-offset_right = 174.0
-offset_bottom = 26.0
-theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 12
-text = "i"
+offset_left = 148.0
+offset_top = 2.0
+offset_right = 176.0
+offset_bottom = 30.0
+flat = true
+expand_icon = true
 [connection signal="pressed" from="InfoButton" to="." method="_on_info_pressed"]

@@ -27,7 +27,7 @@ func _build_pool():
 		var data = CardDatabase.get_card(cid)
 		if not data: continue
 		var w = CARD_SCENE.instantiate()
-		w.setup(cid, data.card_name, data.cost, TYPE_NAMES.get(data.card_type, "?"), data.description)
+		w.setup(cid, data.card_name, data.cost, TYPE_NAMES.get(data.card_type, "?"), data.description, data.card_type)
 		w.clicked.connect(_on_pool_card_clicked)
 		grid.add_child(w)
 		pool_widgets[cid] = w
@@ -88,7 +88,7 @@ func _update_ui():
 		var data = CardDatabase.get_card(cid)
 		if not data: continue
 		var w = CARD_SCENE.instantiate()
-		w.setup(cid, data.card_name, data.cost, TYPE_NAMES.get(data.card_type, "?"), data.description)
+		w.setup(cid, data.card_name, data.cost, TYPE_NAMES.get(data.card_type, "?"), data.description, data.card_type)
 		w.clicked.connect(_on_deck_card_clicked)
 		w.set_in_deck_mode(true)
 		deck_grid.add_child(w)

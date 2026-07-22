@@ -57,7 +57,6 @@ var default_deck: Array[String] = []
 
 var last_attacker: Node = null
 var skill_overlays: Array[Node] = []
-var _turn_toast_shown: bool = false
 
 var _am:
 	get:
@@ -727,6 +726,10 @@ func _sync_card_play(_player_id: int, _card_id: String, _target_path: String):
 func _sync_energy(player_id: int, value: int):
 	energy_system.player_energy[player_id] = value
 	_update_player_panels()
+	# 刷新手牌可用性
+	var my_pid = 1 if GlobalGameData.is_host else 2
+	if player_id == my_pid:
+		hand_panel.refresh_affordability(value)
 
 @rpc("call_local", "reliable")
 func _sync_hand(player_id: int, hand: Array):
@@ -735,6 +738,9 @@ func _sync_hand(player_id: int, hand: Array):
 		var typed: Array[String] = []
 		typed.assign(hand)
 		hand_panel.play_draw_animation(typed)
+		# 刷新手牌可用性
+		var energy = energy_system.get_energy(my_pid)
+		hand_panel.refresh_affordability(energy)
 		if _am and GlobalGameData.turn_has_been_drawn:
 			_am.play_sfx("card_play")
 
@@ -990,11 +996,6 @@ func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn,
 	# 回合提示
 		var is_enemy_phase = phase == GlobalGameData.TurnPhase.ENEMY_TURN
 		var is_my_turn = (host_turn == GlobalGameData.is_host) != is_enemy_phase
-		if not _turn_toast_shown:
-			show_toast("我方先手" if is_my_turn else "对方先手", 2.0)
-			_turn_toast_shown = true
-		else:
-			show_toast("我方回合" if is_my_turn else "敌方回合", 1.5)
 	update_ui_turn_indicator()
 
 func update_ui_turn_indicator():

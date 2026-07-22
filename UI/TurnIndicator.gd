@@ -2,7 +2,12 @@ extends Control
 
 @onready var turn_label = $MarginContainer/VBoxContainer/TurnLabel
 @onready var end_turn_button = $MarginContainer/VBoxContainer/EndTurnButton
+@onready var transition = $TurnTransition
+@onready var transition_mask = $TurnTransition/Mask
+@onready var transition_label = $TurnTransition/TransitionLabel
 @onready var main: Node2D = get_tree().current_scene
+
+var _last_phase: int = -1
 
 func _ready():
 	hide()
@@ -22,6 +27,12 @@ func _is_my_turn() -> bool:
 
 func update_turn_display():
 	var phase = GlobalGameData.current_turn_phase
+
+	# 检测回合切换，播放过渡动画
+	if phase != _last_phase and phase != GlobalGameData.TurnPhase.NONE and phase != GlobalGameData.TurnPhase.START_ROUND and phase != GlobalGameData.TurnPhase.GAME_OVER:
+		_play_turn_transition()
+	_last_phase = phase
+
 	if phase == GlobalGameData.TurnPhase.GAME_OVER:
 		turn_label.text = "游戏结束！"
 		show()
@@ -38,6 +49,32 @@ func update_turn_display():
 		show()
 		end_turn_button.show()
 		end_turn_button.disabled = true
+
+func _play_turn_transition():
+	var is_my = _is_my_turn()
+	transition_label.text = "你的回合" if is_my else "敌方回合"
+
+	# 初始位置：屏幕右侧外
+	transition_mask.position.x = 1280
+	transition_label.modulate.a = 0.0
+	transition.show()
+
+	# 动画
+	var tw = create_tween().set_trans(Tween.TRANS_CUBIC)
+	# 遮罩从右移入
+	tw.tween_property(transition_mask, "position:x", 0.0, 0.35).set_ease(Tween.EASE_OUT)
+	# 文字淡入
+	tw.parallel().tween_property(transition_label, "modulate:a", 1.0, 0.2).set_delay(0.1)
+	# 停留
+	tw.tween_interval(0.8)
+	# 遮罩向左移出
+	tw.tween_property(transition_mask, "position:x", -1280.0, 0.35).set_ease(Tween.EASE_IN)
+	# 文字淡出
+	tw.parallel().tween_property(transition_label, "modulate:a", 0.0, 0.2)
+	tw.tween_callback(func():
+		transition.hide()
+		transition_mask.position.x = 1280
+	)
 
 func _on_EndTurnButton_pressed():
 	main.unselect_character(null, true)

@@ -28,6 +28,11 @@ func set_hand(card_ids: Array[String]):
 			_add_card(data)
 	_layout_cards()
 
+func refresh_affordability(current_energy: int):
+	for card in card_uis:
+		if is_instance_valid(card) and card.card_data:
+			card.set_affordable(card.card_data.cost <= current_energy)
+
 func remove_card_via_data(data: CardData) -> bool:
 	for i in range(card_uis.size() - 1, -1, -1):
 		if card_uis[i].card_data == data:
