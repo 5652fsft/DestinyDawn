@@ -12,10 +12,10 @@ script = ExtResource("1_5dp7v")
 
 [node name="CardImage" type="TextureRect" parent="." unique_id=1258655115]
 layout_mode = 0
-offset_left = 0.0
-offset_top = 28.0
-offset_right = 140.0
-offset_bottom = 107.0
+offset_left = 10.0
+offset_top = 34.0
+offset_right = 130.0
+offset_bottom = 101.0
 stretch_mode = 6
 
 [node name="BorderOverlay" type="Panel" parent="." unique_id=1036784715]
