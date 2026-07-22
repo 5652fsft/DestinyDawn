@@ -5,16 +5,17 @@
 
 [node name="DeckCardUI" type="Panel" unique_id=1296529402]
 custom_minimum_size = Vector2(125, 183)
-scale = Vector2(0.95, 0.95)
 clip_contents = true
+scale = Vector2(0.95, 0.95)
 script = ExtResource("1")
 
 [node name="CardImage" type="TextureRect" parent="." unique_id=78257877]
 layout_mode = 0
-offset_left = 6.0
-offset_top = 28.0
-offset_right = 119.0
-offset_bottom = 91.0
+offset_left = 7.0
+offset_top = 26.0
+offset_right = 118.0
+offset_bottom = 84.0
+expand_mode = 2
 stretch_mode = 6
 
 [node name="BorderOverlay" type="Panel" parent="." unique_id=290545763]

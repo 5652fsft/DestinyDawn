@@ -194,9 +194,6 @@ func _on_hover_enter():
 	var panel_style: StyleBoxFlat = get_theme_stylebox("panel") as StyleBoxFlat
 	if panel_style:
 		panel_style.bg_color = Color(0.15, 0.15, 0.25, 1.0)
-		panel_style.shadow_size = CardTheme.HOVER_SHADOW_SIZE
-		panel_style.shadow_color = CardTheme.HOVER_SHADOW_COLOR
-		panel_style.shadow_offset = CardTheme.HOVER_SHADOW_OFFSET
 
 func _on_hover_exit():
 	if _hover_tween:
@@ -209,4 +206,3 @@ func _on_hover_exit():
 	var panel_style: StyleBoxFlat = get_theme_stylebox("panel") as StyleBoxFlat
 	if panel_style:
 		panel_style.bg_color = CardTheme.CARD_BG
-		panel_style.shadow_size = 0

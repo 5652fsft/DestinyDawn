@@ -21,6 +21,7 @@ var is_move_mode: bool = false
 var is_attack_mode: bool = false
 var is_viewing_enemy: bool = false
 var _hand_hidden: bool = false
+var _surrender_dialog: Panel = null
 
 # === 卡牌系统 ===
 var pending_card_data: CardData = null
@@ -481,6 +482,13 @@ func _input(event: InputEvent):
 			show_toast("卡牌已收起，按 F 恢复", 2.0)
 		else:
 			show_toast("卡牌已展开，按 F 收起", 2.0)
+	if event is InputEventKey and event.keycode == KEY_ESCAPE and event.pressed and not event.echo:
+		if GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.GAME_OVER:
+			return
+		if _surrender_dialog and _surrender_dialog.visible:
+			_hide_surrender_dialog()
+		else:
+			_show_surrender_dialog()
 
 func _unhandled_input(event: InputEvent):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
@@ -914,6 +922,79 @@ func draw_for_new_turn():
 		energy_system.restore_energy(1)
 		energy_system.restore_energy(2)
 		sync_all_card_state()
+
+# === 投降 ===
+func _show_surrender_dialog():
+	if _surrender_dialog:
+		_surrender_dialog.show()
+		return
+	_surrender_dialog = Panel.new()
+	_surrender_dialog.anchor_left = 0.3
+	_surrender_dialog.anchor_top = 0.3
+	_surrender_dialog.anchor_right = 0.7
+	_surrender_dialog.anchor_bottom = 0.7
+	var bg = StyleBoxFlat.new()
+	bg.bg_color = Color(0.08, 0.09, 0.14, 0.95)
+	bg.border_width_top = 2
+	bg.border_width_bottom = 2
+	bg.border_width_left = 2
+	bg.border_width_right = 2
+	bg.border_color = Color(0.3, 0.32, 0.35, 0.6)
+	bg.corner_radius_top_left = 12
+	bg.corner_radius_top_right = 12
+	bg.corner_radius_bottom_left = 12
+	bg.corner_radius_bottom_right = 12
+	_surrender_dialog.add_theme_stylebox_override("panel", bg)
+
+	var vbox = VBoxContainer.new()
+	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_surrender_dialog.add_child(vbox)
+
+	var label = Label.new()
+	label.text = "确认投降？"
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_font_override("font", load("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf"))
+	label.add_theme_font_size_override("font_size", 28)
+	label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	label.size_flags_vertical = 3
+	vbox.add_child(label)
+
+	var hbox = HBoxContainer.new()
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	var confirm = Button.new()
+	confirm.text = "确认"
+	var cancel = Button.new()
+	cancel.text = "取消"
+	for b in [confirm, cancel]:
+		b.custom_minimum_size = Vector2(100, 50)
+		ButtonTheme.apply_menu(b)
+		ButtonTheme.set_font(b, 22)
+	hbox.add_child(confirm)
+	hbox.add_child(cancel)
+	vbox.add_child(hbox)
+
+	confirm.pressed.connect(_confirm_surrender)
+	cancel.pressed.connect(_hide_surrender_dialog)
+
+	$UI.add_child(_surrender_dialog)
+	if _am: _am.play_sfx("click")
+
+func _hide_surrender_dialog():
+	if _surrender_dialog:
+		_surrender_dialog.hide()
+
+func _confirm_surrender():
+	_hide_surrender_dialog()
+	var targets = GlobalGameData.host_characters if GlobalGameData.is_host else GlobalGameData.client_characters
+	for c in targets:
+		if c and c.has_method("rpc"):
+			c.rpc("take_damage", 9999)
+		elif c:
+			c.hp = 0
+	if multiplayer.has_multiplayer_peer():
+		GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.GAME_OVER
+		rpc_id(0, "_sync_turn_phase", GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats)
+	show_battle_result()
 
 func show_battle_result():
 	var is_host_win = GlobalGameData.host_characters.any(func(c): return c.hp > 0)
