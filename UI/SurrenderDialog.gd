@@ -1,13 +1,13 @@
 extends Panel
 
 var _hand_was_hidden: bool = false
+var _hiding_hand: bool = false
 
 func _ready():
 	var overlay = StyleBoxFlat.new()
 	overlay.bg_color = Color(0, 0, 0, 0.7)
 	add_theme_stylebox_override("panel", overlay)
 
-	# Card 全透明
 	var card_bg = StyleBoxFlat.new()
 	card_bg.bg_color = Color(0, 0, 0, 0)
 	$Card.add_theme_stylebox_override("panel", card_bg)
@@ -17,13 +17,15 @@ func _ready():
 	ButtonTheme.apply_menu($Card/VBox/HBox/CancelButton)
 	ButtonTheme.set_font($Card/VBox/HBox/CancelButton, 22)
 
-func show():
-	var main = get_node("/root/Main")
-	if main and main.has_method("_hide_hand"):
-		_hand_was_hidden = "_hand_hidden" in main and main._hand_hidden
-		if not _hand_was_hidden:
-			main._hide_hand()
-	super.show()
+func _notification(what):
+	if what == NOTIFICATION_VISIBILITY_CHANGED and visible and not _hiding_hand:
+		_hiding_hand = true
+		var main = get_node("/root/Main")
+		if main and main.has_method("_hide_hand"):
+			_hand_was_hidden = "_hand_hidden" in main and main._hand_hidden
+			if not _hand_was_hidden:
+				main._hide_hand()
+		_hiding_hand = false
 
 func _on_confirm_pressed():
 	var main = get_tree().current_scene
