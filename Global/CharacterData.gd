@@ -16,7 +16,7 @@ const DATA = {
 	"silverwolf":{"name":"银狼",    "hp":65,  "move":5, "atk":16, "range":2,
 		"skill":"系统入侵", "skill_desc":"目标虚弱 + 迟缓各 3 回合", "skill_cd":4,
 		"passive":"数据篡改", "passive_desc":"攻击时有 50% 概率对目标附加随机减益"},
-	"hamster":   {"name":"芝士仓鼠","hp":48,  "move":6, "atk":26, "range":4,
+	"hamster":   {"name":"芝士仓鼠","hp":48,  "move":6, "atk":24, "range":3,
 		"skill":"动作如潮", "skill_desc":"立即获得 1 次额外行动，该技能不消耗行动次数", "skill_cd":3,
 		"passive":"钢铁直架", "passive_desc":"消灭敌方后获得 1 次额外行动，获得一层 [嗜血成性]，效果为攻击力 +50%，持续两回合，最多可叠加 3 层"},
 }

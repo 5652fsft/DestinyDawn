@@ -7,7 +7,16 @@
 custom_minimum_size = Vector2(140, 200)
 size_flags_horizontal = 0
 size_flags_vertical = 0
+clip_contents = true
 script = ExtResource("1_5dp7v")
+
+[node name="CardImage" type="TextureRect" parent="." unique_id=1258655115]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 140.0
+offset_bottom = 103.0
+stretch_mode = 6
 
 [node name="BorderOverlay" type="Panel" parent="." unique_id=1036784715]
 layout_mode = 0
@@ -51,15 +60,6 @@ theme_override_font_sizes/font_size = 11
 text = "ATTACK"
 horizontal_alignment = 2
 vertical_alignment = 1
-
-[node name="CardImage" type="TextureRect" parent="." unique_id=1258655115]
-layout_mode = 0
-offset_left = 6.0
-offset_top = 34.0
-offset_right = 134.0
-offset_bottom = 100.0
-expand_mode = 3
-stretch_mode = 5
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1355378850]
 layout_mode = 0

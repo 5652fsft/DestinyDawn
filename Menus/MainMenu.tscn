@@ -174,7 +174,7 @@ layout_mode = 0
 offset_left = 14.0
 offset_top = 8.0
 offset_right = 464.0
-offset_bottom = 77.0
+offset_bottom = 80.0
 theme_override_constants/separation = 8
 
 [node name="OnlineLabelVBox" type="VBoxContainer" parent="ButtonPanel/OnlineFrame/OnlineRow" unique_id=890836528]
