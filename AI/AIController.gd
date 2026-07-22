@@ -45,22 +45,41 @@ func _pan_to(chara: Node):
 	tw.tween_property(_camera, "position", chara.position, 0.4)
 
 
+func _focus_on_player_characters():
+	var alive = []
+	for c in GlobalGameData.host_characters:
+		if is_instance_valid(c) and c.hp > 0:
+			alive.append(c)
+	if alive.is_empty():
+		return
+	var avg = Vector2.ZERO
+	for c in alive:
+		avg += c.global_position
+	avg /= alive.size()
+	if _camera:
+		var tw = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tw.tween_property(_camera, "position", avg, 0.6)
+
+
 func _process(_delta):
 	if not GlobalGameData.is_ai_mode:
 		return
+
+	if GlobalGameData.current_turn_phase != _current_phase:
+		# 轮到玩家回合时聚焦玩家角色
+		if GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.PLAYER_TURN and GlobalGameData.is_host_turn:
+			_focus_on_player_characters()
+		if _current_phase != -1:
+			_log("阶段变化: %d -> %d，清理旧队列" % [_current_phase, GlobalGameData.current_turn_phase])
+		_action_queue.clear()
+		_busy = false
+		_current_phase = GlobalGameData.current_turn_phase
 
 	if not _is_ai_phase():
 		_action_queue.clear()
 		_busy = false
 		_current_phase = -1
 		return
-
-	if GlobalGameData.current_turn_phase != _current_phase:
-		if _current_phase != -1:
-			_log("阶段变化: %d -> %d，清理旧队列" % [_current_phase, GlobalGameData.current_turn_phase])
-		_action_queue.clear()
-		_busy = false
-		_current_phase = GlobalGameData.current_turn_phase
 
 	if _busy:
 		_action_timer -= _delta
