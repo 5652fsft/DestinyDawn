@@ -114,6 +114,7 @@ func _setup_ai_controller():
 	_log("AI 控制器已创建并添加到场景", "Mode")
 
 func _ready():
+	BackgroundSingleton.enter_battle()
 	GlobalGameData.reset_battle_state()
 	GlobalGameData.load_defaults_if_empty()
 	if _am:
@@ -933,29 +934,43 @@ func _show_surrender_dialog():
 	_surrender_dialog.anchor_top = 0.3
 	_surrender_dialog.anchor_right = 0.7
 	_surrender_dialog.anchor_bottom = 0.7
-	var bg = StyleBoxFlat.new()
-	bg.bg_color = Color(0.08, 0.09, 0.14, 0.95)
-	bg.border_width_top = 2
-	bg.border_width_bottom = 2
-	bg.border_width_left = 2
-	bg.border_width_right = 2
-	bg.border_color = Color(0.3, 0.32, 0.35, 0.6)
-	bg.corner_radius_top_left = 12
-	bg.corner_radius_top_right = 12
-	bg.corner_radius_bottom_left = 12
-	bg.corner_radius_bottom_right = 12
-	_surrender_dialog.add_theme_stylebox_override("panel", bg)
+
+	var overlay = StyleBoxFlat.new()
+	overlay.bg_color = Color(0, 0, 0, 0.7)
+	_surrender_dialog.add_theme_stylebox_override("panel", overlay)
+
+	var card = Panel.new()
+	card.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var card_style = StyleBoxFlat.new()
+	card_style.bg_color = Color(0.12, 0.13, 0.18, 0.95)
+	card_style.border_width_top = 2
+	card_style.border_width_bottom = 2
+	card_style.border_width_left = 2
+	card_style.border_width_right = 2
+	card_style.border_color = Color(0.3, 0.32, 0.35, 0.6)
+	card_style.corner_radius_top_left = 12
+	card_style.corner_radius_top_right = 12
+	card_style.corner_radius_bottom_left = 12
+	card_style.corner_radius_bottom_right = 12
+	card_style.shadow_size = 8
+	card_style.shadow_color = Color(0, 0, 0, 0.5)
+	card_style.shadow_offset = Vector2(0, 4)
+	card.add_theme_stylebox_override("panel", card_style)
+	_surrender_dialog.add_child(card)
 
 	var vbox = VBoxContainer.new()
 	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_surrender_dialog.add_child(vbox)
+	card.add_child(vbox)
 
 	var label = Label.new()
 	label.text = "确认投降？"
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_font_override("font", load("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf"))
+	var font_res = load("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
+	label.add_theme_font_override("font", font_res)
 	label.add_theme_font_size_override("font_size", 28)
-	label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	label.add_theme_color_override("font_color", Color(1, 0.85, 0.2))
+	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.5))
+	label.add_theme_constant_override("outline_size", 2)
 	label.size_flags_vertical = 3
 	vbox.add_child(label)
 

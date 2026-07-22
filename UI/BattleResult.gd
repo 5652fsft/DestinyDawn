@@ -69,5 +69,4 @@ func _on_return_pressed():
 
 func _on_retry_pressed():
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
-	BackgroundSingleton.exit_battle()
 	get_tree().change_scene_to_file("res://Scenes/scene.tscn")
