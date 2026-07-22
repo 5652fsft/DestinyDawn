@@ -44,6 +44,7 @@ func show_for(character: Node):
 	skill_name_label.add_theme_font_override("font", FONT)
 	skill_desc_label.text = active_skill.description
 	skill_desc_label.add_theme_font_override("normal_font", FONT)
+	skill_desc_label.reset_size()
 	cooldown_label.add_theme_font_override("font", FONT)
 	_targeting = false
 	use_button.text = "使用技能"
