@@ -31,7 +31,7 @@ func _input(event):
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN or event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			var ctrl = get_viewport().gui_get_hovered_control()
 			while ctrl:
-				if ctrl.mouse_filter == Control.MOUSE_FILTER_STOP:
+				if ctrl is ScrollContainer:
 					return
 				ctrl = ctrl.get_parent()
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN and scaleNum > 0.4:
