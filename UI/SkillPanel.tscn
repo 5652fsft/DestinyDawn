@@ -24,12 +24,18 @@ theme_override_fonts/font = ExtResource("2_af7tq")
 theme_override_font_sizes/font_size = 18
 text = "技能名"
 
-[node name="SkillDescLabel" type="Label" parent="VBoxContainer" unique_id=1803795637]
+[node name="SkillDescScroll" type="ScrollContainer" parent="VBoxContainer" unique_id=1934206861]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 50)
+horizontal_scroll_mode = 0
+
+[node name="SkillDescLabel" type="Label" parent="VBoxContainer/SkillDescScroll" unique_id=1803795637]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_af7tq")
 theme_override_font_sizes/font_size = 14
 text = "技能描述"
 autowrap_mode = 2
+size_flags_horizontal = 3
 
 [node name="CooldownLabel" type="Label" parent="VBoxContainer" unique_id=1066417046]
 layout_mode = 2

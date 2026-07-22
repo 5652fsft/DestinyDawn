@@ -10,7 +10,7 @@ signal skill_used(skill: BaseSkill, target_type: int)
 signal skill_cancelled()
 
 @onready var skill_name_label = $VBoxContainer/SkillNameLabel
-@onready var skill_desc_label = $VBoxContainer/SkillDescLabel
+@onready var skill_desc_label = $VBoxContainer/SkillDescScroll/SkillDescLabel
 @onready var use_button = $VBoxContainer/UseButton
 @onready var cooldown_label = $VBoxContainer/CooldownLabel
 
@@ -30,7 +30,6 @@ func _ready():
 	bg.corner_radius_bottom_left = 8
 	add_theme_stylebox_override("panel", bg)
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	_wrap_desc_in_scroll()
 
 func show_for(character: Node):
 	current_character = character
@@ -50,20 +49,6 @@ func show_for(character: Node):
 	use_button.text = "使用技能"
 	_update_cooldown()
 	show()
-
-func _wrap_desc_in_scroll():
-	var vbox = $VBoxContainer
-	var idx = skill_desc_label.get_index()
-	var sc = ScrollContainer.new()
-	sc.name = "SkillDescScroll"
-	sc.custom_minimum_size = Vector2(0, 50)
-	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	vbox.remove_child(skill_desc_label)
-	vbox.add_child(sc)
-	vbox.move_child(sc, idx)
-	sc.add_child(skill_desc_label)
-	skill_desc_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	skill_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 
 func set_targeting_mode(active: bool):
 	_targeting = active
