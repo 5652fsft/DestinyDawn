@@ -42,6 +42,10 @@ func _ready():
 	hide()
 
 func show_result(is_winner: bool, stats: Dictionary):
+	# 自动隐藏手牌
+	var hand = get_tree().current_scene.get_node_or_null("UI/HandPanel")
+	if hand: hand.hide()
+
 	$VBoxContainer/TitleLabel.text = "胜 利" if is_winner else "败 北"
 	$VBoxContainer/TitleLabel.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2) if is_winner else Color(1.0, 0.3, 0.3))
 
