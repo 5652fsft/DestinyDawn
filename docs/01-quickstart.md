@@ -6,7 +6,7 @@
 
 ## 1. 项目概述
 
-Destiny Dawn 是一款基于 Godot 4.7.1 的回合制六边形战棋卡牌游戏，两名玩家各控制 3 名角色，在六角格地图上使用卡牌与技能对战。
+Destiny Dawn 是一款基于 Godot 4.7.1 的回合制六边形战棋卡牌游戏，两名玩家各控制 3 名角色（从 9 名角色中选择），在六角格地图上使用卡牌与技能对战。
 
 ### 核心定位
 
@@ -62,7 +62,7 @@ destiny-dawn/
 │  ├ CardEffect.gd             # 卡牌效果执行器
 │  ├ BuffData.gd               # Buff 数据资源类（class_name BuffData）
 │  └ BuffDatabase.gd           # Buff 注册表（class_name BuffDatabase）
-├ Characters/                  # 各角色目录（Bronya/Seele/Elaina/Firefly/SilverWolf/Hamster）
+├ Characters/                  # 各角色目录（Bronya/Seele/Elaina/Firefly/SilverWolf/Hamster/Karrigan/Zephyr/Anpan）
 │  ├ BaseCharacter.gd          # 角色基类
 │  └ FloatingBar.gd/.tscn      # 血条/护盾
 ├ Global/
@@ -96,7 +96,7 @@ destiny-dawn/
 │  ├ main.gd                   # 战斗主逻辑
 │  └ camera.gd                 # 摄像机控制
 ├ Skills/
-│  ├ BaseSkill.gd              # 技能资源类
+│  ├ BaseSkill.gd              # 技能资源类（含 CELL 地格目标枚举）
 │  └ SkillEffect.gd            # 技能效果执行器
 ├ UI/
 │  ├ Theme/GameTheme.tres      # UI 主题文件
@@ -136,6 +136,7 @@ scene.tscn (Node2D) — main.gd
 ├ MultiplayerSpawner             — 网络生成器
 ├ EnergySystem (Node)            — 能量系统（EnergySystem.gd）
 ├ DeckManager (Node)             — 卡牌管理（DeckManager.gd）
+├ FieldEffectManager (Node2D)    — 场地效果（烟雾等）
 ├ UI (CanvasLayer)
 │  ├ CharacterInfoPanel          — 角色属性面板
 │  ├ PassiveSkillPanel           — 被动技能面板

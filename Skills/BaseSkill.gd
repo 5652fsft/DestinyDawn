@@ -1,7 +1,7 @@
 class_name BaseSkill
 extends Resource
 
-enum SkillTarget { NONE, SELF, ALLY_SINGLE, ENEMY_SINGLE }
+enum SkillTarget { NONE, SELF, ALLY_SINGLE, ENEMY_SINGLE, CELL }
 
 @export var skill_name: String = ""
 @export var description: String = ""

@@ -55,6 +55,12 @@ static func execute_active(character: Node, skill: BaseSkill, target: Node, main
 			return _silverwolf_active(character, target, main)
 		"芝士仓鼠":
 			return _hamster_active(character, target, main)
+		"karrigan":
+			return _karrigan_active(character, target, main)
+		"Zephyr":
+			return _zephyr_active(character, target, main)
+		"あんパン":
+			return _anpan_active(character, target, main)
 		_:
 			push_warning("未知角色技能: ", char_name)
 			return false
@@ -200,6 +206,83 @@ static func _hamster_active(character: Node, target: Node, main: Node) -> bool:
 	character.rpc("_play_vfx_preset", "heal")
 	return true
 
+static func _anpan_active(character: Node, target: Node, main: Node) -> bool:
+	var bm = main.get_node_or_null("BuffManager") if main else null
+	var dm = main.get_node_or_null("DeckManager") if main else null
+	var es = main.get_node_or_null("EnergySystem") if main else null
+	if not dm or not es:
+		return false
+	var pid = 1 if character in GlobalGameData.host_characters else 2
+	# 抽牌至上限
+	var hand = dm.get_hand(pid)
+	var to_draw = dm.hand_limit - hand.size()
+	if to_draw > 0:
+		dm.draw_cards(pid, to_draw)
+	# 回能至上限
+	es.set_energy(pid, 10)
+	if bm and bm.has_method("apply_buff"):
+		bm.apply_buff(character, "soften", 20, 3, character)
+	var _am = Engine.get_singleton("AudioManager")
+	if _am: _am.play_sfx("anpan_skill", character)
+	print("[Skill] あんパン [极速高温烘焙] 抽 %d 张牌，回满能量，获得诅咒" % to_draw)
+	character.rpc("_play_vfx_preset", "buff")
+	return true
+
+static func _zephyr_active(character: Node, target: Node, main: Node) -> bool:
+	var self_dmg = max(1, int(character.hp * 0.2))
+	# 自伤为真实伤害，跳过攀升减免
+	character.hp = max(1, character.hp - self_dmg)
+	if character.has_method("_spawn_float"):
+		character._spawn_float(self_dmg)
+	if character.has_method("_shake_camera"):
+		character._shake_camera(3.0)
+	if character.has_method("rpc") and character.multiplayer and character.multiplayer.has_multiplayer_peer():
+		character.rpc("_sync_hp", character.hp)
+	var bm = main.get_node_or_null("BuffManager") if main else null
+	if bm and bm.has_method("apply_buff"):
+		bm.apply_buff(character, "ascend", 10, 2, character)
+	var _am = Engine.get_singleton("AudioManager")
+	if _am: _am.play_sfx("zephyr_skill", character)
+	print("[Skill] Zephyr [引煞赴烬] 自伤 %d，获得 1 层攀升" % self_dmg)
+	character.rpc("_play_vfx_preset", "buff")
+	return true
+
+static func _karrigan_active(character: Node, target: Node, main: Node) -> bool:
+	if not target or not main:
+		return false
+	var target_cell = character.grid_layer.local_to_map(character.grid_layer.to_local(target.global_position))
+	if character.grid_layer.get_cell_source_id(target_cell) == -1:
+		return false
+	var fm = main.get_node_or_null("FieldEffectManager") if main else null
+	if fm and fm.has_method("place_smoke"):
+		fm.place_smoke(target_cell, 3, 2, character.grid_layer)
+	else:
+		var directions = [
+			Vector2i(1,0), Vector2i(1,-1), Vector2i(0,-1),
+			Vector2i(-1,0), Vector2i(-1,1), Vector2i(0,1)
+		]
+		var smoke_cells = [target_cell]
+		var visited = {target_cell: 0}
+		var queue = [target_cell]
+		while queue.size() > 0:
+			var cell = queue.pop_front()
+			var cost = visited[cell]
+			if cost >= 3:
+				continue
+			for d in directions:
+				var next_cell = cell + d
+				if not visited.has(next_cell) and character.grid_layer.get_cell_source_id(next_cell) != -1:
+					visited[next_cell] = cost + 1
+					smoke_cells.append(next_cell)
+					queue.append(next_cell)
+		for cell in smoke_cells:
+			GlobalGameData.smoke_cells[cell] = 2
+	var _am = Engine.get_singleton("AudioManager")
+	if _am: _am.play_sfx("karrigan_skill", character)
+	print("[Skill] karrigan [狂野·纵横烟中] 在 %s 周围 3 格展开烟雾" % character.character_name)
+	character.rpc("_play_vfx_preset", "buff")
+	return true
+
 static func _is_valid_target_for_skill(character: Node, skill: BaseSkill, target: Node) -> bool:
 	if not target or not character:
 		return false
@@ -210,6 +293,6 @@ static func _is_valid_target_for_skill(character: Node, skill: BaseSkill, target
 			return character.name.begins_with("Host") == target.name.begins_with("Host")
 		BaseSkill.SkillTarget.ENEMY_SINGLE:
 			return character.name.begins_with("Host") != target.name.begins_with("Host")
-		BaseSkill.SkillTarget.NONE:
+		BaseSkill.SkillTarget.NONE, BaseSkill.SkillTarget.CELL:
 			return true
 	return true

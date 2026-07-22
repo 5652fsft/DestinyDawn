@@ -72,7 +72,7 @@ func _ready():
 	active_skill.cooldown = 3
 	active_skill.skill_range = 0  # 0 = 不限制范围，>0 = 最大 hex 格数
 	active_skill.target_type = BaseSkill.SkillTarget.ENEMY_SINGLE
-	# 可选: ALLY_SINGLE / SELF / NONE
+	# 可选: ALLY_SINGLE / SELF / NONE / CELL
 	active_skill.is_passive = false
 
 # 主动技能执行入口（必须实现）
@@ -98,14 +98,17 @@ func perform_attack(target_path: NodePath):
 - 角色与目标之间的距离超过 `skill_range` 时，该目标不显示高亮且无法选中
 - `skill_range = 0` 表示无限制（如 Bronya 的全图护盾、耗鼠的自选技能）
 - 具体到每个角色的设计意图：
-  | 角色 | skill_range | 说明 |
-  |---|---|---|
-  | 布洛妮娅 | 0 | 全图任意友方均可护盾 |
-  | 希儿 | 10 | 大范围内瞬移突进（但不可全图） |
-  | 伊蕾娜 | 6 | 中程 AoE 爆发 |
-  | 流萤 | 6 | 中程突击灼烧 |
-  | 银狼 | 0 | 全图任意敌方减益 |
-  | 芝士仓鼠 | 0 | 仅作用于自身（SELF 目标） |
+  | 角色 | skill_range | 目标类型 | 说明 |
+  |---|---|---|---|
+  | 布洛妮娅 | 0 | ALLY_SINGLE | 全图任意友方均可护盾 |
+  | 希儿 | 10 | ENEMY_SINGLE | 大范围内瞬移突进（但不可全图） |
+  | 伊蕾娜 | 6 | ENEMY_SINGLE | 中程 AoE 爆发 |
+  | 流萤 | 6 | ENEMY_SINGLE | 中程突击灼烧 |
+  | 银狼 | 0 | ENEMY_SINGLE | 全图任意敌方减益 |
+  | 芝士仓鼠 | 0 | SELF | 仅作用于自身 |
+  | karrigan | 0 | CELL | 全图任意地格生成烟雾 |
+  | Zephyr | 0 | SELF | 仅作用于自身 |
+  | あんパン | 3 | SELF | 3 格范围内自身 |
 
 ### 角色行动状态（合并阶段）
 
@@ -264,5 +267,6 @@ static func _newchar_active(character: Node, target: Node):
 - [ ] `Assets/Sprites/Standee/newchar_Standee.png`
 - [ ] `main.gd`: 添加 `const CHARACTER_NEWCHAR` + map 条目
 - [ ] `SkillEffect.gd`: execute_active 分支 / get_passive_modifier 分支
-- [ ] **`AI/AIController.gd`**: `_evaluate_skill_target()` 新增角色技能分支（详见 `docs/08-ai-mode-plan.md#8-新增角色时必须同步更新-ai-逻辑`）
+- [ ] **`AI/AIController.gd`**: `_evaluate_skill_target()` 新增角色技能分支（详见 `docs/08-ai-mode.md`）
 - [ ] **`Scenes/main.gd`**: `_generate_ai_team_and_deck()` 角色池添加新角色 ID
+- [ ] **`Global/FieldEffectManager.gd`**: 如技能涉及场地效果（烟雾等），需添加管理逻辑

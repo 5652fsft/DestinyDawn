@@ -71,8 +71,3 @@ static func setup(path: String):
 # 获取单例
 static func get_singleton() -> BackgroundSingleton:
 	return instance
-
-# 确保背景实例正确创建
-func _ensure_background():
-	if not _background_instance:
-		_create_background_instance()

@@ -33,7 +33,7 @@
 在 `Scenes/main.gd` 的角色 ID 列表中添加新角色：
 
 ```gdscript
-var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster", "new_character_id"]
+var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster", "karrigan", "zephyr", "anpan"]
 ```
 
 ### 角色名映射
@@ -48,6 +48,9 @@ var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster"
 | firefly | "流萤" |
 | silverwolf | "银狼" |
 | hamster | "芝士仓鼠" |
+| karrigan | "karrigan" |
+| zephyr | "Zephyr" |
+| anpan | "あんパン" |
 
 ---
 

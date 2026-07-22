@@ -484,6 +484,12 @@ func _evaluate_skill_target(chara: Node) -> Node:
 			target = _find_highest_attack_enemy()
 		"芝士仓鼠":
 			target = _evaluate_attack_target(chara)
+		"karrigan":
+			target = _find_highest_value_enemy()
+		"Zephyr":
+			target = chara
+		"あんパン":
+			target = chara
 		_:
 			return null
 	if target and _is_skill_out_of_range(chara, target):

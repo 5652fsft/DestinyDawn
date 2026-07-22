@@ -7,7 +7,7 @@ static func _register_cards():
 	var cards = [
 		# ========== 费用 0 ==========
 		_create_card("card_overload", "能量过载", CardData.CardType.TACTICAL, 0,
-			CardData.TargetType.SELF, "获得 2 能量，自身受到 5 点伤害",
+			CardData.TargetType.ALLY_SINGLE, "获得 2 能量，我方目标受到 5 点伤害",
 			CardData.EffectType.DRAW_CARD, 1),
 
 		# ========== 费用 1 — 攻击 ==========
@@ -104,7 +104,7 @@ static func _register_cards():
 			CardData.EffectType.DEBUFF_MOVE, 2, 2),
 
 		_create_card("card_shadowstep", "暗影步", CardData.CardType.DISPLACE, 2,
-			CardData.TargetType.ENEMY_SINGLE, "传送到目标相邻位置并造成 12 点伤害",
+			CardData.TargetType.ALLY_SINGLE, "使我方单体瞬移到距离最远的敌方目标旁，对其造成 12 点伤害",
 			CardData.EffectType.TELEPORT, 12),
 
 		# ========== 费用 2 — 治疗/护盾 ==========
@@ -148,7 +148,7 @@ static func _register_cards():
 			CardData.EffectType.AOE_DAMAGE, 16, 1, 2),
 
 		_create_card("card_chain_lightning", "闪电链", CardData.CardType.ATTACK, 3,
-			CardData.TargetType.ENEMY_SINGLE, "对目标造成 20 点伤害，跳跃至附近敌人递减",
+			CardData.TargetType.ENEMY_SINGLE, "对目标造成 20 点伤害，周围 1 格内的敌方额外受到 10 点伤害，周围 2 格内敌方额外受到 5 点伤害",
 			CardData.EffectType.CHAIN_DAMAGE, 20),
 
 		_create_card("card_mass_heal", "群体治愈", CardData.CardType.HEAL, 3,

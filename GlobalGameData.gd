@@ -23,6 +23,13 @@ var character_move_used_num: int = 0
 var character_attack_used: Dictionary = {}
 var character_attack_used_num: int = 0
 
+# 烟雾系统：格子坐标 → 剩余回合数
+var smoke_cells: Dictionary = {}
+# 凯瑞根死亡标记
+var karrigan_death_flag: bool = false
+# 本回合出牌计数
+var cards_played_this_turn: int = 0
+
 const DEFAULT_TEAM: Array[String] = ["bronya", "seele", "elaina"]
 const DEFAULT_DECK: Array[String] = [
 	"card_fireball", "card_ice_shard", "card_heal", "card_small_heal",
@@ -57,6 +64,9 @@ func reset_battle_state():
 	character_move_used_num = 0
 	character_attack_used.clear()
 	character_attack_used_num = 0
+	smoke_cells.clear()
+	karrigan_death_flag = false
+	cards_played_this_turn = 0
 	battle_stats = {
 		host_damage_dealt = 0,
 		host_healing_done = 0,

@@ -175,10 +175,6 @@ func _update_sprite_texture():
 	var tex = load("res://Assets/Sprites/Characters/%s%s" % [char_id, suffix])
 	if tex:
 		sprite.texture = tex
-	if not grid_layer:
-		return Vector2i(-1, -1)
-	var local_pos = grid_layer.to_local(global_position)
-	return grid_layer.local_to_map(local_pos)
 
 func is_enemy(other: CharacterBody2D) -> bool:
 	if other == null:
@@ -264,10 +260,7 @@ func show_move_range():
 	# 高亮所有可达格子（跳过起始格）
 	for cell in valid_move_cells.keys():
 		if cell != start_cell:
-			#print("[Debug] 可达格子", cell)
-			highlight_layer.set_cell(cell, 0, Vector2i.ZERO)  # 假设 Highlight 层 ID=0 有瓦片
-
-	#print("[Debug] 起始格子: ", start_cell, " 可达格子数: ", valid_move_cells.size())
+			highlight_layer.set_cell(cell, 0, Vector2i.ZERO)
 
 func show_attack_range():
 	valid_attack_cells.clear()
@@ -467,9 +460,6 @@ func _consume_extra_attack():
 
 @rpc("any_peer", "call_local", "reliable")
 func perform_attack(target_path: NodePath):
-	#if not is_multiplayer_authority():
-		#return
-	
 	var target = get_node_or_null(target_path)
 	if not target or not target is CharacterBody2D:
 		return
@@ -727,6 +717,10 @@ func move_toward_target():
 		if is_multiplayer_authority() and multiplayer.has_multiplayer_peer():
 			rpc("_sync_position", global_position)
 		main.unreserve_move_cell(self)
+		# 烟雾检测：友方停在烟雾中不消耗移动次数
+		var cell = get_current_cell()
+		if main and main.field_effect_manager and main.field_effect_manager.has_method("on_move_complete"):
+			main.field_effect_manager.on_move_complete(self, cell)
 		main.end_character_move()
 	move_and_slide()
 

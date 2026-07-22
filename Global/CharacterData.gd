@@ -19,6 +19,15 @@ const DATA = {
 	"hamster":   {"name":"芝士仓鼠","hp":48,  "move":6, "atk":24, "range":3,
 		"skill":"动作如潮", "skill_desc":"立即获得 1 次额外行动，该技能不消耗行动次数", "skill_cd":3,
 		"passive":"钢铁直架", "passive_desc":"消灭敌方后获得 1 次额外行动，获得一层 [嗜血成性]，效果为攻击力 +50%，持续两回合，最多可叠加 3 层"},
+	"karrigan":    {"name":"karrigan", "hp":65,  "move":9, "atk":10, "range":6,
+		"skill":"狂野·纵横烟中", "skill_desc":"在目标地格及其周围三格展开烟雾，持续两回合。友方角色移动后若停留在烟雾范围内，则该次移动不消耗移动次数", "skill_cd":3,
+		"passive":"倒霉·混烟致残", "passive_desc":"karrigan 在场时，友方全体获得[拧绳]：受到攻击时 karrigan 分摊 30% 伤害。karrigan 死亡后移除[拧绳]，剩余友方下回合获得一次额外行动和[传承]（攻击力+50%）"},
+	"zephyr":      {"name":"Zephyr", "hp":85,  "move":5, "atk":8, "range":3,
+		"skill":"引煞赴烬", "skill_desc":"降低当前 20% 血量，获得一层[攀升]：受到伤害 -10%，持续两回合，最多两层。不消耗行动次数", "skill_cd":0,
+		"passive":"血煞逆锋", "passive_desc":"根据已损失血量增加攻击力，数值为已损失血量的 60%"},
+	"anpan":   {"name":"あんパン", "hp":65,  "move":5, "atk":13, "range":3,
+		"skill":"极速高温烘焙", "skill_desc":"立即抽取卡牌至上限，恢复能量至上限。获得[松软]：受到伤害 +20%，持续 3 回合", "skill_cd":3,
+		"passive":"面包大家族", "passive_desc":"每使用 2 张卡牌摸取 1 张卡牌，不超过手牌数量上限，并恢复 1 点能量。攻击敌方目标后，对目标施加[高温烫嘴]，持续两回合，效果为受到伤害 +5%"},
 }
 
 static func get_data(id: String) -> Dictionary:
@@ -34,4 +43,5 @@ static func get_all_ids() -> Array[String]:
 static func get_sprite_id(id: String) -> String:
 	match id:
 		"silverwolf": return "SilverWolf"
+		"anpan": return "Anpan"
 		_: return id[0].to_upper() + id.substr(1)

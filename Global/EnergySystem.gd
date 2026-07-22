@@ -4,9 +4,6 @@ var player_energy: Dictionary = {}  # player_id -> energy
 var max_energy: int = 10
 var energy_per_turn: int = 2
 
-func _ready():
-	pass
-
 func init_players(player_ids: Array[int]):
 	for pid in player_ids:
 		player_energy[pid] = 3

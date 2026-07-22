@@ -62,4 +62,29 @@ static func _all_buffs() -> Dictionary:
 	b.category = BuffData.Category.SPECIAL; b.is_harmful = true; b.max_stacks = 1
 	out["taunt"] = b
 
+	b = BuffData.new()
+	b.id = "legacy"; b.name = "传承"; b.type = BuffData.BuffType.ATTACK_BUFF
+	b.category = BuffData.Category.SPECIAL; b.is_harmful = false; b.max_stacks = 3
+	out["legacy"] = b
+
+	b = BuffData.new()
+	b.id = "ascend"; b.name = "攀升"; b.type = BuffData.BuffType.DEFENSE_BUFF
+	b.category = BuffData.Category.SPECIAL; b.is_harmful = false; b.max_stacks = 2
+	out["ascend"] = b
+
+	b = BuffData.new()
+	b.id = "hot_burn"; b.name = "高温烫嘴"; b.type = BuffData.BuffType.MARK
+	b.category = BuffData.Category.SPECIAL; b.is_harmful = true; b.max_stacks = 1
+	out["hot_burn"] = b
+
+	b = BuffData.new()
+	b.id = "soften"; b.name = "松软"; b.type = BuffData.BuffType.MARK
+	b.category = BuffData.Category.SPECIAL; b.is_harmful = true; b.max_stacks = 1
+	out["soften"] = b
+
+	b = BuffData.new()
+	b.id = "rope"; b.name = "拧绳"; b.type = BuffData.BuffType.MARK
+	b.category = BuffData.Category.SPECIAL; b.is_harmful = false; b.max_stacks = 99
+	out["rope"] = b
+
 	return out

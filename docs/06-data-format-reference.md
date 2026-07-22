@@ -21,14 +21,17 @@ const DATA = {
 
 ### 内置角色数据（此处仅为举例，不是最新版数据！）
 
-| ID | name | HP | Move | ATK | Range | Skill | Skill Range | Passive |
-|---|---|---|---|---|---|---|---|---|
-| bronya | 布洛妮娅 | 68 | 5 | 15 | 1 | 护卫指令 | 0 | 铁壁 |
-| seele | 希儿 | 65 | 6 | 18 | 1 | 相位突进 | 10 | 暗影突袭 |
-| elaina | 伊蕾娜 | 60 | 5 | 20 | 3 | 星尘爆裂 | 6 | 魔力共鸣 |
-| firefly | 流萤 | 85 | 5 | 14 | 1 | 烈焰冲锋 | 6 | 燃烧装甲 |
-| silverwolf | 银狼 | 65 | 5 | 16 | 2 | 系统入侵 | 0 | 数据篡改 |
-| hamster | 芝士仓鼠 | 48 | 6 | 26 | 4 | 动作如潮 | 0 | 钢铁直架 |
+| ID | name | HP | Move | ATK | Range | Skill | Skill Range | Target | Passive |
+|---|---|---|---|---|---|---|---|---|---|---|
+| bronya | 布洛妮娅 | 68 | 5 | 15 | 1 | 护卫指令 | 0 | ALLY_SINGLE | 铁壁 |
+| seele | 希儿 | 65 | 6 | 18 | 1 | 相位突进 | 10 | ENEMY_SINGLE | 暗影突袭 |
+| elaina | 伊蕾娜 | 60 | 5 | 20 | 3 | 星尘爆裂 | 6 | ENEMY_SINGLE | 魔力共鸣 |
+| firefly | 流萤 | 85 | 5 | 14 | 1 | 烈焰冲锋 | 6 | ENEMY_SINGLE | 燃烧装甲 |
+| silverwolf | 银狼 | 65 | 5 | 16 | 2 | 系统入侵 | 0 | ENEMY_SINGLE | 数据篡改 |
+| hamster | 芝士仓鼠 | 48 | 6 | 24 | 3 | 动作如潮 | 0 | SELF | 钢铁直架 |
+| karrigan | karrigan | 65 | 9 | 10 | 6 | 狂野·纵横烟中 | 0 | CELL | 倒霉·混烟致残 |
+| zephyr | Zephyr | 85 | 5 | 8 | 3 | 引煞赴烬 | 0 | SELF | 血煞逆锋 |
+| anpan | あんパン | 65 | 5 | 13 | 3 | 极速高温烘焙 | 3 | SELF | 面包大家族 |
 
 ---
 
@@ -106,7 +109,7 @@ _create_card(
 ## Buff 数据 — `Global/BuffDatabase.gd`
 
 | Buff ID | 显示名 | 类型 | 分类 | 最大层数 | 每回合触发 |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | attack_buff | 力量强化 | ATTACK_BUFF | MAGIC | 3 | 否 |
 | attack_debuff | 虚弱 | ATTACK_DEBUFF | MAGIC | 3 | 否 |
 | defense_buff | 伤害减免 | DEFENSE_BUFF | PHYSICAL | 2 | 否 |
@@ -117,6 +120,11 @@ _create_card(
 | mark | 标记 | MARK | SPECIAL | 1 | 否 |
 | bloodthirst | 嗜血成性 | ATTACK_BUFF | SPECIAL | 3 | 否 |
 | magic_flow | 魔力充盈 | ATTACK_BUFF | SPECIAL | 3 | 否 |
+| legacy | 传承 | ATTACK_BUFF | SPECIAL | 3 | 否 |
+| ascend | 攀升 | DEFENSE_BUFF | SPECIAL | 2 | 否 |
+| hot_burn | 高温烫嘴 | MARK | SPECIAL | 1 | 否 |
+| soften | 松软 | MARK | SPECIAL | 1 | 否 |
+| rope | 拧绳 | MARK | SPECIAL | 99 | 否 |
 
 Buff 条目结构：
 
@@ -190,7 +198,7 @@ Buff 条目结构：
 ```gdscript
 class_name BaseSkill extends Resource
 
-enum SkillTarget { NONE, SELF, ALLY_SINGLE, ENEMY_SINGLE }
+enum SkillTarget { NONE, SELF, ALLY_SINGLE, ENEMY_SINGLE, CELL }
 
 @export var skill_name: String = ""
 @export var description: String = ""
@@ -330,6 +338,9 @@ var character_attack_used_num: int = 0       # 已使用的攻击次数
 | 流萤 | 烈焰冲锋 | `attack_sword.ogg` |
 | 银狼 | 系统入侵 | `attack_digital.ogg` |
 | 芝士仓鼠 | 动作如潮 | `attack_gun.ogg` |
+| karrigan | 狂野·纵横烟中 | `karrigan_skill.ogg` |
+| Zephyr | 引煞赴烬 | `zephyr_skill.ogg` |
+| あんパン | 极速高温烘焙 | `anpan_skill.ogg` |
 
 ### 卡牌效果音效（`Cards/CardEffect.gd`）
 

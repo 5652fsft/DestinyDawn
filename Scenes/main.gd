@@ -26,6 +26,9 @@ var _surrender_dialog: Panel = null
 # === 卡牌系统 ===
 var pending_card_data: CardData = null
 var is_targeting: bool = false
+var current_card_player_id: int = -1
+var _cell_targeting: bool = false
+var _pending_skill: BaseSkill = null
 
 @onready var ground_layer: TileMapLayer = $Map/Ground
 @onready var highlight_layer: TileMapLayer = $Map/Highlight
@@ -37,6 +40,7 @@ var is_targeting: bool = false
 @onready var deck_manager = $DeckManager
 var buff_manager: Node = null
 var vfx_manager: Node = null
+var field_effect_manager: Node = null
 @onready var skill_panel = $UI/SkillPanel
 @onready var passive_skill_panel = $UI/PassiveSkillPanel
 @onready var move_button = $UI/MoveButton
@@ -51,6 +55,9 @@ const CHARACTER_ELAINA = preload("res://Characters/Elaina/Elaina.tscn")
 const CHARACTER_FIREFLY = preload("res://Characters/Firefly/Firefly.tscn")
 const CHARACTER_SILVERWOLF = preload("res://Characters/SilverWolf/SilverWolf.tscn")
 const CHARACTER_HAMSTER = preload("res://Characters/Hamster/Hamster.tscn")
+const CHARACTER_KARRIGAN = preload("res://Characters/Karrigan/Karrigan.tscn")
+const CHARACTER_ZEPHYR = preload("res://Characters/Zephyr/Zephyr.tscn")
+const CHARACTER_ANPAN = preload("res://Characters/Anpan/Anpan.tscn")
 
 var team_roster: Array[PackedScene] = []
 var enemy_roster: Array[PackedScene] = []
@@ -70,6 +77,8 @@ func _build_team_from_selection():
 		"bronya": CHARACTER_BRONYA, "seele": CHARACTER_SEELE,
 		"elaina": CHARACTER_ELAINA, "firefly": CHARACTER_FIREFLY,
 		"silverwolf": CHARACTER_SILVERWOLF, "hamster": CHARACTER_HAMSTER,
+		"karrigan": CHARACTER_KARRIGAN, "zephyr": CHARACTER_ZEPHYR,
+		"anpan": CHARACTER_ANPAN,
 	}
 	if not GlobalGameData.selected_team.is_empty():
 		for cid in GlobalGameData.selected_team:
@@ -93,7 +102,7 @@ func _build_deck_from_selection():
 	default_deck = GlobalGameData.selected_deck.duplicate()
 
 func _generate_ai_team_and_deck():
-	var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster"]
+	var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster", "karrigan", "zephyr", "anpan"]
 	all_chars.shuffle()
 	GlobalGameData.client_team = []
 	GlobalGameData.client_team.assign(all_chars.slice(0, 3))
@@ -122,6 +131,7 @@ func _ready():
 		_am.play_bgm_random()
 	_init_buff_manager()
 	_init_vfx_manager()
+	_init_field_effect_manager()
 
 	if GlobalGameData.is_ai_mode:
 		_log("AI 模式初始化开始", "Mode")
@@ -286,6 +296,13 @@ func _init_vfx_manager():
 	add_child(vm)
 	vfx_manager = vm
 
+func _init_field_effect_manager():
+	var fm = Node2D.new()
+	fm.name = "FieldEffectManager"
+	fm.set_script(load("res://Global/FieldEffectManager.gd"))
+	add_child(fm)
+	field_effect_manager = fm
+
 func _on_client_joined(id: int):
 	print("[Net] 客户端 %d 加入" % id)
 	rpc_id(id, "_sync_opponent_name", GlobalGameData.player_name)
@@ -356,8 +373,8 @@ func select_character(chara: CharacterBody2D, enemy_view: bool = false):
 		is_move_mode = false
 		is_attack_mode = false
 		_reset_button_texts()
-		is_viewing_enemy = enemy_view
 	selected_character = chara
+	is_viewing_enemy = enemy_view
 	chara.is_selected = true
 	if _am: _am.play_sfx("click")
 	character_info_panel.show_for(chara)
@@ -468,6 +485,10 @@ func _process(delta):
 
 func _input(event: InputEvent):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		if _cell_targeting:
+			_try_select_cell()
+			get_viewport().set_input_as_handled()
+			return
 		if is_targeting:
 			_try_select_target(event.position)
 			get_viewport().set_input_as_handled()
@@ -493,7 +514,7 @@ func _input(event: InputEvent):
 
 func _unhandled_input(event: InputEvent):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
-		if is_targeting:
+		if _cell_targeting or is_targeting:
 			cancel_targeting()
 			get_viewport().set_input_as_handled()
 		elif is_move_mode:
@@ -508,6 +529,25 @@ func _unhandled_input(event: InputEvent):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_try_select_target(event.position)
 		get_viewport().set_input_as_handled()
+
+func _try_select_cell():
+	if not selected_character or not _pending_skill:
+		cancel_targeting()
+		return
+	var mouse_pos = get_global_mouse_position()
+	var local_pos = ground_layer.to_local(mouse_pos)
+	var cell = ground_layer.local_to_map(local_pos)
+	if ground_layer.get_cell_source_id(cell) == -1:
+		show_toast("无效目标位置")
+		return
+	# 创建临时标记节点传递格子坐标
+	var marker = Node2D.new()
+	Characters.add_child(marker)
+	marker.global_position = ground_layer.to_global(ground_layer.map_to_local(cell))
+	selected_character.use_active_skill(marker)
+	marker.queue_free()
+	_active_skill_post_exec(_pending_skill)
+	cancel_targeting()
 
 func _try_select_target(_pos: Vector2):
 	var space_state = get_world_2d().direct_space_state
@@ -578,7 +618,7 @@ func on_card_played(card_data: CardData):
 func highlight_targets(card_data: CardData):
 	highlight_layer.clear()
 	match card_data.target_type:
-		CardData.TargetType.ALLY_SINGLE, CardData.TargetType.ALLY_ALL:
+		CardData.TargetType.ALLY_SINGLE, CardData.TargetType.ALLY_ALL, CardData.TargetType.SELF:
 			var allies = _get_my_characters()
 			for c in allies:
 				if c.hp > 0:
@@ -592,11 +632,6 @@ func highlight_targets(card_data: CardData):
 					var cell = _get_character_cell(c)
 					if cell != null:
 						highlight_layer.set_cell(cell, 0, Vector2i.ZERO)
-		CardData.TargetType.SELF:
-			if selected_character and selected_character.hp > 0:
-				var cell = _get_character_cell(selected_character)
-				if cell != null:
-					highlight_layer.set_cell(cell, 0, Vector2i.ZERO)
 
 func on_card_dropped(card_data: CardData) -> bool:
 	on_card_played(card_data)
@@ -626,9 +661,7 @@ func _is_ally(chara: CharacterBody2D) -> bool:
 
 func _is_valid_target(target_type: int, is_ally: bool, hit: Node = null) -> bool:
 	match target_type:
-		CardData.TargetType.SELF:
-			return hit != null and hit == selected_character
-		CardData.TargetType.ALLY_SINGLE, CardData.TargetType.ALLY_ALL:
+		CardData.TargetType.SELF, CardData.TargetType.ALLY_SINGLE, CardData.TargetType.ALLY_ALL:
 			return is_ally
 		CardData.TargetType.ENEMY_SINGLE, CardData.TargetType.ENEMY_ALL:
 			return not is_ally
@@ -644,10 +677,11 @@ func _update_skill_button():
 func cancel_targeting():
 	pending_card_data = null
 	is_targeting = false
+	_cell_targeting = false
+	_pending_skill = null
 	highlight_layer.clear()
 	_clear_skill_overlays()
 	_update_skill_button()
-	# 恢复攻击范围高亮（仅当处于攻击模式且角色仍有行动次数时）
 	if selected_character and is_attack_mode and selected_character.get_current_phase() == "Active" and not GlobalGameData.character_attack_used.get(selected_character.name, false):
 		selected_character.show_attack_range()
 
@@ -656,10 +690,6 @@ func _on_target_selected(target: Node):
 		return
 	if pending_card_data:
 		var card_data = pending_card_data
-		if card_data.target_type == CardData.TargetType.SELF and target != selected_character:
-			show_toast("该卡牌只能对自己使用")
-			cancel_targeting()
-			return
 		if not _is_valid_target(card_data.target_type, _is_ally(target), target):
 			show_toast("目标选择无效")
 			cancel_targeting()
@@ -705,6 +735,8 @@ func _execute_play_card(player_id: int, card_id: String, target_path: String):
 		energy_system.set_energy(player_id, energy_system.get_energy(player_id) + card_data.cost)
 		return
 
+	current_card_player_id = player_id
+
 	var target: Node = null
 	if target_path and not target_path.is_empty():
 		target = get_node_or_null(target_path)
@@ -718,6 +750,13 @@ func _execute_play_card(player_id: int, card_id: String, target_path: String):
 	GlobalGameData.battle_stats[stat_key] += 1
 
 	CardEffect.execute(card_data, target, self)
+
+	current_card_player_id = -1
+
+	# 出牌计数 & あんパン被动
+	GlobalGameData.cards_played_this_turn += 1
+	_check_anpan_passive(player_id)
+
 	var hand = deck_manager.get_hand(player_id)
 	var energy = energy_system.get_energy(player_id)
 	if multiplayer.has_multiplayer_peer():
@@ -758,7 +797,6 @@ func _on_skill_used(skill: BaseSkill, target_type: int):
 		return
 	_cancel_move_mode()
 	_cancel_attack_mode()
-	# 隐藏攻击范围高亮（如果存在）
 	if selected_character.has_method("hide_attack_range"):
 		selected_character.hide_attack_range()
 	match target_type:
@@ -766,15 +804,19 @@ func _on_skill_used(skill: BaseSkill, target_type: int):
 			selected_character.use_active_skill(selected_character)
 			_active_skill_post_exec(skill)
 			_update_skill_button()
-		BaseSkill.SkillTarget.ALLY_SINGLE:
+		BaseSkill.SkillTarget.ALLY_SINGLE, BaseSkill.SkillTarget.ENEMY_SINGLE:
 			pending_card_data = null
 			is_targeting = true
+			_pending_skill = null
 			highlight_skill_targets()
 			_update_skill_button()
-		BaseSkill.SkillTarget.ENEMY_SINGLE:
+		BaseSkill.SkillTarget.CELL:
 			pending_card_data = null
-			is_targeting = true
-			highlight_skill_targets()
+			is_targeting = false
+			_cell_targeting = true
+			_pending_skill = skill
+			highlight_layer.clear()
+			show_toast("点击地图上的格子释放技能", 2.0)
 			_update_skill_button()
 
 func _active_skill_post_exec(skill: BaseSkill):
@@ -788,13 +830,18 @@ func _active_skill_post_exec(skill: BaseSkill):
 			GlobalGameData.character_attack_used[selected_character.name] = true
 			GlobalGameData.character_attack_used_num += 1
 	skill_panel._update_cooldown()
-	var main = get_tree().current_scene
 	if selected_character.has_method("hide_attack_range"):
 		selected_character.hide_attack_range()
 	show_toast("释放 [%s]" % skill.skill_name, 1.0)
 	check_attack()
 	_update_action_buttons(selected_character)
 	character_info_panel.refresh()
+	_update_player_panels()
+	var pid = 1 if GlobalGameData.is_host else 2
+	var hand = deck_manager.get_hand(pid) if deck_manager else []
+	_sync_hand(pid, hand)
+	var energy = energy_system.get_energy(pid) if energy_system else 0
+	_sync_energy(pid, energy)
 	cancel_targeting()
 
 func _make_hex_overlay(color: Color, r: float = 68.0) -> Polygon2D:
@@ -844,10 +891,23 @@ func highlight_skill_targets():
 func _update_player_energy():
 	_update_player_panels()
 
+func _check_anpan_passive(player_id: int):
+	if GlobalGameData.cards_played_this_turn <= 0 or GlobalGameData.cards_played_this_turn % 2 != 0:
+		return
+	var allies = GlobalGameData.host_characters if player_id == 1 else GlobalGameData.client_characters
+	for c in allies:
+		if c and c.character_name == "あんパン" and c.hp > 0:
+			deck_manager.draw_cards(player_id, 1)
+			var cur_energy = energy_system.get_energy(player_id)
+			energy_system.set_energy(player_id, cur_energy + 1)
+			print("[Passive] あんパン [面包大家族] 触发: 抽1张 + 回1能量")
+			break
+
 func draw_extra_card(chara: Node, count: int = 1):
 	if not multiplayer.is_server():
 		return
-	var pid = 1 if chara in GlobalGameData.host_characters else 2
+	var pid = get_current_player_id()
+	pid = max(1, pid)
 	deck_manager.draw_cards(pid, count)
 
 func _get_my_characters() -> Array:
@@ -973,6 +1033,7 @@ func sync_all_card_state():
 
 @rpc("any_peer", "call_local", "reliable")
 func reset_character_state() -> void:
+	GlobalGameData.cards_played_this_turn = 0
 	GlobalGameData.character_move_used_num = 0
 	GlobalGameData.character_move_used.clear()
 	GlobalGameData.character_attack_used_num = 0
@@ -984,6 +1045,26 @@ func reset_character_state() -> void:
 			c._extra_attacks = 0
 		if "active_skill" in c and c.active_skill and c.active_skill.current_cooldown > 0:
 			c.active_skill.current_cooldown -= 1
+
+	# 凯瑞根死亡：给存活友方额外行动 + 传承
+	if GlobalGameData.karrigan_death_flag:
+		GlobalGameData.karrigan_death_flag = false
+		for c in characters:
+			if c.name.begins_with("Host") != GlobalGameData.is_host:
+				continue
+			if c.hp <= 0:
+				continue
+			if c.character_name == "karrigan":
+				continue
+			if "_extra_attacks" in c:
+				c._extra_attacks += 1
+			if buff_manager and buff_manager.has_method("apply_buff"):
+				buff_manager.apply_buff(c, "legacy", 50, 2, c)
+				print("[Passive] karrigan 死亡触发：%s 获得额外行动 + 传承" % c.character_name)
+
+	# 烟雾递减
+	if field_effect_manager and field_effect_manager.has_method("tick_smoke"):
+		field_effect_manager.tick_smoke()
 
 @rpc("any_peer", "call_local", "reliable")
 func advance_turn_phase():
@@ -1154,10 +1235,10 @@ func _update_passive_panel(chara):
 		return
 	if "passive_skill" in chara and chara.passive_skill and character_info_panel.visible:
 		var ps = chara.passive_skill
-		passive_skill_panel.get_node("VBoxContainer/SkillNameLabel").text = "天赋·%s" % ps.skill_name
-		passive_skill_panel.get_node("VBoxContainer/SkillDescLabel").text = ps.description
-		passive_skill_panel.get_node("VBoxContainer/CooldownLabel").hide()
-		passive_skill_panel.get_node("VBoxContainer/UseButton").hide()
+		passive_skill_panel.skill_name_label.text = "天赋·%s" % ps.skill_name
+		passive_skill_panel.skill_desc_label.text = ps.description
+		passive_skill_panel.cooldown_label.hide()
+		passive_skill_panel.use_button.hide()
 		passive_skill_panel.show()
 	else:
 		passive_skill_panel.hide()

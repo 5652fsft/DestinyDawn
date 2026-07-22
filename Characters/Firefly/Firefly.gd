@@ -27,6 +27,7 @@ func _ready():
 	active_skill.target_type = BaseSkill.SkillTarget.ENEMY_SINGLE
 	active_skill.is_passive = false
 
+@rpc("any_peer", "call_local", "reliable")
 func take_damage(damage: int):
 	if damage > 0 and not _burn_armor_used:
 		_burn_armor_used = true

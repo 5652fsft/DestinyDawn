@@ -28,6 +28,12 @@ func shake(intensity: float = 5.0, duration: float = 0.15):
 
 func _input(event):
 	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN or event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			var ctrl = get_viewport().gui_get_hovered_control()
+			while ctrl:
+				if ctrl is ScrollContainer:
+					return
+				ctrl = ctrl.get_parent()
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN and scaleNum > 0.4:
 			scaleNum -= 0.05
 			startMousePosition = Vector2.ZERO

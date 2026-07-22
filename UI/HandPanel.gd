@@ -76,19 +76,6 @@ func _z(i: int, n: int) -> int:
 	var center = float(n - 1) * 0.5
 	return int(n - abs(float(i) - center))
 
-func _justify():
-	var n = card_uis.size()
-	if n == 0:
-		return
-	for i in range(n):
-		var card = card_uis[i]
-		if not is_instance_valid(card):
-			continue
-		var p = _compute(i, n)
-		card.position = Vector2(p.x, p.y)
-		card.rotation = p.r
-		card.z_index = _z(i, n)
-
 func _layout_cards():
 	var n = card_uis.size()
 	if n == 0:

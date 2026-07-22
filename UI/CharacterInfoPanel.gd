@@ -12,10 +12,12 @@ const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 @onready var buff_header = $ScrollContainer/VBox/BuffHeader
 @onready var buff_label = $ScrollContainer/VBox/BuffLabel
 @onready var buffs_container = $ScrollContainer/VBox/BuffsContainer
+@onready var scroll_container = $ScrollContainer
 
 var current_character: Node = null
 
 func _ready():
+	mouse_filter = Control.MOUSE_FILTER_STOP
 	var bg = StyleBoxFlat.new()
 	bg.bg_color = Color(0.08, 0.08, 0.15, 0.85)
 	add_theme_stylebox_override("panel", bg)
@@ -31,6 +33,9 @@ func show_for(character: Node):
 	current_character = character
 	if current_character.has_signal("buffs_changed"):
 		current_character.buffs_changed.connect(refresh)
+	var main_node = get_tree().current_scene
+	var viewing_enemy = main_node.is_viewing_enemy if main_node else false
+	scroll_container.offset_bottom = 500.0 if viewing_enemy else 343.0
 	refresh()
 	show()
 
@@ -148,6 +153,16 @@ func _buff_desc(key: String, entry: Dictionary) -> String:
 			return "[color=#668066][魔力充盈][/color] 攻击力+%d%%（%d回合）" % [val, dur]
 		"bloodthirst":
 			return "[color=#805959][嗜血成性][/color] 攻击力+%d%%（%d回合）" % [val, dur]
+		"legacy":
+			return "[color=#665588][传承][/color] 攻击力+%d%%（%d回合）" % [val, dur]
+		"ascend":
+			return "[color=#668c59][攀升][/color] 受到伤害-%d%%（%d回合）" % [val, dur]
+		"hot_burn":
+			return "[color=#996633][高温烫嘴][/color] 受伤加深+%d%%（%d回合）" % [val, dur]
+		"soften":
+			return "[color=#994d4d][松软][/color] 受伤加深+%d%%（%d回合）" % [val, dur]
+		"rope":
+			return "[color=#8cbf8c][拧绳][/color] karrigan 给客人的护身符（持续 %d 回合）" % [dur]
 	return "%s %d（%d回合）" % [key, val, dur]
 
 func _on_CloseButton_pressed():

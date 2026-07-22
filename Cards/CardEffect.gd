@@ -37,6 +37,8 @@ static func execute(card: CardData, target: Node, main: Node) -> bool:
 				return _execute_frostbite(card, target)
 			return _execute_debuff_move(card, target)
 		CardData.EffectType.TELEPORT:
+			if card.id == "card_shadowstep":
+				return _execute_shadowstep_new(card, target, main)
 			return _execute_teleport(card, target, main)
 		CardData.EffectType.SWAP:
 			return _execute_swap(card, target, main)
@@ -55,7 +57,7 @@ static func execute(card: CardData, target: Node, main: Node) -> bool:
 		CardData.EffectType.AOE_HEAL:
 			return _execute_aoe_heal(card, target, main)
 		CardData.EffectType.CHAIN_DAMAGE:
-			return _execute_chain_damage(card, target, main)
+			return _execute_chain_lightning_new(card, target, main)
 		CardData.EffectType.DAMAGE_OVER_TIME:
 			if card.id == "card_poison_blade":
 				return _execute_poison_blade(card, target)
@@ -253,6 +255,61 @@ static func _execute_teleport(card: CardData, target: Node, main: Node) -> bool:
 		var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
+static func _execute_shadowstep_new(card: CardData, target: Node, main: Node) -> bool:
+	if not target or not main:
+		return false
+	if not target.has_method("get_current_cell") or not "grid_layer" in target:
+		return false
+	var gl = target.grid_layer
+	if not gl:
+		return false
+	var target_cell = target.get_current_cell()
+	var is_target_host = target.name.begins_with("Host")
+	var furthest_enemy = null
+	var furthest_dist = -1.0
+	for c in main.get_tree().get_nodes_in_group("characters"):
+		if c == target or c.hp <= 0:
+			continue
+		if c.name.begins_with("Host") == is_target_host:
+			continue
+		var e_cell = c.get_current_cell()
+		if e_cell == Vector2i(-1, -1):
+			continue
+		var d = target_cell.distance_squared_to(e_cell)
+		if d > furthest_dist:
+			furthest_dist = d
+			furthest_enemy = c
+	if not furthest_enemy:
+		return false
+	var enemy_cell = furthest_enemy.get_current_cell()
+	var neighbors = [
+		Vector2i(1,0), Vector2i(1,-1), Vector2i(0,-1),
+		Vector2i(-1,0), Vector2i(-1,1), Vector2i(0,1)
+	]
+	var best_cell = null
+	for d in neighbors:
+		var pick = enemy_cell + d
+		if gl.get_cell_source_id(pick) != -1:
+			if main.has_method("is_cell_occupied") and not main.is_cell_occupied(pick, target):
+				best_cell = pick
+				break
+	if best_cell == null:
+		return false
+	var world_pos = gl.to_global(gl.map_to_local(best_cell))
+	target.global_position = world_pos
+	target.target_world = world_pos
+	target.velocity = Vector2.ZERO
+	if furthest_enemy.has_method("take_damage"):
+		_rpc_take_damage(furthest_enemy, card.effect_value)
+	if target.has_method("rpc"):
+		target.rpc("_play_vfx_preset", "entrance")
+	if furthest_enemy.has_method("rpc"):
+		furthest_enemy.rpc("_play_vfx_preset", "hit")
+	var _am = Engine.get_singleton("AudioManager")
+	if _am: _am.play_sfx("attack_magic", furthest_enemy)
+	print("[Card] 暗影步：%s 瞬移至 %s 旁，造成 %d 点伤害" % [target.name, furthest_enemy.name, card.effect_value])
+	return true
+
 static func _execute_swap(card: CardData, target: Node, main: Node) -> bool:
 	var caster = main.selected_character if main else null
 	if not caster or not target or not caster.has_method("get_current_cell"):
@@ -286,16 +343,15 @@ static func _execute_siphon(card: CardData, target: Node, main: Node) -> bool:
 	return true
 
 static func _execute_overload(card: CardData, target: Node, main: Node) -> bool:
-	if not main:
+	if not main or not target:
 		return false
-	var caster = main.selected_character if main else null
 	var energy_node = main.get_node_or_null("EnergySystem")
 	if energy_node and energy_node.has_method("set_energy"):
-		var pid = 1 if caster and _is_host_side(caster) else 2
+		var pid = 1 if _is_host_side(target) else 2
 		var cur = energy_node.get_energy(pid)
 		energy_node.set_energy(pid, cur + 2)
-	if caster and caster.has_method("take_damage"):
-		_rpc_take_damage(caster, 5)
+	if target and target.has_method("take_damage"):
+		_rpc_take_damage(target, 5)
 	return true
 
 static func _execute_aoe_damage(card: CardData, target: Node, main: Node) -> bool:
@@ -329,37 +385,46 @@ static func _execute_aoe_heal(card: CardData, target: Node, main: Node) -> bool:
 			_rpc_take_damage(t, -val)
 	return true
 
-static func _execute_chain_damage(card: CardData, primary: Node, main: Node) -> bool:
+static func _execute_chain_lightning_new(card: CardData, primary: Node, main: Node) -> bool:
 	if not primary or not main:
 		return false
-	var caster = main.selected_character if main else null
-	if not caster:
-		return false
 	_rpc_take_damage(primary, card.effect_value)
-	var is_caster_host = _is_host_side(caster)
-	var hit: Array = [primary]
-	var remaining = 3
-	var current = primary
-	while remaining > 0:
-		var nearest = null
-		var nearest_dist = 99999.0
-		for c in main.get_tree().get_nodes_in_group("characters"):
-			if c in hit:
-				continue
-			if _is_host_side(c) == is_caster_host:
-				continue
-			var d = current.global_position.distance_to(c.global_position)
-			if d < nearest_dist and d <= 200.0:
-				nearest = c
-				nearest_dist = d
-		if not nearest:
-			break
-		var dmg = card.effect_value - (3 - remaining) * 5
-		_rpc_take_damage(nearest, max(1, dmg))
-		hit.append(nearest)
-		current = nearest
-		remaining -= 1
+	var is_primary_host = _is_host_side(primary)
+	var primary_cell = primary.get_current_cell() if primary.has_method("get_current_cell") else Vector2i(-1, -1)
+	for c in main.get_tree().get_nodes_in_group("characters"):
+		if c == primary or c.hp <= 0:
+			continue
+		if _is_host_side(c) != is_primary_host:
+			continue
+		if not c.has_method("get_current_cell"):
+			continue
+		var c_cell = c.get_current_cell()
+		if c_cell == Vector2i(-1, -1) or primary_cell == Vector2i(-1, -1):
+			continue
+		var dist = _hex_distance(primary_cell, c_cell)
+		if dist == 1:
+			_rpc_take_damage(c, 10)
+		elif dist == 2:
+			_rpc_take_damage(c, 5)
+	if primary.has_method("rpc"):
+		primary.rpc("_play_vfx_preset", "explosion")
+	var _am = Engine.get_singleton("AudioManager")
+	if _am: _am.play_sfx("attack_magic", primary)
+	print("[Card] 闪电链：%s 主目标 %d 点伤害，溅射周围敌人" % [primary.name, card.effect_value])
 	return true
+
+static func _hex_distance(a: Vector2i, b: Vector2i) -> int:
+	var ac = _offset_to_cube(a)
+	var bc = _offset_to_cube(b)
+	return max(abs(ac.x - bc.x), abs(ac.y - bc.y), abs(ac.z - bc.z))
+
+static func _offset_to_cube(cell: Vector2i) -> Vector3i:
+	var col = cell.x
+	var row = cell.y
+	var x = col - (row - (row & 1)) / 2
+	var z = row
+	var y = -x - z
+	return Vector3i(x, y, z)
 
 static func _execute_linear_aoe(card: CardData, target: Node, main: Node) -> bool:
 	var caster = main.selected_character if main else null
