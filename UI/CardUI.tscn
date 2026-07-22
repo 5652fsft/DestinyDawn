@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dhc4pen0f81bp"]
 
-[ext_resource type="Script" uid="uid://c42ter5ipdo12" path="res://UI/CardUI.gd" id="1_5dp7v"]
+[ext_resource type="Script" path="res://UI/CardUI.gd" id="1_5dp7v"]
 [ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2_spd3y"]
 
 [node name="CardUI" type="Panel" unique_id=1614797370]

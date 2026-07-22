@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cqddclhiufl2h"]
 
-[ext_resource type="Script" uid="uid://c42ter5ipdo12" path="res://UI/SurrenderDialog.gd" id="1"]
+[ext_resource type="Script" path="res://UI/SurrenderDialog.gd" id="1"]
 [ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2"]
 
 [node name="SurrenderDialog" type="Panel" unique_id=1914785884]
