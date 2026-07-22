@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dcvk0wgi4glyl" path="res://UI/SkillPanel.gd" id="1_af7tq"]
 [ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2_af7tq"]
+[ext_resource type="Script" path="res://UI/ScrollAcceptRichTextLabel.gd" id="3_af7tq"]
 
 [node name="SkillPanel" type="Panel" unique_id=1799763723]
 visible = false
@@ -25,6 +26,7 @@ theme_override_font_sizes/font_size = 18
 text = "技能名"
 
 [node name="SkillDescLabel" type="RichTextLabel" parent="VBoxContainer" unique_id=1803795637]
+script = ExtResource("3_af7tq")
 layout_mode = 2
 theme_override_fonts/normal_font = ExtResource("2_af7tq")
 theme_override_font_sizes/normal_font_size = 14
