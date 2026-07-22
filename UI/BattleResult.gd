@@ -43,7 +43,7 @@ func _ready():
 
 func show_result(is_winner: bool, stats: Dictionary):
 	# 自动隐藏手牌（与 F 键相同机制）
-	var main = get_tree().current_scene
+	var main = get_node("/root/Main")
 	if main and main.has_method("_hide_hand"):
 		main._hide_hand()
 
