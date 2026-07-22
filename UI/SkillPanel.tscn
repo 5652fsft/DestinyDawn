@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://b4hqxvb38t0ya"]
 
-[ext_resource type="Script" path="res://UI/SkillPanel.gd" id="1_af7tq"]
+[ext_resource type="Script" uid="uid://dcvk0wgi4glyl" path="res://UI/SkillPanel.gd" id="1_af7tq"]
 [ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2_af7tq"]
 
-[node name="SkillPanel" type="Panel"]
+[node name="SkillPanel" type="Panel" unique_id=1799763723]
 visible = false
 offset_left = 20.0
 offset_top = 480.0
@@ -11,33 +11,33 @@ offset_right = 340.0
 offset_bottom = 660.0
 script = ExtResource("1_af7tq")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=493102801]
 layout_mode = 0
 offset_left = 12.0
 offset_top = 12.0
 offset_right = 308.0
 offset_bottom = 168.0
 
-[node name="SkillNameLabel" type="Label" parent="VBoxContainer"]
+[node name="SkillNameLabel" type="Label" parent="VBoxContainer" unique_id=1245895864]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_af7tq")
 theme_override_font_sizes/font_size = 18
 text = "技能名"
 
-[node name="SkillDescLabel" type="Label" parent="VBoxContainer"]
+[node name="SkillDescLabel" type="Label" parent="VBoxContainer" unique_id=1803795637]
 layout_mode = 2
-autowrap_mode = 2
 theme_override_fonts/font = ExtResource("2_af7tq")
 theme_override_font_sizes/font_size = 14
 text = "技能描述"
+autowrap_mode = 2
 
-[node name="CooldownLabel" type="Label" parent="VBoxContainer"]
+[node name="CooldownLabel" type="Label" parent="VBoxContainer" unique_id=1066417046]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_af7tq")
 theme_override_font_sizes/font_size = 16
 text = "冷却: 0 回合"
 
-[node name="UseButton" type="Button" parent="VBoxContainer"]
+[node name="UseButton" type="Button" parent="VBoxContainer" unique_id=1809258904]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_af7tq")
 theme_override_font_sizes/font_size = 18

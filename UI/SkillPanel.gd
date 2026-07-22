@@ -57,13 +57,13 @@ func _wrap_desc_in_scroll():
 	var sc = ScrollContainer.new()
 	sc.name = "SkillDescScroll"
 	sc.custom_minimum_size = Vector2(0, 50)
-	sc.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	vbox.remove_child(skill_desc_label)
 	vbox.add_child(sc)
 	vbox.move_child(sc, idx)
 	sc.add_child(skill_desc_label)
 	skill_desc_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	skill_desc_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	skill_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 
 func set_targeting_mode(active: bool):
 	_targeting = active
