@@ -54,6 +54,12 @@ func _play_turn_transition():
 	var is_my = _is_my_turn()
 	transition_label.text = "你的回合" if is_my else "敌方回合"
 
+	# 过渡期间隐藏手牌，结束后恢复
+	var hand_panel = main.get_node_or_null("UI/HandPanel")
+	var had_hand = hand_panel and hand_panel.visible and not ("_hand_hidden" in main and main._hand_hidden)
+	if had_hand:
+		hand_panel.hide()
+
 	# 初始位置：屏幕右侧外
 	transition_mask.position.x = 1280
 	transition_label.modulate.a = 0.0
@@ -74,6 +80,9 @@ func _play_turn_transition():
 	tw.tween_callback(func():
 		transition.hide()
 		transition_mask.position.x = 1280
+		# 恢复手牌（仅当用户未主动用 F 隐藏）
+		if hand_panel and had_hand and not ("_hand_hidden" in main and main._hand_hidden):
+			hand_panel.show()
 	)
 
 func _on_EndTurnButton_pressed():
