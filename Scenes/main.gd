@@ -1237,6 +1237,7 @@ func _update_passive_panel(chara):
 		var ps = chara.passive_skill
 		passive_skill_panel.skill_name_label.text = "天赋·%s" % ps.skill_name
 		passive_skill_panel.skill_desc_label.text = ps.description
+		passive_skill_panel.skill_desc_label.reset_size()
 		passive_skill_panel.cooldown_label.hide()
 		passive_skill_panel.use_button.hide()
 		passive_skill_panel.show()
