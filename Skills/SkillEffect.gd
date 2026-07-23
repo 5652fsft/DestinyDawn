@@ -213,12 +213,12 @@ static func _anpan_active(character: Node, target: Node, main: Node) -> bool:
 	if not dm or not es:
 		return false
 	var pid = 1 if character in GlobalGameData.host_characters else 2
-	# 能量检查（需 6 点）
-	if es.get_energy(pid) < 6:
-		print("[Skill] あんパン [极速高温烘焙] 能量不足（需 6），当前 %d" % es.get_energy(pid))
-		var main_node = main
-		if main_node and main_node.has_method("show_toast"):
-			main_node.show_toast("能量不足！需要 6 点能量")
+	# 能量检查
+	var reason = get_skill_block_reason(character, main)
+	if reason:
+		print("[Skill] あんパン [极速高温烘焙] %s" % reason)
+		if main and main.has_method("show_toast"):
+			main.show_toast(reason)
 		return false
 	es.spend_energy(pid, 6)
 	# 抽牌至上限
@@ -290,6 +290,20 @@ static func _karrigan_active(character: Node, target: Node, main: Node) -> bool:
 	print("[Skill] karrigan [狂野·纵横烟中] 在 %s 周围 3 格展开烟雾" % character.character_name)
 	character.play_vfx_preset_safe("buff")
 	return true
+
+# 查询技能是否被阻挡（能量不足等），返回 "" 表示可用，否则返回原因文本
+static func get_skill_block_reason(character: Node, main: Node) -> String:
+	if not character or not main:
+		return ""
+	var name = character.character_name if "character_name" in character else ""
+	match name:
+		"あんパン":
+			var es = main.get_node_or_null("EnergySystem")
+			if es:
+				var pid = 1 if character in GlobalGameData.host_characters else 2
+				if es.get_energy(pid) < 6:
+					return "能量不足（需 6）"
+	return ""
 
 static func _is_valid_target_for_skill(character: Node, skill: BaseSkill, target: Node) -> bool:
 	if not target or not character:
