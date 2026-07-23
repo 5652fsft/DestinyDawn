@@ -88,7 +88,7 @@ offset_right = 1240.0
 offset_bottom = 640.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 18
-text = "✔ 保存编队"
+text = "保存编队"
 
 [connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="SaveButton" to="." method="_on_save_pressed"]

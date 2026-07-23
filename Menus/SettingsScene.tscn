@@ -51,6 +51,7 @@ theme_override_font_sizes/font_size = 20
 text = "总音量"
 
 [node name="MasterSlider" type="HSlider" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 min_value = 0.0
 max_value = 1.0
@@ -64,6 +65,7 @@ theme_override_font_sizes/font_size = 20
 text = "音乐音量"
 
 [node name="BGMSlider" type="HSlider" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 min_value = 0.0
 max_value = 1.0
@@ -77,6 +79,7 @@ theme_override_font_sizes/font_size = 20
 text = "音效音量"
 
 [node name="SFXSlider" type="HSlider" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 min_value = 0.0
 max_value = 1.0

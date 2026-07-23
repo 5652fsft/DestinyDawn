@@ -19,9 +19,9 @@ const PORT_RANGE = 10
 @onready var lobby_backdrop = $LobbyBackdrop
 @onready var lobby_panel = $LobbyPanel
 @onready var room_code_label = $LobbyPanel/VBox/RoomCodeLabel
+@onready var public_ip_label = $LobbyPanel/VBox/PublicIPLabel
 @onready var local_ip_label = $LobbyPanel/VBox/LocalIPLabel
 @onready var upnp_status_label = $LobbyPanel/VBox/UpnpStatusLabel
-@onready var wait_status_label = $LobbyPanel/VBox/WaitStatusLabel
 @onready var copy_button = $LobbyPanel/VBox/LobbyButtonRow/CopyButton
 @onready var cancel_host_button = $LobbyPanel/VBox/LobbyButtonRow/CancelHostButton
 
@@ -31,7 +31,7 @@ const PORT_RANGE = 10
 @onready var join_status_label = $JoinPanel/VBox/JoinStatusLabel
 @onready var connect_button = $JoinPanel/VBox/JoinButtonRow/ConnectButton
 @onready var cancel_join_button = $JoinPanel/VBox/JoinButtonRow/CancelJoinButton
-@onready var how_to_connect = $JoinPanel/VBox/HowToConnect
+
 
 
 func _ready():
@@ -71,7 +71,7 @@ func _ready():
 	connect_button.pressed.connect(_on_connect_to_room)
 	cancel_join_button.pressed.connect(_on_cancel_join)
 	room_code_input.text_submitted.connect(_on_connect_to_room)
-	how_to_connect.pressed.connect(_on_how_to_connect)
+
 
 
 func _apply_glass_style():
@@ -87,11 +87,20 @@ func _apply_glass_style():
 	style_gray.corner_radius_top_right = 10
 	style_gray.corner_radius_bottom_left = 10
 	style_gray.corner_radius_bottom_right = 10
-	$ButtonPanel/TopRow/TeamButton.add_theme_stylebox_override("normal", style_gray)
-	$ButtonPanel/TopRow/DeckButton.add_theme_stylebox_override("normal", style_gray)
+	# 灰底毛玻璃按钮（全部状态）
+	var style_gray_pressed = style_gray.duplicate()
+	style_gray_pressed.bg_color = Color(0.35, 0.35, 0.38, 0.6)
+	style_gray_pressed.border_color = Color(0.5, 0.5, 0.55, 0.5)
+	var style_gray_hover = style_gray.duplicate()
+	style_gray_hover.bg_color = Color(0.45, 0.45, 0.48, 0.55)
+	for btn in [$ButtonPanel/TopRow/TeamButton, $ButtonPanel/TopRow/DeckButton]:
+		for state in ["normal", "focus", "disabled"]:
+			btn.add_theme_stylebox_override(state, style_gray)
+		btn.add_theme_stylebox_override("hover", style_gray_hover)
+		btn.add_theme_stylebox_override("pressed", style_gray_pressed)
 	$ButtonPanel/OnlineFrame.add_theme_stylebox_override("panel", style_gray)
 
-	# 蓝底毛玻璃（单人/联机按钮）
+	# 蓝底毛玻璃按钮（全部状态）
 	var style_blue = StyleBoxFlat.new()
 	style_blue.bg_color = Color(0.32, 0.4, 0.52, 0.45)
 	style_blue.border_width_top = 1
@@ -103,23 +112,18 @@ func _apply_glass_style():
 	style_blue.corner_radius_top_right = 10
 	style_blue.corner_radius_bottom_left = 10
 	style_blue.corner_radius_bottom_right = 10
-	$ButtonPanel/SoloButton.add_theme_stylebox_override("normal", style_blue)
-	$ButtonPanel/OnlineFrame/OnlineRow/HostButton.add_theme_stylebox_override("normal", style_blue)
-	$ButtonPanel/OnlineFrame/OnlineRow/JoinButton.add_theme_stylebox_override("normal", style_blue)
+	var style_blue_hover = style_blue.duplicate()
+	style_blue_hover.bg_color = Color(0.38, 0.46, 0.58, 0.55)
+	var style_blue_pressed = style_blue.duplicate()
+	style_blue_pressed.bg_color = Color(0.28, 0.36, 0.48, 0.55)
+	style_blue_pressed.border_color = Color(0.6, 0.65, 0.8, 0.5)
+	for btn in [$ButtonPanel/SoloButton, $ButtonPanel/OnlineFrame/OnlineRow/HostButton, $ButtonPanel/OnlineFrame/OnlineRow/JoinButton]:
+		for state in ["normal", "focus", "disabled"]:
+			btn.add_theme_stylebox_override(state, style_blue)
+		btn.add_theme_stylebox_override("hover", style_blue_hover)
+		btn.add_theme_stylebox_override("pressed", style_blue_pressed)
 
-	# 悬停效果
-	var style_hover_gray = style_gray.duplicate()
-	style_hover_gray.bg_color = Color(0.45, 0.45, 0.48, 0.55)
-	$ButtonPanel/TopRow/TeamButton.add_theme_stylebox_override("hover", style_hover_gray)
-	$ButtonPanel/TopRow/DeckButton.add_theme_stylebox_override("hover", style_hover_gray)
-
-	var style_hover_blue = style_blue.duplicate()
-	style_hover_blue.bg_color = Color(0.38, 0.46, 0.58, 0.55)
-	$ButtonPanel/SoloButton.add_theme_stylebox_override("hover", style_hover_blue)
-	$ButtonPanel/OnlineFrame/OnlineRow/HostButton.add_theme_stylebox_override("hover", style_hover_blue)
-	$ButtonPanel/OnlineFrame/OnlineRow/JoinButton.add_theme_stylebox_override("hover", style_hover_blue)
-
-	# 左上角小按钮样式
+	# 左上角小按钮样式（全部状态）
 	var style_icon = StyleBoxFlat.new()
 	style_icon.bg_color = Color(0.15, 0.15, 0.18, 0.6)
 	style_icon.border_width_top = 1
@@ -131,36 +135,46 @@ func _apply_glass_style():
 	style_icon.corner_radius_top_right = 6
 	style_icon.corner_radius_bottom_left = 6
 	style_icon.corner_radius_bottom_right = 6
-	$SettingsButton.add_theme_stylebox_override("normal", style_icon)
-	$GuideButton.add_theme_stylebox_override("normal", style_icon)
-
 	var style_icon_hover = style_icon.duplicate()
 	style_icon_hover.bg_color = Color(0.2, 0.2, 0.25, 0.7)
-	$SettingsButton.add_theme_stylebox_override("hover", style_icon_hover)
-	$GuideButton.add_theme_stylebox_override("hover", style_icon_hover)
+	var style_icon_pressed = style_icon.duplicate()
+	style_icon_pressed.bg_color = Color(0.12, 0.12, 0.15, 0.7)
+	style_icon_pressed.border_color = Color(0.4, 0.4, 0.45, 0.5)
+	for btn in [$SettingsButton, $GuideButton]:
+		for state in ["normal", "focus", "disabled"]:
+			btn.add_theme_stylebox_override(state, style_icon)
+		btn.add_theme_stylebox_override("hover", style_icon_hover)
+		btn.add_theme_stylebox_override("pressed", style_icon_pressed)
 
-	# 联机覆盖层面板样式
-	var style_overlay = StyleBoxFlat.new()
-	style_overlay.bg_color = Color(0.12, 0.12, 0.16, 0.95)
-	style_overlay.border_width_top = 2
-	style_overlay.border_width_bottom = 1
-	style_overlay.border_width_left = 1
-	style_overlay.border_width_right = 1
-	style_overlay.border_color = Color(0.5, 0.55, 0.7, 0.5)
-	style_overlay.corner_radius_top_left = 14
-	style_overlay.corner_radius_top_right = 14
-	style_overlay.corner_radius_bottom_left = 14
-	style_overlay.corner_radius_bottom_right = 14
-	style_overlay.shadow_color = Color(0, 0, 0, 0.4)
-	style_overlay.shadow_size = 12
-	lobby_panel.add_theme_stylebox_override("panel", style_overlay)
-	join_panel.add_theme_stylebox_override("panel", style_overlay)
+	# 联机覆盖层面板样式（与主菜单一致毛玻璃）
+	var style_glass = style_gray.duplicate()
+	style_glass.bg_color = Color(0.4, 0.4, 0.43, 0.55)
+	lobby_panel.add_theme_stylebox_override("panel", style_glass)
+	join_panel.add_theme_stylebox_override("panel", style_glass)
 
-	# 联机面板按钮样式
+	# 联机面板按钮样式（浅蓝毛玻璃 + 左对齐 + 字体 + 左边距）
+	var font_btn = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
+	var style_btn_pad = style_blue.duplicate()
+	style_btn_pad.content_margin_left = 12
+	style_btn_pad.border_width_left = 0
+	var style_btn_hover_pad = style_blue_hover.duplicate()
+	style_btn_hover_pad.content_margin_left = 12
+	style_btn_hover_pad.border_width_left = 0
+	var style_btn_pressed_pad = style_blue_pressed.duplicate()
+	style_btn_pressed_pad.content_margin_left = 12
+	style_btn_pressed_pad.border_width_left = 0
 	for btn in [copy_button, cancel_host_button, connect_button, cancel_join_button]:
 		ButtonTheme.apply_menu(btn)
+		for state in ["normal", "focus", "disabled"]:
+			btn.add_theme_stylebox_override(state, style_btn_pad)
+		btn.add_theme_stylebox_override("hover", style_btn_hover_pad)
+		btn.add_theme_stylebox_override("pressed", style_btn_pressed_pad)
+		btn.add_theme_font_override("font", font_btn)
+		btn.add_theme_font_size_override("font_size", 18)
+		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 
-	# RoomCodeInput 字体
+	# RoomCodeInput 样式
+	ButtonTheme.apply_glass_edit(room_code_input)
 	var font_input = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 	room_code_input.add_theme_font_override("font", font_input)
 	room_code_input.add_theme_font_size_override("font_size", 16)
@@ -214,21 +228,21 @@ func _on_host_pressed():
 
 	_lobby_active = true
 	_show_lobby_ui(true)
-	_set_lobby_status("正在设置联机...", false)
 	room_code_label.text = "你的房间码：——"
+	public_ip_label.text = ""
 	local_ip_label.text = ""
 	upnp_status_label.text = ""
 
 	# 尝试可用端口
 	var port = _try_find_port()
 	if port == -1:
-		_set_lobby_status("❌ 端口不可用，请更换端口", false)
+		upnp_status_label.text = "❌ 端口不可用，请更换端口"
 		return
 	_server_port = port
 
 	var peer = ENetMultiplayerPeer.new()
 	if peer.create_server(_server_port) != OK:
-		_set_lobby_status("❌ 服务器创建失败", false)
+		upnp_status_label.text = "❌ 服务器创建失败"
 		return
 
 	multiplayer.multiplayer_peer = peer
@@ -395,28 +409,37 @@ func _update_lobby_ui():
 	var room_ip = _my_vpn_ip if not _my_vpn_ip.is_empty() else (_my_public_ip if not _my_public_ip.is_empty() else _my_local_ip)
 	room_code_label.text = "你的房间码：%s:%d" % [room_ip, _server_port]
 
-	# 备用地址
-	var extras = []
+	# 外网 IP（单独一行）
 	if _my_vpn_ip and not _my_public_ip.is_empty():
-		extras.append("外网 %s:%d" % [_my_public_ip, _server_port])
-	if _my_vpn_ip and _my_local_ip != "127.0.0.1":
-		extras.append("局域网 %s:%d" % [_my_local_ip, _server_port])
-	if _my_vpn_ip.is_empty() and not _my_public_ip.is_empty() and _my_local_ip != "127.0.0.1":
-		extras.append("局域网备用 %s:%d" % [_my_local_ip, _server_port])
-	local_ip_label.text = "  ".join(extras) if extras else ""
+		public_ip_label.text = "外网 %s:%d" % [_my_public_ip, _server_port]
+	elif _my_vpn_ip.is_empty() and not _my_public_ip.is_empty():
+		public_ip_label.text = "外网 %s:%d" % [_my_public_ip, _server_port]
+	else:
+		public_ip_label.text = ""
 
+	# 局域网 IP（单独一行）
+	if not _my_vpn_ip.is_empty() and _my_local_ip != "127.0.0.1":
+		local_ip_label.text = "局域网 %s:%d" % [_my_local_ip, _server_port]
+	elif _my_vpn_ip.is_empty() and not _my_public_ip.is_empty() and _my_local_ip != "127.0.0.1":
+		local_ip_label.text = "局域网备用 %s:%d" % [_my_local_ip, _server_port]
+	elif _my_vpn_ip.is_empty() and _my_public_ip.is_empty() and _my_local_ip != "127.0.0.1":
+		local_ip_label.text = "局域网 %s:%d" % [_my_local_ip, _server_port]
+	else:
+		local_ip_label.text = ""
+
+	# 状态提示
 	var has_pending_http = _http_request != null or not _pending_urls.is_empty()
 	var need_port_fwd = not _upnp_success and not _my_public_ip.is_empty()
 	if _my_public_ip.is_empty():
 		if has_pending_http:
-			_set_lobby_status("正在获取公网 IP...", false)
+			upnp_status_label.text = "正在获取公网 IP..."
 		else:
-			_set_lobby_status("等待队友加入...", false)
 			upnp_status_label.text = "⚠ 未获取到公网 IP（局域网或 VPN 可用）"
 	else:
-		_set_lobby_status("等待队友加入...", false)
 		if need_port_fwd:
 			upnp_status_label.text = "⚠ 外网联机需路由器端口转发或使用 VPN"
+		else:
+			upnp_status_label.text = ""
 
 
 func _on_peer_connected(id: int):
@@ -424,7 +447,7 @@ func _on_peer_connected(id: int):
 		return
 	print("[Host] 玩家加入，peer_id: ", id)
 	GlobalGameData.pending_client_id = id
-	_set_lobby_status("✅ 队友已加入！进入战斗...", true)
+	upnp_status_label.text = "✅ 队友已加入"
 
 	# 断开 lobby 信号，避免切场景后误触发
 	if multiplayer.peer_connected.is_connected(_on_peer_connected):
@@ -443,7 +466,7 @@ func _on_peer_disconnected(id: int):
 	if not _lobby_active:
 		return
 	print("[Host] 玩家断开，peer_id: ", id)
-	_set_lobby_status("队友已断开连接，等待重新加入...", false)
+	upnp_status_label.text = "队友已断开连接"
 
 
 func _show_lobby_ui(show: bool):
@@ -454,14 +477,6 @@ func _show_lobby_ui(show: bool):
 func _hide_lobby_ui():
 	lobby_backdrop.visible = false
 	lobby_panel.visible = false
-
-
-func _set_lobby_status(text: String, is_success: bool):
-	wait_status_label.text = text
-	if is_success:
-		wait_status_label.add_theme_color_override("font_color", Color(0.4, 1, 0.4, 1))
-	else:
-		wait_status_label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
 
 
 func _on_copy_room_code():
@@ -647,79 +662,7 @@ func _on_cancel_join():
 	join_panel.visible = false
 
 
-func _on_how_to_connect():
-	var popup = AcceptDialog.new()
-	popup.title = "📡 如何联机"
-	popup.dialog_text = ""
-	var font = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 
-	# 自定义内容
-	var vbox = VBoxContainer.new()
-	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	vbox.add_theme_constant_override("separation", 8)
-
-	var sections = [
-		{"title": "同一网络", "text": "双方连同一个 Wi-Fi 或局域网 → 直接可用", "color": Color(0.4, 1, 0.4, 1)},
-		{"title": "VPN 虚拟局域网", "text": "装 Radmin VPN 或 ZeroTier（免费）\n两人加入同一虚拟网络 → 用虚拟 IP 连", "color": Color(0.4, 0.8, 1, 1)},
-		{"title": "端口转发", "text": "主机在路由器设置「端口转发」\n外网 IP + 端口号才能从公网连通", "color": Color(1, 0.8, 0.4, 1)},
-		{"title": "UPnP 自动", "text": "主机点「创建」时自动尝试\n路由器支持则无需手动设置", "color": Color(0.6, 0.6, 0.8, 1)},
-	]
-	for s in sections:
-		var hbox = HBoxContainer.new()
-		hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-		var dot = Label.new()
-		dot.text = "●"
-		dot.add_theme_color_override("font_color", s["color"])
-		dot.add_theme_font_override("font", font)
-		dot.add_theme_font_size_override("font_size", 14)
-		dot.custom_minimum_size = Vector2(20, 0)
-		hbox.add_child(dot)
-
-		var inner = VBoxContainer.new()
-		inner.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-		var title = Label.new()
-		title.text = s["title"]
-		title.add_theme_color_override("font_color", s["color"])
-		title.add_theme_font_override("font", font)
-		title.add_theme_font_size_override("font_size", 16)
-		inner.add_child(title)
-
-		var desc = Label.new()
-		desc.text = s["text"]
-		desc.add_theme_color_override("font_color", Color(0.8, 0.8, 0.85, 1))
-		desc.add_theme_font_override("font", font)
-		desc.add_theme_font_size_override("font_size", 13)
-		desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		inner.add_child(desc)
-
-		hbox.add_child(inner)
-		vbox.add_child(hbox)
-
-	popup.add_child(vbox)
-	popup.min_size = Vector2(480, 300)
-	popup.size = Vector2(520, 360)
-
-	# 弹窗样式
-	var panel = StyleBoxFlat.new()
-	panel.bg_color = Color(0.1, 0.1, 0.14, 0.96)
-	panel.border_width_top = 2
-	panel.border_width_bottom = 1
-	panel.border_width_left = 1
-	panel.border_width_right = 1
-	panel.border_color = Color(0.4, 0.45, 0.6, 0.5)
-	panel.corner_radius_top_left = 12
-	panel.corner_radius_top_right = 12
-	panel.corner_radius_bottom_left = 12
-	panel.corner_radius_bottom_right = 12
-	panel.shadow_color = Color(0, 0, 0, 0.5)
-	panel.shadow_size = 16
-	popup.add_theme_stylebox_override("panel", panel)
-
-	popup.popup_centered()
-
-	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 
 
 # ============================================================

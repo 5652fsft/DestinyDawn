@@ -13,6 +13,11 @@ func _ready():
 	slots = GlobalGameData.selected_team.duplicate()
 	_build_roster()
 	_update_slots()
+
+	for btn in [$BackButton, $SaveButton]:
+		ButtonTheme.apply_menu(btn)
+		ButtonTheme.apply_glass_blue(btn)
+		ButtonTheme.set_font(btn, 20)
 	
 	# 初始化单例背景
 	BackgroundSingleton.setup(BackgroundManager.get_current_bg_path())

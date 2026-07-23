@@ -261,182 +261,155 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 11
 text = "JOIN"
 
-[node name="LobbyBackdrop" type="ColorRect" parent="."]
+[node name="LobbyBackdrop" type="ColorRect" parent="." unique_id=325493915]
 visible = false
-mouse_filter = 1
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
 color = Color(0.06, 0.06, 0.1, 0.6)
 
-[node name="LobbyPanel" type="Panel" parent="."]
+[node name="LobbyPanel" type="Panel" parent="." unique_id=1497064246]
 visible = false
 layout_mode = 0
-offset_left = 380.0
-offset_top = 200.0
-offset_right = 900.0
-offset_bottom = 520.0
+offset_left = 340.0
+offset_top = 235.0
+offset_right = 940.0
+offset_bottom = 485.0
 
-[node name="AccentBar" type="ColorRect" parent="LobbyPanel"]
+[node name="VBox" type="VBoxContainer" parent="LobbyPanel" unique_id=557818408]
 layout_mode = 0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 520.0
-offset_bottom = 3.0
-color = Color(0.4, 0.6, 1.0, 0.6)
+offset_left = 20.0
+offset_top = 16.0
+offset_right = 580.0
+offset_bottom = 230.0
+theme_override_constants/separation = 8
 
-[node name="VBox" type="VBoxContainer" parent="LobbyPanel"]
-layout_mode = 0
-offset_left = 25.0
-offset_top = 20.0
-offset_right = 495.0
-offset_bottom = 295.0
-theme_override_constants/separation = 10
-
-[node name="LobbyTitle" type="Label" parent="LobbyPanel/VBox"]
+[node name="LobbyTitle" type="Label" parent="LobbyPanel/VBox" unique_id=28422368]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 24
 text = "创建主机"
-horizontal_alignment = 1
 
-[node name="RoomCodeLabel" type="Label" parent="LobbyPanel/VBox"]
+[node name="RoomCodeLabel" type="Label" parent="LobbyPanel/VBox" unique_id=1677168403]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
 text = "你的房间码：——"
-horizontal_alignment = 1
 
-[node name="LocalIPLabel" type="Label" parent="LobbyPanel/VBox"]
+[node name="PublicIPLabel" type="Label" parent="LobbyPanel/VBox" unique_id=741139302]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 14
-text = ""
-horizontal_alignment = 1
 
-[node name="UpnpStatusLabel" type="Label" parent="LobbyPanel/VBox"]
+[node name="LocalIPLabel" type="Label" parent="LobbyPanel/VBox" unique_id=1899232190]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.7, 0.4, 1)
+theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 14
-text = ""
-horizontal_alignment = 1
 
-[node name="WaitStatusLabel" type="Label" parent="LobbyPanel/VBox"]
+[node name="UpnpStatusLabel" type="Label" parent="LobbyPanel/VBox" unique_id=835201508]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
 theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 18
-text = "等待队友加入..."
-horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
 
-[node name="LobbyButtonRow" type="HBoxContainer" parent="LobbyPanel/VBox"]
+[node name="LobbyButtonRow" type="HBoxContainer" parent="LobbyPanel/VBox" unique_id=1866669885]
 layout_mode = 2
-alignment = 1
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
-[node name="CopyButton" type="Button" parent="LobbyPanel/VBox/LobbyButtonRow"]
-custom_minimum_size = Vector2(160, 40)
+[node name="CopyButton" type="Button" parent="LobbyPanel/VBox/LobbyButtonRow" unique_id=537893104]
+custom_minimum_size = Vector2(150, 40)
 layout_mode = 2
+size_flags_horizontal = 3
 text = "复制房间码"
 
-[node name="CancelHostButton" type="Button" parent="LobbyPanel/VBox/LobbyButtonRow"]
-custom_minimum_size = Vector2(100, 40)
+[node name="CancelHostButton" type="Button" parent="LobbyPanel/VBox/LobbyButtonRow" unique_id=1869608692]
+custom_minimum_size = Vector2(150, 40)
 layout_mode = 2
+size_flags_horizontal = 3
 text = "取消"
 
-[node name="JoinBackdrop" type="ColorRect" parent="."]
+[node name="JoinBackdrop" type="ColorRect" parent="." unique_id=716474270]
 visible = false
-mouse_filter = 1
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
 color = Color(0.06, 0.06, 0.1, 0.6)
 
-[node name="JoinPanel" type="Panel" parent="."]
+[node name="JoinPanel" type="Panel" parent="." unique_id=382660756]
 visible = false
 layout_mode = 0
-offset_left = 380.0
-offset_top = 220.0
-offset_right = 900.0
-offset_bottom = 460.0
+offset_left = 340.0
+offset_top = 265.0
+offset_right = 940.0
+offset_bottom = 455.0
 
-[node name="AccentBar" type="ColorRect" parent="JoinPanel"]
+[node name="VBox" type="VBoxContainer" parent="JoinPanel" unique_id=959764378]
 layout_mode = 0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 520.0
-offset_bottom = 3.0
-color = Color(0.4, 0.6, 1.0, 0.6)
-
-[node name="VBox" type="VBoxContainer" parent="JoinPanel"]
-layout_mode = 0
-offset_left = 25.0
-offset_top = 20.0
-offset_right = 495.0
-offset_bottom = 220.0
-theme_override_constants/separation = 10
-
-[node name="JoinTitle" type="Label" parent="JoinPanel/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 28
-text = "加入游戏"
-horizontal_alignment = 1
-
-[node name="InputRow" type="HBoxContainer" parent="JoinPanel/VBox"]
-layout_mode = 2
+offset_left = 20.0
+offset_top = 16.0
+offset_right = 580.0
+offset_bottom = 180.0
 theme_override_constants/separation = 8
 
-[node name="InputLabel" type="Label" parent="JoinPanel/VBox/InputRow"]
+[node name="JoinTitle" type="Label" parent="JoinPanel/VBox" unique_id=807089543]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 24
+text = "加入游戏"
+
+[node name="InputRow" type="HBoxContainer" parent="JoinPanel/VBox" unique_id=1861217094]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="InputLabel" type="Label" parent="JoinPanel/VBox/InputRow" unique_id=2098175550]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2")
+theme_override_font_sizes/font_size = 20
 text = "房间码："
 vertical_alignment = 1
 
-[node name="RoomCodeInput" type="LineEdit" parent="JoinPanel/VBox/InputRow"]
+[node name="RoomCodeInput" type="LineEdit" parent="JoinPanel/VBox/InputRow" unique_id=1248555772]
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "IP:端口，如 123.45.67.89:1145"
 
-[node name="JoinStatusLabel" type="Label" parent="JoinPanel/VBox"]
+[node name="JoinStatusLabel" type="Label" parent="JoinPanel/VBox" unique_id=579864479]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 16
-text = ""
-horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
 
-[node name="JoinButtonRow" type="HBoxContainer" parent="JoinPanel/VBox"]
+[node name="JoinButtonRow" type="HBoxContainer" parent="JoinPanel/VBox" unique_id=362311544]
 layout_mode = 2
-alignment = 1
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
-[node name="ConnectButton" type="Button" parent="JoinPanel/VBox/JoinButtonRow"]
-custom_minimum_size = Vector2(140, 40)
+[node name="ConnectButton" type="Button" parent="JoinPanel/VBox/JoinButtonRow" unique_id=45095934]
+custom_minimum_size = Vector2(160, 40)
 layout_mode = 2
+size_flags_horizontal = 3
 text = "连接"
 
-[node name="CancelJoinButton" type="Button" parent="JoinPanel/VBox/JoinButtonRow"]
-custom_minimum_size = Vector2(100, 40)
+[node name="CancelJoinButton" type="Button" parent="JoinPanel/VBox/JoinButtonRow" unique_id=511414967]
+custom_minimum_size = Vector2(160, 40)
 layout_mode = 2
+size_flags_horizontal = 3
 text = "取消"
 
-[node name="HowToConnect" type="Button" parent="JoinPanel/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.6, 0.8, 1)
-theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 14
-flat = true
-text = "如何获取房间码？"
 [connection signal="pressed" from="SettingsButton" to="." method="_on_settings_pressed"]
 [connection signal="pressed" from="GuideButton" to="." method="_on_guide_pressed"]
 [connection signal="pressed" from="ButtonPanel/TopRow/TeamButton" to="." method="_on_team_pressed"]

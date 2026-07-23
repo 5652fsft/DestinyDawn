@@ -16,6 +16,11 @@ func _ready():
 	$VBoxContainer/CardPool.add_theme_stylebox_override("panel", transparent)
 	_build_pool()
 	_update_ui()
+
+	for btn in [$BackButton, $SaveButton]:
+		ButtonTheme.apply_menu(btn)
+		ButtonTheme.apply_glass_blue(btn)
+		ButtonTheme.set_font(btn, 20)
 	
 	# 初始化单例背景
 	BackgroundSingleton.setup(BackgroundManager.get_current_bg_path())
