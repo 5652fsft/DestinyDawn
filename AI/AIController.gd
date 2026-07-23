@@ -465,6 +465,10 @@ func _should_use_skill(chara: Node) -> bool:
 	if GlobalGameData.character_attack_used.get(chara.name, false):
 		if not chara.has_method("_consumes_attack_on_skill") or chara._consumes_attack_on_skill():
 			return false
+	var reason = SkillEffect.get_skill_block_reason(chara, _main)
+	if reason:
+		_log("%s 技能被阻挡: %s" % [chara.character_name, reason])
+		return false
 	return true
 
 
