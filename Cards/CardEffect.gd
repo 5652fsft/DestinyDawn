@@ -397,38 +397,35 @@ static func _execute_overload(card: CardData, target: Node, main: Node) -> bool:
 	return true
 
 static func _execute_aoe_damage(card: CardData, target: Node, main: Node) -> bool:
-	if not target or not main:
+	if not main:
 		return false
-	var caster = main.selected_character if main else null
-	var is_caster_host = _is_host_side(caster if caster else target)
+	var is_caster_host = GlobalGameData.is_host
+	if target:
+		is_caster_host = _is_host_side(target)
 	var dmg = card.effect_value
-	if _is_host_side(target) != is_caster_host and target.has_method("take_damage"):
-		_rpc_take_damage(target, dmg)
-	var targets = _get_characters_in_range(main, target, card.effect_radius)
-	for t in targets:
-		if t.has_method("take_damage") and _is_host_side(t) != is_caster_host:
-			_rpc_take_damage(t, dmg)
-	if caster:
+	for c in main.get_tree().get_nodes_in_group("characters"):
+		if c.has_method("take_damage") and _is_host_side(c) != is_caster_host:
+			_rpc_take_damage(c, dmg)
+	if main.selected_character:
+		var caster = main.selected_character
 		if caster.has_method("play_vfx_preset_safe"):
 			caster.play_vfx_preset_safe("explosion")
 		elif caster.has_method("rpc"):
 			caster.rpc("_play_vfx_preset", "explosion")
-		var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic")
 	return true
 
 static func _execute_aoe_heal(card: CardData, target: Node, main: Node) -> bool:
-	if not target or not main:
+	if not main:
 		return false
-	var caster = main.selected_character if main else null
+	var is_caster_host = GlobalGameData.is_host
+	if target:
+		is_caster_host = _is_host_side(target)
 	var val = card.effect_value
-	var is_caster_host = _is_host_side(caster if caster else target)
-	if _is_host_side(target) == is_caster_host and target.has_method("take_damage"):
-		_rpc_take_damage(target, -val)
-	var targets = _get_characters_in_range(main, target, card.effect_radius)
-	for t in targets:
-		if t.has_method("take_damage") and _is_host_side(t) == is_caster_host:
-			_rpc_take_damage(t, -val)
-	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("heal", target)
+	for c in main.get_tree().get_nodes_in_group("characters"):
+		if c.has_method("take_damage") and _is_host_side(c) == is_caster_host:
+			_rpc_take_damage(c, -val)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("heal")
 	return true
 
 static func _execute_chain_lightning_new(card: CardData, primary: Node, main: Node) -> bool:

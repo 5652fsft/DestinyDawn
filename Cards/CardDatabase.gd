@@ -113,8 +113,8 @@ static func _register_cards():
 			CardData.EffectType.HEAL, 20),
 
 		_create_card("card_heal_wave", "治疗波", CardData.CardType.HEAL, 2,
-			CardData.TargetType.ALLY_SINGLE, "治疗目标及其周围友方 10 点生命",
-			CardData.EffectType.AOE_HEAL, 10, 1, 1),
+			CardData.TargetType.NONE, "治疗己方全体 10 点生命",
+			CardData.EffectType.AOE_HEAL, 10),
 
 		_create_card("card_shield", "护盾屏障", CardData.CardType.SHIELD, 2,
 			CardData.TargetType.ALLY_SINGLE, "为单个友方提供 16 点护盾",
@@ -140,20 +140,20 @@ static func _register_cards():
 
 		# ========== 费用 3 ==========
 		_create_card("card_firestorm", "烈焰风暴", CardData.CardType.ATTACK, 3,
-			CardData.TargetType.ENEMY_SINGLE, "对目标及周围1格敌人造成 24 点伤害",
-			CardData.EffectType.AOE_DAMAGE, 24, 1, 1),
+			CardData.TargetType.NONE, "对敌方全体造成 24 点伤害",
+			CardData.EffectType.AOE_DAMAGE, 24),
 
 		_create_card("card_arrow_rain", "箭雨", CardData.CardType.ATTACK, 3,
-			CardData.TargetType.ENEMY_SINGLE, "对目标及周围2格敌人造成 16 点伤害",
-			CardData.EffectType.AOE_DAMAGE, 16, 1, 2),
+			CardData.TargetType.NONE, "对敌方全体造成 16 点伤害",
+			CardData.EffectType.AOE_DAMAGE, 16),
 
 		_create_card("card_chain_lightning", "闪电链", CardData.CardType.ATTACK, 3,
 			CardData.TargetType.ENEMY_SINGLE, "对目标造成 20 点伤害，周围 1 格内的敌方额外受到 10 点伤害，周围 2 格内敌方额外受到 5 点伤害",
 			CardData.EffectType.CHAIN_DAMAGE, 20),
 
 		_create_card("card_mass_heal", "群体治愈", CardData.CardType.HEAL, 3,
-			CardData.TargetType.ALLY_SINGLE, "治疗目标及周围友方 14 点生命",
-			CardData.EffectType.AOE_HEAL, 14, 1, 1),
+			CardData.TargetType.NONE, "治疗己方全体 14 点生命",
+			CardData.EffectType.AOE_HEAL, 14),
 	]
 
 	for c in cards:
