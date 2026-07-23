@@ -4,6 +4,7 @@
 *.uid
 *.bin
 *.import
+*.ogv
 /android/
 /ios/
 /web/
