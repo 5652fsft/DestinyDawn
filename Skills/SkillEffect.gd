@@ -302,7 +302,7 @@ static func get_skill_block_reason(character: Node, main: Node) -> String:
 			if es:
 				var pid = 1 if character in GlobalGameData.host_characters else 2
 				if es.get_energy(pid) < 6:
-					return "能量不足（需 6）"
+					return "能量不足"
 	return ""
 
 static func _is_valid_target_for_skill(character: Node, skill: BaseSkill, target: Node) -> bool:

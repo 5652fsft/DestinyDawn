@@ -29,12 +29,12 @@ layout_mode = 2
 theme_override_fonts/normal_font = ExtResource("2_af7tq")
 theme_override_font_sizes/normal_font_size = 14
 text = "被动描述"
-custom_minimum_size = Vector2(296, 70)
+custom_minimum_size = Vector2(296, 60)
 autowrap_mode = 2
 bbcode_enabled = false
 scroll_active = true
 size_flags_horizontal = 3
-size_flags_vertical = 3
+size_flags_vertical = 0
 
 [node name="HSeparator" type="HSeparator" parent="VBoxContainer" unique_id=1111110003]
 layout_mode = 2

@@ -27,7 +27,7 @@ _create_card(
 	CardData.EffectType.DAMAGE,   # effect_type: 效果类型
 	25,                           # effect_value: 效果数值
 	1,                            # effect_duration: 持续回合数（默认1）
-	0,                            # effect_radius: 范围半径（默认0）
+	0,                            # effect_radius: 范围半径（默认0，AOE_DAMAGE/AOE_HEAL 已改为全阵营生效，忽略此参数）
 )
 ```
 

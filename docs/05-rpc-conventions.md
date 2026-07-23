@@ -145,6 +145,16 @@ Client connects:
 - Client 角色：命名 `Client{id}Character_0/1/2`，权限 = client_id，出生点 = `client_birth_point`
 - 角色名称影响阵营判定：`name.begins_with("Host")` → host_characters
 
+## Player ID 获取
+
+```gdscript
+# main.gd — 安全获取当前 peer 的 player ID
+func _my_id() -> int:
+    return multiplayer.get_unique_id() if multiplayer.has_multiplayer_peer() else (1 if GlobalGameData.is_host else 2)
+```
+
+**原因**：`multiplayer.get_unique_id()` 在没有 multiplayer peer 时返回 0（单人/AI 模式），不能直接用作 player ID。
+
 ## 关键注意事项
 
 1. **不要对 `@rpc` 函数使用 `call_local` + 无 `authority`**：会导致双方都试图处理同一逻辑
@@ -152,3 +162,10 @@ Client connects:
 3. **`rpc_id(0, ...)`** 广播到所有 peer（包含发送者自己）。配合 `call_local` 使用时，发送者会执行两次——一次来自 `call_local`，一次来自网络接收。需要确保幂等或只处理一次
 4. **状态同步始终由服务端驱动**：客户端从不主动修改游戏状态
 5. **`_sync_hand` 只发送给手牌持有者**：`if player_id == my_pid` 过滤
+6. **单人/联机模式守卫**：所有可能被客户端调用的 RPC 函数应检查 `multiplayer.is_server()` 或 `GlobalGameData.is_ai_mode`：
+   ```gdscript
+   func draw_for_new_turn():
+       if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
+           return
+   ```
+7. **技能能量检查**：使用 `SkillEffect.get_skill_block_reason(character, main)` 统一查询技能可用性，返回 `""` 表示可用，否则返回阻挡原因文本（如 `"能量不足"`），SkillPanel 据此禁用按钮
