@@ -117,6 +117,16 @@ func _update_cooldown():
 	if cd > 0:
 		use_button.disabled = true
 		return
+	# あんパン 技能能量检查
+	if current_character and "character_name" in current_character and current_character.character_name == "あんパン":
+		var main = get_tree().current_scene
+		if main and main.has_node("EnergySystem"):
+			var es = main.get_node("EnergySystem")
+			var pid = 1 if current_character in GlobalGameData.host_characters else 2
+			if es.get_energy(pid) < 6:
+				use_button.disabled = true
+				use_button.text = "能量不足（需 6）"
+				return
 	if current_character and current_character.has_method("get_current_phase"):
 		var phase = current_character.get_current_phase()
 		if phase != "Active":

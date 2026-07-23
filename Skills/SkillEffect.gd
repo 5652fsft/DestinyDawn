@@ -213,6 +213,14 @@ static func _anpan_active(character: Node, target: Node, main: Node) -> bool:
 	if not dm or not es:
 		return false
 	var pid = 1 if character in GlobalGameData.host_characters else 2
+	# 能量检查（需 6 点）
+	if es.get_energy(pid) < 6:
+		print("[Skill] あんパン [极速高温烘焙] 能量不足（需 6），当前 %d" % es.get_energy(pid))
+		var main_node = main
+		if main_node and main_node.has_method("show_toast"):
+			main_node.show_toast("能量不足！需要 6 点能量")
+		return false
+	es.spend_energy(pid, 6)
 	# 抽牌至上限
 	var hand = dm.get_hand(pid)
 	var to_draw = dm.hand_limit - hand.size()
@@ -224,7 +232,7 @@ static func _anpan_active(character: Node, target: Node, main: Node) -> bool:
 		bm.apply_buff(character, "soften", 20, 3, character)
 	var _am = Engine.get_singleton("AudioManager")
 	if _am: _am.play_sfx("anpan_skill", character)
-	print("[Skill] あんパン [极速高温烘焙] 抽 %d 张牌，回满能量，获得诅咒" % to_draw)
+	print("[Skill] あんパン [极速高温烘焙] 消耗 6 能量，抽 %d 张牌，回满能量，获得[松软]" % to_draw)
 	character.play_vfx_preset_safe("buff")
 	return true
 
