@@ -9,13 +9,10 @@ var _targeting: bool = false
 signal skill_used(skill: BaseSkill, target_type: int)
 signal skill_cancelled()
 
-@onready var passive_name_label = $VBoxContainer/PassiveNameLabel
-@onready var passive_desc_label = $VBoxContainer/PassiveDescLabel
-@onready var separator = $VBoxContainer/HSeparator
 @onready var skill_name_label = $VBoxContainer/SkillNameLabel
 @onready var skill_desc_label = $VBoxContainer/SkillDescLabel
-@onready var cooldown_label = $VBoxContainer/CooldownLabel
 @onready var use_button = $VBoxContainer/UseButton
+@onready var cooldown_label = $VBoxContainer/CooldownLabel
 
 func _ready():
 	ButtonTheme.apply_menu(use_button)
@@ -33,56 +30,40 @@ func _ready():
 	bg.corner_radius_bottom_left = 8
 	add_theme_stylebox_override("panel", bg)
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_wrap_desc_in_scroll()
 
 func show_for(character: Node):
 	current_character = character
-	if not character:
+	if not character or not "active_skill" in character:
 		hide()
 		return
-
-	var has_passive = "passive_skill" in character and character.passive_skill
-	passive_name_label.visible = has_passive
-	passive_desc_label.visible = has_passive
-	separator.visible = has_passive
-	if has_passive:
-		var ps = character.passive_skill
-		passive_name_label.text = "天赋·%s" % ps.skill_name
-		passive_name_label.add_theme_font_override("font", FONT)
-		passive_desc_label.text = ps.description
-		passive_desc_label.add_theme_font_override("normal_font", FONT)
-
-	var has_active = "active_skill" in character and character.active_skill
-	skill_name_label.visible = has_active
-	skill_desc_label.visible = has_active
-	cooldown_label.visible = has_active
-	use_button.visible = has_active
-	if has_active:
-		active_skill = character.active_skill
-		skill_name_label.text = active_skill.skill_name
-		skill_name_label.add_theme_font_override("font", FONT)
-		skill_desc_label.text = active_skill.description
-		skill_desc_label.add_theme_font_override("normal_font", FONT)
-		cooldown_label.add_theme_font_override("font", FONT)
-		_targeting = false
-		use_button.text = "使用技能"
-		_update_cooldown()
-	else:
-		active_skill = null
-
+	active_skill = character.active_skill
+	if not active_skill:
+		hide()
+		return
+	skill_name_label.text = active_skill.skill_name
+	skill_name_label.add_theme_font_override("font", FONT)
+	skill_desc_label.text = active_skill.description
+	skill_desc_label.add_theme_font_override("font", FONT)
+	cooldown_label.add_theme_font_override("font", FONT)
+	_targeting = false
+	use_button.text = "使用技能"
+	_update_cooldown()
 	show()
 
-func update_passive(chara):
-	if "passive_skill" in chara and chara.passive_skill:
-		var ps = chara.passive_skill
-		passive_name_label.text = "天赋·%s" % ps.skill_name
-		passive_desc_label.text = ps.description
-		passive_name_label.visible = true
-		passive_desc_label.visible = true
-		separator.visible = true
-	else:
-		passive_name_label.visible = false
-		passive_desc_label.visible = false
-		separator.visible = false
+func _wrap_desc_in_scroll():
+	var vbox = $VBoxContainer
+	var idx = skill_desc_label.get_index()
+	var sc = ScrollContainer.new()
+	sc.name = "SkillDescScroll"
+	sc.custom_minimum_size = Vector2(0, 50)
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	vbox.remove_child(skill_desc_label)
+	vbox.add_child(sc)
+	vbox.move_child(sc, idx)
+	sc.add_child(skill_desc_label)
+	skill_desc_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	skill_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 
 func set_targeting_mode(active: bool):
 	_targeting = active

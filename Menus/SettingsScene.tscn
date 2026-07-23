@@ -33,15 +33,16 @@ text = "玩家名称"
 layout_mode = 2
 text = "玩家"
 
-[node name="IPLabel" type="Label" parent="VBoxContainer"]
+[node name="PortLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
-text = "联机服务器地址"
+text = "默认联机端口"
 
-[node name="IPEdit" type="LineEdit" parent="VBoxContainer"]
+[node name="PortEdit" type="LineEdit" parent="VBoxContainer"]
 layout_mode = 2
-text = "127.0.0.1"
+text = "1145"
+placeholder_text = "默认 1145"
 
 [node name="MasterLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2

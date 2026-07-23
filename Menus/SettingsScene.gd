@@ -3,7 +3,7 @@ extends Control
 const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 
 @onready var name_edit = $VBoxContainer/NameEdit
-@onready var ip_edit = $VBoxContainer/IPEdit
+@onready var port_edit = $VBoxContainer/PortEdit
 @onready var master_slider = $VBoxContainer/MasterSlider
 @onready var bgm_slider = $VBoxContainer/BGMSlider
 @onready var sfx_slider = $VBoxContainer/SFXSlider
@@ -14,14 +14,14 @@ const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 func _ready():
 	GlobalGameData.load_defaults_if_empty()
 	name_edit.text = GlobalGameData.player_name
-	ip_edit.text = GlobalGameData.server_ip
+	port_edit.text = str(GlobalGameData.server_port)
 	master_slider.value = GlobalGameData.audio_volume_master
 	bgm_slider.value = GlobalGameData.audio_volume_bgm
 	sfx_slider.value = GlobalGameData.audio_volume_sfx
 	for btn in [save_btn, back_btn]:
 		ButtonTheme.apply_menu(btn)
 		ButtonTheme.set_font(btn, 20)
-	for le in [name_edit, ip_edit]:
+	for le in [name_edit, port_edit]:
 		le.add_theme_font_override("font", FONT)
 		le.add_theme_font_size_override("font_size", 18)
 	save_btn.pressed.connect(_on_save_pressed)
@@ -63,7 +63,11 @@ func _on_sfx_volume_changed(v: float):
 
 func _on_save_pressed():
 	GlobalGameData.player_name = name_edit.text
-	GlobalGameData.server_ip = ip_edit.text
+	var port_str = port_edit.text.strip_edges()
+	if port_str.is_valid_int():
+		var p = port_str.to_int()
+		if p > 0 and p <= 65535:
+			GlobalGameData.server_port = p
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	get_tree().change_scene_to_file("res://Menus/MainMenu.tscn")
 

@@ -42,6 +42,9 @@ var selected_deck: Array[String] = []    # 卡组：卡牌ID列表
 var player_name: String = "玩家"
 var opponent_name: String = "对手"
 var server_ip: String = "127.0.0.1"
+var server_port: int = 1145
+var pending_client_id: int = -1
+var client_peer_id: int = 2
 
 # 音效系统音量（0.0 ~ 1.0）
 var audio_volume_master: float = 0.8

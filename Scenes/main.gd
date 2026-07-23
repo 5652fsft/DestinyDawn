@@ -163,11 +163,18 @@ func _ready():
 		
 		_init_player_card_systems()
 		multiplayer.peer_connected.connect(_on_client_joined)
+		if GlobalGameData.pending_client_id > 0:
+			var cid = GlobalGameData.pending_client_id
+			GlobalGameData.pending_client_id = -1
+			GlobalGameData.client_peer_id = cid
+			get_tree().create_timer(0.5).timeout.connect(func():
+				_on_client_joined(cid)
+			)
 		_show_waiting_overlay()
 		if not multiplayer.has_multiplayer_peer():
 			advance_turn_phase()
 	else:
-		pass
+		_show_client_waiting()
 	
 	_setup_action_buttons()
 
@@ -282,7 +289,7 @@ func _client_send_setup(team_ids: Array, deck_ids: Array):
 	var sender_id = multiplayer.get_remote_sender_id()
 	GlobalGameData.client_team = team_ids
 	if deck_manager and not deck_ids.is_empty() and GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.NONE:
-		deck_manager.init_player(2, deck_ids)
+		deck_manager.init_player(sender_id, deck_ids)
 	call_deferred("_spawn_client_characters", sender_id)
 
 func _init_buff_manager():
@@ -308,6 +315,7 @@ func _init_field_effect_manager():
 
 func _on_client_joined(id: int):
 	print("[Net] 客户端 %d 加入" % id)
+	GlobalGameData.client_peer_id = id
 	rpc_id(id, "_sync_opponent_name", GlobalGameData.player_name)
 	rpc_id(id, "_request_client_setup")
 	_build_team_from_selection()
@@ -318,6 +326,7 @@ func _on_client_joined(id: int):
 
 @rpc("any_peer", "reliable")
 func _sync_opponent_name(name: String):
+	_hide_waiting_overlay()
 	GlobalGameData.opponent_name = name
 	print("[Net] 对方名称: %s" % name)
 	# 刷新玩家面板名称
@@ -343,7 +352,9 @@ func _init_player_card_systems():
 	if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
 		return
 	var host_id = multiplayer.get_unique_id()
-	var player_ids: Array[int] = [host_id, 2]
+	if GlobalGameData.pending_client_id > 0:
+		GlobalGameData.client_peer_id = GlobalGameData.pending_client_id
+	var player_ids: Array[int] = [host_id, GlobalGameData.client_peer_id]
 	for pid in player_ids:
 		deck_manager.init_player(pid, default_deck.duplicate())
 	energy_system.init_players(player_ids)
@@ -604,7 +615,7 @@ func _try_select_character(_pos: Vector2):
 		unselect_character(selected_character, true)
 
 func on_card_played(card_data: CardData):
-	var my_pid = 1 if GlobalGameData.is_host else 2
+	var my_pid = multiplayer.get_unique_id()
 	var who = "Host" if GlobalGameData.is_host else "Client"
 	if get_current_player_id() != my_pid:
 		return
@@ -719,7 +730,7 @@ func _target_play_card(card_data: CardData, target: Node):
 	var target_path = ""
 	if target:
 		target_path = target.get_path()
-	var my_pid = 1 if GlobalGameData.is_host else 2
+	var my_pid = multiplayer.get_unique_id()
 	if multiplayer.has_multiplayer_peer():
 		rpc("_server_play_card", my_pid, card_data.id, target_path)
 	else:
@@ -781,13 +792,13 @@ func _sync_energy(player_id: int, value: int):
 	energy_system.player_energy[player_id] = value
 	_update_player_panels()
 	# 刷新手牌可用性
-	var my_pid = 1 if GlobalGameData.is_host else 2
+	var my_pid = multiplayer.get_unique_id()
 	if player_id == my_pid:
 		hand_panel.refresh_affordability(value)
 
 @rpc("call_local", "reliable")
 func _sync_hand(player_id: int, hand: Array):
-	var my_pid = 1 if GlobalGameData.is_host else 2
+	var my_pid = multiplayer.get_unique_id()
 	if player_id == my_pid:
 		var typed: Array[String] = []
 		typed.assign(hand)
@@ -843,7 +854,7 @@ func _active_skill_post_exec(skill: BaseSkill):
 	_update_action_buttons(selected_character)
 	character_info_panel.refresh()
 	_update_player_panels()
-	var pid = 1 if GlobalGameData.is_host else 2
+	var pid = multiplayer.get_unique_id()
 	var hand = deck_manager.get_hand(pid) if deck_manager else []
 	if multiplayer.has_multiplayer_peer():
 		rpc("_sync_hand", pid, hand)
@@ -949,11 +960,12 @@ func _get_character_cell(chara: Node) -> Vector2i:
 
 func get_current_player_id() -> int:
 	var phase = GlobalGameData.current_turn_phase
+	var cid = GlobalGameData.client_peer_id
 	match phase:
 		GlobalGameData.TurnPhase.PLAYER_TURN:
-			return 1 if GlobalGameData.is_host_turn else 2
+			return 1 if GlobalGameData.is_host_turn else cid
 		GlobalGameData.TurnPhase.ENEMY_TURN:
-			return 2 if GlobalGameData.is_host_turn else 1
+			return cid if GlobalGameData.is_host_turn else 1
 	return -1
 
 
@@ -996,13 +1008,13 @@ func draw_for_new_turn():
 		return
 	if not GlobalGameData.turn_has_been_drawn:
 		deck_manager.init_initial_draw(1)
-		deck_manager.init_initial_draw(2)
+		deck_manager.init_initial_draw(GlobalGameData.client_peer_id)
 		sync_all_card_state()
 	else:
 		deck_manager.draw_cards(1, 1)
-		deck_manager.draw_cards(2, 1)
+		deck_manager.draw_cards(GlobalGameData.client_peer_id, 1)
 		energy_system.restore_energy(1)
-		energy_system.restore_energy(2)
+		energy_system.restore_energy(GlobalGameData.client_peer_id)
 		sync_all_card_state()
 
 # === 手牌 ===
@@ -1057,20 +1069,35 @@ func _show_waiting_overlay():
 		return
 	if not multiplayer.is_server() or not multiplayer.has_multiplayer_peer():
 		return
-	_waiting_overlay = ColorRect.new()
-	_waiting_overlay.color = Color(0.08, 0.08, 0.12, 0.8)
-	_waiting_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_waiting_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
-	$UI.add_child(_waiting_overlay)
+	_waiting_overlay = _make_waiting_overlay("等待玩家连接...")
+
+func _show_client_waiting():
+	if _waiting_overlay:
+		return
+	if multiplayer.is_server():
+		return
+	_waiting_overlay = _make_waiting_overlay("等待主机...")
+
+func _hide_waiting_overlay():
+	if _waiting_overlay:
+		_waiting_overlay.queue_free()
+		_waiting_overlay = null
+
+func _make_waiting_overlay(text: String) -> ColorRect:
+	var overlay = ColorRect.new()
+	overlay.color = Color(0.08, 0.08, 0.12, 0.8)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	$UI.add_child(overlay)
 	var font = load("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 	var label = Label.new()
-	label.text = "等待玩家连接..."
+	label.text = text
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.add_theme_font_override("font", font)
 	label.add_theme_font_size_override("font_size", 48)
 	label.add_theme_color_override("font_color", Color(0.85, 0.85, 0.9, 1))
-	_waiting_overlay.add_child(label)
+	overlay.add_child(label)
 	label.anchor_left = 0.5
 	label.anchor_top = 0.5
 	label.anchor_right = 0.5
@@ -1079,11 +1106,7 @@ func _show_waiting_overlay():
 	label.offset_top = -75
 	label.offset_right = 200
 	label.offset_bottom = -5
-
-func _hide_waiting_overlay():
-	if _waiting_overlay:
-		_waiting_overlay.queue_free()
-		_waiting_overlay = null
+	return overlay
 
 func show_battle_result(from_surrender: bool = false, surrendering_is_host: bool = false):
 	var i_win
@@ -1107,7 +1130,7 @@ func show_battle_result(from_surrender: bool = false, surrendering_is_host: bool
 		$UI/BattleResult.show_result(i_win, GlobalGameData.battle_stats, is_multiplayer)
 
 func sync_all_card_state():
-	for pid in [1, 2]:
+	for pid in [1, GlobalGameData.client_peer_id]:
 		if multiplayer.has_multiplayer_peer():
 			rpc_id(0, "_sync_energy", pid, energy_system.get_energy(pid))
 			rpc_id(0, "_sync_hand", pid, deck_manager.get_hand(pid))
@@ -1254,7 +1277,7 @@ func _update_player_panels():
 		var host_turn = _is_player_turn(true)
 		host_player_panel.refresh(host_turn, host_energy)
 	if client_player_panel:
-		var client_energy = energy_system.get_energy(2)
+		var client_energy = energy_system.get_energy(GlobalGameData.client_peer_id)
 		var client_turn = _is_player_turn(false)
 		client_player_panel.refresh(client_turn, client_energy)
 
