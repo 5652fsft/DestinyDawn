@@ -634,7 +634,10 @@ func on_card_played(card_data: CardData):
 		return
 	print("[Card] %s 选中卡牌 [%s]" % [who, card_data.card_name])
 	if card_data.target_type == CardData.TargetType.NONE:
-		rpc("_server_play_card", my_pid, card_data.id, "")
+		if multiplayer.has_multiplayer_peer():
+			rpc("_server_play_card", my_pid, card_data.id, "")
+		else:
+			_execute_play_card(my_pid, card_data.id, "")
 	else:
 		pending_card_data = card_data
 		is_targeting = true
