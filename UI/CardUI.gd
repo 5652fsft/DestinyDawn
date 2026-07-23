@@ -189,7 +189,8 @@ func _on_hover_enter():
 	z_index = 10
 	_hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	_hover_tween.tween_property(self, "scale", _base_scale * CardTheme.HOVER_SCALE, CardTheme.HOVER_TWEEN_SEC)
-	_hover_tween.parallel().tween_property(self, "self_modulate", CardTheme.HOVER_MODULATE, CardTheme.HOVER_TWEEN_SEC)
+	if _affordable:
+		_hover_tween.parallel().tween_property(self, "self_modulate", CardTheme.HOVER_MODULATE, CardTheme.HOVER_TWEEN_SEC)
 
 	var panel_style: StyleBoxFlat = get_theme_stylebox("panel") as StyleBoxFlat
 	if panel_style:
