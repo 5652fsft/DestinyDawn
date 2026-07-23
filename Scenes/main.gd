@@ -614,8 +614,11 @@ func _try_select_character(_pos: Vector2):
 	elif selected_character:
 		unselect_character(selected_character, true)
 
+func _my_id() -> int:
+	return multiplayer.get_unique_id() if multiplayer.has_multiplayer_peer() else (1 if GlobalGameData.is_host else 2)
+
 func on_card_played(card_data: CardData):
-	var my_pid = multiplayer.get_unique_id()
+	var my_pid = _my_id()
 	var who = "Host" if GlobalGameData.is_host else "Client"
 	if get_current_player_id() != my_pid:
 		return
@@ -730,7 +733,7 @@ func _target_play_card(card_data: CardData, target: Node):
 	var target_path = ""
 	if target:
 		target_path = target.get_path()
-	var my_pid = multiplayer.get_unique_id()
+	var my_pid = _my_id()
 	if multiplayer.has_multiplayer_peer():
 		rpc("_server_play_card", my_pid, card_data.id, target_path)
 	else:
@@ -792,13 +795,13 @@ func _sync_energy(player_id: int, value: int):
 	energy_system.player_energy[player_id] = value
 	_update_player_panels()
 	# 刷新手牌可用性
-	var my_pid = multiplayer.get_unique_id()
+	var my_pid = _my_id()
 	if player_id == my_pid:
 		hand_panel.refresh_affordability(value)
 
 @rpc("call_local", "reliable")
 func _sync_hand(player_id: int, hand: Array):
-	var my_pid = multiplayer.get_unique_id()
+	var my_pid = _my_id()
 	if player_id == my_pid:
 		var typed: Array[String] = []
 		typed.assign(hand)
@@ -854,7 +857,7 @@ func _active_skill_post_exec(skill: BaseSkill):
 	_update_action_buttons(selected_character)
 	character_info_panel.refresh()
 	_update_player_panels()
-	var pid = multiplayer.get_unique_id()
+	var pid = _my_id()
 	var hand = deck_manager.get_hand(pid) if deck_manager else []
 	if multiplayer.has_multiplayer_peer():
 		rpc("_sync_hand", pid, hand)
