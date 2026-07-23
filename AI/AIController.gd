@@ -313,10 +313,21 @@ func _execute_skill(chara: Node, target: Node):
 
 
 func _execute_card(chara: Node, card_id: String, target: Node):
+	var card_data = CardDatabase.get_card(card_id)
+	if not card_data:
+		_log("卡牌 %s 不存在，跳过" % card_id, "Card")
+		return
+	var hand = _deck_manager.get_hand(2)
+	if card_id not in hand:
+		_log("[%s] 已不在手牌中，跳过" % card_data.card_name, "Card")
+		return
+	if not _energy_system.can_afford(2, card_data.cost):
+		_log("能量不足，无法使用 [%s]（需 %d）" % [card_data.card_name, card_data.cost], "Card")
+		return
 	var target_path = ""
 	if target != null and is_instance_valid(target):
 		target_path = target.get_path()
-	_log("%s 使用卡牌 %s，目标: %s" % [chara.character_name, card_id, target_path if target_path else "无"], "Card")
+	_log("AI 使用 [%s]，目标: %s" % [card_data.card_name, target_path if target_path else "无"], "Card")
 	var prev_selected = _main.selected_character
 	_main.selected_character = chara
 	_main._execute_play_card(2, card_id, target_path)

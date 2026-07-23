@@ -3,8 +3,7 @@ extends Node
 const LOG_PATH: String = "user://logs/ai.log"
 
 static func log(msg: String, category: String = "AI"):
-	var timestamp = Time.get_time_string_from_system()
-	var line = "[%s][%s] %s" % [timestamp, category, msg]
+	var line = "[%s] %s" % [category, msg]
 	print(line)
 	_ensure_log_dir()
 	_append_to_file(line)
