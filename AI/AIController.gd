@@ -701,7 +701,7 @@ func _score_card(card: CardData, chara: Node, target: Node) -> int:
 func _end_phase():
 	_log("AI 结束当前阶段，调用 advance_turn_phase", "EndTurn")
 	_main.unselect_character(null, true)
-	_main.rpc("advance_turn_phase")
+	_main.advance_turn_phase()
 
 
 func _get_ai_alive() -> Array:

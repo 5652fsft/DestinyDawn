@@ -19,6 +19,8 @@ offset_bottom = 343.0
 [node name="VBox" type="VBoxContainer" parent="ScrollContainer" unique_id=2023283012]
 custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
+size_flags_horizontal = 1
+size_flags_vertical = 0
 
 [node name="NameLabel" type="Label" parent="ScrollContainer/VBox" unique_id=539442598]
 layout_mode = 2
@@ -79,3 +81,4 @@ text = "效果"
 
 [node name="BuffsContainer" type="VBoxContainer" parent="ScrollContainer/VBox" unique_id=1082733770]
 layout_mode = 2
+custom_minimum_size = Vector2(320, 80)

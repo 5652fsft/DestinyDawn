@@ -66,5 +66,7 @@ func get_current_background_path() -> String:
 
 # 隐藏背景（战斗模式）
 func hide_background():
+	if not _is_ready:
+		await ready
 	video_player.hide()
 	fallback.hide()

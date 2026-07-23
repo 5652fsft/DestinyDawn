@@ -147,7 +147,7 @@ static func _seele_active(character: Node, target: Node, main: Node) -> bool:
 		character.rpc("_sync_position", world_pos)
 	if target.has_method("take_damage"):
 		var bonus = int(character.attack * 1.2)
-		target.rpc("take_damage", bonus)
+		target.take_damage_safe(bonus)
 		var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("seele_skill", target)
 		print("[Skill] %s [相位突进] → %s 造成 %d 点伤害" % [character.character_name, target.name, bonus])
 	return true
@@ -160,15 +160,15 @@ static func _elaina_active(character: Node, target: Node, main: Node) -> bool:
 	var is_caster_host = character.name.begins_with("Host")
 	# 主要目标
 	if target.has_method("take_damage"):
-		target.rpc("take_damage", dmg)
+		target.take_damage_safe(dmg)
 	var target_cell = main._get_character_cell(target)
 	var aoe_cells = get_cells_in_range(character.grid_layer, target_cell, 1)
 	for c in main.get_tree().get_nodes_in_group("characters"):
 		if c != target and c.hp > 0 and c.name.begins_with("Host") != is_caster_host:
 			var c_cell = main._get_character_cell(c)
 			if aoe_cells.has(c_cell):
-				c.rpc("take_damage", dmg)
-	target.rpc("_play_vfx_preset", "explosion")
+				c.take_damage_safe(dmg)
+	target.play_vfx_preset_safe("explosion")
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("elaina_skill", target)
 	print("[Skill] %s [星尘爆裂] → %s 及周围造成 %d 点伤害" % [character.character_name, target.name, dmg])
 	return true
@@ -177,7 +177,7 @@ static func _elaina_active(character: Node, target: Node, main: Node) -> bool:
 static func _firefly_active(character: Node, target: Node, main: Node) -> bool:
 	if not target:
 		return false
-	target.rpc("take_damage", 25)
+	target.take_damage_safe(25)
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("firefly_skill", target)
 	var bm = main.get_node_or_null("BuffManager") if main else null
 	if bm and bm.has_method("apply_buff"):
@@ -203,7 +203,7 @@ static func _hamster_active(character: Node, target: Node, main: Node) -> bool:
 		character._extra_attacks += 1
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("hamster_skill", character)
 	print("[Skill] %s [动作如潮] 获得额外行动" % character.character_name)
-	character.rpc("_play_vfx_preset", "heal")
+	character.play_vfx_preset_safe("heal")
 	return true
 
 static func _anpan_active(character: Node, target: Node, main: Node) -> bool:
@@ -225,7 +225,7 @@ static func _anpan_active(character: Node, target: Node, main: Node) -> bool:
 	var _am = Engine.get_singleton("AudioManager")
 	if _am: _am.play_sfx("anpan_skill", character)
 	print("[Skill] あんパン [极速高温烘焙] 抽 %d 张牌，回满能量，获得诅咒" % to_draw)
-	character.rpc("_play_vfx_preset", "buff")
+	character.play_vfx_preset_safe("buff")
 	return true
 
 static func _zephyr_active(character: Node, target: Node, main: Node) -> bool:
@@ -244,7 +244,7 @@ static func _zephyr_active(character: Node, target: Node, main: Node) -> bool:
 	var _am = Engine.get_singleton("AudioManager")
 	if _am: _am.play_sfx("zephyr_skill", character)
 	print("[Skill] Zephyr [引煞赴烬] 自伤 %d，获得 1 层攀升" % self_dmg)
-	character.rpc("_play_vfx_preset", "buff")
+	character.play_vfx_preset_safe("buff")
 	return true
 
 static func _karrigan_active(character: Node, target: Node, main: Node) -> bool:
@@ -280,7 +280,7 @@ static func _karrigan_active(character: Node, target: Node, main: Node) -> bool:
 	var _am = Engine.get_singleton("AudioManager")
 	if _am: _am.play_sfx("karrigan_skill", character)
 	print("[Skill] karrigan [狂野·纵横烟中] 在 %s 周围 3 格展开烟雾" % character.character_name)
-	character.rpc("_play_vfx_preset", "buff")
+	character.play_vfx_preset_safe("buff")
 	return true
 
 static func _is_valid_target_for_skill(character: Node, skill: BaseSkill, target: Node) -> bool:

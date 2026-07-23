@@ -43,9 +43,12 @@ func perform_attack(target_path: NodePath):
 	if last_target_max_hp > 0 and last_target_hp >= last_target_max_hp:
 		dmg = int(dmg * 1.5)
 
-	target.rpc("take_damage", dmg)
+	target.take_damage_safe(dmg)
 	print("[Combat] %s → %s 造成 %d 点伤害（暗影突袭）" % [name, target.name, dmg])
-	rpc_id(0, "_play_attack_animation", target_path)
+	if multiplayer.has_multiplayer_peer():
+		rpc_id(0, "_play_attack_animation", target_path)
+	else:
+		_play_attack_animation(target_path)
 
 func use_active_skill(target: Node) -> bool:
 	return SkillEffect.execute_active(self, active_skill, target, main)

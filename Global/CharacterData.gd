@@ -3,7 +3,7 @@ class_name CharacterData
 const DATA = {
 	"bronya":    {"name":"布洛妮娅", "hp":68,  "move":5, "atk":15, "range":1,
 		"skill":"护卫指令", "skill_desc":"为友方单体提供 30 点护盾", "skill_cd":3,
-		"passive":"铁壁", "passive_desc":"受到伤害 -20%，当生命值 <50% 时受到伤害 -35%）"},
+		"passive":"铁壁", "passive_desc":"受到伤害 -20%，当生命值 <50% 时受到伤害 -35%"},
 	"seele":     {"name":"希儿",    "hp":65,  "move":6, "atk":18, "range":1,
 		"skill":"相位突进", "skill_desc":"瞬移至 10 格范围内选定的单体目标旁并发动 1.2 倍强化攻击", "skill_cd":3,
 		"passive":"暗影突袭", "passive_desc":"攻击满血敌人时伤害 +50%"},

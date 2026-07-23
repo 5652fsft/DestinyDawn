@@ -67,6 +67,9 @@ func reset_battle_state():
 	smoke_cells.clear()
 	karrigan_death_flag = false
 	cards_played_this_turn = 0
+	host_team.clear()
+	client_team.clear()
+	ai_deck.clear()
 	battle_stats = {
 		host_damage_dealt = 0,
 		host_healing_done = 0,

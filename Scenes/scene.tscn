@@ -54,15 +54,6 @@ script = ExtResource("7_p4fma")
 [node name="CharacterInfoPanel" parent="UI" unique_id=1060276128 instance=ExtResource("4_yp48q")]
 theme = ExtResource("12_p4fma")
 
-[node name="PassiveSkillPanel" parent="UI" unique_id=1886998702 instance=ExtResource("10_p4fma")]
-offset_top = 400.0
-offset_bottom = 520.0
-mouse_filter = 1
-theme = ExtResource("12_p4fma")
-
-[node name="VBoxContainer" parent="UI/PassiveSkillPanel"]
-offset_bottom = 110.0
-
 [node name="TurnIndicator" parent="UI" unique_id=463834768 instance=ExtResource("5_yp48q")]
 theme = ExtResource("12_p4fma")
 
@@ -72,8 +63,6 @@ anchors_preset = 7
 theme = ExtResource("12_p4fma")
 
 [node name="SkillPanel" parent="UI" unique_id=1934206860 instance=ExtResource("10_p4fma")]
-offset_top = 530.0
-offset_bottom = 710.0
 theme = ExtResource("12_p4fma")
 
 [node name="HostPlayerPanel" parent="UI" unique_id=1883136691 instance=ExtResource("11_p4fma")]

@@ -19,6 +19,9 @@ const BGM_TRACKS: Array[String] = ["battle1", "battle2", "battle3", "battle4", "
 var _bgm_order: Array[int] = []
 var _bgm_index: int = -1
 
+var _stop_token: int = 0
+var _fade_tween: Tween = null
+
 func _init():
 	Engine.register_singleton("AudioManager", self)
 
@@ -89,11 +92,13 @@ func play_sfx(name: String, target: Node = null):
 func play_bgm(name: String):
 	if not _bgm_cache.has(name) or _bgm_cache[name] == null:
 		return
+	_stop_token += 1
 	_shuffle_and_play(name)
 
 func play_bgm_random():
 	if _bgm_cache.is_empty():
 		return
+	_stop_token += 1
 	_bgm_order.clear()
 	for i in range(BGM_TRACKS.size()):
 		_bgm_order.append(i)
@@ -102,6 +107,8 @@ func play_bgm_random():
 	_play_next_bgm()
 
 func _play_next_bgm():
+	if _fade_tween:
+		_fade_tween.kill()
 	_bgm_index += 1
 	if _bgm_index >= _bgm_order.size():
 		_bgm_order.shuffle()
@@ -111,6 +118,7 @@ func _play_next_bgm():
 		_play_next_bgm()
 		return
 	bgm_player.stream = _bgm_cache[track]
+	bgm_player.volume_db = 0.0
 	bgm_player.play()
 
 func _on_bgm_finished():
@@ -130,10 +138,15 @@ func _shuffle_and_play(first: String):
 	_play_next_bgm()
 
 func stop_bgm(fade: float = 0.0):
+	var my_token = _stop_token
+	if _fade_tween:
+		_fade_tween.kill()
 	if fade > 0.0:
-		var tween = create_tween()
-		tween.tween_method(_fade_bgm_volume, bgm_player.volume_db, -80.0, fade)
-		await tween.finished
+		_fade_tween = create_tween()
+		_fade_tween.tween_method(_fade_bgm_volume, bgm_player.volume_db, -80.0, fade)
+		await _fade_tween.finished
+	if my_token != _stop_token:
+		return
 	bgm_player.stop()
 	bgm_player.volume_db = 0.0
 

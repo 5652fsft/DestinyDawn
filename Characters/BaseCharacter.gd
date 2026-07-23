@@ -64,7 +64,16 @@ var hover_tween: Tween = null
 var _is_hovered: bool = false
 var _fb_origin_y: float = 0.0
 var _base_sprite_scale: Vector2 = Vector2.ONE
-var shield: int = 0
+var _shield: int = 0
+var shield: int:
+	get:
+		return _shield
+	set(value):
+		_shield = value
+		if main and main.has_method("_update_character_info_panel"):
+			main._update_character_info_panel(self)
+		if floating_bar:
+			floating_bar.refresh()
 var buffs: Dictionary = {}  # {"buff_id": [{"value": int, "remaining": int}, ...]}
 
 func get_buffs(buff_id: String) -> Array:
@@ -391,6 +400,13 @@ func handle_move():
 				main.show_toast("超出移动范围")
 				return
 			
+			var current_cell = get_current_cell()
+			if cell_coord == current_cell:
+				hide_move_range()
+				main.unselect_character(self)
+				main.check_move()
+				return
+			
 			if main.is_cell_occupied(cell_coord, self):
 				main.show_toast("该格子已被占据")
 				return
@@ -438,7 +454,7 @@ func handle_attack():
 					return
 				var enemy_cell = clicked_enemy.grid_layer.local_to_map(clicked_enemy.grid_layer.to_local(clicked_enemy.global_position))
 				if valid_attack_cells.has(enemy_cell):
-					rpc("perform_attack", clicked_enemy.get_path())
+					perform_attack_safe(clicked_enemy.get_path())
 					if _get_extra_attacks() > 0:
 						_consume_extra_attack()
 					elif not GlobalGameData.character_attack_used.get(name, false):
@@ -452,11 +468,13 @@ func handle_attack():
 				return
 			main.unselect_character(self)
 
+var _extra_attacks: int = 0
+
 func _get_extra_attacks() -> int:
-	return 0
+	return _extra_attacks
 
 func _consume_extra_attack():
-	pass
+	_extra_attacks -= 1
 
 @rpc("any_peer", "call_local", "reliable")
 func perform_attack(target_path: NodePath):
@@ -477,7 +495,22 @@ func perform_attack(target_path: NodePath):
 	print("[Combat] %s → %s 造成 %d 点伤害" % [name, target.name, effective_attack])
 	
 	# 同步动画（所有客户端）
-	rpc_id(0, "_play_attack_animation", target_path)
+	if multiplayer.has_multiplayer_peer():
+		rpc_id(0, "_play_attack_animation", target_path)
+	else:
+		_play_attack_animation(target_path)
+
+func perform_attack_safe(target_path: NodePath) -> void:
+	if multiplayer.has_multiplayer_peer():
+		rpc("perform_attack", target_path)
+	else:
+		perform_attack(target_path)
+
+func take_damage_safe(damage: int) -> void:
+	if multiplayer.has_multiplayer_peer():
+		rpc("take_damage", damage)
+	else:
+		take_damage(damage)
 
 @rpc("call_local", "reliable")
 func _play_attack_animation(target_path: NodePath):
@@ -522,6 +555,12 @@ func _play_vfx_preset(preset: String):
 	if vfx_manager and vfx_manager.has_method("play"):
 		vfx_manager.play(self, preset)
 
+func play_vfx_preset_safe(preset: String) -> void:
+	if multiplayer.has_multiplayer_peer():
+		rpc("_play_vfx_preset", preset)
+	else:
+		_play_vfx_preset(preset)
+
 @rpc("any_peer", "call_local", "reliable")
 func _play_vfx(color: Color, duration: float = 0.2):
 	if not sprite:
@@ -554,15 +593,16 @@ func take_damage(damage: int):
 		hp = min(max_hp, hp - damage)
 		_spawn_float(-damage, true)
 		if _am: _am.play_sfx("heal", self)
-		if multiplayer.is_server():
+		if multiplayer.is_server() or GlobalGameData.is_ai_mode:
 			var key = "host_healing_done" if is_host else "client_healing_done"
 			GlobalGameData.battle_stats[key] += -damage
 			print("[Combat] %s 恢复 %d 点 HP [%d/%d]" % [name, -damage, hp, max_hp])
+		if multiplayer.is_server():
 			rpc_id(0, "_sync_hp", hp)
 		return
 	
 	# MARK: take extra damage
-	var mark_pct = buff_manager.get_total(self, "mark") if buff_manager else 0
+	var mark_pct = buff_manager.get_total_by_type(self, BuffData.BuffType.MARK) if buff_manager else 0
 	if mark_pct > 0:
 		damage = damage * (100 + mark_pct) / 100
 		print("[Buff] %s 被标记，额外承受 %d%% 伤害！" % [name, mark_pct])
@@ -588,7 +628,7 @@ func take_damage(damage: int):
 	hp = max(0, hp - damage)
 	_spawn_float(damage)
 	_shake_camera(3.0)
-	if multiplayer.is_server():
+	if multiplayer.is_server() or GlobalGameData.is_ai_mode:
 		var key = "host_damage_dealt" if not is_host else "client_damage_dealt"
 		GlobalGameData.battle_stats[key] += damage
 		print("[Combat] %s 受到 %d 点伤害，剩余 HP: %d" % [name, damage, hp])
@@ -598,10 +638,10 @@ func take_damage(damage: int):
 		if _am: _am.play_sfx("death", self)
 		hide()
 		collision_layer = 0
-		main.unregister_character(self)
-		if multiplayer.is_server():
+		if multiplayer.is_server() or GlobalGameData.is_ai_mode:
 			var killer_key = "client_kills" if is_host else "host_kills"
 			GlobalGameData.battle_stats[killer_key] += 1
+		main.unregister_character(self)
 	if multiplayer.is_server():
 		rpc_id(0, "_sync_hp", hp)
 		rpc_id(0, "_sync_shield", shield)
@@ -651,8 +691,6 @@ func process_buffs():
 @rpc("any_peer", "call_local", "reliable")
 func _sync_shield(new_shield: int):
 	shield = new_shield
-	if floating_bar:
-		floating_bar.refresh()
 
 @rpc("any_peer", "call_local", "reliable")
 func _sync_buffs(new_buffs: Dictionary):

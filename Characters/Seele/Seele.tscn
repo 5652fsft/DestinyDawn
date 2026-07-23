@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://gcd7jp5i01be"]
 
-[ext_resource type="Script" uid="uid://btsv0s1u7c3u6" path="res://Characters/Seele/Seele.gd" id="1_md115"]
+[ext_resource type="Script" path="res://Characters/Seele/Seele.gd" id="1_md115"]
 [ext_resource type="PackedScene" uid="uid://dgleh5lfnpj7g" path="res://Characters/FloatingBar.tscn" id="3_md115"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_xa6pd"]

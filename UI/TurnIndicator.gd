@@ -89,6 +89,9 @@ func _on_EndTurnButton_pressed():
 	main.unselect_character(null, true)
 	if _is_my_turn():
 		print("[Info] 结束当前阶段，进入下一阶段")
-		main.rpc("advance_turn_phase")
+		if main.multiplayer.has_multiplayer_peer():
+			main.rpc("advance_turn_phase")
+		else:
+			main.advance_turn_phase()
 	else:
 		print("[Info] 不是你的回合")

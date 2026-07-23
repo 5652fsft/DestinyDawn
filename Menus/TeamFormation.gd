@@ -85,6 +85,7 @@ func _build_slot_uis():
 			var slot_idx = i
 			slot.gui_input.connect(func(event: InputEvent):
 				if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+					var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("deck_select")
 					_remove_slot(slot_idx))
 		else:
 			var empty = Panel.new()

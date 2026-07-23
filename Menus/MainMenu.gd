@@ -1,6 +1,7 @@
 ﻿extends Control
 
 func _ready():
+	_cleanup_multiplayer_peer()
 	GlobalGameData.load_defaults_if_empty()
 
 	# 应用按钮样式
@@ -103,8 +104,14 @@ func _on_deck_pressed():
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	get_tree().change_scene_to_file("res://Menus/DeckBuilder.tscn")
 
+func _cleanup_multiplayer_peer():
+	if multiplayer.multiplayer_peer:
+		multiplayer.multiplayer_peer.close()
+		multiplayer.multiplayer_peer = null
+
 func _on_solo_pressed():
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
+	_cleanup_multiplayer_peer()
 	GlobalGameData.load_defaults_if_empty()
 	GlobalGameData.is_host = true
 	GlobalGameData.is_ai_mode = true
@@ -112,6 +119,7 @@ func _on_solo_pressed():
 	get_tree().change_scene_to_file("res://Scenes/scene.tscn")
 
 func _on_host_pressed():
+	_cleanup_multiplayer_peer()
 	var peer = ENetMultiplayerPeer.new()
 	if peer.create_server(1145) != OK:
 		print("[Error] 服务器启动失败")
@@ -122,6 +130,7 @@ func _on_host_pressed():
 	get_tree().change_scene_to_file("res://Scenes/scene.tscn")
 
 func _on_join_pressed():
+	_cleanup_multiplayer_peer()
 	var ip = GlobalGameData.server_ip
 	if ip.is_empty():
 		ip = "127.0.0.1"

@@ -21,6 +21,7 @@ func _ready():
 	var bg = StyleBoxFlat.new()
 	bg.bg_color = Color(0.08, 0.08, 0.15, 0.85)
 	add_theme_stylebox_override("panel", bg)
+	$ScrollContainer/VBox.size_flags_vertical = 0
 
 func show_for(character: Node):
 	if not character:
@@ -101,8 +102,8 @@ func _update_buffs():
 		placeholder.bbcode_enabled = true
 		placeholder.text = "暂无效果"
 		placeholder.modulate = Color(1, 1, 1, 0.5)
-		placeholder.fit_content = true
 		placeholder.scroll_active = false
+		placeholder.custom_minimum_size = Vector2(0, 22)
 		buffs_container.add_child(placeholder)
 		buff_header.hide()
 		buff_label.hide()
@@ -117,8 +118,8 @@ func _update_buffs():
 			rtl.add_theme_font_override("normal_font", FONT)
 			rtl.bbcode_enabled = true
 			rtl.text = _buff_desc(key, entry)
-			rtl.fit_content = true
 			rtl.scroll_active = false
+			rtl.custom_minimum_size = Vector2(0, 22)
 			buffs_container.add_child(rtl)
 
 func _buff_desc(key: String, entry: Dictionary) -> String:

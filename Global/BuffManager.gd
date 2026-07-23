@@ -20,8 +20,11 @@ func apply_buff(target: Node, buff_id: String, value: int, duration: int, source
 			target.rpc("_sync_buffs", _pack(target))
 
 	var preset = _preset_for(buff_id)
-	if preset and target.has_method("rpc"):
-		target.rpc("_play_vfx_preset", preset)
+	if preset:
+		if target.has_method("play_vfx_preset_safe"):
+			target.play_vfx_preset_safe(preset)
+		elif target.has_method("rpc"):
+			target.rpc("_play_vfx_preset", preset)
 
 	_emit(target)
 	return true
@@ -106,6 +109,16 @@ func get_total(target: Node, buff_id: String) -> int:
 	var total = 0
 	for entry in list:
 		total += entry.value
+	return total
+
+func get_total_by_type(target: Node, buff_type: int) -> int:
+	if not target or not target.has_method("get_all_buffs"):
+		return 0
+	var total = 0
+	for buff_id in target.get_all_buffs().keys():
+		var data = BuffDatabase.get_buff_data(buff_id)
+		if data and data.type == buff_type:
+			total += get_total(target, buff_id)
 	return total
 
 func has_any(target: Node, buff_id: String) -> bool:

@@ -80,6 +80,7 @@ static func _execute_damage(card: CardData, target: Node, main: Node) -> bool:
 	if not target or not target.has_method("take_damage"):
 		return false
 	_rpc_take_damage(target, card.effect_value)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
 static func _execute_reckoning(card: CardData, target: Node, main: Node) -> bool:
@@ -94,6 +95,7 @@ static func _execute_reckoning(card: CardData, target: Node, main: Node) -> bool
 	if main.has_method("show_toast"):
 		main.show_toast("[惩戒] %s 身上 %d 个 buff，造成 %d 点伤害" % [target.character_name if "character_name" in target else target.name, buff_count, dmg], 1.5)
 	_rpc_take_damage(target, dmg)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
 static func _execute_fireball(card: CardData, target: Node, main: Node) -> bool:
@@ -101,6 +103,7 @@ static func _execute_fireball(card: CardData, target: Node, main: Node) -> bool:
 		return false
 	_rpc_take_damage(target, card.effect_value)
 	_apply_temp_buff(target, "burn", 5, 2)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
 static func _execute_ice_shard(card: CardData, target: Node) -> bool:
@@ -108,6 +111,7 @@ static func _execute_ice_shard(card: CardData, target: Node) -> bool:
 		return false
 	_rpc_take_damage(target, card.effect_value)
 	_apply_temp_buff(target, "move_debuff", -2, 1)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
 static func _execute_heal(card: CardData, target: Node) -> bool:
@@ -116,12 +120,17 @@ static func _execute_heal(card: CardData, target: Node) -> bool:
 	var heal_amount = min(card.effect_value, target.max_hp - target.hp)
 	if heal_amount <= 0:
 		return false
-	if target.has_method("rpc"):
+	if target.has_method("take_damage_safe"):
+		target.take_damage_safe(-heal_amount)
+	elif target.has_method("rpc"):
 		target.rpc("take_damage", -heal_amount)
-		target.rpc("_play_vfx_preset", "heal")
-		var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("heal", target)
 	else:
 		target.hp = min(target.max_hp, target.hp + heal_amount)
+	if target.has_method("play_vfx_preset_safe"):
+		target.play_vfx_preset_safe("heal")
+	elif target.has_method("rpc"):
+		target.rpc("_play_vfx_preset", "heal")
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("heal", target)
 	return true
 
 static func _execute_life_split(card: CardData, target: Node, main: Node) -> bool:
@@ -137,11 +146,16 @@ static func _execute_life_split(card: CardData, target: Node, main: Node) -> boo
 	var heal_amount = min(card.effect_value, target.max_hp - target.hp)
 	if heal_amount <= 0:
 		return false
-	if target.has_method("rpc"):
+	if target.has_method("take_damage_safe"):
+		target.take_damage_safe(-heal_amount)
+	elif target.has_method("rpc"):
 		target.rpc("take_damage", -heal_amount)
-		target.rpc("_play_vfx_preset", "heal")
 	else:
 		target.hp = min(target.max_hp, target.hp + heal_amount)
+	if target.has_method("play_vfx_preset_safe"):
+		target.play_vfx_preset_safe("heal")
+	elif target.has_method("rpc"):
+		target.rpc("_play_vfx_preset", "heal")
 	return true
 
 static func _execute_shield(card: CardData, target: Node) -> bool:
@@ -152,8 +166,11 @@ static func _execute_shield(card: CardData, target: Node) -> bool:
 	target.shield = target.shield + card.effect_value
 	if target.has_method("rpc"):
 		target.rpc("_sync_shield", target.shield)
+	if target.has_method("play_vfx_preset_safe"):
+		target.play_vfx_preset_safe("shield")
+	elif target.has_method("rpc"):
 		target.rpc("_play_vfx_preset", "shield")
-		var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("shield", target)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("shield", target)
 	return true
 
 static func _execute_shield_overload(card: CardData, target: Node) -> bool:
@@ -167,7 +184,11 @@ static func _execute_shield_overload(card: CardData, target: Node) -> bool:
 		target.shield = target.shield + card.effect_value
 	if target.has_method("rpc"):
 		target.rpc("_sync_shield", target.shield)
+	if target.has_method("play_vfx_preset_safe"):
+		target.play_vfx_preset_safe("shield")
+	elif target.has_method("rpc"):
 		target.rpc("_play_vfx_preset", "shield")
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("shield", target)
 	return true
 
 static func _execute_buff_attack(card: CardData, target: Node) -> bool:
@@ -191,6 +212,7 @@ static func _execute_frostbite(card: CardData, target: Node) -> bool:
 	if target and target.has_method("take_damage"):
 		_rpc_take_damage(target, 12)
 	_apply_temp_buff(target, "move_debuff", -card.effect_value, card.effect_duration)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
 static func _execute_poison_blade(card: CardData, target: Node) -> bool:
@@ -198,6 +220,7 @@ static func _execute_poison_blade(card: CardData, target: Node) -> bool:
 		return false
 	_rpc_take_damage(target, 4)
 	_apply_temp_buff(target, "poison", card.effect_value, card.effect_duration)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_sword", target)
 	return true
 
 static func _apply_temp_buff(target: Node, buff_key: String, value: int, duration: int) -> bool:
@@ -214,9 +237,13 @@ static func _apply_temp_buff(target: Node, buff_key: String, value: int, duratio
 		target.buffs[buff_key] = []
 	target.buffs[buff_key].append(entry)
 	if target.has_method("rpc"):
-		target.rpc("_sync_buffs", target.buffs.duplicate())
+		if target.multiplayer.has_multiplayer_peer():
+			target.rpc("_sync_buffs", target.buffs.duplicate())
 		var vfx_color = Color(1.0, 0.9, 0.2) if value > 0 else Color(0.6, 0.2, 0.8)
-		target.rpc("_play_vfx", vfx_color, 0.25)
+		if target.multiplayer.has_multiplayer_peer():
+			target.rpc("_play_vfx", vfx_color, 0.25)
+		else:
+			target._play_vfx(vfx_color, 0.25)
 	return true
 
 # ==================== 需要 selected_character 的机械效果 ====================
@@ -246,13 +273,17 @@ static func _execute_teleport(card: CardData, target: Node, main: Node) -> bool:
 			var world_pos = gl.to_global(gl.map_to_local(pick))
 			caster.global_position = world_pos
 			caster.target_world = world_pos
-	if caster.has_method("rpc"):
+	if caster.has_method("play_vfx_preset_safe"):
+		caster.play_vfx_preset_safe("entrance")
+	elif caster.has_method("rpc"):
 		caster.rpc("_play_vfx_preset", "entrance")
 	if card.effect_value > 0 and target.has_method("take_damage"):
 		_rpc_take_damage(target, card.effect_value)
-	if target.has_method("rpc"):
+	if target.has_method("play_vfx_preset_safe"):
+		target.play_vfx_preset_safe("hit")
+	elif target.has_method("rpc"):
 		target.rpc("_play_vfx_preset", "hit")
-		var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
 static func _execute_shadowstep_new(card: CardData, target: Node, main: Node) -> bool:
@@ -301,9 +332,13 @@ static func _execute_shadowstep_new(card: CardData, target: Node, main: Node) ->
 	target.velocity = Vector2.ZERO
 	if furthest_enemy.has_method("take_damage"):
 		_rpc_take_damage(furthest_enemy, card.effect_value)
-	if target.has_method("rpc"):
+	if target.has_method("play_vfx_preset_safe"):
+		target.play_vfx_preset_safe("entrance")
+	elif target.has_method("rpc"):
 		target.rpc("_play_vfx_preset", "entrance")
-	if furthest_enemy.has_method("rpc"):
+	if furthest_enemy.has_method("play_vfx_preset_safe"):
+		furthest_enemy.play_vfx_preset_safe("hit")
+	elif furthest_enemy.has_method("rpc"):
 		furthest_enemy.rpc("_play_vfx_preset", "hit")
 	var _am = Engine.get_singleton("AudioManager")
 	if _am: _am.play_sfx("attack_magic", furthest_enemy)
@@ -321,10 +356,15 @@ static func _execute_swap(card: CardData, target: Node, main: Node) -> bool:
 	target.global_position = caster_pos
 	if target.has_method("move_toward_target"):
 		target.target_world = caster_pos
-	if caster.has_method("rpc"):
+	if caster.has_method("play_vfx_preset_safe"):
+		caster.play_vfx_preset_safe("entrance")
+	elif caster.has_method("rpc"):
 		caster.rpc("_play_vfx_preset", "entrance")
-	if target.has_method("rpc"):
+	if target.has_method("play_vfx_preset_safe"):
+		target.play_vfx_preset_safe("entrance")
+	elif target.has_method("rpc"):
 		target.rpc("_play_vfx_preset", "entrance")
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
 static func _execute_draw_card(card: CardData, main: Node) -> bool:
@@ -340,6 +380,7 @@ static func _execute_siphon(card: CardData, target: Node, main: Node) -> bool:
 	if main and main.has_method("draw_extra_card"):
 		var caster = main.selected_character if main else null
 		main.draw_extra_card(caster, 1)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
 static func _execute_overload(card: CardData, target: Node, main: Node) -> bool:
@@ -352,6 +393,7 @@ static func _execute_overload(card: CardData, target: Node, main: Node) -> bool:
 		energy_node.set_energy(pid, cur + 2)
 	if target and target.has_method("take_damage"):
 		_rpc_take_damage(target, 5)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
 static func _execute_aoe_damage(card: CardData, target: Node, main: Node) -> bool:
@@ -366,8 +408,11 @@ static func _execute_aoe_damage(card: CardData, target: Node, main: Node) -> boo
 	for t in targets:
 		if t.has_method("take_damage") and _is_host_side(t) != is_caster_host:
 			_rpc_take_damage(t, dmg)
-	if caster and caster.has_method("rpc"):
-		caster.rpc("_play_vfx_preset", "explosion")
+	if caster:
+		if caster.has_method("play_vfx_preset_safe"):
+			caster.play_vfx_preset_safe("explosion")
+		elif caster.has_method("rpc"):
+			caster.rpc("_play_vfx_preset", "explosion")
 		var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
@@ -383,6 +428,7 @@ static func _execute_aoe_heal(card: CardData, target: Node, main: Node) -> bool:
 	for t in targets:
 		if t.has_method("take_damage") and _is_host_side(t) == is_caster_host:
 			_rpc_take_damage(t, -val)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("heal", target)
 	return true
 
 static func _execute_chain_lightning_new(card: CardData, primary: Node, main: Node) -> bool:
@@ -406,7 +452,9 @@ static func _execute_chain_lightning_new(card: CardData, primary: Node, main: No
 			_rpc_take_damage(c, 10)
 		elif dist == 2:
 			_rpc_take_damage(c, 5)
-	if primary.has_method("rpc"):
+	if primary.has_method("play_vfx_preset_safe"):
+		primary.play_vfx_preset_safe("explosion")
+	elif primary.has_method("rpc"):
 		primary.rpc("_play_vfx_preset", "explosion")
 	var _am = Engine.get_singleton("AudioManager")
 	if _am: _am.play_sfx("attack_magic", primary)
@@ -440,10 +488,13 @@ static func _execute_linear_aoe(card: CardData, target: Node, main: Node) -> boo
 		if dot > 0 and dot <= max_dist * 130.0:
 			var lateral = to.length() - dot
 			if lateral < 80.0:
-				if c.has_method("rpc"):
+				if c.has_method("take_damage_safe"):
+					c.take_damage_safe(card.effect_value)
+				elif c.has_method("rpc"):
 					c.rpc("take_damage", card.effect_value)
 				else:
 					c.take_damage(card.effect_value)
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
 # ==================== 通用工具 ====================
@@ -461,7 +512,9 @@ static func _is_host_side(node: Node) -> bool:
 	return node.name.begins_with("Host")
 
 static func _rpc_take_damage(node: Node, amount: int):
-	if node.has_method("rpc"):
+	if node.has_method("take_damage_safe"):
+		node.take_damage_safe(amount)
+	elif node.has_method("rpc"):
 		node.rpc("take_damage", amount)
 	else:
 		node.take_damage(amount)

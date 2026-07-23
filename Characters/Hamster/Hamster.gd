@@ -2,7 +2,6 @@ extends "res://Characters/BaseCharacter.gd"
 
 var active_skill: BaseSkill
 var passive_skill: BaseSkill
-var _extra_attacks: int = 0
 
 func _ready():
 	var _cd = CharacterData.get_data("hamster")

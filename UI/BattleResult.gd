@@ -1,8 +1,10 @@
 extends Panel
 
+@onready var retry_button = $VBoxContainer/ButtonVBox/RetryButton
+
 func _ready():
 	var bg = StyleBoxFlat.new()
-	bg.bg_color = Color(0, 0, 0, 0.7)
+	bg.bg_color = Color(0.08, 0.08, 0.12, 0.8)
 	add_theme_stylebox_override("panel", bg)
 
 	var card_style = StyleBoxFlat.new()
@@ -41,7 +43,11 @@ func _ready():
 	ButtonTheme.set_font($VBoxContainer/ButtonVBox/RetryButton, 22)
 	hide()
 
-func show_result(is_winner: bool, stats: Dictionary):
+func show_result(is_winner: bool, stats: Dictionary, is_multiplayer: bool = false):
+	if is_multiplayer:
+		retry_button.hide()
+	else:
+		retry_button.show()
 	# 自动隐藏手牌（与 F 键相同机制）
 	var main = get_node("/root/Main")
 	if main and main.has_method("_hide_hand"):
@@ -74,4 +80,5 @@ func _on_return_pressed():
 
 func _on_retry_pressed():
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
+	BackgroundSingleton.exit_battle()
 	get_tree().change_scene_to_file("res://Scenes/scene.tscn")

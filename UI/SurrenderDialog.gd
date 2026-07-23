@@ -5,7 +5,7 @@ var _hiding_hand: bool = false
 
 func _ready():
 	var overlay = StyleBoxFlat.new()
-	overlay.bg_color = Color(0, 0, 0, 0.7)
+	overlay.bg_color = Color(0.08, 0.08, 0.12, 0.8)
 	add_theme_stylebox_override("panel", overlay)
 
 	var card_bg = StyleBoxFlat.new()

@@ -42,7 +42,6 @@ var buff_manager: Node = null
 var vfx_manager: Node = null
 var field_effect_manager: Node = null
 @onready var skill_panel = $UI/SkillPanel
-@onready var passive_skill_panel = $UI/PassiveSkillPanel
 @onready var move_button = $UI/MoveButton
 @onready var attack_button = $UI/AttackButton
 @onready var host_player_panel = $UI/HostPlayerPanel
@@ -69,6 +68,8 @@ var skill_overlays: Array[Node] = []
 var _am:
 	get:
 		return Engine.get_singleton("AudioManager")
+
+var _waiting_overlay: Control = null
 
 func _build_team_from_selection():
 	team_roster.clear()
@@ -148,7 +149,7 @@ func _ready():
 		_log("双方角色已生成，卡牌系统已初始化", "Mode")
 		_setup_action_buttons()
 		_setup_ai_controller()
-		rpc("advance_turn_phase")
+		call_deferred("advance_turn_phase")
 		return
 
 	if not multiplayer.has_multiplayer_peer():
@@ -162,8 +163,9 @@ func _ready():
 		
 		_init_player_card_systems()
 		multiplayer.peer_connected.connect(_on_client_joined)
+		_show_waiting_overlay()
 		if not multiplayer.has_multiplayer_peer():
-			rpc("advance_turn_phase")
+			advance_turn_phase()
 	else:
 		pass
 	
@@ -181,11 +183,12 @@ func _setup_action_buttons():
 func _update_action_buttons(chara):
 	if not chara:
 		return
-	move_button.disabled = GlobalGameData.character_move_used.get(chara.name, false)
+	var is_active = chara.has_method("get_current_phase") and chara.get_current_phase() == "Active"
+	move_button.disabled = not is_active or GlobalGameData.character_move_used.get(chara.name, false)
 	move_button.modulate = Color(1, 1, 1, 0.5) if move_button.disabled else Color(1, 1, 1)
 	var atk_used = GlobalGameData.character_attack_used.get(chara.name, false)
 	var extra = chara._get_extra_attacks() if chara.has_method("_get_extra_attacks") else 0
-	attack_button.disabled = atk_used and extra <= 0
+	attack_button.disabled = not is_active or (atk_used and extra <= 0)
 	attack_button.modulate = Color(1, 1, 1, 0.5) if attack_button.disabled else Color(1, 1, 1)
 
 func _on_move_pressed():
@@ -333,10 +336,11 @@ func _spawn_client_characters(id: int):
 		_spawn_character(enemy_roster[i].resource_path, "Client%dCharacter_%d" % [id, i], id, GlobalGameData.client_birth_point[i])
 		rpc("_spawn_character_remote", enemy_roster[i].resource_path, "Client%dCharacter_%d" % [id, i], id, GlobalGameData.client_birth_point[i])
 	print("[Info] 开始游戏")
+	_hide_waiting_overlay()
 	rpc("advance_turn_phase")
 
 func _init_player_card_systems():
-	if not multiplayer.is_server():
+	if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
 		return
 	var host_id = multiplayer.get_unique_id()
 	var player_ids: Array[int] = [host_id, 2]
@@ -358,8 +362,11 @@ func unregister_character(chara: CharacterBody2D):
 	if selected_character == chara:
 		if highlight_layer:
 			highlight_layer.clear()
-	if multiplayer.is_server() and check_victory():
-		rpc("advance_turn_phase")
+	if (multiplayer.is_server() or GlobalGameData.is_ai_mode) and check_victory():
+		if multiplayer.has_multiplayer_peer():
+			rpc("advance_turn_phase")
+		else:
+			advance_turn_phase()
 			
 func select_character(chara: CharacterBody2D, enemy_view: bool = false):
 	if chara.hp <= 0:
@@ -383,10 +390,8 @@ func select_character(chara: CharacterBody2D, enemy_view: bool = false):
 	_update_action_buttons(chara)
 	if enemy_view:
 		skill_panel.hide()
-		passive_skill_panel.hide()
 	else:
 		skill_panel.show_for(chara)
-		_update_passive_panel(chara)
 
 func unselect_character(chara: CharacterBody2D, unselect_all = false):
 	if unselect_all:
@@ -399,7 +404,6 @@ func unselect_character(chara: CharacterBody2D, unselect_all = false):
 		is_viewing_enemy = false
 		character_info_panel.hide()
 		skill_panel.hide()
-		passive_skill_panel.hide()
 		move_button.hide()
 		attack_button.hide()
 	else:
@@ -411,7 +415,6 @@ func unselect_character(chara: CharacterBody2D, unselect_all = false):
 		is_viewing_enemy = false
 		character_info_panel.hide()
 		skill_panel.hide()
-		passive_skill_panel.hide()
 		move_button.hide()
 		attack_button.hide()
 	
@@ -593,7 +596,10 @@ func _try_select_character(_pos: Vector2):
 		else:
 			select_character(clicked_ally)
 	elif clicked_enemy:
-		select_character(clicked_enemy, true)
+		if clicked_enemy.is_selected:
+			unselect_character(clicked_enemy, true)
+		else:
+			select_character(clicked_enemy, true)
 	elif selected_character:
 		unselect_character(selected_character, true)
 
@@ -839,7 +845,10 @@ func _active_skill_post_exec(skill: BaseSkill):
 	_update_player_panels()
 	var pid = 1 if GlobalGameData.is_host else 2
 	var hand = deck_manager.get_hand(pid) if deck_manager else []
-	_sync_hand(pid, hand)
+	if multiplayer.has_multiplayer_peer():
+		rpc("_sync_hand", pid, hand)
+	else:
+		_sync_hand(pid, hand)
 	var energy = energy_system.get_energy(pid) if energy_system else 0
 	_sync_energy(pid, energy)
 	cancel_targeting()
@@ -898,17 +907,27 @@ func _check_anpan_passive(player_id: int):
 	for c in allies:
 		if c and c.character_name == "あんパン" and c.hp > 0:
 			deck_manager.draw_cards(player_id, 1)
+			var hand = deck_manager.get_hand(player_id)
 			var cur_energy = energy_system.get_energy(player_id)
 			energy_system.set_energy(player_id, cur_energy + 1)
+			if multiplayer.has_multiplayer_peer():
+				rpc("_sync_hand", player_id, hand)
+			else:
+				_sync_hand(player_id, hand)
 			print("[Passive] あんパン [面包大家族] 触发: 抽1张 + 回1能量")
 			break
 
 func draw_extra_card(chara: Node, count: int = 1):
-	if not multiplayer.is_server():
+	if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
 		return
 	var pid = get_current_player_id()
 	pid = max(1, pid)
 	deck_manager.draw_cards(pid, count)
+	var hand = deck_manager.get_hand(pid) if deck_manager else []
+	if multiplayer.has_multiplayer_peer():
+		rpc("_sync_hand", pid, hand)
+	else:
+		_sync_hand(pid, hand)
 
 func _get_my_characters() -> Array:
 	if GlobalGameData.is_host:
@@ -941,7 +960,7 @@ func get_current_player_id() -> int:
 # === 回合系统 ===
 @rpc("call_local", "reliable")
 func start_new_round():
-	if not multiplayer.is_server():
+	if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
 		return
 	
 	if not GlobalGameData.turn_has_been_drawn:
@@ -953,11 +972,13 @@ func start_new_round():
 	
 	GlobalGameData.battle_stats.turns_taken += 1
 	
-	rpc("reset_character_state")
-	rpc("draw_for_new_turn")
 	if multiplayer.has_multiplayer_peer():
+		rpc("reset_character_state")
+		rpc("draw_for_new_turn")
 		rpc("process_all_buffs")
 	else:
+		reset_character_state()
+		draw_for_new_turn()
 		process_all_buffs()
 	GlobalGameData.turn_has_been_drawn = true
 
@@ -971,7 +992,7 @@ func process_all_buffs():
 
 @rpc("call_local", "reliable")
 func draw_for_new_turn():
-	if not multiplayer.is_server():
+	if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
 		return
 	if not GlobalGameData.turn_has_been_drawn:
 		deck_manager.init_initial_draw(1)
@@ -993,9 +1014,17 @@ func _hide_hand():
 func _show_surrender_dialog():
 	if _surrender_dialog:
 		_surrender_dialog.show()
+		character_info_panel.hide()
+		skill_panel.hide()
+		move_button.hide()
+		attack_button.hide()
 		return
 	_surrender_dialog = load("res://UI/SurrenderDialog.tscn").instantiate()
 	$UI.add_child(_surrender_dialog)
+	character_info_panel.hide()
+	skill_panel.hide()
+	move_button.hide()
+	attack_button.hide()
 	if _am: _am.play_sfx("click")
 
 func _hide_surrender_dialog():
@@ -1006,30 +1035,85 @@ func _confirm_surrender():
 	_hide_surrender_dialog()
 	var targets = GlobalGameData.host_characters if GlobalGameData.is_host else GlobalGameData.client_characters
 	for c in targets:
-		if c and c.has_method("rpc"):
+		if c and c.has_method("take_damage_safe"):
+			c.take_damage_safe(9999)
+		elif c and c.has_method("rpc"):
 			c.rpc("take_damage", 9999)
 		elif c:
 			c.hp = 0
 	if multiplayer.has_multiplayer_peer():
-		GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.GAME_OVER
-		rpc_id(0, "_sync_turn_phase", GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats)
-	show_battle_result()
+		rpc_id(0, "_sync_surrender", GlobalGameData.is_host, GlobalGameData.battle_stats)
+	show_battle_result(true, GlobalGameData.is_host)
 
-func show_battle_result():
-	var is_host_win = GlobalGameData.host_characters.any(func(c): return c.hp > 0)
-	var i_win = is_host_win if GlobalGameData.is_host else not is_host_win
-	print("[Phase] 胜利方: %s" % ("服务端" if is_host_win else "客户端"))
+@rpc("any_peer", "call_local", "reliable")
+func _sync_surrender(surrendering_is_host: bool, stats: Dictionary = {}):
+	GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.GAME_OVER
+	if not stats.is_empty():
+		GlobalGameData.battle_stats = stats
+	show_battle_result(true, surrendering_is_host)
+
+func _show_waiting_overlay():
+	if _waiting_overlay:
+		return
+	if not multiplayer.is_server() or not multiplayer.has_multiplayer_peer():
+		return
+	_waiting_overlay = ColorRect.new()
+	_waiting_overlay.color = Color(0.08, 0.08, 0.12, 0.8)
+	_waiting_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_waiting_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	$UI.add_child(_waiting_overlay)
+	var font = load("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
+	var label = Label.new()
+	label.text = "等待玩家连接..."
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_override("font", font)
+	label.add_theme_font_size_override("font_size", 48)
+	label.add_theme_color_override("font_color", Color(0.85, 0.85, 0.9, 1))
+	_waiting_overlay.add_child(label)
+	label.anchor_left = 0.5
+	label.anchor_top = 0.5
+	label.anchor_right = 0.5
+	label.anchor_bottom = 0.5
+	label.offset_left = -200
+	label.offset_top = -75
+	label.offset_right = 200
+	label.offset_bottom = -5
+
+func _hide_waiting_overlay():
+	if _waiting_overlay:
+		_waiting_overlay.queue_free()
+		_waiting_overlay = null
+
+func show_battle_result(from_surrender: bool = false, surrendering_is_host: bool = false):
+	var i_win
+	if from_surrender:
+		i_win = GlobalGameData.is_host != surrendering_is_host
+		print("[Phase] 投降，胜利方: %s" % ("服务端" if i_win else "客户端"))
+	else:
+		var is_host_win = GlobalGameData.host_characters.any(func(c): return c.hp > 0)
+		i_win = is_host_win if GlobalGameData.is_host else not is_host_win
+		print("[Phase] 胜利方: %s" % ("服务端" if is_host_win else "客户端"))
 	if _am:
 		_am.stop_bgm(0.5)
 		_am.play_sfx("victory" if i_win else "defeat")
 	hand_panel.hide()
+	character_info_panel.hide()
+	skill_panel.hide()
+	move_button.hide()
+	attack_button.hide()
+	var is_multiplayer = multiplayer.has_multiplayer_peer()
 	if $UI.has_node("BattleResult"):
-		$UI/BattleResult.show_result(i_win, GlobalGameData.battle_stats)
+		$UI/BattleResult.show_result(i_win, GlobalGameData.battle_stats, is_multiplayer)
 
 func sync_all_card_state():
 	for pid in [1, 2]:
-		rpc_id(0, "_sync_energy", pid, energy_system.get_energy(pid))
-		rpc_id(0, "_sync_hand", pid, deck_manager.get_hand(pid))
+		if multiplayer.has_multiplayer_peer():
+			rpc_id(0, "_sync_energy", pid, energy_system.get_energy(pid))
+			rpc_id(0, "_sync_hand", pid, deck_manager.get_hand(pid))
+		else:
+			_sync_energy(pid, energy_system.get_energy(pid))
+			_sync_hand(pid, deck_manager.get_hand(pid))
 
 @rpc("any_peer", "call_local", "reliable")
 func reset_character_state() -> void:
@@ -1068,14 +1152,15 @@ func reset_character_state() -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func advance_turn_phase():
-	if not multiplayer.is_server():
+	if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
 		return
 		
 	if check_victory():
 		print("[Phase] 游戏结束")
 		GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.GAME_OVER
-		rpc_id(0, "_sync_turn_phase", GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats)
-		show_battle_result()
+		if multiplayer.has_multiplayer_peer():
+			rpc_id(0, "_sync_turn_phase", GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats)
+		_sync_turn_phase(GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats)
 		return
 	
 	match GlobalGameData.current_turn_phase:
@@ -1093,7 +1178,9 @@ func advance_turn_phase():
 			GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.START_ROUND
 			start_new_round()
 	
-	rpc_id(0, "_sync_turn_phase", GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn)
+	if multiplayer.has_multiplayer_peer():
+		rpc_id(0, "_sync_turn_phase", GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn)
+	_sync_turn_phase(GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn)
 
 @rpc("call_local", "reliable")
 func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn, stats: Dictionary = {}):
@@ -1106,7 +1193,6 @@ func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn,
 		selected_character = null
 		character_info_panel.hide()
 		skill_panel.hide()
-		passive_skill_panel.hide()
 		move_button.hide()
 		attack_button.hide()
 	if phase == GlobalGameData.TurnPhase.GAME_OVER:
@@ -1227,22 +1313,8 @@ func check_victory() -> bool:
 func _update_character_info_panel(chara):
 	if character_info_panel and character_info_panel.current_character == chara:
 		character_info_panel.refresh()
-		_update_passive_panel(chara)
+		skill_panel.update_passive(chara)
 		_update_action_buttons(chara)
-
-func _update_passive_panel(chara):
-	if not passive_skill_panel:
-		return
-	if "passive_skill" in chara and chara.passive_skill and character_info_panel.visible:
-		var ps = chara.passive_skill
-		passive_skill_panel.skill_name_label.text = "天赋·%s" % ps.skill_name
-		passive_skill_panel.skill_desc_label.text = ps.description
-		passive_skill_panel.skill_desc_label.update_minimum_size()
-		passive_skill_panel.cooldown_label.hide()
-		passive_skill_panel.use_button.hide()
-		passive_skill_panel.show()
-	else:
-		passive_skill_panel.hide()
 
 func is_my_turn() -> bool:
 	var phase = GlobalGameData.current_turn_phase
