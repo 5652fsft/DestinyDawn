@@ -1,11 +1,7 @@
 extends Node2D
 
-var _Logger = null
 func _log(msg: String, category: String = "AI"):
-	if _Logger == null:
-		_Logger = load("res://Global/AILogger.gd")
-	if _Logger:
-		_Logger.log(msg, category)
+	print("[%s] %s" % [category, msg])
 
 var selected_character = null
 var characters: Array[CharacterBody2D] = []

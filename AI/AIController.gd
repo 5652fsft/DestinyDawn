@@ -1,12 +1,8 @@
 class_name AIController
 extends Node
 
-var _Logger = null
 func _log(msg: String, category: String = "AI"):
-	if _Logger == null:
-		_Logger = load("res://Global/AILogger.gd")
-	if _Logger:
-		_Logger.log(msg, category)
+	print("[%s] %s" % [category, msg])
 
 # === 动作队列 ===
 var _action_queue: Array[Dictionary] = []
