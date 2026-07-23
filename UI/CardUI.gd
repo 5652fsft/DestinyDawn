@@ -201,7 +201,8 @@ func _on_hover_exit():
 	z_index = _saved_z
 	_hover_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	_hover_tween.tween_property(self, "scale", _base_scale, CardTheme.HOVER_TWEEN_SEC)
-	_hover_tween.parallel().tween_property(self, "self_modulate", Color.WHITE, CardTheme.HOVER_TWEEN_SEC)
+	var restore = Color.WHITE if _affordable else Color(0.6, 0.6, 0.65, CardTheme.DISABLED_ALPHA)
+	_hover_tween.parallel().tween_property(self, "self_modulate", restore, CardTheme.HOVER_TWEEN_SEC)
 
 	var panel_style: StyleBoxFlat = get_theme_stylebox("panel") as StyleBoxFlat
 	if panel_style:
