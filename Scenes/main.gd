@@ -316,6 +316,7 @@ func _init_field_effect_manager():
 func _on_client_joined(id: int):
 	print("[Net] 客户端 %d 加入" % id)
 	GlobalGameData.client_peer_id = id
+	rpc_id(id, "_sync_client_peer_id", id)
 	rpc_id(id, "_sync_opponent_name", GlobalGameData.player_name)
 	rpc_id(id, "_request_client_setup")
 	_build_team_from_selection()
@@ -333,6 +334,11 @@ func _sync_opponent_name(name: String):
 	for p in [$UI/HostPlayerPanel, $UI/ClientPlayerPanel]:
 		if p and p.has_method("refresh_name"):
 			p.refresh_name()
+
+@rpc("authority", "call_local", "reliable")
+func _sync_client_peer_id(id: int):
+	GlobalGameData.client_peer_id = id
+	print("[Net] 客户端 peer ID: ", id)
 
 @rpc("any_peer", "reliable")
 func _request_client_setup():
@@ -858,14 +864,15 @@ func _active_skill_post_exec(skill: BaseSkill):
 	_update_action_buttons(selected_character)
 	character_info_panel.refresh()
 	_update_player_panels()
-	var pid = _my_id()
-	var hand = deck_manager.get_hand(pid) if deck_manager else []
-	if multiplayer.has_multiplayer_peer():
-		rpc("_sync_hand", pid, hand)
-	else:
-		_sync_hand(pid, hand)
-	var energy = energy_system.get_energy(pid) if energy_system else 0
-	_sync_energy(pid, energy)
+	if multiplayer.is_server() or not multiplayer.has_multiplayer_peer():
+		var pid = _my_id()
+		var hand = deck_manager.get_hand(pid) if deck_manager else []
+		if multiplayer.has_multiplayer_peer():
+			rpc("_sync_hand", pid, hand)
+		else:
+			_sync_hand(pid, hand)
+	var energy = energy_system.get_energy(_my_id()) if energy_system else 0
+	_sync_energy(_my_id(), energy)
 	cancel_targeting()
 
 func _make_hex_overlay(color: Color, r: float = 68.0) -> Polygon2D:
