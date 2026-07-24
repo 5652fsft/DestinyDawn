@@ -155,7 +155,7 @@ func _build_action_queue():
 			var card_action = _evaluate_best_card(chara)
 			if not card_action.is_empty():
 				_action_queue.append(card_action)
-				_log("%s 将使用卡牌: %s" % [_char_label(chara), card_action.get("card_id", "?")])
+				_log("AI 将使用卡牌: %s" % card_action.get("card_id", "?"))
 		if not GlobalGameData.character_attack_used.get(chara.name, false) or (chara.has_method("_get_extra_attacks") and chara._get_extra_attacks() > 0):
 			var attack_target = _evaluate_attack_target(chara)
 			if attack_target != null:
