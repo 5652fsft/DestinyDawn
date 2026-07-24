@@ -329,7 +329,7 @@ func _execute_card(chara: Node, card_id: String, target: Node):
 	var target_path = ""
 	if target != null and is_instance_valid(target):
 		target_path = target.get_path()
-	_log("AI 使用 [%s]，目标: %s" % [card_data.card_name, target_path if target_path else "无"], "Card")
+	_log("AI 使用 [%s]，目标: %s" % [card_data.card_name, _char_label(target) if target and is_instance_valid(target) else "无"], "Card")
 	var prev_selected = _main.selected_character
 	_main.selected_character = chara
 	_main._execute_play_card(2, card_id, target_path)

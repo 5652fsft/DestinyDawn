@@ -812,7 +812,7 @@ func _sync_energy(player_id: int, value: int):
 @rpc("call_local", "reliable")
 func _sync_hand(player_id: int, hand: Array):
 	var my_pid = _my_id()
-	print("[Sync] _sync_hand player_id=", player_id, " my_pid=", my_pid, " hand=", hand)
+	print("[Sync] 同步手牌 player_id=", player_id, " my_pid=", my_pid, " hand=", hand)
 	if player_id == my_pid:
 		var typed: Array[String] = []
 		typed.assign(hand)
@@ -1020,9 +1020,9 @@ func process_all_buffs():
 @rpc("call_local", "reliable")
 func draw_for_new_turn():
 	if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
-		print("[Draw] skip: not server, not ai")
+		print("[Draw] 跳过：非服务器且非AI模式")
 		return
-	print("[Draw] start, turn_has_been_drawn=", GlobalGameData.turn_has_been_drawn, " cid=", GlobalGameData.client_peer_id)
+	print("[Draw] 开始抽牌，turn_has_been_drawn=", GlobalGameData.turn_has_been_drawn, " cid=", GlobalGameData.client_peer_id)
 	if not GlobalGameData.turn_has_been_drawn:
 		deck_manager.init_initial_draw(1)
 		deck_manager.init_initial_draw(GlobalGameData.client_peer_id)

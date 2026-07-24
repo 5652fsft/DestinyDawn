@@ -8,20 +8,20 @@ var initial_draw: int = 3
 var draw_per_turn: int = 1
 
 func init_player(player_id: int, deck_card_ids: Array[String]):
-	print("[Deck] init_player pid=", player_id, " cards=", deck_card_ids)
+	print("[Deck] 初始化玩家 pid=", player_id, " 卡牌=", deck_card_ids)
 	var shuffled: Array[String] = deck_card_ids.duplicate()
 	shuffled.shuffle()
 	player_decks[player_id] = shuffled
 	player_hands[player_id] = [] as Array[String]
 	player_discards[player_id] = [] as Array[String]
-	print("[Deck] init_player done, deck_size=", player_decks.get(player_id, []).size())
+	print("[Deck] 初始化完成，牌库大小=", player_decks.get(player_id, []).size())
 
 @rpc("authority", "call_local", "reliable")
 func draw_cards(player_id: int, count: int) -> Array[String]:
 	var drawn: Array[String] = []
-	print("[Deck] draw_cards pid=", player_id, " count=", count, " has_deck=", player_decks.has(player_id), " has_hand=", player_hands.has(player_id))
+	print("[Deck] 抽牌 pid=", player_id, " 数量=", count, " 有牌库=", player_decks.has(player_id), " 有手牌=", player_hands.has(player_id))
 	if not player_decks.has(player_id) or not player_hands.has(player_id):
-		print("[Deck] draw_cards FAIL: player not initialized")
+		print("[Deck] 抽牌失败：玩家未初始化")
 		return drawn
 	var deck: Array[String] = []
 	deck.assign(player_decks[player_id])

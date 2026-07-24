@@ -530,10 +530,11 @@ static func _apply_magic_resonance(card: CardData, main: Node):
 		return
 	if not "characters" in main:
 		return
+	var caster_is_host = main.current_card_player_id == 1 if "current_card_player_id" in main else true
 	for c in main.characters:
 		if not c or not c.has_method("get_buffs"):
 			continue
-		if not c.name.begins_with("Host"):
+		if c.name.begins_with("Host") != caster_is_host:
 			continue
 		if c.character_name != "伊蕾娜":
 			continue

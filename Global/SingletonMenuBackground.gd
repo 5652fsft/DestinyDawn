@@ -11,12 +11,12 @@ func _ready():
 	_is_ready = true
 
 func setup_background(path: String):
-	print("[SingletonMenuBackground] setup_background called with: ", path)
+	print("[SingletonMenuBackground] 设置背景: ", path)
 	if not _is_ready:
 		await ready
 	
 	if path.is_empty():
-		print("[SingletonMenuBackground] Setting empty background")
+		print("[SingletonMenuBackground] 设为空背景")
 		video_player.hide()
 		fallback.show()
 		_current_background_path = ""
@@ -24,12 +24,12 @@ func setup_background(path: String):
 	
 	# 如果已经是同一个背景，直接显示即可
 	if _current_background_path == path:
-		print("[SingletonMenuBackground] Same background, just showing")
+		print("[SingletonMenuBackground] 相同背景，直接显示")
 		video_player.show()
 		fallback.hide()
 		return
 	
-	print("[SingletonMenuBackground] Loading new background: ", path)
+	print("[SingletonMenuBackground] 加载新背景: ", path)
 	# 新背景，需要加载
 	_current_background_path = path
 	video_player.show()
@@ -38,10 +38,10 @@ func setup_background(path: String):
 	if stream:
 		video_player.stream = stream
 		video_player.play()
-		print("[SingletonMenuBackground] Background loaded and playing")
-		print("[SingletonMenuBackground] Video player state - visible: ", video_player.visible, " is_playing: ", video_player.is_playing(), " size: ", video_player.size)
+		print("[SingletonMenuBackground] 背景加载并播放")
+		print("[SingletonMenuBackground] 播放器状态 - 可见: ", video_player.visible, " 播放中: ", video_player.is_playing(), " 尺寸: ", video_player.size)
 	else:
-		print("[SingletonMenuBackground] Failed to load background")
+		print("[SingletonMenuBackground] 背景加载失败")
 		video_player.hide()
 		fallback.show()
 
