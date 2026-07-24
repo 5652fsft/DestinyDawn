@@ -517,6 +517,17 @@ static func _rpc_take_damage(node: Node, amount: int):
 		node.take_damage(amount)
 
 static func _apply_magic_resonance(card: CardData, main: Node):
+	var attack_types = [
+		CardData.EffectType.DAMAGE, CardData.EffectType.AOE_DAMAGE,
+		CardData.EffectType.CHAIN_DAMAGE, CardData.EffectType.DAMAGE_OVER_TIME,
+		CardData.EffectType.LINEAR_AOE
+	]
+	var debuff_types = [
+		CardData.EffectType.DEBUFF_ATTACK, CardData.EffectType.DEBUFF_MOVE,
+		CardData.EffectType.MARK, CardData.EffectType.TAUNT
+	]
+	if not (card.effect_type in attack_types or card.effect_type in debuff_types):
+		return
 	if not "characters" in main:
 		return
 	var caster_is_host = main.current_card_player_id == 1 if "current_card_player_id" in main else true
