@@ -78,7 +78,7 @@ theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
 [node name="BuffScrollContainer" type="ScrollContainer" parent="VBoxMain" unique_id=832753707]
-custom_minimum_size = Vector2(0, 120)
+custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
 size_flags_vertical = 0
 vertical_scroll_mode = 3

@@ -51,16 +51,20 @@ func refresh():
 		$VBoxMain.offset_bottom = 680
 		$VBoxMain/AttrScrollContainer.vertical_scroll_mode = 3
 		$VBoxMain/BuffScrollContainer.vertical_scroll_mode = 3
-		$VBoxMain/AttrScrollContainer.custom_minimum_size.y = 300
-		$VBoxMain/BuffScrollContainer.custom_minimum_size.y = 250
+		$VBoxMain/AttrScrollContainer.size_flags_vertical = 3
+		$VBoxMain/BuffScrollContainer.size_flags_vertical = 2
+		$VBoxMain/AttrScrollContainer.custom_minimum_size = Vector2(0, 0)
+		$VBoxMain/BuffScrollContainer.custom_minimum_size = Vector2(0, 0)
 	else:
 		$VBoxMain/AttrScrollContainer.vertical_scroll_mode = 3
 		$VBoxMain/BuffScrollContainer.vertical_scroll_mode = 3
+		$VBoxMain/AttrScrollContainer.size_flags_vertical = 0
+		$VBoxMain/BuffScrollContainer.size_flags_vertical = 0
+		$VBoxMain/AttrScrollContainer.custom_minimum_size = Vector2(0, 164)
+		$VBoxMain/BuffScrollContainer.custom_minimum_size = Vector2(0, 96)
 		name_label.text = current_character.character_name
 		modulate = Color(1, 1, 1)
 		$VBoxMain.offset_bottom = 407
-		$VBoxMain/AttrScrollContainer.custom_minimum_size.y = 164
-		$VBoxMain/BuffScrollContainer.custom_minimum_size.y = 120
 
 	var atk_used = GlobalGameData.character_attack_used.get(current_character.name, false)
 	var extra = current_character._get_extra_attacks() if current_character.has_method("_get_extra_attacks") else 0
