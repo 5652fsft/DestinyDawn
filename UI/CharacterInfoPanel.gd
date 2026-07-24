@@ -4,14 +4,10 @@ const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 
 @onready var name_label = $VBoxMain/NameLabel
 @onready var action_label = $VBoxMain/ActionLabel
-@onready var hp_label = $VBoxMain/AttrScrollContainer/AttrVBox/HPLabel
-@onready var attack_label = $VBoxMain/AttrScrollContainer/AttrVBox/AttackLabel
-@onready var move_label = $VBoxMain/AttrScrollContainer/AttrVBox/MovePointsLabel
-@onready var attack_range_label = $VBoxMain/AttrScrollContainer/AttrVBox/AttackRangeLabel
-@onready var shield_label = $VBoxMain/AttrScrollContainer/AttrVBox/ShieldLabel
-@onready var buff_header = $VBoxMain/BuffScrollContainer/BuffVBox/BuffHeader
-@onready var buff_label = $VBoxMain/BuffScrollContainer/BuffVBox/BuffLabel
-@onready var buffs_container = $VBoxMain/BuffScrollContainer/BuffVBox/BuffsContainer
+@onready var attr_rich_label = $VBoxMain/AttrRichLabel
+@onready var buff_rich_label = $VBoxMain/BuffRichLabel
+@onready var buff_header = $VBoxMain/BuffHeader
+@onready var buff_label = $VBoxMain/BuffLabel
 
 var current_character: Node = null
 
@@ -49,19 +45,15 @@ func refresh():
 		name_label.text = "敌方·%s" % current_character.character_name
 		modulate = Color(1.0, 0.85, 0.85)
 		$VBoxMain.offset_bottom = 680
-		$VBoxMain/AttrScrollContainer.vertical_scroll_mode = 3
-		$VBoxMain/BuffScrollContainer.vertical_scroll_mode = 3
-		$VBoxMain/AttrScrollContainer.size_flags_vertical = 3
-		$VBoxMain/BuffScrollContainer.size_flags_vertical = 2
-		$VBoxMain/AttrScrollContainer.custom_minimum_size = Vector2(0, 164)
-		$VBoxMain/BuffScrollContainer.custom_minimum_size = Vector2(0, 96)
+		attr_rich_label.size_flags_vertical = 3
+		buff_rich_label.size_flags_vertical = 2
+		attr_rich_label.custom_minimum_size = Vector2(310, 0)
+		buff_rich_label.custom_minimum_size = Vector2(310, 0)
 	else:
-		$VBoxMain/AttrScrollContainer.vertical_scroll_mode = 3
-		$VBoxMain/BuffScrollContainer.vertical_scroll_mode = 3
-		$VBoxMain/AttrScrollContainer.size_flags_vertical = 0
-		$VBoxMain/BuffScrollContainer.size_flags_vertical = 0
-		$VBoxMain/AttrScrollContainer.custom_minimum_size = Vector2(0, 164)
-		$VBoxMain/BuffScrollContainer.custom_minimum_size = Vector2(0, 96)
+		attr_rich_label.size_flags_vertical = 0
+		buff_rich_label.size_flags_vertical = 0
+		attr_rich_label.custom_minimum_size = Vector2(310, 164)
+		buff_rich_label.custom_minimum_size = Vector2(310, 96)
 		name_label.text = current_character.character_name
 		modulate = Color(1, 1, 1)
 		$VBoxMain.offset_bottom = 407
@@ -70,13 +62,13 @@ func refresh():
 	var extra = current_character._get_extra_attacks() if current_character.has_method("_get_extra_attacks") else 0
 	var remaining = (0 if atk_used else 1) + extra
 
-	var move_pts = current_character.effective_move_points if "effective_move_points" in current_character else current_character.move_points
 	var move_used = GlobalGameData.character_move_used.get(current_character.name, false)
 	var move_remaining = 0 if move_used else 1
 
 	action_label.text = "剩余行动: %d | 移动: %d" % [remaining, move_remaining]
 
-	hp_label.text = "生命值: %d / %d" % [current_character.hp, current_character.max_hp]
+	var attr_lines = []
+	attr_lines.append("生命值: %d / %d" % [current_character.hp, current_character.max_hp])
 
 	var base_atk = current_character.attack
 	var buffed_atk = current_character.effective_attack if "effective_attack" in current_character else base_atk
@@ -84,48 +76,31 @@ func refresh():
 		var diff = buffed_atk - base_atk
 		var sign = "+" if diff > 0 else ""
 		var color = "green" if diff > 0 else "red"
-		attack_label.text = "攻击力: %d  [color=%s]%s%d[/color]" % [base_atk, color, sign, diff]
+		attr_lines.append("攻击力: %d  [color=%s]%s%d[/color]" % [base_atk, color, sign, diff])
 	else:
-		attack_label.text = "攻击力: %d" % base_atk
+		attr_lines.append("攻击力: %d" % base_atk)
 
-	move_label.text = "移动范围: %d" % move_pts
-
-	var atk_range = current_character.attack_range if "attack_range" in current_character else 1
-	attack_range_label.text = "攻击范围: %d" % atk_range
+	attr_lines.append("移动范围: %d" % (current_character.effective_move_points if "effective_move_points" in current_character else current_character.move_points))
+	attr_lines.append("攻击范围: %d" % (current_character.attack_range if "attack_range" in current_character else 1))
 
 	if "shield" in current_character and current_character.shield > 0:
-		shield_label.show()
-		shield_label.text = "护盾: %d" % current_character.shield
-	else:
-		shield_label.hide()
+		attr_lines.append("护盾: %d" % current_character.shield)
+
+	attr_rich_label.text = "\n".join(attr_lines)
 
 	_update_buffs()
 
 func _update_buffs():
-	for child in buffs_container.get_children():
-		child.queue_free()
-	if not current_character or not "buffs" in current_character or current_character.buffs.is_empty():
-		var placeholder = RichTextLabel.new()
-		placeholder.add_theme_font_size_override("normal_font_size", 14)
-		placeholder.add_theme_font_override("normal_font", FONT)
-		placeholder.bbcode_enabled = true
-		placeholder.text = "暂无效果"
-		placeholder.modulate = Color(1, 1, 1, 0.5)
-		placeholder.scroll_active = false
-		placeholder.custom_minimum_size = Vector2(0, 22)
-		buffs_container.add_child(placeholder)
-		return
-	for key in current_character.buffs:
-		var list = current_character.buffs[key]
-		for entry in list:
-			var rtl = RichTextLabel.new()
-			rtl.add_theme_font_size_override("normal_font_size", 14)
-			rtl.add_theme_font_override("normal_font", FONT)
-			rtl.bbcode_enabled = true
-			rtl.text = _buff_desc(key, entry)
-			rtl.scroll_active = false
-			rtl.custom_minimum_size = Vector2(0, 22)
-			buffs_container.add_child(rtl)
+	var lines = []
+	if current_character and "buffs" in current_character and not current_character.buffs.is_empty():
+		for key in current_character.buffs:
+			var list = current_character.buffs[key]
+			for entry in list:
+				lines.append(_buff_desc(key, entry))
+	if lines.is_empty():
+		buff_rich_label.text = "[color=#808080]暂无效果[/color]"
+	else:
+		buff_rich_label.text = "\n".join(lines)
 
 func _buff_desc(key: String, entry: Dictionary) -> String:
 	var dur = entry.get("remaining", 0)
