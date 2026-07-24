@@ -206,7 +206,7 @@ func _on_move_pressed():
 		return
 	if _am: _am.play_sfx("click")
 	if selected_character.get_current_phase() != "Active":
-		print("[Warn] 移动按钮：不在 Active 阶段")
+		print("[Warn] 移动按钮：不在行动回合")
 		return
 	if GlobalGameData.character_move_used.get(selected_character.name, false):
 		show_toast("该角色本回合已移动")
@@ -229,7 +229,7 @@ func _on_attack_pressed():
 		return
 	if _am: _am.play_sfx("click")
 	if selected_character.get_current_phase() != "Active":
-		print("[Warn] 攻击按钮：不在 Active 阶段")
+		print("[Warn] 攻击按钮：不在行动回合")
 		return
 	if GlobalGameData.character_attack_used.get(selected_character.name, false):
 		var extra = selected_character._get_extra_attacks() if selected_character.has_method("_get_extra_attacks") else 0
@@ -1327,7 +1327,7 @@ func check_attack() -> void:
 		var extra = c._get_extra_attacks() if c.has_method("_get_extra_attacks") else 0
 		total_remaining += (0 if used else 1) + extra
 	if total_remaining <= 0:
-		print("[Phase] 所有角色行动次数已耗尽，点击结束回合进入下一阶段")
+		print("[Phase] 所有角色行动次数已耗尽，点击结束回合")
 		if toast and toast.has_method("show_message"):
 			toast.show_message("所有角色行动次数已耗尽，点击结束回合", 2.0)
 

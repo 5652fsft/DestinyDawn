@@ -84,7 +84,7 @@ func _process(_delta):
 		if is_my_turn:
 			_focus_on_player_characters()
 		if _current_phase != -1:
-			_log("阶段变化: %d -> %d，清理旧队列" % [_current_phase, GlobalGameData.current_turn_phase])
+			_log("回合变化: %d -> %d，清理旧队列" % [_current_phase, GlobalGameData.current_turn_phase])
 		_action_queue.clear()
 		_busy = false
 		_current_phase = GlobalGameData.current_turn_phase
@@ -104,7 +104,7 @@ func _process(_delta):
 	if _action_queue.is_empty():
 		_build_action_queue()
 		if _action_queue.is_empty():
-			_log("无待执行动作，结束阶段", "EndTurn")
+			_log("无待执行动作，结束回合", "EndTurn")
 			_end_phase()
 			return
 		_busy = true
@@ -716,7 +716,7 @@ func _score_card(card: CardData, chara: Node, target: Node) -> int:
 # ==================== 辅助函数 ====================
 
 func _end_phase():
-	_log("AI 结束当前阶段，调用 advance_turn_phase", "EndTurn")
+	_log("AI 结束当前回合，调用 advance_turn_phase", "EndTurn")
 	_main.unselect_character(null, true)
 	_main.advance_turn_phase()
 

@@ -130,7 +130,7 @@ func _update_cooldown():
 		var phase = current_character.get_current_phase()
 		if phase != "Active":
 			use_button.disabled = true
-			use_button.text = "不符合当前阶段"
+			use_button.text = "不在当前回合"
 			return
 	if current_character and GlobalGameData.character_attack_used.get(current_character.name, false):
 		if not current_character.has_method("_consumes_attack_on_skill") or current_character._consumes_attack_on_skill():
