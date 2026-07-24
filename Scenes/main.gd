@@ -3,6 +3,12 @@ extends Node2D
 func _log(msg: String, category: String = "AI"):
 	print("[%s] %s" % [category, msg])
 
+func _char_label(c) -> String:
+	if not c:
+		return "?"
+	var is_player_side = c.name.begins_with("Host") == GlobalGameData.is_host
+	return ("玩家/" if is_player_side else "对手/") + c.character_name
+
 var selected_character = null
 var characters: Array[CharacterBody2D] = []
 var cell_occupancy: Dictionary = {}
@@ -621,14 +627,14 @@ func _my_id() -> int:
 
 func on_card_played(card_data: CardData):
 	var my_pid = _my_id()
-	var who = "Host" if GlobalGameData.is_host else "Client"
+	var who_label = _char_label(selected_character) if selected_character else ("玩家" if GlobalGameData.is_host else "玩家")
 	if get_current_player_id() != my_pid:
 		return
 	if not energy_system.can_afford(my_pid, card_data.cost):
 		show_toast("能量不足！需要 %d 能量" % card_data.cost)
-		print("[Warn] %s 能量不足，无法使用 %s" % [who, card_data.card_name])
+		print("[Warn] %s 能量不足，无法使用 %s" % [who_label, card_data.card_name])
 		return
-	print("[Card] %s 选中卡牌 [%s]" % [who, card_data.card_name])
+	print("[Card] %s 选中卡牌 [%s]" % [who_label, card_data.card_name])
 	if card_data.target_type == CardData.TargetType.NONE:
 		if multiplayer.has_multiplayer_peer():
 			rpc("_server_play_card", my_pid, card_data.id, "")
@@ -719,8 +725,8 @@ func _on_target_selected(target: Node):
 			show_toast("目标选择无效")
 			cancel_targeting()
 			return
-		var player_name = GlobalGameData.player_name if GlobalGameData.is_host else ("AI" if GlobalGameData.is_ai_mode else "Client")
-		print("[Info] %s 对 %s 使用 [%s]" % [player_name, target.name, card_data.card_name])
+		var who_label = _char_label(selected_character) if selected_character else ("玩家" if GlobalGameData.is_host else "玩家")
+		print("[Info] %s 对 %s 使用 [%s]" % [who_label, _char_label(target), card_data.card_name])
 		_target_play_card(card_data, target)
 		hand_panel.remove_card_via_data(card_data)
 		cancel_targeting()
@@ -765,9 +771,8 @@ func _execute_play_card(player_id: int, card_id: String, target_path: String):
 	var target: Node = null
 	if target_path and not target_path.is_empty():
 		target = get_node_or_null(target_path)
-	var player_name = GlobalGameData.player_name if player_id == 1 else ("AI" if GlobalGameData.is_ai_mode else "Client")
-
-	print("[Card] %s 使用 [%s]，目标: %s" % [player_name, card_data.card_name, target.name if target else "无"])
+	var who_label = "玩家" if player_id == _my_id() else "对手"
+	print("[Card] %s 使用 [%s]，目标: %s" % [who_label, card_data.card_name, _char_label(target) if target else "无"])
 	if _am: _am.play_sfx("card_play")
 
 	# 战斗统计：记录卡牌使用
@@ -1179,7 +1184,7 @@ func reset_character_state() -> void:
 				c._extra_attacks += 1
 			if buff_manager and buff_manager.has_method("apply_buff"):
 				buff_manager.apply_buff(c, "legacy", 50, 2, c)
-				print("[Passive] karrigan 死亡触发：%s 获得额外行动 + 传承" % c.character_name)
+				print("[Passive] karrigan 死亡触发：%s 获得额外行动 + 传承" % _char_label(c))
 
 	# 烟雾递减
 	if field_effect_manager and field_effect_manager.has_method("tick_smoke"):

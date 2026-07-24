@@ -37,7 +37,7 @@ func take_damage(damage: int):
 			var last = main_node.get("last_attacker") if main_node else null
 			if last:
 				buff_manager.apply_buff(last, "burn", 5, 2, self)
-				print("[Skill] %s [燃烧装甲] → %s 灼烧 5×2回合" % [character_name, last.name])
+				print("[Skill] %s [燃烧装甲] → %s 灼烧 5×2回合" % [_char_label(self), _char_label(last)])
 	super(damage)
 
 func use_active_skill(target: Node) -> bool:

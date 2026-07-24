@@ -46,4 +46,4 @@ func perform_attack(target_path: NodePath):
 	if target and target.hp <= 0 and not target.visible and main and main.buff_manager:
 		_extra_attacks += 1
 		main.buff_manager.apply_buff(self, "bloodthirst", 50, 2, self)
-		print("[Skill] %s [钢铁直架] 击杀获得1次额外行动，1层嗜血成性" % character_name)
+		print("[Skill] %s [钢铁直架] 击杀获得1次额外行动，1层嗜血成性" % _char_label(self))

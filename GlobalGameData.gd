@@ -114,3 +114,9 @@ var client_birth_point = [
 	Vector2(1260, -698),  # cell (6, -13)
 	Vector2(1260, -257),  # cell (8, -11)
 ]
+
+func get_char_label(c) -> String:
+	if not c:
+		return "?"
+	var is_player_side = c.name.begins_with("Host") == is_host
+	return ("玩家/" if is_player_side else "对手/") + c.character_name

@@ -376,6 +376,12 @@ func _is_mouse_over_ui() -> bool:
 		ctrl = ctrl.get_parent()
 	return false
 
+func _char_label(c) -> String:
+	if not c:
+		return "?"
+	var is_player_side = c.name.begins_with("Host") == GlobalGameData.is_host
+	return ("玩家/" if is_player_side else "对手/") + c.character_name
+
 func handle_move():
 	if hp <= 0:
 		return
@@ -418,7 +424,7 @@ func handle_move():
 			
 			var target_local = grid_layer.map_to_local(cell_coord)
 			target_world = grid_layer.to_global(target_local)
-			print("[Move] %s → (%d, %d) 消耗 %d" % [name, cell_coord.x, cell_coord.y, valid_move_cells[cell_coord]])
+			print("[Move] %s → (%d, %d) 消耗 %d" % [_char_label(self), cell_coord.x, cell_coord.y, valid_move_cells[cell_coord]])
 			GlobalGameData.character_move_used[name] = true
 			GlobalGameData.character_move_used_num += 1
 		hide_move_range()
@@ -464,7 +470,7 @@ func handle_attack():
 					main.check_attack()
 				else:
 					main.show_toast("超出攻击范围")
-					print("[Warn] %s 目标超出攻击范围！" % name)
+					print("[Warn] %s 目标超出攻击范围！" % _char_label(self))
 				return
 			main.unselect_character(self)
 
@@ -492,7 +498,7 @@ func perform_attack(target_path: NodePath):
 	if main:
 		main.last_attacker = self
 	target.take_damage(effective_attack)
-	print("[Combat] %s → %s 造成 %d 点伤害" % [name, target.name, effective_attack])
+	print("[Combat] %s → %s 造成 %d 点伤害" % [_char_label(self), _char_label(target), effective_attack])
 	
 	# 同步动画（所有客户端）
 	if multiplayer.has_multiplayer_peer():
@@ -596,7 +602,7 @@ func take_damage(damage: int):
 		if multiplayer.is_server() or GlobalGameData.is_ai_mode:
 			var key = "host_healing_done" if is_host else "client_healing_done"
 			GlobalGameData.battle_stats[key] += -damage
-			print("[Combat] %s 恢复 %d 点 HP [%d/%d]" % [name, -damage, hp, max_hp])
+			print("[Combat] %s 恢复 %d 点 HP [%d/%d]" % [_char_label(self), -damage, hp, max_hp])
 		if multiplayer.is_server():
 			rpc_id(0, "_sync_hp", hp)
 		return
@@ -605,16 +611,16 @@ func take_damage(damage: int):
 	var mark_pct = buff_manager.get_total_by_type(self, BuffData.BuffType.MARK) if buff_manager else 0
 	if mark_pct > 0:
 		damage = damage * (100 + mark_pct) / 100
-		print("[Buff] %s 被标记，额外承受 %d%% 伤害！" % [name, mark_pct])
+		print("[Buff] %s 被标记，额外承受 %d%% 伤害！" % [_char_label(self), mark_pct])
 	
 	# 防御减免：defense_buff 为正数减伤，负数易伤
 	var def_val = buff_manager.get_total(self, "defense_buff") if buff_manager else 0
 	if def_val != 0:
 		damage = max(1, damage - def_val)
 		if def_val > 0:
-			print("[Buff] %s 防御减免 %d 点伤害" % [name, def_val])
+			print("[Buff] %s 防御减免 %d 点伤害" % [_char_label(self), def_val])
 		else:
-			print("[Buff] %s 易伤额外承受 %d 点伤害" % [name, -def_val])
+			print("[Buff] %s 易伤额外承受 %d 点伤害" % [_char_label(self), -def_val])
 	
 	var absorbed = min(shield, damage)
 	shield -= absorbed
@@ -623,7 +629,7 @@ func take_damage(damage: int):
 		_spawn_float(absorbed, false, true)
 		if _am: _am.play_sfx("shield", self)
 		if multiplayer.is_server():
-			print("[Combat] %s 护盾吸收 %d 点伤害，剩余护盾: %d" % [name, absorbed, shield])
+			print("[Combat] %s 护盾吸收 %d 点伤害，剩余护盾: %d" % [_char_label(self), absorbed, shield])
 	
 	hp = max(0, hp - damage)
 	_spawn_float(damage)
@@ -631,7 +637,7 @@ func take_damage(damage: int):
 	if multiplayer.is_server() or GlobalGameData.is_ai_mode:
 		var key = "host_damage_dealt" if not is_host else "client_damage_dealt"
 		GlobalGameData.battle_stats[key] += damage
-		print("[Combat] %s 受到 %d 点伤害，剩余 HP: %d" % [name, damage, hp])
+		print("[Combat] %s 受到 %d 点伤害，剩余 HP: %d" % [_char_label(self), damage, hp])
 	if hp <= 0:
 		if not visible:
 			return

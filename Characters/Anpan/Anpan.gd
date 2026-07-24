@@ -38,4 +38,4 @@ func perform_attack(target_path: NodePath):
 		return
 	if main and main.buff_manager and main.buff_manager.has_method("apply_buff"):
 		main.buff_manager.apply_buff(target, "hot_burn", 5, 2, self)
-		print("[Passive] あんパン [面包大家族] 对 %s 施加高温烫嘴" % target.name)
+		print("[Passive] あんパン [面包大家族] 对 %s 施加高温烫嘴" % _char_label(target))

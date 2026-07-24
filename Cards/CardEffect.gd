@@ -93,7 +93,7 @@ static func _execute_reckoning(card: CardData, target: Node, main: Node) -> bool
 		buff_count += target.buffs[key].size()
 	var dmg = max(1, card.effect_value * buff_count)
 	if main.has_method("show_toast"):
-		main.show_toast("[惩戒] %s 身上 %d 个 buff，造成 %d 点伤害" % [target.character_name if "character_name" in target else target.name, buff_count, dmg], 1.5)
+		main.show_toast("[惩戒] %s 身上 %d 个 buff，造成 %d 点伤害" % [GlobalGameData.get_char_label(target), buff_count, dmg], 1.5)
 	_rpc_take_damage(target, dmg)
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
@@ -342,7 +342,7 @@ static func _execute_shadowstep_new(card: CardData, target: Node, main: Node) ->
 		furthest_enemy.rpc("_play_vfx_preset", "hit")
 	var _am = Engine.get_singleton("AudioManager")
 	if _am: _am.play_sfx("attack_magic", furthest_enemy)
-	print("[Card] 暗影步：%s 瞬移至 %s 旁，造成 %d 点伤害" % [target.name, furthest_enemy.name, card.effect_value])
+	print("[Card] 暗影步：%s 瞬移至 %s 旁，造成 %d 点伤害" % [GlobalGameData.get_char_label(target), GlobalGameData.get_char_label(furthest_enemy), card.effect_value])
 	return true
 
 static func _execute_swap(card: CardData, target: Node, main: Node) -> bool:
@@ -455,7 +455,7 @@ static func _execute_chain_lightning_new(card: CardData, primary: Node, main: No
 		primary.rpc("_play_vfx_preset", "explosion")
 	var _am = Engine.get_singleton("AudioManager")
 	if _am: _am.play_sfx("attack_magic", primary)
-	print("[Card] 闪电链：%s 主目标 %d 点伤害，溅射周围敌人" % [primary.name, card.effect_value])
+	print("[Card] 闪电链：%s 主目标 %d 点伤害，溅射周围敌人" % [GlobalGameData.get_char_label(primary), card.effect_value])
 	return true
 
 static func _hex_distance(a: Vector2i, b: Vector2i) -> int:
@@ -542,7 +542,7 @@ static func _apply_magic_resonance(card: CardData, main: Node):
 		var bm = main.get_node_or_null("BuffManager")
 		if bm and bm.has_method("apply_buff"):
 			bm.apply_buff(c, "magic_flow", 15, 2)
-			print("[Passive] %s [魔力充盈] 获得一层攻击力 +15%%" % c.character_name)
+			print("[Passive] %s [魔力充盈] 获得一层攻击力 +15%%" % GlobalGameData.get_char_label(c))
 		return
 
 static func _execute_cleanse(target: Node) -> bool:

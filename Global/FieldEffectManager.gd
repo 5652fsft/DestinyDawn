@@ -31,9 +31,8 @@ func clear_smoke():
 func on_move_complete(character: Node, cell: Vector2i):
 	if not is_in_smoke(cell):
 		return
-	var name = character.name if character.has_method("get_name") else ""
-	GlobalGameData.character_move_used[name] = false
-	print("[FieldEffect] %s 停留在烟雾中，本次移动不消耗次数" % name)
+	GlobalGameData.character_move_used[character.name] = false
+	print("[FieldEffect] %s 停留在烟雾中，本次移动不消耗次数" % GlobalGameData.get_char_label(character))
 
 func _update_visuals(grid_layer: TileMapLayer):
 	_clear_visuals()

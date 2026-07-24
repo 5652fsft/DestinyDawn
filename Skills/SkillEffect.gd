@@ -28,7 +28,7 @@ static func execute_active(character: Node, skill: BaseSkill, target: Node, main
 		return false
 
 	if not _is_valid_target_for_skill(character, skill, target):
-		print("[Skill] %s 目标类型不匹配（%s）" % [character.character_name, skill.target_type])
+		print("[Skill] %s 目标类型不匹配（%s）" % [GlobalGameData.get_char_label(character), skill.target_type])
 		return false
 
 	if skill.skill_range > 0:
@@ -37,7 +37,7 @@ static func execute_active(character: Node, skill: BaseSkill, target: Node, main
 		var target_cell = main._get_character_cell(target)
 		var reachable = get_cells_in_range(grid_layer, char_cell, skill.skill_range)
 		if not reachable.has(target_cell):
-			print("[Skill] %s 目标超出技能范围" % character.character_name)
+			print("[Skill] %s 目标超出技能范围" % GlobalGameData.get_char_label(character))
 			return false
 
 	var char_name = character.character_name if "character_name" in character else ""
@@ -88,7 +88,7 @@ static func _bronya_passive(character: Node, modifier_key: String, base_value: i
 	if character.hp < character.max_hp * 0.5:
 		reduction = 0.35
 		label = "铁壁[35%]"
-	print("[Skill] %s [%s] 减免 %d%% 伤害" % [character.character_name, label, int(reduction * 100)])
+	print("[Skill] %s [%s] 减免 %d%% 伤害" % [GlobalGameData.get_char_label(character), label, int(reduction * 100)])
 	return int(base_value * (1.0 - reduction))
 
 # === 布洛妮娅 主动：护卫指令 ===
@@ -101,7 +101,7 @@ static func _bronya_active(character: Node, target: Node) -> bool:
 	if target.has_method("rpc"):
 		target.rpc("_sync_shield", target.shield)
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("bronya_skill", target)
-	print("[Skill] %s [护卫指令] → %s 护盾 +30" % [character.character_name, target.name])
+	print("[Skill] %s [护卫指令] → %s 护盾 +30" % [GlobalGameData.get_char_label(character), GlobalGameData.get_char_label(target)])
 	return true
 
 # === 希儿 被动：暗影突袭 ===
@@ -111,7 +111,7 @@ static func _seele_passive(character: Node, modifier_key: String, base_value: in
 	if not "last_target_hp" in character:
 		return base_value
 	if character.last_target_hp == null or character.last_target_hp >= character.last_target_max_hp:
-		print("[Skill] %s [暗影突袭] 攻击满血目标，伤害 +50%%" % character.character_name)
+		print("[Skill] %s [暗影突袭] 攻击满血目标，伤害 +50%%" % GlobalGameData.get_char_label(character))
 		return int(base_value * 1.5)
 	return base_value
 
@@ -133,7 +133,7 @@ static func _seele_active(character: Node, target: Node, main: Node) -> bool:
 			best_cell = neighbor
 			break
 	if best_cell == null:
-		print("[Warn] %s 无法找到 [相位突进] 的瞬移位置" % character.character_name)
+		print("[Warn] %s 无法找到 [相位突进] 的瞬移位置" % GlobalGameData.get_char_label(character))
 		return false
 	var target_local = character.grid_layer.map_to_local(best_cell)
 	var world_pos = character.grid_layer.to_global(target_local)
@@ -149,7 +149,7 @@ static func _seele_active(character: Node, target: Node, main: Node) -> bool:
 		var bonus = int(character.attack * 1.2)
 		target.take_damage_safe(bonus)
 		var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("seele_skill", target)
-		print("[Skill] %s [相位突进] → %s 造成 %d 点伤害" % [character.character_name, target.name, bonus])
+		print("[Skill] %s [相位突进] → %s 造成 %d 点伤害" % [GlobalGameData.get_char_label(character), GlobalGameData.get_char_label(target), bonus])
 	return true
 
 # === 伊蕾娜 主动：星尘爆裂 ===
@@ -170,7 +170,7 @@ static func _elaina_active(character: Node, target: Node, main: Node) -> bool:
 				c.take_damage_safe(dmg)
 	target.play_vfx_preset_safe("explosion")
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("elaina_skill", target)
-	print("[Skill] %s [星尘爆裂] → %s 及周围造成 %d 点伤害" % [character.character_name, target.name, dmg])
+	print("[Skill] %s [星尘爆裂] → %s 及周围造成 %d 点伤害" % [GlobalGameData.get_char_label(character), GlobalGameData.get_char_label(target), dmg])
 	return true
 
 # === 流萤 主动：烈焰冲锋 ===
@@ -182,7 +182,7 @@ static func _firefly_active(character: Node, target: Node, main: Node) -> bool:
 	var bm = main.get_node_or_null("BuffManager") if main else null
 	if bm and bm.has_method("apply_buff"):
 		bm.apply_buff(target, "burn", 5, 2, character)
-	print("[Skill] %s [烈焰冲锋] → %s 造成 25 伤害 + 灼烧" % [character.character_name, target.name])
+	print("[Skill] %s [烈焰冲锋] → %s 造成 25 伤害 + 灼烧" % [GlobalGameData.get_char_label(character), GlobalGameData.get_char_label(target)])
 	return true
 
 # === 银狼 主动：系统入侵 ===
@@ -194,7 +194,7 @@ static func _silverwolf_active(character: Node, target: Node, main: Node) -> boo
 		bm.apply_buff(target, "attack_debuff", -8, 3, character)
 		bm.apply_buff(target, "move_debuff", -2, 3, character)
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("silverwolf_skill", target)
-	print("[Skill] %s [系统入侵] → %s 虚弱+迟缓 3 回合" % [character.character_name, target.name])
+	print("[Skill] %s [系统入侵] → %s 虚弱+迟缓 3 回合" % [GlobalGameData.get_char_label(character), GlobalGameData.get_char_label(target)])
 	return true
 
 # === 芝士仓鼠 主动：动作如潮 ===
@@ -202,7 +202,7 @@ static func _hamster_active(character: Node, target: Node, main: Node) -> bool:
 	if "_extra_attacks" in character:
 		character._extra_attacks += 1
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("hamster_skill", character)
-	print("[Skill] %s [动作如潮] 获得额外行动" % character.character_name)
+	print("[Skill] %s [动作如潮] 获得额外行动" % GlobalGameData.get_char_label(character))
 	character.play_vfx_preset_safe("heal")
 	return true
 
@@ -287,7 +287,7 @@ static func _karrigan_active(character: Node, target: Node, main: Node) -> bool:
 			GlobalGameData.smoke_cells[cell] = 2
 	var _am = Engine.get_singleton("AudioManager")
 	if _am: _am.play_sfx("karrigan_skill", character)
-	print("[Skill] karrigan [狂野·纵横烟中] 在 %s 周围 3 格展开烟雾" % character.character_name)
+	print("[Skill] karrigan [狂野·纵横烟中] 在 %s 周围 3 格展开烟雾" % GlobalGameData.get_char_label(character))
 	character.play_vfx_preset_safe("buff")
 	return true
 
