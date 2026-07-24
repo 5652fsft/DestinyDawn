@@ -48,9 +48,19 @@ func refresh():
 	if viewing_enemy:
 		name_label.text = "敌方·%s" % current_character.character_name
 		modulate = Color(1.0, 0.85, 0.85)
+		$VBoxMain.offset_bottom = 680
+		$VBoxMain/AttrScrollContainer.vertical_scroll_mode = 3
+		$VBoxMain/BuffScrollContainer.vertical_scroll_mode = 3
+		$VBoxMain/AttrScrollContainer.custom_minimum_size.y = 300
+		$VBoxMain/BuffScrollContainer.custom_minimum_size.y = 250
 	else:
+		$VBoxMain/AttrScrollContainer.vertical_scroll_mode = 3
+		$VBoxMain/BuffScrollContainer.vertical_scroll_mode = 3
 		name_label.text = current_character.character_name
 		modulate = Color(1, 1, 1)
+		$VBoxMain.offset_bottom = 407
+		$VBoxMain/AttrScrollContainer.custom_minimum_size.y = 164
+		$VBoxMain/BuffScrollContainer.custom_minimum_size.y = 120
 
 	var atk_used = GlobalGameData.character_attack_used.get(current_character.name, false)
 	var extra = current_character._get_extra_attacks() if current_character.has_method("_get_extra_attacks") else 0
@@ -100,11 +110,7 @@ func _update_buffs():
 		placeholder.scroll_active = false
 		placeholder.custom_minimum_size = Vector2(0, 22)
 		buffs_container.add_child(placeholder)
-		buff_header.hide()
-		buff_label.hide()
 		return
-	buff_header.show()
-	buff_label.show()
 	for key in current_character.buffs:
 		var list = current_character.buffs[key]
 		for entry in list:
