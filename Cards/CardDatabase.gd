@@ -41,7 +41,7 @@ static func _register_cards():
 			CardData.EffectType.HEAL_OVER_TIME, 5, 3),
 
 		_create_card("card_shield_overload", "护盾过载", CardData.CardType.SHIELD, 1,
-			CardData.TargetType.SELF, "获得 8 点护盾，若已有护盾则翻倍",
+			CardData.TargetType.SELF, "对自身施加 8 点护盾，若已有护盾则翻倍",
 			CardData.EffectType.SHIELD, 8),
 
 		# ========== 费用 1 — Buff/Debuff ==========
@@ -58,7 +58,7 @@ static func _register_cards():
 			CardData.EffectType.EXTRA_MOVE, 3, 2),
 
 		_create_card("card_double_edge", "双刃剑", CardData.CardType.BUFF, 1,
-			CardData.TargetType.SELF, "对自身施加 [攻击强化] 和 [易伤]，效果为攻击力 +10、受到伤害 +5（持续 2 回合）",
+			CardData.TargetType.ALLY_SINGLE, "对我方单体目标施加 [攻击强化] 和 [易伤]，效果为攻击力 +10、受到伤害 +5（持续 2 回合）",
 			CardData.EffectType.BUFF_ATTACK, 10, 2),
 
 		_create_card("card_weakness", "虚弱诅咒", CardData.CardType.DEBUFF, 1,
@@ -126,7 +126,7 @@ static func _register_cards():
 
 		# ========== 费用 2 — Buff/Debuff ==========
 		_create_card("card_iron_wall", "铁壁形态", CardData.CardType.BUFF, 2,
-			CardData.TargetType.SELF, "对自身施加 [防御]，效果为受到伤害减伤 12 点（持续 3 回合）",
+			CardData.TargetType.ALLY_SINGLE, "对我方单体目标施加 [防御]，效果为受到伤害减伤 12 点（持续 3 回合）",
 			CardData.EffectType.BUFF_DEFENSE, 12, 3),
 
 		_create_card("card_disarm", "时停", CardData.CardType.DEBUFF, 2,
