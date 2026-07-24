@@ -748,19 +748,23 @@ func move_toward_target():
 	var dist = global_position.distance_to(target_world)
 	if dist > 5:
 		velocity = global_position.direction_to(target_world) * speed
+		move_and_slide()
+		if global_position.distance_to(target_world) > dist:
+			_finish_move_to_target()
 	else:
-		global_position = target_world
-		velocity = Vector2.ZERO
-		is_moving = false
-		if is_multiplayer_authority() and multiplayer.has_multiplayer_peer():
-			rpc("_sync_position", global_position)
-		main.unreserve_move_cell(self)
-		# 烟雾检测：友方停在烟雾中不消耗移动次数
-		var cell = get_current_cell()
-		if main and main.field_effect_manager and main.field_effect_manager.has_method("on_move_complete"):
-			main.field_effect_manager.on_move_complete(self, cell)
-		main.end_character_move()
-	move_and_slide()
+		_finish_move_to_target()
+
+func _finish_move_to_target():
+	global_position = target_world
+	velocity = Vector2.ZERO
+	is_moving = false
+	if is_multiplayer_authority() and multiplayer.has_multiplayer_peer():
+		rpc("_sync_position", global_position)
+	main.unreserve_move_cell(self)
+	var cell = get_current_cell()
+	if main and main.field_effect_manager and main.field_effect_manager.has_method("on_move_complete"):
+		main.field_effect_manager.on_move_complete(self, cell)
+	main.end_character_move()
 
 @rpc("call_local", "reliable")
 func _sync_position(pos: Vector2):
