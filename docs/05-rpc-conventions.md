@@ -169,3 +169,18 @@ func _my_id() -> int:
 		   return
    ```
 7. **技能能量检查**：使用 `SkillEffect.get_skill_block_reason(character, main)` 统一查询技能可用性，返回 `""` 表示可用，否则返回阻挡原因文本（如 `"能量不足"`），SkillPanel 据此禁用按钮
+8. **FieldEffect 同步（烟雾等）**：`FieldEffectManager` 不是 MultiplayerSynchronizer 节点，所有跨端场效需通过 RPC 同步：
+   ```gdscript
+   # FieldEffectManager.gd
+   @rpc("authority", "call_local", "reliable")
+   func rpc_place_smoke(center_cell: Vector2i, radius: int, duration: int):
+	   var gl = get_tree().current_scene.get_node_or_null("Map/Ground")
+	   # 各端独立创建 Polygon2D 视觉并更新 GlobalGameData.smoke_cells
+   
+   # 调用方：place_smoke() 自动判断 multiplayer 路径
+   func place_smoke(center_cell, radius, duration, grid_layer):
+	   if main.multiplayer.has_multiplayer_peer():
+		   rpc("rpc_place_smoke", center_cell, radius, duration)
+	   else:
+		   # 单机/AI 模式直接执行
+   ```

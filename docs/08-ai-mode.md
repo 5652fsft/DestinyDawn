@@ -56,11 +56,12 @@ var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster"
 
 ## 调试验证
 
-AI 日志路径：`user://logs/ai.log`
+AI 日志通过 `_log()` 直接输出到 Godot 控制台（`print()`），不再写入文件。
 
-查看关键条目确认技能按预期使用。如果技能未触发，检查：
+关键条目确认技能按预期使用。如果技能未触发，检查：
 1. `_should_use_skill()` 是否因 `cooldown` 或 `attack_used` 阻止
-2. `match` 的角色名是否与 `character_name` 完全一致
+2. `get_skill_block_reason()` 是否返回非空阻挡原因（能量不足等）
+3. `match` 的角色名是否与 `character_name` 完全一致
 
 ---
 

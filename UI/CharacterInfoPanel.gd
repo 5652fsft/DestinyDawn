@@ -107,7 +107,7 @@ func _buff_desc(key: String, entry: Dictionary) -> String:
 	var val = entry.get("value", 0)
 	match key:
 		"attack_buff":
-			return "[color=#668c66][攻击强化][/color] 攻击力+%d（%d 回合）" % [val, dur]
+			return "[color=#668c66][攻击强化][/color] 攻击力 +%d（%d 回合）" % [val, dur]
 		"attack_debuff":
 			return "[color=#994d4d][虚弱][/color] 攻击力 -%d（%d 回合）" % [val, dur]
 		"move_debuff":

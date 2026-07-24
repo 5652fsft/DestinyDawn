@@ -357,11 +357,22 @@
 **开发语言**：GDScript  
 **网络协议**：ENet (UPnP + HTTP 公网 IP)  
 **联机方式**：房间码直连 / VPN 虚拟 IP 自动检测  
-**当前版本**：v0.6.1
+**当前版本**：v0.6.2
 
 ---
 
 ## 更新日志
+
+### v0.6.2 — UI修复与文档更新
+- **CharacterInfoPanel 重构**：ScrollContainer+VBox → RichTextLabel + `scroll_active=true`，滚动功能正常
+- **SkillPanel 清理**：移除 `_wrap_desc_in_scroll()` 旧代码（与 RichTextLabel `scroll_active` 冲突）
+- **卡牌描述规范化**：全部 35 张卡牌使用统一语法「对我方/敌方 单体/群体 目标造成x点伤害/恢复x点生命值/施加[xx]」
+- **术语统一**：「移动力」→「移动范围」；所有 Buff 描述同步更新
+- **TurnIndicator 层级修复**：移动至场景树底部（PlayerInfoPanel 之后），`mouse_filter=IGNORE` 避免阻挡卡牌拖拽
+- **烟雾联机同步**：新增 `rpc_place_smoke` RPC，`place_smoke` 自动判断 multiplayer 路径
+- **AOE 阵营判定修正**：AOE 函数统一使用 `main.current_card_player_id` 替代硬编码 `is_host`
+- **伊蕾娜被动修复**：`_apply_magic_resonance` 使用 `current_card_player_id` 确保双端触发一致
+- **AILogger 删除**：AI 日志改为 `print()` 直接输出，不再写入文件
 
 ### v0.6.1 — 技能重构与联机修复
 - **あんパン 技能重做**：改为消耗 6 能量启动，能量不足时按钮禁用并提示

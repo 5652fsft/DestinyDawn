@@ -84,10 +84,10 @@ static func _bronya_passive(character: Node, modifier_key: String, base_value: i
 	if modifier_key != "incoming_damage":
 		return base_value
 	var reduction = 0.2
-	var label = "铁壁[20%]"
+	var label = "铁壁 [20%]"
 	if character.hp < character.max_hp * 0.5:
 		reduction = 0.35
-		label = "铁壁[35%]"
+		label = "铁壁 [35%]"
 	print("[Skill] %s [%s] 减免 %d%% 伤害" % [GlobalGameData.get_char_label(character), label, int(reduction * 100)])
 	return int(base_value * (1.0 - reduction))
 
@@ -232,7 +232,7 @@ static func _anpan_active(character: Node, target: Node, main: Node) -> bool:
 		bm.apply_buff(character, "soften", 20, 3, character)
 	var _am = Engine.get_singleton("AudioManager")
 	if _am: _am.play_sfx("anpan_skill", character)
-	print("[Skill] あんパン [极速高温烘焙] 消耗 6 能量，抽 %d 张牌，回满能量，获得[松软]" % to_draw)
+	print("[Skill] あんパン [极速高温烘焙] 消耗 6 能量，抽 %d 张牌，回满能量，获得 [松软]" % to_draw)
 	character.play_vfx_preset_safe("buff")
 	return true
 
