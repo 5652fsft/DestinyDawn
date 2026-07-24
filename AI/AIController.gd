@@ -4,6 +4,12 @@ extends Node
 func _log(msg: String, category: String = "AI"):
 	print("[%s] %s" % [category, msg])
 
+func _char_label(c) -> String:
+	if not c:
+		return "?"
+	var is_player_side = c.name.begins_with("Host") == GlobalGameData.is_host
+	return ("玩家/" if is_player_side else "AI/") + c.character_name
+
 # === 动作队列 ===
 var _action_queue: Array[Dictionary] = []
 var _action_timer: float = 0.0
@@ -133,7 +139,7 @@ func _build_action_queue():
 				"type": "move", "character": chara, "cell": target
 			})
 		else:
-			_log("%s 无可用移动目标" % chara.character_name)
+			_log("%s 无可用移动目标" % _char_label(chara))
 
 	# 攻击/技能/卡牌队列
 	_log("构建攻击队列，AI 存活角色: %d" % ai_chars.size(), "Queue")
@@ -144,19 +150,19 @@ func _build_action_queue():
 				_action_queue.append({
 					"type": "skill", "character": chara, "target": skill_target
 				})
-				_log("%s 将使用技能 -> %s" % [chara.character_name, skill_target.character_name])
+				_log("%s 将使用技能 -> %s" % [_char_label(chara), _char_label(skill_target)])
 		if _should_play_card(chara):
 			var card_action = _evaluate_best_card(chara)
 			if not card_action.is_empty():
 				_action_queue.append(card_action)
-				_log("%s 将使用卡牌: %s" % [chara.character_name, card_action.get("card_id", "?")])
+				_log("%s 将使用卡牌: %s" % [_char_label(chara), card_action.get("card_id", "?")])
 		if not GlobalGameData.character_attack_used.get(chara.name, false) or (chara.has_method("_get_extra_attacks") and chara._get_extra_attacks() > 0):
 			var attack_target = _evaluate_attack_target(chara)
 			if attack_target != null:
 				_action_queue.append({
 					"type": "attack", "character": chara, "target": attack_target
 				})
-				_log("%s 将攻击 -> %s" % [chara.character_name, attack_target.character_name])
+				_log("%s 将攻击 -> %s" % [_char_label(chara), _char_label(attack_target)])
 
 
 # ==================== 动作执行 ====================
@@ -216,7 +222,7 @@ func _execute_current_action():
 func _execute_move(chara: Node, cell: Vector2i):
 	var gl = chara.grid_layer
 	if not gl:
-		_log("%s 移动失败：无 grid_layer" % chara.character_name, "Move")
+		_log("%s 移动失败：无 grid_layer" % _char_label(chara), "Move")
 		return
 
 	# 防重叠：目标格子被占用时找最近空闲格子
@@ -224,10 +230,10 @@ func _execute_move(chara: Node, cell: Vector2i):
 		var start = chara.get_current_cell()
 		var free = _find_nearest_free_cell(chara, cell, start)
 		if free != Vector2i(-1, -1):
-			_log("%s 原目标 (%d,%d) 被占用，改到 (%d,%d)" % [chara.character_name, cell.x, cell.y, free.x, free.y], "Move")
+			_log("%s 原目标 (%d,%d) 被占用，改到 (%d,%d)" % [_char_label(chara), cell.x, cell.y, free.x, free.y], "Move")
 			cell = free
 		else:
-			_log("%s 目标 (%d,%d) 被占用且无可用邻格，跳过移动" % [chara.character_name, cell.x, cell.y], "Move")
+			_log("%s 目标 (%d,%d) 被占用且无可用邻格，跳过移动" % [_char_label(chara), cell.x, cell.y], "Move")
 			return
 
 	var target_local = gl.map_to_local(cell)
@@ -236,7 +242,7 @@ func _execute_move(chara: Node, cell: Vector2i):
 	# 确保角色可见 + 还原调制
 	if not chara.visible:
 		chara.show()
-		_log("%s 不可见，已强制显示" % chara.character_name, "Move")
+		_log("%s 不可见，已强制显示" % _char_label(chara), "Move")
 	if chara.has_node("Sprite2D"):
 		var spr = chara.get_node("Sprite2D")
 		spr.modulate = Color.WHITE
@@ -248,7 +254,7 @@ func _execute_move(chara: Node, cell: Vector2i):
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("move", chara)
 	GlobalGameData.character_move_used[chara.name] = true
 	GlobalGameData.character_move_used_num += 1
-	_log("%s 移动到 (%d, %d)，位置 %s" % [chara.character_name, cell.x, cell.y, world_pos], "Move")
+	_log("%s 移动到 (%d, %d)，位置 %s" % [_char_label(chara), cell.x, cell.y, world_pos], "Move")
 
 
 # ==================== 防重叠 ====================
@@ -274,14 +280,14 @@ func _find_nearest_free_cell(chara: Node, target: Vector2i, start: Vector2i) -> 
 
 func _execute_attack(chara: Node, target: Node):
 	if not is_instance_valid(target) or target.hp <= 0:
-		_log("%s 攻击目标无效" % chara.character_name, "Attack")
+		_log("%s 攻击目标无效" % _char_label(chara), "Attack")
 		return
 	if GlobalGameData.character_attack_used.get(chara.name, false):
 		var extra = chara._get_extra_attacks() if chara.has_method("_get_extra_attacks") else 0
 		if extra <= 0:
-			_log("%s 已无行动次数，跳过攻击" % chara.character_name, "Attack")
+			_log("%s 已无行动次数，跳过攻击" % _char_label(chara), "Attack")
 			return
-	_log("%s 攻击 -> %s" % [chara.character_name, target.character_name], "Attack")
+	_log("%s 攻击 -> %s" % [_char_label(chara), _char_label(target)], "Attack")
 	chara.perform_attack(target.get_path())
 	# 确保行动次数消耗（perform_attack 内部可能因 multiplayer 判断跳过）
 	if not GlobalGameData.character_attack_used.get(chara.name, false):
@@ -295,9 +301,9 @@ func _execute_attack(chara: Node, target: Node):
 
 func _execute_skill(chara: Node, target: Node):
 	if not is_instance_valid(target) or target.hp <= 0:
-		_log("%s 技能目标无效" % chara.character_name, "Skill")
+		_log("%s 技能目标无效" % _char_label(chara), "Skill")
 		return
-	_log("%s 使用技能 -> %s" % [chara.character_name, target.character_name], "Skill")
+	_log("%s 使用技能 -> %s" % [_char_label(chara), _char_label(target)], "Skill")
 	chara.use_active_skill(target)
 	if chara.active_skill:
 		chara.active_skill.current_cooldown = chara.active_skill.cooldown
@@ -474,7 +480,7 @@ func _should_use_skill(chara: Node) -> bool:
 			return false
 	var reason = SkillEffect.get_skill_block_reason(chara, _main)
 	if reason:
-		_log("%s 技能被阻挡: %s" % [chara.character_name, reason])
+		_log("%s 技能被阻挡: %s" % [_char_label(chara), reason])
 		return false
 	return true
 
@@ -504,7 +510,7 @@ func _evaluate_skill_target(chara: Node) -> Node:
 		_:
 			return null
 	if target and _is_skill_out_of_range(chara, target):
-		_log("%s 技能目标 %s 超出范围" % [chara.character_name, target.character_name])
+		_log("%s 技能目标 %s 超出范围" % [_char_label(chara), _char_label(target)])
 		return null
 	return target
 
