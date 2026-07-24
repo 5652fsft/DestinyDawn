@@ -30,7 +30,8 @@ theme_override_font_sizes/font_size = 16
 
 [node name="AttrScrollContainer" type="ScrollContainer" parent="VBoxMain" unique_id=832753706]
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 260)
 
 [node name="AttrVBox" type="VBoxContainer" parent="VBoxMain/AttrScrollContainer" unique_id=2023283014]
 custom_minimum_size = Vector2(310, 0)
@@ -77,7 +78,8 @@ theme_override_font_sizes/font_size = 15
 
 [node name="BuffScrollContainer" type="ScrollContainer" parent="VBoxMain" unique_id=832753707]
 layout_mode = 2
-size_flags_vertical = 2
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 200)
 
 [node name="BuffVBox" type="VBoxContainer" parent="VBoxMain/BuffScrollContainer" unique_id=2023283015]
 custom_minimum_size = Vector2(310, 0)
