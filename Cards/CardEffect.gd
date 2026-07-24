@@ -399,7 +399,7 @@ static func _execute_overload(card: CardData, target: Node, main: Node) -> bool:
 static func _execute_aoe_damage(card: CardData, target: Node, main: Node) -> bool:
 	if not main:
 		return false
-	var is_caster_host = GlobalGameData.is_host
+	var is_caster_host = main.current_card_player_id == 1 if "current_card_player_id" in main else true
 	if target:
 		is_caster_host = _is_host_side(target)
 	var dmg = card.effect_value
@@ -418,7 +418,7 @@ static func _execute_aoe_damage(card: CardData, target: Node, main: Node) -> boo
 static func _execute_aoe_heal(card: CardData, target: Node, main: Node) -> bool:
 	if not main:
 		return false
-	var is_caster_host = GlobalGameData.is_host
+	var is_caster_host = main.current_card_player_id == 1 if "current_card_player_id" in main else true
 	if target:
 		is_caster_host = _is_host_side(target)
 	var val = card.effect_value
