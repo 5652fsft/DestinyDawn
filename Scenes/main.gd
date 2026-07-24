@@ -280,7 +280,7 @@ func _spawn_character(scene_path: String, char_name: String, authority: int, pos
 func _spawn_character_remote(scene_path: String, char_name: String, authority: int, pos: Vector2):
 	_spawn_character(scene_path, char_name, authority, pos)
 
-# Phase 6 — LAN 编队/卡组同步
+# 联机编队/卡组同步
 @rpc("any_peer", "reliable")
 func _sync_host_setup(team_ids: Array, deck_ids: Array):
 	GlobalGameData.host_team = team_ids
@@ -634,7 +634,6 @@ func on_card_played(card_data: CardData):
 		show_toast("能量不足！需要 %d 能量" % card_data.cost)
 		print("[Warn] %s 能量不足，无法使用 %s" % [who_label, card_data.card_name])
 		return
-	print("[Card] %s 选中卡牌 [%s]" % [who_label, card_data.card_name])
 	if card_data.target_type == CardData.TargetType.NONE:
 		if multiplayer.has_multiplayer_peer():
 			rpc("_server_play_card", my_pid, card_data.id, "")

@@ -53,8 +53,8 @@ func refresh():
 		$VBoxMain/BuffScrollContainer.vertical_scroll_mode = 3
 		$VBoxMain/AttrScrollContainer.size_flags_vertical = 3
 		$VBoxMain/BuffScrollContainer.size_flags_vertical = 2
-		$VBoxMain/AttrScrollContainer.custom_minimum_size = Vector2(0, 0)
-		$VBoxMain/BuffScrollContainer.custom_minimum_size = Vector2(0, 0)
+		$VBoxMain/AttrScrollContainer.custom_minimum_size = Vector2(0, 164)
+		$VBoxMain/BuffScrollContainer.custom_minimum_size = Vector2(0, 96)
 	else:
 		$VBoxMain/AttrScrollContainer.vertical_scroll_mode = 3
 		$VBoxMain/BuffScrollContainer.vertical_scroll_mode = 3
@@ -132,44 +132,44 @@ func _buff_desc(key: String, entry: Dictionary) -> String:
 	var val = entry.get("value", 0)
 	match key:
 		"attack_buff":
-			return "[color=#668c66][攻击强化][/color] 攻击力+%d（%d回合）" % [val, dur]
+			return "[color=#668c66][攻击强化][/color] 攻击力+%d（%d 回合）" % [val, dur]
 		"attack_debuff":
-			return "[color=#994d4d][虚弱][/color] 攻击力-%d（%d回合）" % [val, dur]
+			return "[color=#994d4d][虚弱][/color] 攻击力 -%d（%d 回合）" % [val, dur]
 		"move_debuff":
-			return "[color=#8c6640][迟缓][/color] 移动力-%d（%d回合）" % [val, dur]
+			return "[color=#8c6640][迟缓][/color] 移动范围 -%d（%d 回合）" % [val, dur]
 		"defense_buff":
 			var abs_val = abs(val)
 			if val > 0:
-				return "[color=#59668c][防御][/color] 受到伤害 -%d（%d回合）" % [abs_val, dur]
+				return "[color=#59668c][防御][/color] 受到伤害 -%d（%d 回合）" % [abs_val, dur]
 			else:
-				return "[color=#994d4d][易伤][/color] 受到伤害 +%d（%d回合）" % [abs_val, dur]
+				return "[color=#994d4d][易伤][/color] 受到伤害 +%d（%d 回合）" % [abs_val, dur]
 		"poison":
-			return "[color=#804040][中毒][/color] 每回合-%d生命（%d回合）" % [val, dur]
+			return "[color=#804040][中毒][/color] 每回合 -%d 生命值（%d 回合）" % [val, dur]
 		"burn":
-			return "[color=#804040][灼烧][/color] 每回合-%d生命（%d回合）" % [val, dur]
+			return "[color=#804040][灼烧][/color] 每回合 -%d 生命值（%d 回合）" % [val, dur]
 		"regen":
-			return "[color=#598060][再生][/color] 每回合恢复+%d生命（%d回合）" % [val, dur]
+			return "[color=#598060][再生][/color] 每回合恢复 +%d 生命值（%d 回合）" % [val, dur]
 		"mark":
-			return "[color=#734d80][标记][/color] 受伤加深+%d%%（%d回合）" % [val, dur]
+			return "[color=#734d80][标记][/color] 受到伤害 +%d%%（%d 回合）" % [val, dur]
 		"extra_move":
-			return "[color=#4d808c][加速][/color] 移动力+%d（%d回合）" % [val, dur]
+			return "[color=#4d808c][加速][/color] 移动范围 +%d（%d 回合）" % [val, dur]
 		"taunt":
-			return "[color=#8c804d][嘲讽][/color] 强制攻击（%d回合）" % [dur]
+			return "[color=#8c804d][嘲讽][/color] 强制攻击（%d 回合）" % [dur]
 		"magic_flow":
-			return "[color=#668066][魔力充盈][/color] 攻击力+%d%%（%d回合）" % [val, dur]
+			return "[color=#668066][魔力充盈][/color] 攻击力 +%d%%（%d 回合）" % [val, dur]
 		"bloodthirst":
-			return "[color=#805959][嗜血成性][/color] 攻击力+%d%%（%d回合）" % [val, dur]
+			return "[color=#805959][嗜血成性][/color] 攻击力 +%d%%（%d 回合）" % [val, dur]
 		"legacy":
-			return "[color=#665588][传承][/color] 攻击力+%d%%（%d回合）" % [val, dur]
+			return "[color=#665588][传承][/color] 攻击力 +%d%%（%d 回合）" % [val, dur]
 		"ascend":
-			return "[color=#668c59][攀升][/color] 受到伤害-%d%%（%d回合）" % [val, dur]
+			return "[color=#668c59][攀升][/color] 受到伤害 -%d%%（%d 回合）" % [val, dur]
 		"hot_burn":
-			return "[color=#996633][高温烫嘴][/color] 受伤加深+%d%%（%d回合）" % [val, dur]
+			return "[color=#996633][高温烫嘴][/color] 受到伤害 +%d%%（%d 回合）" % [val, dur]
 		"soften":
-			return "[color=#994d4d][松软][/color] 受伤加深+%d%%（%d回合）" % [val, dur]
+			return "[color=#994d4d][松软][/color] 受到伤害 +%d%%（%d 回合）" % [val, dur]
 		"rope":
-			return "[color=#8cbf8c][拧绳][/color] karrigan 给客人的护身符（持续 %d 回合）" % [dur]
-	return "%s %d（%d回合）" % [key, val, dur]
+			return "[color=#8cbf8c][拧绳][/color] karrigan 给队友的护身符，分摊 30% 的伤害（%d 回合）" % [dur]
+	return "%s %d（%d 回合）" % [key, val, dur]
 
 func _on_CloseButton_pressed():
 	_disconnect_buffs()
