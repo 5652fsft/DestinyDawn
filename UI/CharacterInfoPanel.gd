@@ -45,15 +45,15 @@ func refresh():
 		name_label.text = "敌方·%s" % current_character.character_name
 		modulate = Color(1.0, 0.85, 0.85)
 		$VBoxMain.offset_bottom = 680
-		attr_rich_label.size_flags_vertical = 3
-		buff_rich_label.size_flags_vertical = 2
-		attr_rich_label.custom_minimum_size = Vector2(310, 0)
-		buff_rich_label.custom_minimum_size = Vector2(310, 0)
+		attr_rich_label.size_flags_vertical = 2
+		buff_rich_label.size_flags_vertical = 3
+		attr_rich_label.custom_minimum_size = Vector2(310, 116)
+		buff_rich_label.custom_minimum_size = Vector2(310, 75)
 	else:
 		attr_rich_label.size_flags_vertical = 0
 		buff_rich_label.size_flags_vertical = 0
-		attr_rich_label.custom_minimum_size = Vector2(310, 164)
-		buff_rich_label.custom_minimum_size = Vector2(310, 96)
+		attr_rich_label.custom_minimum_size = Vector2(310, 116)
+		buff_rich_label.custom_minimum_size = Vector2(310, 75)
 		name_label.text = current_character.character_name
 		modulate = Color(1, 1, 1)
 		$VBoxMain.offset_bottom = 407

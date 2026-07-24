@@ -14,7 +14,7 @@ layout_mode = 0
 offset_left = 16.0
 offset_top = 16.0
 offset_right = 342.0
-offset_bottom = 347.0
+offset_bottom = 371.0
 
 [node name="NameLabel" type="Label" parent="VBoxMain" unique_id=539442598]
 layout_mode = 2
@@ -38,14 +38,13 @@ theme_override_font_sizes/font_size = 14
 text = "属性"
 
 [node name="AttrRichLabel" type="RichTextLabel" parent="VBoxMain" unique_id=1812238725]
-custom_minimum_size = Vector2(310, 164)
+custom_minimum_size = Vector2(310, 116)
 layout_mode = 2
 size_flags_vertical = 0
 theme_override_fonts/normal_font = ExtResource("2_6xa78")
 theme_override_font_sizes/normal_font_size = 15
-autowrap_mode = 0
 bbcode_enabled = true
-scroll_active = true
+autowrap_mode = 0
 
 [node name="BuffHeader" type="HSeparator" parent="VBoxMain" unique_id=1239085440]
 layout_mode = 2
@@ -57,11 +56,10 @@ theme_override_font_sizes/font_size = 14
 text = "效果"
 
 [node name="BuffRichLabel" type="RichTextLabel" parent="VBoxMain" unique_id=1082733770]
-custom_minimum_size = Vector2(310, 96)
+custom_minimum_size = Vector2(310, 75)
 layout_mode = 2
 size_flags_vertical = 0
 theme_override_fonts/normal_font = ExtResource("2_6xa78")
 theme_override_font_sizes/normal_font_size = 15
-autowrap_mode = 0
 bbcode_enabled = true
-scroll_active = true
+autowrap_mode = 0
