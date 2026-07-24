@@ -45,6 +45,7 @@ theme_override_fonts/normal_font = ExtResource("2_6xa78")
 theme_override_font_sizes/normal_font_size = 15
 bbcode_enabled = true
 autowrap_mode = 0
+scroll_active = true
 
 [node name="BuffHeader" type="HSeparator" parent="VBoxMain" unique_id=1239085440]
 layout_mode = 2
@@ -63,3 +64,4 @@ theme_override_fonts/normal_font = ExtResource("2_6xa78")
 theme_override_font_sizes/normal_font_size = 15
 bbcode_enabled = true
 autowrap_mode = 0
+scroll_active = true
