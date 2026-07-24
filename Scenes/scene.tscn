@@ -54,9 +54,6 @@ script = ExtResource("7_p4fma")
 [node name="CharacterInfoPanel" parent="UI" unique_id=1060276128 instance=ExtResource("4_yp48q")]
 theme = ExtResource("12_p4fma")
 
-[node name="TurnIndicator" parent="UI" unique_id=463834768 instance=ExtResource("5_yp48q")]
-theme = ExtResource("12_p4fma")
-
 [node name="HandPanel" parent="UI" unique_id=992997772 instance=ExtResource("8_p4fma")]
 layout_mode = 3
 anchors_preset = 7
@@ -84,6 +81,9 @@ offset_right = 1270.0
 offset_bottom = 80.0
 theme = ExtResource("12_p4fma")
 player_side = "Client"
+
+[node name="TurnIndicator" parent="UI" unique_id=463834768 instance=ExtResource("5_yp48q")]
+theme = ExtResource("12_p4fma")
 
 [node name="Toast" parent="UI" unique_id=132693243 instance=ExtResource("13_p4fma")]
 layout_mode = 3

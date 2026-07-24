@@ -12,7 +12,7 @@ static func _register_cards():
 
 		# ========== 费用 1 — 攻击 ==========
 		_create_card("card_ice_shard", "冰晶碎片", CardData.CardType.ATTACK, 1,
-			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标造成 8 点伤害，施加[迟缓]，效果为移动力-2（持续 1 回合）",
+			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标造成 8 点伤害，施加[迟缓]，效果为移动范围-2（持续 1 回合）",
 			CardData.EffectType.DAMAGE, 8),
 
 		_create_card("card_siphon", "法力汲取", CardData.CardType.ATTACK, 1,
@@ -54,7 +54,7 @@ static func _register_cards():
 			CardData.EffectType.BUFF_DEFENSE, 8, 2),
 
 		_create_card("card_haste", "加速", CardData.CardType.BUFF, 1,
-			CardData.TargetType.ALLY_SINGLE, "对我方单体目标施加[加速]，效果为移动力+3（持续 2 回合）",
+			CardData.TargetType.ALLY_SINGLE, "对我方单体目标施加[加速]，效果为移动范围+3（持续 2 回合）",
 			CardData.EffectType.EXTRA_MOVE, 3, 2),
 
 		_create_card("card_double_edge", "双刃剑", CardData.CardType.BUFF, 1,
@@ -66,7 +66,7 @@ static func _register_cards():
 			CardData.EffectType.DEBUFF_ATTACK, 6, 2),
 
 		_create_card("card_slow", "迟缓术", CardData.CardType.DEBUFF, 1,
-			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标施加[迟缓]，效果为移动力-2（持续 1 回合）",
+			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标施加[迟缓]，效果为移动范围-2（持续 1 回合）",
 			CardData.EffectType.DEBUFF_MOVE, 2, 1),
 
 		_create_card("card_mark", "标记", CardData.CardType.DEBUFF, 1,
@@ -100,7 +100,7 @@ static func _register_cards():
 			CardData.EffectType.DAMAGE, 28),
 
 		_create_card("card_frostbite", "冰冻术", CardData.CardType.ATTACK, 2,
-			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标造成 12 点伤害，施加[迟缓]，效果为移动力-2（持续 2 回合）",
+			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标造成 12 点伤害，施加[迟缓]，效果为移动范围-2（持续 2 回合）",
 			CardData.EffectType.DEBUFF_MOVE, 2, 2),
 
 		_create_card("card_shadowstep", "暗影步", CardData.CardType.DISPLACE, 2,
