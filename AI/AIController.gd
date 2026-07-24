@@ -641,8 +641,6 @@ func _pick_target_for_card(card: CardData) -> Node:
 	match card.target_type:
 		CardData.TargetType.NONE:
 			return null
-		CardData.TargetType.SELF:
-			return _get_first_ai_alive()
 		CardData.TargetType.ALLY_SINGLE:
 			return _find_lowest_hp_ally()
 		CardData.TargetType.ALLY_ALL:

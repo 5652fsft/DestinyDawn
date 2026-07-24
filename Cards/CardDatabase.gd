@@ -41,7 +41,7 @@ static func _register_cards():
 			CardData.EffectType.HEAL_OVER_TIME, 5, 3),
 
 		_create_card("card_shield_overload", "护盾过载", CardData.CardType.SHIELD, 1,
-			CardData.TargetType.SELF, "对自身施加 8 点护盾，若已有护盾则翻倍",
+			CardData.TargetType.ALLY_SINGLE, "对我方单体目标施加 8 点护盾，若已有护盾则翻倍",
 			CardData.EffectType.SHIELD, 8),
 
 		# ========== 费用 1 — Buff/Debuff ==========

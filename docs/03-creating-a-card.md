@@ -56,7 +56,6 @@ _create_card(
 
 #### 目标明确
 - 描述开头必须写明对谁生效，不要省略目标
-- `TargetType.SELF` → `"对自身..."`（如护盾过载：`"对自身施加 8 点护盾"`）
 - `TargetType.ALLY_SINGLE` → `"对我方单体目标..."`（如双刃剑：`"对我方单体目标施加 [攻击强化] 和 [易伤]"`）
 
 #### 空格规则
@@ -86,15 +85,14 @@ _create_card(
 ### 目标类型 (TargetType)
 
 | 值 | 常量 | 说明 |
-|---|---|---|
+|---|---|---|---|
 | 0 | `NONE` | 无目标（如抽牌） |
-| 1 | `SELF` | 自己 |
-| 2 | `ALLY_SINGLE` | 单个友方 |
-| 3 | `ENEMY_SINGLE` | 单个敌方 |
-| 4 | `ALLY_ALL` | 所有友方 |
-| 5 | `ENEMY_ALL` | 所有敌方 |
-| 6 | `CELL` | 地面格子 |
-| 7 | `ALL_CHARACTERS` | 所有角色 |
+| 1 | `ALLY_SINGLE` | 单个友方 |
+| 2 | `ENEMY_SINGLE` | 单个敌方 |
+| 3 | `ALLY_ALL` | 所有友方 |
+| 4 | `ENEMY_ALL` | 所有敌方 |
+| 5 | `CELL` | 地面格子 |
+| 6 | `ALL_CHARACTERS` | 所有角色 |
 
 ---
 

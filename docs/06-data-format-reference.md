@@ -82,15 +82,14 @@ _create_card(
 ### 目标类型枚举 (`CardData.TargetType`)
 
 | 值 | 常量 | 说明 |
-|---|---|---|
+|---|---|---|---|
 | 0 | NONE | 无目标 |
-| 1 | SELF | 自己 |
-| 2 | ALLY_SINGLE | 单体友方 |
-| 3 | ENEMY_SINGLE | 单体敌方 |
-| 4 | ALLY_ALL | 全体友方 |
-| 5 | ENEMY_ALL | 全体敌方 |
-| 6 | CELL | 地面格子 |
-| 7 | ALL_CHARACTERS | 全体角色 |
+| 1 | ALLY_SINGLE | 单体友方 |
+| 2 | ENEMY_SINGLE | 单体敌方 |
+| 3 | ALLY_ALL | 全体友方 |
+| 4 | ENEMY_ALL | 全体敌方 |
+| 5 | CELL | 地面格子 |
+| 6 | ALL_CHARACTERS | 全体角色 |
 
 ### 卡牌类型枚举 (`CardData.CardType`)
 

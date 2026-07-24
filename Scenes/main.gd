@@ -648,7 +648,7 @@ func on_card_played(card_data: CardData):
 func highlight_targets(card_data: CardData):
 	highlight_layer.clear()
 	match card_data.target_type:
-		CardData.TargetType.ALLY_SINGLE, CardData.TargetType.ALLY_ALL, CardData.TargetType.SELF:
+		CardData.TargetType.ALLY_SINGLE, CardData.TargetType.ALLY_ALL:
 			var allies = _get_my_characters()
 			for c in allies:
 				if c.hp > 0:
@@ -691,7 +691,7 @@ func _is_ally(chara: CharacterBody2D) -> bool:
 
 func _is_valid_target(target_type: int, is_ally: bool, hit: Node = null) -> bool:
 	match target_type:
-		CardData.TargetType.SELF, CardData.TargetType.ALLY_SINGLE, CardData.TargetType.ALLY_ALL:
+		CardData.TargetType.ALLY_SINGLE, CardData.TargetType.ALLY_ALL:
 			return is_ally
 		CardData.TargetType.ENEMY_SINGLE, CardData.TargetType.ENEMY_ALL:
 			return not is_ally
