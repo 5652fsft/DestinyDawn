@@ -5,11 +5,34 @@ var smoke_overlays: Array[Node] = []
 func _ready():
 	GlobalGameData.smoke_cells.clear()
 
-func place_smoke(center_cell: Vector2i, radius: int, duration: int, grid_layer: TileMapLayer):
-	var cells = _get_cells_in_radius(center_cell, radius, grid_layer)
+@rpc("authority", "call_local", "reliable")
+func rpc_place_smoke(center_cell: Vector2i, radius: int, duration: int):
+	var main = get_tree().current_scene
+	var gl = main.get_node_or_null("Map/Ground") if main else null
+	if not gl:
+		return
+	var cells = _get_cells_in_radius(center_cell, radius, gl)
 	for cell in cells:
 		GlobalGameData.smoke_cells[cell] = duration
-	_update_visuals(grid_layer)
+	_update_visuals(gl)
+
+func place_smoke(center_cell: Vector2i, radius: int, duration: int, grid_layer: TileMapLayer):
+	var main = get_tree().current_scene
+	if main and main.multiplayer.has_multiplayer_peer():
+		rpc("rpc_place_smoke", center_cell, radius, duration)
+	else:
+		var cells = _get_cells_in_radius(center_cell, radius, grid_layer)
+		for cell in cells:
+			GlobalGameData.smoke_cells[cell] = duration
+		_update_visuals(grid_layer)
+
+@rpc("authority", "call_local", "reliable")
+func rpc_sync_smoke_cells(smoke_data: Dictionary):
+	GlobalGameData.smoke_cells = smoke_data
+	var main = get_tree().current_scene
+	var gl = main.get_node_or_null("Map/Ground") if main else null
+	if gl:
+		_update_visuals(gl)
 
 func is_in_smoke(cell: Vector2i) -> bool:
 	return GlobalGameData.smoke_cells.has(cell)
