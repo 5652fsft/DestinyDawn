@@ -2,17 +2,16 @@ extends Panel
 
 const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 
-@onready var name_label = $ScrollContainer/VBox/NameLabel
-@onready var action_label = $ScrollContainer/VBox/ActionLabel
-@onready var hp_label = $ScrollContainer/VBox/HPLabel
-@onready var attack_label = $ScrollContainer/VBox/AttackLabel
-@onready var move_label = $ScrollContainer/VBox/MovePointsLabel
-@onready var attack_range_label = $ScrollContainer/VBox/AttackRangeLabel
-@onready var shield_label = $ScrollContainer/VBox/ShieldLabel
-@onready var buff_header = $ScrollContainer/VBox/BuffHeader
-@onready var buff_label = $ScrollContainer/VBox/BuffLabel
-@onready var buffs_container = $ScrollContainer/VBox/BuffsContainer
-@onready var scroll_container = $ScrollContainer
+@onready var name_label = $VBoxMain/NameLabel
+@onready var action_label = $VBoxMain/ActionLabel
+@onready var hp_label = $VBoxMain/AttrScrollContainer/AttrVBox/HPLabel
+@onready var attack_label = $VBoxMain/AttrScrollContainer/AttrVBox/AttackLabel
+@onready var move_label = $VBoxMain/AttrScrollContainer/AttrVBox/MovePointsLabel
+@onready var attack_range_label = $VBoxMain/AttrScrollContainer/AttrVBox/AttackRangeLabel
+@onready var shield_label = $VBoxMain/AttrScrollContainer/AttrVBox/ShieldLabel
+@onready var buff_header = $VBoxMain/BuffScrollContainer/BuffVBox/BuffHeader
+@onready var buff_label = $VBoxMain/BuffScrollContainer/BuffVBox/BuffLabel
+@onready var buffs_container = $VBoxMain/BuffScrollContainer/BuffVBox/BuffsContainer
 
 var current_character: Node = null
 
@@ -21,7 +20,6 @@ func _ready():
 	var bg = StyleBoxFlat.new()
 	bg.bg_color = Color(0.08, 0.08, 0.15, 0.85)
 	add_theme_stylebox_override("panel", bg)
-	$ScrollContainer/VBox.size_flags_vertical = 0
 
 func show_for(character: Node):
 	if not character:
@@ -34,9 +32,6 @@ func show_for(character: Node):
 	current_character = character
 	if current_character.has_signal("buffs_changed"):
 		current_character.buffs_changed.connect(refresh)
-	var main_node = get_tree().current_scene
-	var viewing_enemy = main_node.is_viewing_enemy if main_node else false
-	scroll_container.offset_bottom = 500.0 if viewing_enemy else 343.0
 	refresh()
 	show()
 

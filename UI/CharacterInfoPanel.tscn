@@ -9,44 +9,49 @@ offset_right = 358.0
 offset_bottom = 720.0
 script = ExtResource("1_50icj")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=832753705]
+[node name="VBoxMain" type="VBoxContainer" parent="." unique_id=2023283013]
 layout_mode = 0
-offset_left = 20.0
-offset_top = 30.0
-offset_right = 340.0
-offset_bottom = 343.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 342.0
+offset_bottom = 704.0
 
-[node name="VBox" type="VBoxContainer" parent="ScrollContainer" unique_id=2023283012]
-custom_minimum_size = Vector2(320, 0)
+[node name="NameLabel" type="Label" parent="VBoxMain" unique_id=539442598]
 layout_mode = 2
-size_flags_horizontal = 1
 size_flags_vertical = 0
-
-[node name="NameLabel" type="Label" parent="ScrollContainer/VBox" unique_id=539442598]
-layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 24
 
-[node name="ActionLabel" type="Label" parent="ScrollContainer/VBox" unique_id=160994237]
+[node name="ActionLabel" type="Label" parent="VBoxMain" unique_id=160994237]
 layout_mode = 2
+size_flags_vertical = 0
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 16
 
-[node name="AttrHeader" type="HSeparator" parent="ScrollContainer/VBox" unique_id=544481999]
+[node name="AttrScrollContainer" type="ScrollContainer" parent="VBoxMain" unique_id=832753706]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AttrVBox" type="VBoxContainer" parent="VBoxMain/AttrScrollContainer" unique_id=2023283014]
+custom_minimum_size = Vector2(310, 0)
+layout_mode = 2
+size_flags_horizontal = 1
+
+[node name="AttrHeader" type="HSeparator" parent="VBoxMain/AttrScrollContainer/AttrVBox" unique_id=544481999]
 layout_mode = 2
 
-[node name="AttrLabel" type="Label" parent="ScrollContainer/VBox" unique_id=1008443157]
+[node name="AttrLabel" type="Label" parent="VBoxMain/AttrScrollContainer/AttrVBox" unique_id=1008443157]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 14
 text = "属性"
 
-[node name="HPLabel" type="Label" parent="ScrollContainer/VBox" unique_id=1056265313]
+[node name="HPLabel" type="Label" parent="VBoxMain/AttrScrollContainer/AttrVBox" unique_id=1056265313]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
-[node name="AttackLabel" type="RichTextLabel" parent="ScrollContainer/VBox" unique_id=1812238725]
+[node name="AttackLabel" type="RichTextLabel" parent="VBoxMain/AttrScrollContainer/AttrVBox" unique_id=1812238725]
 custom_minimum_size = Vector2(0, 22)
 layout_mode = 2
 theme_override_fonts/normal_font = ExtResource("2_6xa78")
@@ -55,30 +60,39 @@ bbcode_enabled = true
 text = "攻击力"
 scroll_active = false
 
-[node name="MovePointsLabel" type="Label" parent="ScrollContainer/VBox" unique_id=1950372560]
+[node name="MovePointsLabel" type="Label" parent="VBoxMain/AttrScrollContainer/AttrVBox" unique_id=1950372560]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
-[node name="AttackRangeLabel" type="Label" parent="ScrollContainer/VBox" unique_id=299935244]
+[node name="AttackRangeLabel" type="Label" parent="VBoxMain/AttrScrollContainer/AttrVBox" unique_id=299935244]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
-[node name="ShieldLabel" type="Label" parent="ScrollContainer/VBox" unique_id=383931468]
+[node name="ShieldLabel" type="Label" parent="VBoxMain/AttrScrollContainer/AttrVBox" unique_id=383931468]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 15
 
-[node name="BuffHeader" type="HSeparator" parent="ScrollContainer/VBox" unique_id=1239085440]
+[node name="BuffScrollContainer" type="ScrollContainer" parent="VBoxMain" unique_id=832753707]
+layout_mode = 2
+size_flags_vertical = 2
+
+[node name="BuffVBox" type="VBoxContainer" parent="VBoxMain/BuffScrollContainer" unique_id=2023283015]
+custom_minimum_size = Vector2(310, 0)
+layout_mode = 2
+size_flags_horizontal = 1
+
+[node name="BuffHeader" type="HSeparator" parent="VBoxMain/BuffScrollContainer/BuffVBox" unique_id=1239085440]
 layout_mode = 2
 
-[node name="BuffLabel" type="Label" parent="ScrollContainer/VBox" unique_id=637662349]
+[node name="BuffLabel" type="Label" parent="VBoxMain/BuffScrollContainer/BuffVBox" unique_id=637662349]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_6xa78")
 theme_override_font_sizes/font_size = 14
 text = "效果"
 
-[node name="BuffsContainer" type="VBoxContainer" parent="ScrollContainer/VBox" unique_id=1082733770]
+[node name="BuffsContainer" type="VBoxContainer" parent="VBoxMain/BuffScrollContainer/BuffVBox" unique_id=1082733770]
 layout_mode = 2
-custom_minimum_size = Vector2(320, 80)
+custom_minimum_size = Vector2(310, 80)
