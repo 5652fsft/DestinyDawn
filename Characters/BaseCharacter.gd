@@ -642,6 +642,8 @@ func _spawn_float(value: int, heal: bool = false, shield: bool = false):
 @rpc("any_peer", "call_local", "reliable")
 # 受击：计算标记/防御/护盾减免，同步 HP 和护盾，记录战斗统计
 func take_damage(damage: int):
+	if hp <= 0:
+		return
 	var is_host = name.begins_with("Host")
 	if damage <= 0:
 		hp = min(max_hp, hp - damage)

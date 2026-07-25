@@ -109,32 +109,32 @@ func _set_ring(m: ParticleProcessMaterial, radius: float, inner: float): m.emiss
 
 func _make_hit() -> GPUParticles2D:
 	var p = _base(); p.texture = _get_tex("spark"); p.amount = 10; p.lifetime = 0.35
-	var m = _make_material([Color(1,1,0.6,1.0), Color(1,0.5,0.1,0.8), Color(1,0.15,0.05,0)], 180, Vector2(), 300, 0.3, 0.6, 150.0, [0.5, 1.0, 0.2])
+	var m = _make_material([Color(1,1,0.6,1.0), Color(1,0.5,0.1,0.9), Color(1,0.15,0.05,0)], 180, Vector2(), 300, 0.3, 0.6, 150.0, [0.5, 1.0, 0.2])
 	p.process_material = m; _set_sphere(m, 55.0); return p
 
 func _make_heal() -> GPUParticles2D:
 	var p = _base(); p.texture = _get_tex("circle"); p.amount = 8; p.lifetime = 0.5
-	var m = _make_material([Color(0.6,1,0.6,1.0), Color(0.0,1.0,0.3,0.8), Color(0.0,0.8,0.2,0)], 20, Vector2(0, -50), 120, 0.3, 0.5, 20.0, [0.3, 1.0, 0.0])
+	var m = _make_material([Color(0.6,1,0.6,1.0), Color(0.0,1.0,0.3,0.9), Color(0.0,0.8,0.2,0)], 20, Vector2(0, -50), 120, 0.3, 0.5, 20.0, [0.3, 1.0, 0.0])
 	p.process_material = m; _set_sphere(m, 50.0); return p
 
 func _make_shield() -> GPUParticles2D:
 	var p = _base(); p.texture = _get_tex("circle"); p.amount = 8; p.lifetime = 0.45
-	var m = _make_material([Color(0.6,0.8,1,1.0), Color(0.3,0.6,1.0,0.8), Color(0.2,0.4,0.8,0)], 360, Vector2(), 60, 0.3, 0.6, 40.0, [0.5, 1.2, 0.2])
+	var m = _make_material([Color(0.6,0.8,1,1.0), Color(0.3,0.6,1.0,0.9), Color(0.2,0.4,0.8,0)], 360, Vector2(), 60, 0.3, 0.6, 40.0, [0.5, 1.2, 0.2])
 	p.process_material = m; _set_ring(m, 75.0, 10.0); return p
 
 func _make_buff() -> GPUParticles2D:
 	var p = _base(); p.texture = _get_tex("star"); p.amount = 10; p.lifetime = 0.5
-	var m = _make_material([Color(1,1,0.8,1.0), Color(1.0,0.9,0.2,0.8), Color(0.9,0.7,0.0,0)], 360, Vector2(0, -40), 120, 0.3, 0.6, 80.0, [0.2, 1.2, 0.0])
+	var m = _make_material([Color(1,1,0.8,1.0), Color(1.0,0.9,0.2,0.9), Color(0.9,0.7,0.0,0)], 360, Vector2(0, -40), 120, 0.3, 0.6, 80.0, [0.2, 1.2, 0.0])
 	p.process_material = m; _set_sphere(m, 55.0); return p
 
 func _make_debuff() -> GPUParticles2D:
 	var p = _base(); p.texture = _get_tex("diamond"); p.amount = 8; p.lifetime = 0.5
-	var m = _make_material([Color(0.8,0.4,1,1.0), Color(0.6,0.2,0.8,0.8), Color(0.4,0.1,0.6,0)], 360, Vector2(0, 30), 80, 0.3, 0.6, 60.0, [1.0, 0.5, 0.0])
+	var m = _make_material([Color(0.8,0.4,1,1.0), Color(0.6,0.2,0.8,0.9), Color(0.4,0.1,0.6,0)], 360, Vector2(0, 30), 80, 0.3, 0.6, 60.0, [1.0, 0.5, 0.0])
 	p.process_material = m; _set_sphere(m, 65.0); return p
 
 func _make_entrance() -> GPUParticles2D:
 	var p = _base(); p.texture = _get_tex("star"); p.amount = 12; p.lifetime = 0.4
-	var m = _make_material([Color(1,1,0.7,1.0), Color(1.0,0.85,0.3,0.8), Color(0.9,0.7,0.1,0)], 40, Vector2(0, -70), 180, 0.3, 0.8, 40.0, [0.0, 1.3, 0.0])
+	var m = _make_material([Color(1,1,0.7,1.0), Color(1.0,0.85,0.3,0.9), Color(0.9,0.7,0.1,0)], 40, Vector2(0, -70), 180, 0.3, 0.8, 40.0, [0.0, 1.3, 0.0])
 	p.process_material = m; _set_ring(m, 75.0, 8.0); return p
 
 func _make_explosion() -> GPUParticles2D:
