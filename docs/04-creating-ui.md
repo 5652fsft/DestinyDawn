@@ -13,7 +13,7 @@ var font = load("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 label.add_theme_font_override("font", font)
 ```
 
-字号参考：主标题 28–32，卡牌名 24，描述 18，小标签 16，数值 22。
+字号参考：主标题 28–32，卡牌名 24，描述 18，小标签 16，数值 22。实际以 `ButtonTheme.set_font()` 调用为准。
 
 ### 按钮
 

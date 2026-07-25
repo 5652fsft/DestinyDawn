@@ -50,7 +50,7 @@ _create_card("card_new_id", "显示名称", CardData.CardType.ATTACK, 2,
 | DRAW_CARD | value | 抽牌 |
 | CLEANSE | — | 移除减益 |
 | AOE_DAMAGE / AOE_HEAL | value | 全阵营范围效果 |
-| CHAIN_DAMAGE | value | 连锁 3 跳 |
+| CHAIN_DAMAGE | value | 连锁跳跃 |
 | DAMAGE_OVER_TIME / HEAL_OVER_TIME | value, duration | 持续伤害/治疗 |
 | MARK / TAUNT | percentage, duration | 标记/嘲讽 |
 | TELEPORT / SWAP / LINEAR_AOE | value | 位移（无 caster） |

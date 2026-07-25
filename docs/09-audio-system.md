@@ -6,7 +6,7 @@
 
 - **全局单例**：`AudioManager`（autoload），菜单与战斗共用
 - **BGM**：`AudioStreamPlayer` 循环播放，支持 crossfade
-- **SFX**：`AudioStreamPlayer2D` 池（6 个），支持 2D 空间定位
+- **SFX**：`AudioStreamPlayer2D` 对象池，支持 2D 空间定位
 - **音量**：三路独立（Master / BGM / SFX），值存于 `GlobalGameData.audio_volume_*`
 
 ## 使用方式

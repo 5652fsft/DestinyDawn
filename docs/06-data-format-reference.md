@@ -22,22 +22,6 @@ const DATA = {
 
 > `skill_energy` 为可选字段，定义主动技能消耗的能量值。`SkillEffect.gd` 中通过 `CharacterData.get_data(id).get("skill_energy", 0)` 动态读取。
 
-### 内置角色数据
-
-| ID | name | HP | Move | ATK | Range | Skill | CD | Target | Passive |
-|---|---|---|---|---|---|---|---|---|---|
-| bronya | 布洛妮娅 | 68 | 5 | 15 | 1 | 护卫指令 | 3 | ALLY_SINGLE | 铁壁 |
-| seele | 希儿 | 65 | 6 | 18 | 1 | 相位突进 | 3 | ENEMY_SINGLE | 暗影突袭 |
-| elaina | 伊蕾娜 | 60 | 5 | 20 | 3 | 星尘爆裂 | 4 | ENEMY_SINGLE | 魔力共鸣 |
-| firefly | 流萤 | 85 | 5 | 14 | 1 | 烈焰冲锋 | 3 | ENEMY_SINGLE | 燃烧装甲 |
-| silverwolf | 银狼 | 65 | 5 | 16 | 2 | 系统入侵 | 4 | ENEMY_SINGLE | 数据篡改 |
-| hamster | 芝士仓鼠 | 48 | 6 | 24 | 3 | 动作如潮 | 3 | SELF | 钢铁直架 |
-| karrigan | karrigan | 65 | 9 | 10 | 6 | 狂野·纵横烟中 | 3 | CELL | 倒霉·混烟致残 |
-| zephyr | Zephyr | 85 | 5 | 8 | 3 | 引煞赴烬 | 0 | SELF | 血煞逆锋 |
-| anpan | あんパン | 65 | 5 | 13 | 3 | 极速高温烘焙 | 3 | SELF | 面包大家族 |
-| M1DorG | M1DorG | 72 | 6 | 11 | 1 | 我玩蔚蓝去了 | 4 | SELF | Intel工程师 |
-| Richardovo | Richardovo | 70 | 7 | 14 | 1 | 突破 | 2 | SELF | 闭麦 |
-
 ## Buff 数据 — `Global/BuffDatabase.gd` / `BuffData.gd`
 
 Buff 定义在 `BuffDatabase.gd` 中，各字段：
