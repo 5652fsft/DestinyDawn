@@ -3,17 +3,28 @@
 ## 角色数据 — `Global/CharacterData.gd`
 
 ```gdscript
-"<id>": {
-	"name":"<中文名>", "hp":<int>, "move":<int>, "atk":<int>, "range":<int>,
-	"skill":"<技能名>", "skill_desc":"<描述>", "skill_cd":<int>,
-	"skill_energy":<int>,          # 技能能量消耗（可选，默认 0）
-	"passive":"<被动名>", "passive_desc":"<描述>"
+const DATA = {
+	"<character_id>": {             # 字符串键，全小写英文
+		"name":        "<中文名>",   # 显示用中文名
+		"hp":          <int>,       # 基础生命值
+		"move":        <int>,       # 移动力（格数）
+		"atk":         <int>,       # 基础攻击力
+		"range":       <int>,       # 攻击射程（格数）
+		"skill":       "<技能名>",   # 主动技能名称
+		"skill_desc":  "<技能描述>", # 主动技能描述文本
+		"skill_cd":    <int>,       # 主动技能冷却回合
+		"skill_energy":<int>,       # 技能能量消耗（可选，默认 0）
+		"passive":     "<被动名>",   # 被动技能名称
+		"passive_desc":"<被动描述>", # 被动技能描述文本
+	},
 }
 ```
 
-### 角色一览
+> `skill_energy` 为可选字段，定义主动技能消耗的能量值。`SkillEffect.gd` 中通过 `CharacterData.get_data(id).get("skill_energy", 0)` 动态读取。
 
-| ID | name | HP | Move | ATK | Range | Skill | SkillCD | Target | Passive |
+### 内置角色数据
+
+| ID | name | HP | Move | ATK | Range | Skill | CD | Target | Passive |
 |---|---|---|---|---|---|---|---|---|---|
 | bronya | 布洛妮娅 | 68 | 5 | 15 | 1 | 护卫指令 | 3 | ALLY_SINGLE | 铁壁 |
 | seele | 希儿 | 65 | 6 | 18 | 1 | 相位突进 | 3 | ENEMY_SINGLE | 暗影突袭 |
@@ -27,14 +38,6 @@
 | M1DorG | M1DorG | 72 | 6 | 11 | 1 | 我玩蔚蓝去了 | 4 | SELF | Intel工程师 |
 | Richardovo | Richardovo | 70 | 7 | 14 | 1 | 突破 | 2 | SELF | 闭麦 |
 
-## 卡牌数据 — `Cards/CardDatabase.gd`
-
-```gdscript
-_create_card("id", "name", CardType, cost, TargetType, "desc", EffectType, value, duration=1, radius=0)
-```
-
-完整卡牌表见 `Cards/CardDatabase.gd` 的 `_register_cards()`。
-
 ## Buff 数据 — `Global/BuffDatabase.gd`
 
 ```gdscript
@@ -44,17 +47,21 @@ _create_card("id", "name", CardType, cost, TargetType, "desc", EffectType, value
 ### Buff 类型
 
 | BuffType | 说明 | 效果 |
-|----------|------|------|
-| ATTACK_BUFF | 攻击增益/减益 | `effective_attack` 计算 |
+|---|---|---|
+| ATTACK_BUFF | 攻击增益/减益 | 影响 `effective_attack` |
 | DEFENSE_BUFF | 防御增益/减益 | `take_damage` 中减免 |
 | MARK | 标记 | 受伤 +% |
-| MOVE_BUFF | 移动增益/减益 | `effective_move_points` 计算 |
-| REGEN | 持续治疗 | `process_buffs` 每回合 tick |
-| POISON | 持续伤害 | `process_buffs` 每回合 tick |
+| MOVE_BUFF | 移动增益/减益 | 影响 `effective_move_points` |
+| REGEN | 持续治疗 | `process_buffs` tick |
+| POISON | 持续伤害 | `process_buffs` tick |
 | SHIELD_OVERLOAD | 护盾过载 | shield 翻倍 |
 | BLOODTHIRST | 嗜血 | 攻击 +% |
 | MAGIC_FLOW | 魔力充盈 | 攻击 +% |
 | SOFTEN | 松软 | 受伤 +% |
 | ASCEND | 攀升 | 受伤 -% |
-| EXTRA_MOVE | 额外移动 | 移动 +格 |
+| EXTRA_MOVE | 额外移动 | 移动力 +格 |
 | TAUNT | 嘲讽 | 强制攻击目标 |
+
+## 卡牌数据 — `Cards/CardDatabase.gd`
+
+详细卡牌列表见 `_register_cards()`。

@@ -1,61 +1,190 @@
-# 网络同步 / RPC 规范
+# 网络同步 / RPC 模式规范
 
 ## 权限模型
 
-- **Server (peer 1)**：生成角色、初始化卡组、推进回合、验证卡牌
-- **Client (peer 2+)**：控制己方角色、发起卡牌请求
+| 角色 | 权限 |
+|---|---|
+| **Server (Host, peer 1)** | 最终决策者：生成角色、初始化卡组、推进回合、验证卡牌 |
+| **Client (peer 2+)** | 只能控制己方角色、发送编队/卡组、发起卡牌使用请求 |
+
+检查方法：
+
+```gdscript
+if not multiplayer.is_server():
+	return  # 仅服务端执行
+```
 
 ## RPC 注解模式
 
-| 注解 | 用途 | 示例 |
-|------|------|------|
-| `@rpc("authority", "call_local", "reliable")` | 服务端发起的状态变更 | `DeckManager.draw_cards`, `EnergySystem.set_energy` |
-| `@rpc("any_peer", "call_local", "reliable")` | 战斗动作，双方都需要看到结果 | `perform_attack`, `take_damage`, `advance_turn_phase` |
-| `@rpc("any_peer", "reliable")` | 一次性操作，无需本地执行 | `_spawn_character_remote`, `_client_send_setup` |
-| `@rpc("call_local", "reliable")` | 状态同步广播 | `_sync_turn_phase`, `_sync_energy` |
+### 模式一：`@rpc("authority", "call_local", "reliable")`
 
-## 关键规则
+| 属性 | 含义 |
+|---|---|
+| `authority` | 只有服务器可以**发起**此 RPC |
+| `call_local` | 发起者本地也执行一遍 |
+| `reliable` | 可靠传输 |
 
-### 1. `multiplayer.is_server()` 注意短路顺序
+**用途**：服务端发起的状态变更，本地和远程都需要执行。
 
-AI 模式无 multiplayer peer，调用 `is_server()` 前必须确保 `GlobalGameData.is_ai_mode` 在前：
+**示例**：`DeckManager.draw_cards()`, `EnergySystem.set_energy()`
 
-```gdscript
-# ✅ 正确：is_ai_mode 在前短路
-if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
-    return
+### 模式二：`@rpc("any_peer", "call_local", "reliable")`
 
-# ❌ 错误：is_server() 会因无 peer 抛异常
-if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
-    return
+| 属性 | 含义 |
+|---|---|
+| `any_peer` | 任何 peer 都可以发起 |
+| `call_local` | 发起者本地也执行 |
+
+**用途**：战斗动作（攻击、受伤、移动），双方都需要看到结果。
+
+**示例**：`perform_attack()`, `take_damage()`, `_sync_hp()`, `advance_turn_phase()`
+
+### 模式三：`@rpc("any_peer", "reliable")`
+
+| 属性 | 含义 |
+|---|---|
+| `any_peer` | 任何 peer 可以发起 |
+| 无 `call_local` | 仅在远端执行 |
+
+**用途**：角色生成、编队同步等一次性操作。
+
+**示例**：`_spawn_character_remote()`, `_client_send_setup()`
+
+### 模式四：`@rpc("call_local", "reliable")`
+
+| 属性 | 含义 |
+|---|---|
+| 无 `authority` | 任何 peer 发起（通常由服务端调用） |
+| `call_local` | 发起者也执行 |
+
+**用途**：状态同步广播。
+
+**示例**：`_sync_turn_phase()`, `_sync_energy()`, `_sync_hand()`
+
+---
+
+## 同步模式对照
+
+### 回合阶段同步
+
+```
+Server: advance_turn_phase()
+  → check_victory() → if game over: rpc_id(0, "_sync_turn_phase", GAME_OVER, host_turn, battle_stats)
+  → else: change phase → rpc_id(0, "_sync_turn_phase", phase, host_turn)
+  → Client: _sync_turn_phase() updates local state + UI
 ```
 
-### 2. RPC 调用必须有 peer 保护
+### 角色行动状态同步（合并阶段）
 
-所有 `rpc()` / `rpc_id()` 调用前需检查 `multiplayer.has_multiplayer_peer()`，单机/AI 模式走本地调用：
+**游戏不分独立的移动阶段和攻击阶段**。每个角色在回合内可执行 1 次移动 + 1 次攻击/技能，顺序自由决定；卡牌由玩家独立释放，不消耗角色的行动次数。角色行动状态由 `GlobalGameData.character_move_used` / `character_attack_used` 追踪：
 
-```gdscript
-# 使用 _safe 封装（推荐）
-target.take_damage_safe(dmg)       # 自动判断 peer 存在
-target.play_vfx_preset_safe("hit")  # 同上
+| 状态 | RPC | 频率 |
+|---|---|---|
+| 行动标记 | `rpc("_sync_character_action", {name, action_type, has_moved, has_attacked})` | 每次移动/攻击/技能后 |
+| HP | `rpc_id(0, "_sync_hp", hp)` | take_damage / heal 后 |
+| Shield | `rpc_id(0, "_sync_shield", shield)` | shield 变化后 |
+| Buffs | `target.rpc("_sync_buffs", packed)` | BuffManager 每次变更后 |
+| Position | `rpc("_sync_position", pos)` + MultiplayerSynchronizer | 移动每帧 |
 
-# 或手动守卫
-if target.multiplayer and target.multiplayer.has_multiplayer_peer():
-    target.rpc("_sync_shield", shield)
+### 手牌 / 能量同步
+
+```
+Server: _execute_play_card()
+  → deck_manager.play_card()
+  → energy_system.spend_energy()
+  → CardEffect.execute()
+  → hand = deck_manager.get_hand(player_id)
+  → rpc("_sync_hand", player_id, hand)
+  → rpc("_sync_energy", player_id, energy)
+  → Client: _sync_hand() → hand_panel.play_draw_animation()
+  → Client: _sync_energy() → energy bar update
 ```
 
-### 3. 卡牌由服务端单次执行
+### 抽牌同步
 
-卡牌通过 `_server_play_card`（`@rpc`）调用，仅服务端执行 `CardEffect.execute()`，因此内部 `take_damage_safe` 只会广播一次 RPC。
+```
+Server: draw_for_new_turn()
+  → deck_manager.draw_cards(1/2, count)            # RPC authority call_local
+  → sync_all_card_state()
+	 → for pid in [1,2]:
+		 rpc_id(0, "_sync_hand", pid, hand)
+		 rpc_id(0, "_sync_energy", pid, energy)
+```
 
-### 4. 避免 `call_local` + 无 `authority` 时的重复执行
+---
 
-`@rpc("any_peer", "call_local")` 函数内部**不要**再调 `rpc()`（用直接调用或 `_safe` 封装），否则会在所有端重复触发。
+## 多人游戏启动流程
 
-### 5. `rpc_id(0, ...)` 注意事项
+```
+Host: _ready()
+  → load_defaults_if_empty()
+  → _build_team_from_selection()           # 读取 host_team
+  → _init_player_card_systems()            # 初始化双方卡组（默认）
+  → spawn host characters                  # 生成 HostCharacter_0/1/2
+  → peer_connected.connect(_on_client_joined)
 
-`rpc_id(0, ...)` 广播到所有 peer + 发送者自己，配合 `call_local` 时发送者执行两次。需确保幂等或只处理一次。
+Client connects:
+  → Host: _on_client_joined(id)
+	 → rpc_id(id, "_request_client_setup")   # 请求客户端编队/卡组
+	 → re-init card systems
+	 → spawn host chars
 
-### 6. 状态同步始终由服务端驱动
+  → Client: receives _request_client_setup
+	 → rpc_id(1, "_client_send_setup", team, deck)
 
-客户端从不主动修改游戏状态。`_sync_hand` 只发送给手牌持有者（`if player_id == my_pid`）。
+  → Host: receives _client_send_setup
+	 → GlobalGameData.client_team = team
+	 → deck_manager.init_player(2, deck)     # 使用客户端卡组
+	 → _spawn_client_characters(id)          # 生成 ClientCharacter_0/1/2
+	 → rpc("advance_turn_phase")            # 开始游戏
+```
+
+## 生成角色规则
+
+- Host 角色：命名 `HostCharacter_0/1/2`，权限 = host_id，出生点 = `host_birth_point`
+- Client 角色：命名 `Client{id}Character_0/1/2`，权限 = client_id，出生点 = `client_birth_point`
+- 角色名称影响阵营判定：`name.begins_with("Host")` → host_characters
+
+## Player ID 获取
+
+```gdscript
+# main.gd — 安全获取当前 peer 的 player ID
+func _my_id() -> int:
+	return multiplayer.get_unique_id() if multiplayer.has_multiplayer_peer() else (1 if GlobalGameData.is_host else 2)
+```
+
+**原因**：`multiplayer.get_unique_id()` 在没有 multiplayer peer 时返回 0（单人/AI 模式），不能直接用作 player ID。
+
+## 关键注意事项
+
+1. **不要对 `@rpc` 函数使用 `call_local` + 无 `authority`**：会导致双方都试图处理同一逻辑
+2. **不要在 `_ready()` 中调用 RPC**：MultiplayerPeer 可能尚未就绪
+3. **`rpc_id(0, ...)`** 广播到所有 peer（包含发送者自己）。配合 `call_local` 使用时，发送者会执行两次——一次来自 `call_local`，一次来自网络接收。需要确保幂等或只处理一次
+4. **状态同步始终由服务端驱动**：客户端从不主动修改游戏状态
+5. **`_sync_hand` 只发送给手牌持有者**：`if player_id == my_pid` 过滤
+6. **单人/联机模式守卫**：所有 RPC 函数应检查 `multiplayer.is_server()`。**注意短路顺序**——AI 模式无 multiplayer peer，必须将 `GlobalGameData.is_ai_mode` 放在 `is_server()` 之前：
+   ```gdscript
+   # ✅ 正确（短路保护）
+   if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
+       return
+   # ❌ 错误（is_server() 在无 peer 时会抛异常）
+   if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
+       return
+   ```
+7. **RPC 调用前必须有 `has_multiplayer_peer()` 保护**：所有 `rpc()` / `rpc_id()` 调用在单机/AI 模式下会因无 peer 抛异常，优先使用 `_safe` 封装：
+   ```gdscript
+   # 推荐：使用 _safe 封装（自动判断 peer）
+   target.take_damage_safe(dmg)
+   target.play_vfx_preset_safe("hit")
+   # 或手动守卫
+   if target.multiplayer and target.multiplayer.has_multiplayer_peer():
+       target.rpc("_sync_shield", shield)
+   ```
+8. **技能能量检查**：使用 `SkillEffect.get_skill_block_reason(character, main)` 统一查询技能可用性，返回 `""` 表示可用，否则返回阻挡原因文本（如 `"能量不足"`），SkillPanel 据此禁用按钮。技能能量消耗定义在 `CharacterData.gd` 的 `skill_energy` 字段，通过 `CharacterData.get_data(id).get("skill_energy", 0)` 读取，不在代码中硬编码
+9. **FieldEffect 同步（烟雾等）**：`FieldEffectManager` 不是 MultiplayerSynchronizer 节点，所有跨端场效需通过 RPC 同步：
+   ```gdscript
+   @rpc("authority", "call_local", "reliable")
+   func rpc_place_smoke(center_cell: Vector2i, radius: int, duration: int):
+       var gl = get_tree().current_scene.get_node_or_null("Map/Ground")
+       # 各端独立创建 Polygon2D 视觉并更新 GlobalGameData.smoke_cells
+   ```
