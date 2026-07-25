@@ -5,11 +5,11 @@ var _pool: Array[Node2D] = []
 func fire(from_pos: Vector2, target: Node, preset: String = "magic_bolt",
 		speed: float = 0.3, on_hit: Callable = Callable()) -> Node2D:
 	var p = _get_or_create()
-	p.global_position = from_pos
 	get_tree().current_scene.add_child(p)
+	p.global_position = from_pos
 	_setup_visual(p, preset)
 
-	var target_pos = target.global_position + Vector2(0, -80)
+	var target_pos = target.global_position
 	var dist = from_pos.distance_to(target_pos)
 	var duration = dist / 2000.0 * speed * 10.0
 	duration = clamp(duration, 0.15, 1.0)
@@ -29,12 +29,12 @@ func fire(from_pos: Vector2, target: Node, preset: String = "magic_bolt",
 func fire_arc(from_pos: Vector2, target: Node, preset: String = "heal_orb",
 		speed: float = 0.4, height: float = 200.0, on_hit: Callable = Callable()) -> Node2D:
 	var p = _get_or_create()
-	p.global_position = from_pos
 	get_tree().current_scene.add_child(p)
+	p.global_position = from_pos
 	_setup_visual(p, preset)
 
 	var start = from_pos
-	var end = target.global_position + Vector2(0, -80)
+	var end = target.global_position
 	var mid = (start + end) * 0.5 + Vector2(0, -height)
 	var dist = start.distance_to(end)
 	var duration = clamp(dist / 1500.0, 0.2, 0.8)
@@ -161,17 +161,16 @@ func _make_trail_mat(color: Color, vel: float) -> ParticleProcessMaterial:
 	return m
 
 func _play_impact(p: Node2D, preset: String, target: Node):
-	var hit_pos = target.global_position + Vector2(0, -80)
 	var vfx = target.get_node_or_null("VFXManager") if target.has_node("VFXManager") else null
 	if not vfx:
 		vfx = get_tree().current_scene.get_node_or_null("VFXManager")
 	if vfx and vfx.has_method("play"):
 		match preset:
-			"fireball": vfx.play_at(hit_pos, "explosion")
-			"ice_shard": vfx.play_at(hit_pos, "hit")
-			"dark_bolt": vfx.play_at(hit_pos, "debuff")
+			"fireball": vfx.play_at(target.global_position, "explosion")
+			"ice_shard": vfx.play_at(target.global_position, "hit")
+			"dark_bolt": vfx.play_at(target.global_position, "debuff")
 			_:
-				vfx.play_at(hit_pos, "hit")
+				vfx.play_at(target.global_position, "hit")
 
 func _quadratic_bezier(a: Vector2, b: Vector2, c: Vector2, t: float) -> Vector2:
 	var q = 1.0 - t

@@ -88,7 +88,7 @@ static func elaina_starburst(target: Node):
 # === 流萤 ===
 static func firefly_charge(character: Node, target: Node):
 	var pm = character.get_tree().current_scene.get_node_or_null("ProjectileManager")
-	if pm and pm.has_method("fire"): pm.fire(character.global_position + Vector2(0, -80), target, "fireball", 0.25)
+	if pm and pm.has_method("fire"): pm.fire(character.global_position, target, "fireball", 0.25)
 
 static func firefly_impact(target: Node):
 	var p = _particle("spark", 10, 0.35,

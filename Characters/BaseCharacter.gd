@@ -527,7 +527,7 @@ func _play_attack_animation(target_path: NodePath):
 
 	var dir = sign(target_node.global_position.x - global_position.x)
 	var pm = main.projectile_manager if main and main.has_method("_init_projectile_manager") else null
-	var src_pos = global_position + Vector2(0, -80)
+	var src_pos = global_position
 
 	match attack_sfx:
 		"attack_sword":
