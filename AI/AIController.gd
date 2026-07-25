@@ -325,6 +325,9 @@ func _execute_card(chara: Node, card_id: String, target: Node):
 	if not _energy_system.can_afford(2, card_data.cost):
 		_log("能量不足，无法使用 [%s]（需 %d）" % [card_data.card_name, card_data.cost], "Card")
 		return
+	if target != null and (not is_instance_valid(target) or target.hp <= 0):
+		_log("[%s] 目标已死亡，跳过" % card_data.card_name, "Card")
+		return
 	var target_path = ""
 	if target != null and is_instance_valid(target):
 		target_path = target.get_path()
