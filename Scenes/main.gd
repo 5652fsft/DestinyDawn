@@ -19,6 +19,7 @@ var is_attack_mode: bool = false
 var is_viewing_enemy: bool = false
 var _hand_hidden: bool = false
 var _surrender_dialog: Panel = null
+var _battle_over: bool = false
 
 # === 卡牌系统 ===
 var pending_card_data: CardData = null
@@ -382,6 +383,8 @@ func register_character(chara: CharacterBody2D):
 		GlobalGameData.client_characters.append(chara)
 
 func unregister_character(chara: CharacterBody2D):
+	if _battle_over:
+		return
 	characters.erase(chara)
 	GlobalGameData.host_characters.erase(chara)
 	GlobalGameData.client_characters.erase(chara)
@@ -389,6 +392,7 @@ func unregister_character(chara: CharacterBody2D):
 		if highlight_layer:
 			highlight_layer.clear()
 	if (GlobalGameData.is_ai_mode or multiplayer.is_server()) and check_victory():
+		_battle_over = true
 		if multiplayer.has_multiplayer_peer():
 			rpc("advance_turn_phase")
 		else:
@@ -1164,6 +1168,9 @@ func _make_waiting_overlay(text: String) -> ColorRect:
 	return overlay
 
 func show_battle_result(from_surrender: bool = false, surrendering_is_host: bool = false):
+	if _battle_over:
+		return
+	_battle_over = true
 	var i_win
 	if from_surrender:
 		i_win = GlobalGameData.is_host != surrendering_is_host
@@ -1230,10 +1237,13 @@ func reset_character_state() -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func advance_turn_phase():
+	if _battle_over:
+		return
 	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
 		return
 		
 	if check_victory():
+		_battle_over = true
 		print("[Phase] 游戏结束")
 		GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.GAME_OVER
 		if multiplayer.has_multiplayer_peer():
@@ -1263,6 +1273,8 @@ func advance_turn_phase():
 
 @rpc("call_local", "reliable")
 func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn, stats: Dictionary = {}):
+	if _battle_over:
+		return
 	GlobalGameData.current_turn_phase = phase
 	GlobalGameData.is_host_turn = host_turn
 	if not stats.is_empty():
