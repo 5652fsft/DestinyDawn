@@ -23,10 +23,10 @@
 ```gdscript
 # ✅ 正确
 if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
-    return
+	return
 # ❌ 错误 — AI 模式无 peer，is_server() 抛异常
 if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
-    return
+	return
 ```
 
 ### 2. RPC 调用必须有 peer 保护

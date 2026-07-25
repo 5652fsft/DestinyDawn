@@ -8,10 +8,8 @@
 
 ## 核心机制
 
-- **回合合并**：每个角色每回合可执行 1 次移动 + 1 次攻击/技能，顺序自由
-- **卡牌独立**：卡牌由玩家释放，不消耗角色行动次数，无 caster 概念
-- **AOE 阵营**：通过 `main.current_card_player_id` 判断，不使用 `GlobalGameData.is_host`
-- **技能能量**：消耗定义在 `CharacterData.gd` 的 `skill_energy` 字段，`SkillEffect.gd` 动态读取
+- **回合制**：每个角色每回合可执行 1 次移动 + 1 次行动（攻击/技能），顺序自由
+- **卡牌**：卡牌由玩家释放，不消耗角色行动次数
 
 ## 文档导航
 
@@ -24,3 +22,6 @@
 | `06-data-format-reference.md` | 角色/Buff 数据字段速查 |
 | `08-ai-mode.md` | AI 策略分支注册 |
 | `09-audio-system.md` | 音效添加与调用 |
+
+## 更新流程
+`计划 -> 询问修改 -> 确定规划细则 -> 执行，修改项目-> 检查语法与逻辑错误 -> 修改 readme.md -> 提交 git`
