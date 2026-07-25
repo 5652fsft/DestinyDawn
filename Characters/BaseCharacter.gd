@@ -87,7 +87,10 @@ var highlight_overlays: Array[Node] = []
 var is_selected: bool = false:
 	set(value):
 		is_selected = value
-		sprite.modulate = Color.WHITE if not value else Color.YELLOW
+		var color = Color.WHITE
+		if not value and has_method("_get_deselect_color"):
+			color = call("_get_deselect_color")
+		sprite.modulate = Color.YELLOW if value else color
 		if floating_bar:
 			floating_bar.show_selected(value)
 		if not value:
@@ -672,6 +675,9 @@ var effective_attack: int:
 			var mf = buff_manager.get_total(self, "magic_flow")
 			if mf > 0:
 				base += int(attack * mf / 100.0)
+			var sl = buff_manager.get_total(self, "solo_leveling")
+			if sl > 0:
+				base += int(attack * sl / 100.0)
 		return max(0, base)
 
 var effective_move_points: int:
@@ -686,7 +692,8 @@ func process_buffs():
 	if not buff_manager:
 		return
 	var ticks = buff_manager.process(self)
-	buff_manager._sync_and_emit(self)
+	if multiplayer.is_server() or GlobalGameData.is_ai_mode:
+		buff_manager._sync_and_emit(self)
 	# apply DOT/HOT ticks
 	for t in ticks:
 		if t.is_damage:

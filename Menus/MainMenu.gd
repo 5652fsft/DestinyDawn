@@ -633,7 +633,7 @@ func _on_join_timeout():
 	if _join_timer:
 		_join_timer.queue_free()
 		_join_timer = null
-	join_status_label.text = "⏰ 连接超时\n建议：① 检查房间码 ② 主机需开端口转发\n③ 或用 Radmin VPN / ZeroTier 组局域网"
+	join_status_label.text = "⏰ 连接超时"
 	join_status_label.add_theme_color_override("font_color", Color(1, 0.6, 0, 1))
 	connect_button.disabled = false
 

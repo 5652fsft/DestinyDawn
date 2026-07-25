@@ -61,6 +61,10 @@ static func execute_active(character: Node, skill: BaseSkill, target: Node, main
 			return _zephyr_active(character, target, main)
 		"あんパン":
 			return _anpan_active(character, target, main)
+		"M1DorG":
+			return _M1DorG_active(character, target, main)
+		"Richardovo":
+			return _Richardovo_active(character, target, main)
 		_:
 			push_warning("未知角色技能: ", char_name)
 			return false
@@ -288,6 +292,38 @@ static func _karrigan_active(character: Node, target: Node, main: Node) -> bool:
 	var _am = Engine.get_singleton("AudioManager")
 	if _am: _am.play_sfx("karrigan_skill", character)
 	print("[Skill] karrigan [狂野·纵横烟中] 在 %s 周围 3 格展开烟雾" % GlobalGameData.get_char_label(character))
+	character.play_vfx_preset_safe("buff")
+	return true
+
+static func _M1DorG_active(character: Node, target: Node, main: Node) -> bool:
+	if not character:
+		return false
+	character._away_turns_left = 2
+	if character.has_method("_sync_away_state") and character.multiplayer and character.multiplayer.has_multiplayer_peer():
+		character.rpc("_sync_away_state", character._away_turns_left)
+	var spr = character.get_node_or_null("Sprite2D")
+	if spr:
+		spr.modulate = Color(0.5, 0.5, 0.5)
+	var _am = Engine.get_singleton("AudioManager")
+	if _am: _am.play_sfx("click", character)
+	print("[Skill] %s [我玩蔚蓝去了] 进入蔚蓝状态" % GlobalGameData.get_char_label(character))
+	character.play_vfx_preset_safe("buff")
+	if character.has_signal("buffs_changed"):
+		character.buffs_changed.emit()
+	return true
+
+static func _Richardovo_active(character: Node, target: Node, main: Node) -> bool:
+	if not character:
+		return false
+	var total = 0
+	var bm = main.get_node_or_null("BuffManager") if main else null
+	if bm and bm.has_method("cleanse"):
+		total = bm.cleanse(character, "all")
+	if total > 0 and "_extra_attacks" in character:
+		character._extra_attacks += total
+	var _am = Engine.get_singleton("AudioManager")
+	if _am: _am.play_sfx("click", character)
+	print("[Skill] %s [突破] 消除 %d 个效果，获得 %d 次额外行动" % [GlobalGameData.get_char_label(character), total, total])
 	character.play_vfx_preset_safe("buff")
 	return true
 

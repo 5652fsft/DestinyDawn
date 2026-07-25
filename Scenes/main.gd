@@ -59,6 +59,8 @@ const CHARACTER_HAMSTER = preload("res://Characters/Hamster/Hamster.tscn")
 const CHARACTER_KARRIGAN = preload("res://Characters/Karrigan/Karrigan.tscn")
 const CHARACTER_ZEPHYR = preload("res://Characters/Zephyr/Zephyr.tscn")
 const CHARACTER_ANPAN = preload("res://Characters/Anpan/Anpan.tscn")
+const CHARACTER_M1DORG = preload("res://Characters/M1DorG/M1DorG.tscn")
+const CHARACTER_RICHARDOVO = preload("res://Characters/Richardovo/Richardovo.tscn")
 
 var team_roster: Array[PackedScene] = []
 var enemy_roster: Array[PackedScene] = []
@@ -82,6 +84,7 @@ func _build_team_from_selection():
 		"silverwolf": CHARACTER_SILVERWOLF, "hamster": CHARACTER_HAMSTER,
 		"karrigan": CHARACTER_KARRIGAN, "zephyr": CHARACTER_ZEPHYR,
 		"anpan": CHARACTER_ANPAN,
+		"M1DorG": CHARACTER_M1DORG, "Richardovo": CHARACTER_RICHARDOVO,
 	}
 	if not GlobalGameData.selected_team.is_empty():
 		for cid in GlobalGameData.selected_team:
@@ -1008,6 +1011,7 @@ func start_new_round():
 		process_all_buffs()
 	GlobalGameData.turn_has_been_drawn = true
 
+	process_turn_start()
 	advance_turn_phase()
 
 @rpc("call_local", "reliable")
@@ -1015,6 +1019,34 @@ func process_all_buffs():
 	for chara in get_tree().get_nodes_in_group("characters"):
 		if chara.has_method("process_buffs"):
 			chara.process_buffs()
+
+@rpc("call_local", "reliable")
+func process_turn_start():
+	if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
+		return
+	for c in get_tree().get_nodes_in_group("characters"):
+		if c.hp <= 0:
+			continue
+		if "_away_turns_left" in c and c._away_turns_left > 0:
+			var is_my_team_host = c in GlobalGameData.host_characters
+			if (GlobalGameData.is_host_turn == is_my_team_host) == (GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.ENEMY_TURN):
+				continue
+			c._away_turns_left -= 1
+			if c.has_method("_sync_away_state") and c.multiplayer and c.multiplayer.has_multiplayer_peer():
+				c.rpc("_sync_away_state", c._away_turns_left)
+			if c.has_signal("buffs_changed"):
+				c.buffs_changed.emit()
+			if c._away_turns_left == 0:
+				var team = GlobalGameData.host_characters if c in GlobalGameData.host_characters else GlobalGameData.client_characters
+				for ally in team:
+					if ally.hp > 0 and ally.hp < ally.max_hp:
+						ally.take_damage(-(ally.max_hp - ally.hp))
+				var spr = c.get_node_or_null("Sprite2D")
+				if spr:
+					spr.modulate = Color.WHITE
+				print("[Skill] %s 回归，恢复全体友方生命值" % GlobalGameData.get_char_label(c))
+		if c.has_method("on_turn_start"):
+			c.on_turn_start()
 
 @rpc("call_local", "reliable")
 func draw_for_new_turn():
@@ -1212,6 +1244,7 @@ func advance_turn_phase():
 		
 		GlobalGameData.TurnPhase.PLAYER_TURN:
 			GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.ENEMY_TURN
+			process_turn_start()
 		
 		GlobalGameData.TurnPhase.ENEMY_TURN:
 			GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.START_ROUND

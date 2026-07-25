@@ -32,6 +32,8 @@ const DATA = {
 | karrigan | karrigan | 65 | 9 | 10 | 6 | 狂野·纵横烟中 | 0 | CELL | 倒霉·混烟致残 |
 | zephyr | Zephyr | 85 | 5 | 8 | 3 | 引煞赴烬 | 0 | SELF | 血煞逆锋 |
 | anpan | あんパン | 65 | 5 | 13 | 3 | 极速高温烘焙 | 3 | SELF | 面包大家族 |
+| M1DorG | M1DorG | 72 | 6 | 11 | 1 | 我玩蔚蓝去了 | 0 | SELF | Intel工程师 |
+| Richardovo | Richardovo | 70 | 7 | 14 | 1 | 突破 | 0 | SELF | 闭麦 |
 
 ---
 
@@ -124,6 +126,7 @@ _create_card(
 | hot_burn | 高温烫嘴 | MARK | SPECIAL | 1 | 否 |
 | soften | 松软 | MARK | SPECIAL | 1 | 否 |
 | rope | 拧绳 | MARK | SPECIAL | 99 | 否 |
+| solo_leveling | 我独自升级 | ATTACK_BUFF | SPECIAL | 1 | 否 |
 
 Buff 条目结构：
 

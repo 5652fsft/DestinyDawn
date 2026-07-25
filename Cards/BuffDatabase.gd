@@ -87,4 +87,9 @@ static func _all_buffs() -> Dictionary:
 	b.category = BuffData.Category.SPECIAL; b.is_harmful = false; b.max_stacks = 99
 	out["rope"] = b
 
+	b = BuffData.new()
+	b.id = "solo_leveling"; b.name = "我独自升级"; b.type = BuffData.BuffType.ATTACK_BUFF
+	b.category = BuffData.Category.SPECIAL; b.is_harmful = false; b.max_stacks = 1
+	out["solo_leveling"] = b
+
 	return out

@@ -92,6 +92,8 @@ func refresh():
 
 func _update_buffs():
 	var lines = []
+	if current_character and "_away_turns_left" in current_character and current_character._away_turns_left > 0:
+		lines.append("[color=#668cbf][在玩蔚蓝][/color] 无法移动与行动（剩余 %d 个己方回合）" % current_character._away_turns_left)
 	if current_character and "buffs" in current_character and not current_character.buffs.is_empty():
 		for key in current_character.buffs:
 			var list = current_character.buffs[key]
@@ -144,6 +146,8 @@ func _buff_desc(key: String, entry: Dictionary) -> String:
 			return "[color=#994d4d][松软][/color] 受到伤害 +%d%%（%d 回合）" % [val, dur]
 		"rope":
 			return "[color=#8cbf8c][拧绳][/color] karrigan 给队友的护身符，分摊 30% 的伤害（%d 回合）" % [dur]
+		"solo_leveling":
+			return "[color=#ffcc00][我独自升级][/color] 伤害 +%d%%（%d 回合）" % [val, dur]
 	return "%s %d（%d 回合）" % [key, val, dur]
 
 func _on_CloseButton_pressed():
