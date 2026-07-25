@@ -29,7 +29,7 @@ buses/default_bus_layout="uid://dpvo0w48xjncy"
 
 [autoload]
 
-GlobalGameData="*res://GlobalGameData.gd"
+GlobalGameData="*res://Global/GlobalGameData.gd"
 ButtonTheme="*res://Global/ButtonTheme.gd"
 AudioManager="*res://Global/AudioManager.gd"
 BackgroundManager="*res://Global/BackgroundManager.gd"

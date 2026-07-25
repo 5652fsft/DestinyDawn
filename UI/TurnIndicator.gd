@@ -5,7 +5,7 @@ extends Control
 @onready var transition = $TurnTransition
 @onready var transition_mask = $TurnTransition/Mask
 @onready var transition_label = $TurnTransition/TransitionLabel
-@onready var main: Node2D = get_tree().current_scene
+@onready var main: Node = get_tree().current_scene
 
 var _last_phase: int = -1
 

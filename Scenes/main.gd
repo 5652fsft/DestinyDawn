@@ -3,11 +3,6 @@ extends Node2D
 func _log(msg: String, category: String = "AI"):
 	print("[%s] %s" % [category, msg])
 
-func _char_label(c) -> String:
-	if not c:
-		return "?"
-	var is_player_side = c.name.begins_with("Host") == GlobalGameData.is_host
-	return ("玩家/" if is_player_side else "对手/") + c.character_name
 
 var selected_character = null
 var characters: Array[CharacterBody2D] = []
@@ -360,9 +355,9 @@ func _spawn_client_characters(id: int):
 	rpc("advance_turn_phase")
 
 func _init_player_card_systems():
-	if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
+	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
 		return
-	var host_id = multiplayer.get_unique_id()
+	var host_id = multiplayer.get_unique_id() if multiplayer.has_multiplayer_peer() else 1
 	if GlobalGameData.pending_client_id > 0:
 		GlobalGameData.client_peer_id = GlobalGameData.pending_client_id
 	var player_ids: Array[int] = [host_id, GlobalGameData.client_peer_id]
@@ -384,7 +379,7 @@ func unregister_character(chara: CharacterBody2D):
 	if selected_character == chara:
 		if highlight_layer:
 			highlight_layer.clear()
-	if (multiplayer.is_server() or GlobalGameData.is_ai_mode) and check_victory():
+	if (GlobalGameData.is_ai_mode or multiplayer.is_server()) and check_victory():
 		if multiplayer.has_multiplayer_peer():
 			rpc("advance_turn_phase")
 		else:
@@ -630,7 +625,7 @@ func _my_id() -> int:
 
 func on_card_played(card_data: CardData):
 	var my_pid = _my_id()
-	var who_label = _char_label(selected_character) if selected_character else ("玩家" if GlobalGameData.is_host else "玩家")
+	var who_label = GlobalGameData.get_char_label(selected_character) if selected_character else ("玩家" if GlobalGameData.is_host else "玩家")
 	if get_current_player_id() != my_pid:
 		return
 	if not energy_system.can_afford(my_pid, card_data.cost):
@@ -727,8 +722,8 @@ func _on_target_selected(target: Node):
 			show_toast("目标选择无效")
 			cancel_targeting()
 			return
-		var who_label = _char_label(selected_character) if selected_character else ("玩家" if GlobalGameData.is_host else "玩家")
-		print("[Info] %s 对 %s 使用 [%s]" % [who_label, _char_label(target), card_data.card_name])
+		var who_label = GlobalGameData.get_char_label(selected_character) if selected_character else ("玩家" if GlobalGameData.is_host else "玩家")
+		print("[Info] %s 对 %s 使用 [%s]" % [who_label, GlobalGameData.get_char_label(target), card_data.card_name])
 		_target_play_card(card_data, target)
 		hand_panel.remove_card_via_data(card_data)
 		cancel_targeting()
@@ -774,7 +769,7 @@ func _execute_play_card(player_id: int, card_id: String, target_path: String):
 	if target_path and not target_path.is_empty():
 		target = get_node_or_null(target_path)
 	var who_label = "玩家" if player_id == _my_id() else "对手"
-	print("[Card] %s 使用 [%s]，目标: %s" % [who_label, card_data.card_name, _char_label(target) if target else "无"])
+	print("[Card] %s 使用 [%s]，目标: %s" % [who_label, card_data.card_name, GlobalGameData.get_char_label(target) if target else "无"])
 	if _am: _am.play_sfx("card_play")
 
 	# 战斗统计：记录卡牌使用
@@ -870,7 +865,7 @@ func _active_skill_post_exec(skill: BaseSkill):
 	_update_action_buttons(selected_character)
 	character_info_panel.refresh()
 	_update_player_panels()
-	if multiplayer.is_server() or not multiplayer.has_multiplayer_peer():
+	if not multiplayer.has_multiplayer_peer() or multiplayer.is_server():
 		var pid = _my_id()
 		var hand = deck_manager.get_hand(pid) if deck_manager else []
 		if multiplayer.has_multiplayer_peer():
@@ -881,7 +876,7 @@ func _active_skill_post_exec(skill: BaseSkill):
 	_sync_energy(_my_id(), energy)
 	cancel_targeting()
 
-func _make_hex_overlay(color: Color, r: float = 68.0) -> Polygon2D:
+func _make_hex_overlay(color: Color, r: float = HexUtils.HEX_RADIUS) -> Polygon2D:
 	var hex = Polygon2D.new()
 	var pts: PackedVector2Array = []
 	for k in range(6):
@@ -917,7 +912,7 @@ func highlight_skill_targets():
 			var c_cell = _get_character_cell(c)
 			if not reachable.has(c_cell):
 				continue
-		var hex = _make_hex_overlay(hex_color, 68.0)
+		var hex = _make_hex_overlay(hex_color, HexUtils.HEX_RADIUS)
 		var spr = c.get_node_or_null("Sprite2D")
 		if spr:
 			spr.add_child(hex)
@@ -945,8 +940,8 @@ func _check_anpan_passive(player_id: int):
 			print("[Passive] あんパン [面包大家族] 触发: 抽1张 + 回1能量")
 			break
 
-func draw_extra_card(chara: Node, count: int = 1):
-	if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
+func draw_extra_card(_chara: Node, count: int = 1):
+	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
 		return
 	var pid = get_current_player_id()
 	pid = max(1, pid)
@@ -988,8 +983,9 @@ func get_current_player_id() -> int:
 
 # === 回合系统 ===
 @rpc("call_local", "reliable")
+# 新回合开始：抽牌、处理 Buff、触发回合开始效果
 func start_new_round():
-	if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
+	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
 		return
 	
 	if not GlobalGameData.turn_has_been_drawn:
@@ -1015,14 +1011,16 @@ func start_new_round():
 	advance_turn_phase()
 
 @rpc("call_local", "reliable")
+# 所有角色减少 Buff 持续回合，移除过期 Buff
 func process_all_buffs():
 	for chara in get_tree().get_nodes_in_group("characters"):
 		if chara.has_method("process_buffs"):
 			chara.process_buffs()
 
 @rpc("call_local", "reliable")
+# 处理角色回合开始效果（M1DorG 离开/回归、Richardovo 闭麦等）
 func process_turn_start():
-	if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
+	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
 		return
 	for c in get_tree().get_nodes_in_group("characters"):
 		if c.hp <= 0:
@@ -1050,7 +1048,7 @@ func process_turn_start():
 
 @rpc("call_local", "reliable")
 func draw_for_new_turn():
-	if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
+	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
 		print("[Draw] 跳过：非服务器且非AI模式")
 		return
 	print("[Draw] 开始抽牌，turn_has_been_drawn=", GlobalGameData.turn_has_been_drawn, " cid=", GlobalGameData.client_peer_id)
@@ -1097,7 +1095,7 @@ func _confirm_surrender():
 	for c in targets:
 		if c and c.has_method("take_damage_safe"):
 			c.take_damage_safe(9999)
-		elif c and c.has_method("rpc"):
+		elif c.multiplayer and c.multiplayer.has_multiplayer_peer():
 			c.rpc("take_damage", 9999)
 		elif c:
 			c.hp = 0
@@ -1115,14 +1113,14 @@ func _sync_surrender(surrendering_is_host: bool, stats: Dictionary = {}):
 func _show_waiting_overlay():
 	if _waiting_overlay:
 		return
-	if not multiplayer.is_server() or not multiplayer.has_multiplayer_peer():
+	if not multiplayer.has_multiplayer_peer() or not multiplayer.is_server():
 		return
 	_waiting_overlay = _make_waiting_overlay("等待玩家连接...")
 
 func _show_client_waiting():
 	if _waiting_overlay:
 		return
-	if multiplayer.is_server():
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 		return
 	_waiting_overlay = _make_waiting_overlay("等待主机...")
 
@@ -1215,7 +1213,7 @@ func reset_character_state() -> void:
 				c._extra_attacks += 1
 			if buff_manager and buff_manager.has_method("apply_buff"):
 				buff_manager.apply_buff(c, "legacy", 50, 2, c)
-				print("[Passive] karrigan 死亡触发：%s 获得额外行动 + 传承" % _char_label(c))
+				print("[Passive] karrigan 死亡触发：%s 获得额外行动 + 传承" % GlobalGameData.get_char_label(c))
 
 	# 烟雾递减
 	if field_effect_manager and field_effect_manager.has_method("tick_smoke"):
@@ -1223,7 +1221,7 @@ func reset_character_state() -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func advance_turn_phase():
-	if not multiplayer.is_server() and not GlobalGameData.is_ai_mode:
+	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
 		return
 		
 	if check_victory():

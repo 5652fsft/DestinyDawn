@@ -1,4 +1,4 @@
-extends "res://Characters/BaseCharacter.gd"
+extends BaseCharacter
 
 var active_skill: BaseSkill
 var passive_skill: BaseSkill
@@ -36,7 +36,7 @@ func perform_attack(target_path: NodePath):
 			var debuff = "attack_debuff" if randi() % 2 == 0 else "move_debuff"
 			var val = -5 if debuff == "attack_debuff" else -2
 			buff_manager.apply_buff(target, debuff, val, 1, self)
-			print("[Skill] %s [数据篡改] → %s %s" % [_char_label(self), _char_label(target), "虚弱" if debuff == "attack_debuff" else "迟缓"])
+			print("[Skill] %s [数据篡改] → %s %s" % [GlobalGameData.get_char_label(self), GlobalGameData.get_char_label(target), "虚弱" if debuff == "attack_debuff" else "迟缓"])
 
 func use_active_skill(target: Node) -> bool:
 	return SkillEffect.execute_active(self, active_skill, target, main)

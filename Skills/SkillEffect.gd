@@ -1,28 +1,11 @@
 class_name SkillEffect
 extends Node
 
+# 委托给 HexUtils 的 BFS 范围搜索
 static func get_cells_in_range(grid_layer: TileMapLayer, start_cell: Vector2i, max_range: int) -> Dictionary:
-	var cells: Dictionary = {}
-	var open_list = [start_cell]
-	var visited: Dictionary = {}
-	visited[start_cell] = 0
-	var directions = [
-		Vector2i(1, 0), Vector2i(1, -1), Vector2i(0, -1),
-		Vector2i(-1, 0), Vector2i(-1, 1), Vector2i(0, 1)
-	]
-	while open_list.size() > 0:
-		var cell = open_list.pop_front()
-		var cost = visited[cell]
-		cells[cell] = cost
-		if cost >= max_range:
-			continue
-		for d in directions:
-			var next_cell = cell + d
-			if not visited.has(next_cell) and grid_layer.get_cell_source_id(next_cell) != -1:
-				visited[next_cell] = cost + 1
-				open_list.append(next_cell)
-	return cells
+	return HexUtils.get_cells_in_range(grid_layer, start_cell, max_range)
 
+# 执行主动技能：校验目标与范围后分派到角色具体实现
 static func execute_active(character: Node, skill: BaseSkill, target: Node, main: Node) -> bool:
 	if not character or not skill or skill.is_passive:
 		return false
@@ -102,7 +85,7 @@ static func _bronya_active(character: Node, target: Node) -> bool:
 	if not "shield" in target:
 		target.set("shield", 0)
 	target.shield += 30
-	if target.has_method("rpc"):
+	if target.has_method("rpc") and target.multiplayer and target.multiplayer.has_multiplayer_peer():
 		target.rpc("_sync_shield", target.shield)
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("bronya_skill", target)
 	print("[Skill] %s [护卫指令] → %s 护盾 +30" % [GlobalGameData.get_char_label(character), GlobalGameData.get_char_label(target)])
@@ -126,12 +109,8 @@ static func _seele_active(character: Node, target: Node, main: Node) -> bool:
 	var target_cell = main._get_character_cell(target)
 	if target_cell == Vector2i(-1, -1):
 		return false
-	var directions = [
-		Vector2i(1, 0), Vector2i(1, -1), Vector2i(0, -1),
-		Vector2i(-1, 0), Vector2i(-1, 1), Vector2i(0, 1)
-	]
 	var best_cell = null
-	for d in directions:
+	for d in HexUtils.HEX_DIRS:
 		var neighbor = target_cell + d
 		if not main.is_cell_occupied(neighbor) and character.grid_layer.get_cell_source_id(neighbor) != -1:
 			best_cell = neighbor
@@ -269,24 +248,7 @@ static func _karrigan_active(character: Node, target: Node, main: Node) -> bool:
 	if fm and fm.has_method("place_smoke"):
 		fm.place_smoke(target_cell, 3, 2, character.grid_layer)
 	else:
-		var directions = [
-			Vector2i(1,0), Vector2i(1,-1), Vector2i(0,-1),
-			Vector2i(-1,0), Vector2i(-1,1), Vector2i(0,1)
-		]
-		var smoke_cells = [target_cell]
-		var visited = {target_cell: 0}
-		var queue = [target_cell]
-		while queue.size() > 0:
-			var cell = queue.pop_front()
-			var cost = visited[cell]
-			if cost >= 3:
-				continue
-			for d in directions:
-				var next_cell = cell + d
-				if not visited.has(next_cell) and character.grid_layer.get_cell_source_id(next_cell) != -1:
-					visited[next_cell] = cost + 1
-					smoke_cells.append(next_cell)
-					queue.append(next_cell)
+		var smoke_cells = HexUtils.get_cells_in_radius(target_cell, 3, character.grid_layer)
 		for cell in smoke_cells:
 			GlobalGameData.smoke_cells[cell] = 2
 	var _am = Engine.get_singleton("AudioManager")

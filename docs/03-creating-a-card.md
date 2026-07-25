@@ -148,7 +148,7 @@ static func _execute_my_new_effect(card: CardData, target: Node, main: Node):
 	pass
 ```
 
-> `caster` 参数已废弃，所有卡牌由玩家直接释放到目标，新增效果函数无需 `caster` 参数。
+> `caster` 参数已废弃，所有卡牌由玩家直接释放到目标，新增效果函数无需 `caster` 参数。位移效果（如传送、交换、暗影步）以 `target` 为操作对象，不使用 `main.selected_character`。
 
 ### AOE 卡牌阵营判定
 

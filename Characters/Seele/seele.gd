@@ -1,4 +1,4 @@
-extends "res://Characters/BaseCharacter.gd"
+extends BaseCharacter
 
 var active_skill: BaseSkill
 var passive_skill: BaseSkill
@@ -43,8 +43,8 @@ func perform_attack(target_path: NodePath):
 	if last_target_max_hp > 0 and last_target_hp >= last_target_max_hp:
 		dmg = int(dmg * 1.5)
 
-	target.take_damage_safe(dmg)
-	print("[Combat] %s → %s 造成 %d 点伤害（暗影突袭）" % [_char_label(self), _char_label(target), dmg])
+	target.take_damage(dmg)
+	print("[Combat] %s → %s 造成 %d 点伤害（暗影突袭）" % [GlobalGameData.get_char_label(self), GlobalGameData.get_char_label(target), dmg])
 	if multiplayer.has_multiplayer_peer():
 		rpc_id(0, "_play_attack_animation", target_path)
 	else:

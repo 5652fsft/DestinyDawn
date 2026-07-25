@@ -1,5 +1,6 @@
 extends Node
 
+# 当前玩家是否为主机（单人模式/AI 默认为 true）
 var is_host = false
 var is_ai_mode: bool = false
 
@@ -11,9 +12,12 @@ enum TurnPhase {
 	GAME_OVER
 }
 
+# 当前回合阶段
 var current_turn_phase: int = TurnPhase.NONE
-var turn_has_been_drawn:bool = false
-var is_host_turn: bool = true  # true = Host 先手，false = Client 先手
+# 本回合是否已抽牌
+var turn_has_been_drawn: bool = false
+var is_host_turn: bool = true
+# 当前局双方角色列表
 var host_characters: Array = []
 var client_characters: Array = []
 
@@ -73,25 +77,15 @@ func reset_battle_state():
 	host_team.clear()
 	client_team.clear()
 	ai_deck.clear()
-	battle_stats = {
-		host_damage_dealt = 0,
-		host_healing_done = 0,
-		host_cards_played = 0,
-		host_kills = 0,
-		client_damage_dealt = 0,
-		client_healing_done = 0,
-		client_cards_played = 0,
-		client_kills = 0,
-		turns_taken = 0,
-	}
+	battle_stats = DEFAULT_BATTLE_STATS.duplicate()
 
 # Phase 6 — 对战双方队伍（RPC 同步用）
 var host_team: Array[String] = []
 var client_team: Array[String] = []
 var ai_deck: Array[String] = []
 
-# Phase 6 — 战斗统计
-var battle_stats: Dictionary = {
+# 战斗统计默认值
+const DEFAULT_BATTLE_STATS: Dictionary = {
 	host_damage_dealt = 0,
 	host_healing_done = 0,
 	host_cards_played = 0,
@@ -102,6 +96,9 @@ var battle_stats: Dictionary = {
 	client_kills = 0,
 	turns_taken = 0,
 }
+
+# 战斗统计（每局重置）
+var battle_stats: Dictionary = DEFAULT_BATTLE_STATS.duplicate()
 
 # 角色出生点
 var host_birth_point = [
@@ -115,8 +112,9 @@ var client_birth_point = [
 	Vector2(1260, -257),  # cell (8, -11)
 ]
 
-func get_char_label(c) -> String:
+func get_char_label(c, ai_suffix: bool = false) -> String:
 	if not c:
 		return "?"
 	var is_player_side = c.name.begins_with("Host") == is_host
-	return ("玩家/" if is_player_side else "对手/") + c.character_name
+	var enemy = "AI/" if ai_suffix else "对手/"
+	return ("玩家/" if is_player_side else enemy) + c.character_name

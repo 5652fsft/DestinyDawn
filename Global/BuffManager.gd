@@ -23,7 +23,7 @@ func apply_buff(target: Node, buff_id: String, value: int, duration: int, source
 	if preset:
 		if target.has_method("play_vfx_preset_safe"):
 			target.play_vfx_preset_safe(preset)
-		elif target.has_method("rpc"):
+		elif target.multiplayer and target.multiplayer.has_multiplayer_peer():
 			target.rpc("_play_vfx_preset", preset)
 
 	_emit(target)

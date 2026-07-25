@@ -148,7 +148,7 @@ static func _register_cards():
 			CardData.EffectType.AOE_DAMAGE, 16),
 
 		_create_card("card_chain_lightning", "闪电链", CardData.CardType.ATTACK, 3,
-			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标造成 20 点伤害，周围 1 格内的其他敌方目标额外受到 10 点伤害，周围 2 格内的其他敌方目标额外受到 5 点伤害",
+			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标造成 20 点伤害，其周围 1 格的敌方目标受到 10 点伤害，周围 2 格的敌方目标受到 5 点伤害",
 			CardData.EffectType.CHAIN_DAMAGE, 20),
 
 		_create_card("card_mass_heal", "群体治愈", CardData.CardType.HEAL, 3,

@@ -44,7 +44,7 @@ func _ready():
 
 func load_all_audio():
 	var sfx_list = [
-		"click", "move", "attack", "heal",
+		"click", "move", "heal",
 		"shield", "death", "card_play", "turn_start", "victory", "defeat",
 		"deck_select",
 		"attack_sword", "attack_digital", "attack_magic", "attack_gun",

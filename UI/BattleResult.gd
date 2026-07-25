@@ -49,7 +49,7 @@ func show_result(is_winner: bool, stats: Dictionary, is_multiplayer: bool = fals
 	else:
 		retry_button.show()
 	# 自动隐藏手牌（与 F 键相同机制）
-	var main = get_node("/root/Main")
+	var main = get_tree().current_scene if get_tree() else null
 	if main and main.has_method("_hide_hand"):
 		main._hide_hand()
 
@@ -67,7 +67,7 @@ func show_result(is_winner: bool, stats: Dictionary, is_multiplayer: bool = fals
 	$VBoxContainer/StatsContainer/EnemyPanel/EnDamage.text = "造成伤害: %d" % stats[en_prefix + "_damage_dealt"]
 	$VBoxContainer/StatsContainer/EnemyPanel/EnHeal.text = "治疗量: %d" % stats[en_prefix + "_healing_done"]
 	$VBoxContainer/StatsContainer/EnemyPanel/EnCards.text = "使用卡牌: %d" % stats[en_prefix + "_cards_played"]
-	$VBoxContainer/StatsContainer/EnemyPanel/EnKills.text = "使用卡牌: %d" % stats[en_prefix + "_kills"]
+	$VBoxContainer/StatsContainer/EnemyPanel/EnKills.text = "击杀: %d" % stats[en_prefix + "_kills"]
 
 	var tw = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.tween_property(self, "modulate:a", 1.0, 0.4)

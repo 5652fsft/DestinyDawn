@@ -1,6 +1,7 @@
 class_name CardEffect
 extends Node
 
+# 执行卡牌效果：分派到具体效果函数（卡牌由玩家释放到目标，无 caster 概念）
 static func execute(card: CardData, target: Node, main: Node) -> bool:
 	if not card or not main:
 		return false
@@ -74,7 +75,7 @@ static func execute(card: CardData, target: Node, main: Node) -> bool:
 			push_warning("未知卡牌效果类型: ", card.effect_type)
 			return false
 
-# ==================== 基础效果（无 caster、无亲和力） ====================
+# ==================== 基础效果（无亲和力） ====================
 
 static func _execute_damage(card: CardData, target: Node, main: Node) -> bool:
 	if not target or not target.has_method("take_damage"):
@@ -122,13 +123,13 @@ static func _execute_heal(card: CardData, target: Node) -> bool:
 		return false
 	if target.has_method("take_damage_safe"):
 		target.take_damage_safe(-heal_amount)
-	elif target.has_method("rpc"):
+	elif target.multiplayer and target.multiplayer.has_multiplayer_peer():
 		target.rpc("take_damage", -heal_amount)
 	else:
 		target.hp = min(target.max_hp, target.hp + heal_amount)
 	if target.has_method("play_vfx_preset_safe"):
 		target.play_vfx_preset_safe("heal")
-	elif target.has_method("rpc"):
+	elif target.multiplayer and target.multiplayer.has_multiplayer_peer():
 		target.rpc("_play_vfx_preset", "heal")
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("heal", target)
 	return true
@@ -139,7 +140,7 @@ static func _execute_life_split(card: CardData, target: Node, main: Node) -> boo
 	if target.hp >= target.max_hp:
 		if not main or not main.has_method("draw_extra_card"):
 			return false
-		main.draw_extra_card(target, 1)
+		main.draw_extra_card(null, 1)
 		if main.has_method("show_toast"):
 			main.show_toast("[生命分流] 目标满血，额外抽 1 张牌", 1.5)
 		return true
@@ -148,13 +149,13 @@ static func _execute_life_split(card: CardData, target: Node, main: Node) -> boo
 		return false
 	if target.has_method("take_damage_safe"):
 		target.take_damage_safe(-heal_amount)
-	elif target.has_method("rpc"):
+	elif target.multiplayer and target.multiplayer.has_multiplayer_peer():
 		target.rpc("take_damage", -heal_amount)
 	else:
 		target.hp = min(target.max_hp, target.hp + heal_amount)
 	if target.has_method("play_vfx_preset_safe"):
 		target.play_vfx_preset_safe("heal")
-	elif target.has_method("rpc"):
+	elif target.multiplayer and target.multiplayer.has_multiplayer_peer():
 		target.rpc("_play_vfx_preset", "heal")
 	return true
 
@@ -182,11 +183,11 @@ static func _execute_shield_overload(card: CardData, target: Node) -> bool:
 		target.shield = target.shield * 2
 	else:
 		target.shield = target.shield + card.effect_value
-	if target.has_method("rpc"):
+	if target.multiplayer and target.multiplayer.has_multiplayer_peer():
 		target.rpc("_sync_shield", target.shield)
 	if target.has_method("play_vfx_preset_safe"):
 		target.play_vfx_preset_safe("shield")
-	elif target.has_method("rpc"):
+	elif target.multiplayer and target.multiplayer.has_multiplayer_peer():
 		target.rpc("_play_vfx_preset", "shield")
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("shield", target)
 	return true
@@ -226,7 +227,7 @@ static func _execute_poison_blade(card: CardData, target: Node) -> bool:
 static func _apply_temp_buff(target: Node, buff_key: String, value: int, duration: int) -> bool:
 	if not target:
 		return false
-	var main = target.get_tree().current_scene
+	var main = target.get_tree().current_scene if target.get_tree() else null
 	var bm = main.get_node_or_null("BuffManager") if main else null
 	if bm and bm.has_method("apply_buff"):
 		return bm.apply_buff(target, buff_key, value, duration)
@@ -246,44 +247,32 @@ static func _apply_temp_buff(target: Node, buff_key: String, value: int, duratio
 			target._play_vfx(vfx_color, 0.25)
 	return true
 
-# ==================== 需要 selected_character 的机械效果 ====================
-# 以下函数从 main.selected_character 获取角色引用，用于位移/阵营判断/VFX
+# ==================== 位移/特殊效果（基于 target 操作） ====================
 
 static func _execute_teleport(card: CardData, target: Node, main: Node) -> bool:
-	var caster = main.selected_character if main else null
-	if not target or not caster or not target.has_method("get_current_cell"):
+	if not target or not target.has_method("get_current_cell") or not target.has_method("get_grid_layer"):
 		return false
-	var target_cell = target.get_current_cell()
-	var neighbors = [
-		Vector2i(1,0), Vector2i(1,-1), Vector2i(0,-1),
-		Vector2i(-1,0), Vector2i(-1,1), Vector2i(0,1)
-	]
+	var gl = target.get_grid_layer()
+	if not gl:
+		return false
+	var cell = target.get_current_cell()
 	var valid = []
-	for d in neighbors:
-		var pick = target_cell + d
-		if caster.has_method("get_move_cost") and caster.get_move_cost(pick) > 0:
-			if main.has_method("is_cell_occupied") and not main.is_cell_occupied(pick, caster):
-				valid.append(pick)
+	for d in HexUtils.HEX_DIRS:
+		var pick = cell + d
+		if gl.get_cell_source_id(pick) != -1 and not main.is_cell_occupied(pick, target):
+			valid.append(pick)
 	if valid.is_empty():
 		return false
 	var pick = valid[randi() % valid.size()]
-	if caster.has_method("get_grid_layer"):
-		var gl = caster.get_grid_layer()
-		if gl:
-			var world_pos = gl.to_global(gl.map_to_local(pick))
-			caster.global_position = world_pos
-			caster.target_world = world_pos
-	if caster.has_method("play_vfx_preset_safe"):
-		caster.play_vfx_preset_safe("entrance")
-	elif caster.has_method("rpc"):
-		caster.rpc("_play_vfx_preset", "entrance")
+	var world_pos = gl.to_global(gl.map_to_local(pick))
+	target.global_position = world_pos
+	target.target_world = world_pos
+	if target.has_method("play_vfx_preset_safe"):
+		target.play_vfx_preset_safe("entrance")
+	elif target.multiplayer and target.multiplayer.has_multiplayer_peer():
+		target.rpc("_play_vfx_preset", "entrance")
 	if card.effect_value > 0 and target.has_method("take_damage"):
 		_rpc_take_damage(target, card.effect_value)
-	if target.has_method("play_vfx_preset_safe"):
-		target.play_vfx_preset_safe("hit")
-	elif target.has_method("rpc"):
-		target.rpc("_play_vfx_preset", "hit")
-	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
 static func _execute_shadowstep_new(card: CardData, target: Node, main: Node) -> bool:
@@ -313,12 +302,8 @@ static func _execute_shadowstep_new(card: CardData, target: Node, main: Node) ->
 	if not furthest_enemy:
 		return false
 	var enemy_cell = furthest_enemy.get_current_cell()
-	var neighbors = [
-		Vector2i(1,0), Vector2i(1,-1), Vector2i(0,-1),
-		Vector2i(-1,0), Vector2i(-1,1), Vector2i(0,1)
-	]
 	var best_cell = null
-	for d in neighbors:
+	for d in HexUtils.HEX_DIRS:
 		var pick = enemy_cell + d
 		if gl.get_cell_source_id(pick) != -1:
 			if main.has_method("is_cell_occupied") and not main.is_cell_occupied(pick, target):
@@ -334,11 +319,11 @@ static func _execute_shadowstep_new(card: CardData, target: Node, main: Node) ->
 		_rpc_take_damage(furthest_enemy, card.effect_value)
 	if target.has_method("play_vfx_preset_safe"):
 		target.play_vfx_preset_safe("entrance")
-	elif target.has_method("rpc"):
+	elif target.multiplayer and target.multiplayer.has_multiplayer_peer():
 		target.rpc("_play_vfx_preset", "entrance")
 	if furthest_enemy.has_method("play_vfx_preset_safe"):
 		furthest_enemy.play_vfx_preset_safe("hit")
-	elif furthest_enemy.has_method("rpc"):
+	elif furthest_enemy.multiplayer and furthest_enemy.multiplayer.has_multiplayer_peer():
 		furthest_enemy.rpc("_play_vfx_preset", "hit")
 	var _am = Engine.get_singleton("AudioManager")
 	if _am: _am.play_sfx("attack_magic", furthest_enemy)
@@ -346,40 +331,48 @@ static func _execute_shadowstep_new(card: CardData, target: Node, main: Node) ->
 	return true
 
 static func _execute_swap(card: CardData, target: Node, main: Node) -> bool:
-	var caster = main.selected_character if main else null
-	if not caster or not target or not caster.has_method("get_current_cell"):
+	if not target or not main:
 		return false
-	var caster_pos = caster.global_position
+	var is_host = target.name.begins_with("Host")
+	var swap_with = null
+	for c in main.get_tree().get_nodes_in_group("characters"):
+		if c == target or c.hp <= 0:
+			continue
+		if c.name.begins_with("Host") == is_host:
+			continue
+		if c.has_method("get_current_cell") and target.has_method("get_current_cell"):
+			swap_with = c
+			break
+	if not swap_with:
+		return false
 	var target_pos = target.global_position
-	caster.global_position = target_pos
-	caster.target_world = target_pos
-	target.global_position = caster_pos
-	if target.has_method("move_toward_target"):
-		target.target_world = caster_pos
-	if caster.has_method("play_vfx_preset_safe"):
-		caster.play_vfx_preset_safe("entrance")
-	elif caster.has_method("rpc"):
-		caster.rpc("_play_vfx_preset", "entrance")
+	var swap_pos = swap_with.global_position
+	target.global_position = swap_pos
+	target.target_world = swap_pos
+	swap_with.global_position = target_pos
+	if swap_with.has_method("move_toward_target"):
+		swap_with.target_world = target_pos
 	if target.has_method("play_vfx_preset_safe"):
 		target.play_vfx_preset_safe("entrance")
-	elif target.has_method("rpc"):
+	elif target.multiplayer and target.multiplayer.has_multiplayer_peer():
 		target.rpc("_play_vfx_preset", "entrance")
-	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
+	if swap_with.has_method("play_vfx_preset_safe"):
+		swap_with.play_vfx_preset_safe("entrance")
+	elif swap_with.multiplayer and swap_with.multiplayer.has_multiplayer_peer():
+		swap_with.rpc("_play_vfx_preset", "entrance")
 	return true
 
 static func _execute_draw_card(card: CardData, main: Node) -> bool:
 	if not main or not main.has_method("draw_extra_card"):
 		return false
-	var caster = main.selected_character if main else null
-	main.draw_extra_card(caster, card.effect_value)
+	main.draw_extra_card(null, card.effect_value)
 	return true
 
 static func _execute_siphon(card: CardData, target: Node, main: Node) -> bool:
 	if target and target.has_method("take_damage"):
 		_rpc_take_damage(target, 6)
 	if main and main.has_method("draw_extra_card"):
-		var caster = main.selected_character if main else null
-		main.draw_extra_card(caster, 1)
+		main.draw_extra_card(null, 1)
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
@@ -406,13 +399,6 @@ static func _execute_aoe_damage(card: CardData, target: Node, main: Node) -> boo
 	for c in main.get_tree().get_nodes_in_group("characters"):
 		if c.has_method("take_damage") and _is_host_side(c) != is_caster_host:
 			_rpc_take_damage(c, dmg)
-	if main.selected_character:
-		var caster = main.selected_character
-		if caster.has_method("play_vfx_preset_safe"):
-			caster.play_vfx_preset_safe("explosion")
-		elif caster.has_method("rpc"):
-			caster.rpc("_play_vfx_preset", "explosion")
-	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic")
 	return true
 
 static func _execute_aoe_heal(card: CardData, target: Node, main: Node) -> bool:
@@ -451,7 +437,7 @@ static func _execute_chain_lightning_new(card: CardData, primary: Node, main: No
 			_rpc_take_damage(c, 5)
 	if primary.has_method("play_vfx_preset_safe"):
 		primary.play_vfx_preset_safe("explosion")
-	elif primary.has_method("rpc"):
+	elif primary.multiplayer and primary.multiplayer.has_multiplayer_peer():
 		primary.rpc("_play_vfx_preset", "explosion")
 	var _am = Engine.get_singleton("AudioManager")
 	if _am: _am.play_sfx("attack_magic", primary)
@@ -472,26 +458,25 @@ static func _offset_to_cube(cell: Vector2i) -> Vector3i:
 	return Vector3i(x, y, z)
 
 static func _execute_linear_aoe(card: CardData, target: Node, main: Node) -> bool:
-	var caster = main.selected_character if main else null
-	if not target or not main or not caster:
+	if not target or not main:
 		return false
-	var dir = (target.global_position - caster.global_position).normalized()
+	var dir = Vector2.RIGHT
 	var max_dist = card.effect_value
 	for c in main.get_tree().get_nodes_in_group("characters"):
-		if c == caster:
+		if c == target:
 			continue
-		var to = c.global_position - caster.global_position
+		dir = (c.global_position - target.global_position).normalized()
+		var to = c.global_position - target.global_position
 		var dot = to.dot(dir)
-		if dot > 0 and dot <= max_dist * 130.0:
+		if dot > 0 and dot <= max_dist * HexUtils.HEX_SPACING:
 			var lateral = to.length() - dot
 			if lateral < 80.0:
 				if c.has_method("take_damage_safe"):
 					c.take_damage_safe(card.effect_value)
-				elif c.has_method("rpc"):
+				elif c.multiplayer and c.multiplayer.has_multiplayer_peer():
 					c.rpc("take_damage", card.effect_value)
 				else:
 					c.take_damage(card.effect_value)
-	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
 # ==================== 通用工具 ====================
@@ -501,21 +486,23 @@ static func _get_characters_in_range(main: Node, center: Node, radius: int) -> A
 	for c in main.get_tree().get_nodes_in_group("characters"):
 		if c == center:
 			continue
-		if center.global_position.distance_to(c.global_position) <= radius * 130.0:
+		if center.global_position.distance_to(c.global_position) <= radius * HexUtils.HEX_SPACING:
 			chars.append(c)
 	return chars
 
 static func _is_host_side(node: Node) -> bool:
 	return node.name.begins_with("Host")
 
+# 安全伤害调用：优先 take_damage_safe，无 peer 时直接调用
 static func _rpc_take_damage(node: Node, amount: int):
 	if node.has_method("take_damage_safe"):
 		node.take_damage_safe(amount)
-	elif node.has_method("rpc"):
+	elif node.multiplayer and node.multiplayer.has_multiplayer_peer():
 		node.rpc("take_damage", amount)
 	else:
 		node.take_damage(amount)
 
+# 魔力共鸣：伊蕾娜被动，施放攻击/减益卡牌时触发
 static func _apply_magic_resonance(card: CardData, main: Node):
 	var attack_types = [
 		CardData.EffectType.DAMAGE, CardData.EffectType.AOE_DAMAGE,
@@ -549,12 +536,12 @@ static func _apply_magic_resonance(card: CardData, main: Node):
 static func _execute_cleanse(target: Node) -> bool:
 	if not target:
 		return false
-	var main = target.get_tree().current_scene
+	var main = target.get_tree().current_scene if target.get_tree() else null
 	var bm = main.get_node_or_null("BuffManager") if main else null
 	if bm and bm.has_method("cleanse"):
 		return bm.cleanse(target, "all") > 0
 	if "buffs" in target:
 		target.buffs.clear()
-		if target.has_method("rpc"):
-			target.rpc("_sync_buffs", {})
+	if target.multiplayer and target.multiplayer.has_multiplayer_peer():
+		target.rpc("_sync_buffs", {})
 	return true

@@ -1,7 +1,5 @@
 extends Panel
 
-const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
-
 var current_character: Node = null
 var active_skill: BaseSkill = null
 var _targeting: bool = false

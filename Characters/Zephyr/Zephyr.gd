@@ -1,4 +1,4 @@
-extends "res://Characters/BaseCharacter.gd"
+extends BaseCharacter
 
 var active_skill: BaseSkill
 var passive_skill: BaseSkill
@@ -50,7 +50,10 @@ func perform_attack(target_path: NodePath):
 		main.last_attacker = self
 	target.take_damage(total_damage)
 	print("[Passive] Zephyr [血煞逆锋] 造成 %d 点伤害（基础 %d + 已损 %d HP × 40%%）" % [total_damage, effective_attack, max_hp - hp])
-	rpc_id(0, "_play_attack_animation", target_path)
+	if multiplayer.has_multiplayer_peer():
+		rpc_id(0, "_play_attack_animation", target_path)
+	else:
+		_play_attack_animation(target_path)
 
 @rpc("any_peer", "call_local", "reliable")
 func take_damage(damage: int):

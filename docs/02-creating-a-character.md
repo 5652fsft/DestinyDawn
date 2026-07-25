@@ -40,7 +40,7 @@
 ## B) 角色脚本 — `Characters/NewChar/NewChar.gd`
 
 ```gdscript
-extends "res://Characters/BaseCharacter.gd"
+extends BaseCharacter
 
 var active_skill: BaseSkill
 var passive_skill: BaseSkill

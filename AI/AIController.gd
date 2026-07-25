@@ -10,7 +10,6 @@ func _char_label(c) -> String:
 	var is_player_side = c.name.begins_with("Host") == GlobalGameData.is_host
 	return ("玩家/" if is_player_side else "AI/") + c.character_name
 
-# === 动作队列 ===
 var _action_queue: Array[Dictionary] = []
 var _action_timer: float = 0.0
 var _busy: bool = false
@@ -24,18 +23,12 @@ var _deck_manager: Node = null
 var _camera: Node2D = null
 var _camera_tween: Tween = null
 
-# 六边形邻居方向（奇数列偏移）
-var _hex_dirs: Array[Vector2i] = [
-	Vector2i(1, 0), Vector2i(1, -1), Vector2i(0, -1),
-	Vector2i(-1, 0), Vector2i(-1, 1), Vector2i(0, 1)
-]
-
 
 func _ready():
 	_main = get_tree().current_scene
-	_energy_system = _main.get_node("EnergySystem")
-	_deck_manager = _main.get_node("DeckManager")
-	_camera = _main.get_node("Camera")
+	_energy_system = _main.get_node_or_null("EnergySystem")
+	_deck_manager = _main.get_node_or_null("DeckManager")
+	_camera = _main.get_node_or_null("Camera")
 	_log("AI 控制器就绪")
 
 
@@ -221,6 +214,7 @@ func _execute_current_action():
 		_action_timer = ACTION_DELAY
 
 
+# 执行移动：防重叠、占位、同步
 func _execute_move(chara: Node, cell: Vector2i):
 	var gl = chara.grid_layer
 	if not gl:
@@ -271,7 +265,7 @@ func _find_nearest_free_cell(chara: Node, target: Vector2i, start: Vector2i) -> 
 			var cost = chara.get_move_cost(cur)
 			if cost > 0:
 				return cur
-		for d in _hex_dirs:
+		for d in HexUtils.HEX_DIRS:
 			var n = cur + d
 			if visited.has(n):
 				continue
@@ -280,6 +274,7 @@ func _find_nearest_free_cell(chara: Node, target: Vector2i, start: Vector2i) -> 
 	return Vector2i(-1, -1)
 
 
+# 执行攻击：调用角色 perform_attack_safe
 func _execute_attack(chara: Node, target: Node):
 	if not is_instance_valid(target) or target.hp <= 0:
 		_log("%s 攻击目标无效" % _char_label(chara), "Attack")
@@ -301,6 +296,7 @@ func _execute_attack(chara: Node, target: Node):
 			GlobalGameData.character_attack_used_num += 1
 
 
+# 执行技能：调用角色 use_active_skill
 func _execute_skill(chara: Node, target: Node):
 	if not is_instance_valid(target) or target.hp <= 0:
 		_log("%s 技能目标无效" % _char_label(chara), "Skill")
@@ -316,6 +312,7 @@ func _execute_skill(chara: Node, target: Node):
 			GlobalGameData.character_attack_used_num += 1
 
 
+# 执行卡牌：通过 DeckManager 打出
 func _execute_card(chara: Node, card_id: String, target: Node):
 	var card_data = CardDatabase.get_card(card_id)
 	if not card_data:
@@ -340,6 +337,7 @@ func _execute_card(chara: Node, card_id: String, target: Node):
 
 # ==================== 移动评估 ====================
 
+# 评估最佳移动目标：就近或按策略
 func _evaluate_move_target(chara: Node) -> Vector2i:
 	var gl = chara.grid_layer
 	if not gl:
@@ -382,7 +380,7 @@ func _bfs_reachable(chara: Node, max_move: int) -> Array[Vector2i]:
 
 	while queue.size() > 0:
 		var current = queue.pop_front()
-		for d in _hex_dirs:
+		for d in HexUtils.HEX_DIRS:
 			var next = current.cell + d
 			if visited.has(next):
 				continue
@@ -446,6 +444,7 @@ func _filter_in_attack_range(cells: Array[Vector2i], enemy_cell: Vector2i, attac
 
 # ==================== 攻击评估 ====================
 
+# 评估最佳攻击目标：低血量优先
 func _evaluate_attack_target(chara: Node) -> Node:
 	var enemies = _get_enemies_in_attack_range(chara)
 	if enemies.is_empty():
@@ -472,6 +471,7 @@ func _get_enemies_in_attack_range(chara: Node) -> Array:
 
 # ==================== 技能评估 ====================
 
+# 判断是否应该使用技能
 func _should_use_skill(chara: Node) -> bool:
 	if not chara.active_skill:
 		return false
@@ -487,6 +487,7 @@ func _should_use_skill(chara: Node) -> bool:
 	return true
 
 
+# 评估技能目标（治疗/增益/伤害）
 func _evaluate_skill_target(chara: Node) -> Node:
 	var name = chara.character_name
 	var target: Node = null
@@ -539,7 +540,7 @@ func _find_best_aoe_target(chara: Node) -> Node:
 	var best = null
 	var best_count = -1
 	for e in enemies:
-		var count = _count_enemies_near(e, 130.0)
+		var count = _count_enemies_near(e, HexUtils.HEX_SPACING)
 		if count > best_count:
 			best_count = count
 			best = e
@@ -598,6 +599,7 @@ func _count_enemies_near(center: Node, radius: float) -> int:
 
 # ==================== 卡牌评估 ====================
 
+# 判断是否应该出牌
 func _should_play_card(chara: Node) -> bool:
 	var hand = _deck_manager.get_hand(2)
 	if hand.is_empty():
@@ -609,6 +611,7 @@ func _should_play_card(chara: Node) -> bool:
 	return false
 
 
+# 评估最佳可用卡牌：按分数排序
 func _evaluate_best_card(chara: Node) -> Dictionary:
 	var hand = _deck_manager.get_hand(2)
 	var best_action: Dictionary = {}

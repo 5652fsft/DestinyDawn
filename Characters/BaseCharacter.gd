@@ -1,8 +1,10 @@
-# res://Characters/BaseCharacter.gd
+class_name BaseCharacter
 extends CharacterBody2D
 
 # === 属性 ===
+# 点击检测图层
 const click_layer: int = 2
+# 移动速度（像素/秒）
 const speed: float = 4800.0
 @export var character_name: String = "Character"
 @export var move_points: int = 4
@@ -211,6 +213,19 @@ func get_move_cost(cell: Vector2i) -> int:
 		"wall": return -1
 		_: return 1
 
+# 开销优先插入（二分查找）
+func _insert_sorted(arr: Array, item: Dictionary) -> void:
+	var lo = 0
+	var hi = arr.size()
+	while lo < hi:
+		var mid = (lo + hi) / 2
+		if arr[mid].cost < item.cost:
+			lo = mid + 1
+		else:
+			hi = mid
+	arr.insert(lo, item)
+
+# BFS 寻路：计算并高亮有效移动格子
 func show_move_range():
 	valid_move_cells.clear()
 	var char_local = grid_layer.to_local(global_position)
@@ -223,22 +238,10 @@ func show_move_range():
 	valid_move_cells[start_cell] = 0
 
 	var open_list = []
-	var closed: Dictionary = {}  # 只记录已处理或已排除的格子（值为 true）
+	var closed: Dictionary = {}
 	open_list.append({ "cell": start_cell, "cost": 0 })
 
-	# 六边形邻居方向（Odd Columns）
-	var directions = [
-		Vector2i(1, 0),
-		Vector2i(1, -1),
-		Vector2i(0, -1),
-		Vector2i(-1, 0),
-		Vector2i(-1, 1),
-		Vector2i(0, 1)
-	]
-
 	while open_list.size() > 0:
-		# 简单排序模拟优先队列（最小成本优先）
-		open_list.sort_custom(func(a, b): return a.cost < b.cost)
 		var current = open_list.pop_front()
 		var cell: Vector2i = current.cell
 		var total_cost: int = current.cost
@@ -247,7 +250,7 @@ func show_move_range():
 			continue
 		closed[cell] = true
 
-		for d in directions:
+		for d in HexUtils.HEX_DIRS:
 			var next_cell: Vector2i = cell + d
 			if closed.has(next_cell):
 				continue
@@ -267,13 +270,14 @@ func show_move_range():
 				# 允许更优路径更新
 				if not valid_move_cells.has(next_cell) or new_cost < valid_move_cells[next_cell]:
 					valid_move_cells[next_cell] = new_cost
-					open_list.append({ "cell": next_cell, "cost": new_cost })
+					_insert_sorted(open_list, { "cell": next_cell, "cost": new_cost })
 
 	# 高亮所有可达格子（跳过起始格）
 	for cell in valid_move_cells.keys():
 		if cell != start_cell:
 			highlight_layer.set_cell(cell, 0, Vector2i.ZERO)
 
+# BFS 寻路：计算可攻击范围并高亮敌人
 func show_attack_range():
 	valid_attack_cells.clear()
 	var char_local = grid_layer.to_local(global_position)
@@ -284,19 +288,7 @@ func show_attack_range():
 	var closed: Dictionary = {}  # 只记录已处理或已排除的格子（值为 true）
 	open_list.append({ "cell": start_cell, "cost": 0 })
 
-	# 六边形邻居方向（Odd Columns）
-	var directions = [
-		Vector2i(1, 0),
-		Vector2i(1, -1),
-		Vector2i(0, -1),
-		Vector2i(-1, 0),
-		Vector2i(-1, 1),
-		Vector2i(0, 1)
-	]
-
 	while open_list.size() > 0:
-		# 简单排序模拟优先队列（最小成本优先）
-		open_list.sort_custom(func(a, b): return a.cost < b.cost)
 		var current = open_list.pop_front()
 		var cell: Vector2i = current.cell
 		var total_cost: int = current.cost
@@ -305,7 +297,7 @@ func show_attack_range():
 			continue
 		closed[cell] = true
 
-		for d in directions:
+		for d in HexUtils.HEX_DIRS:
 			var next_cell: Vector2i = cell + d
 			if closed.has(next_cell):
 				continue
@@ -319,14 +311,14 @@ func show_attack_range():
 				# 允许更优路径更新
 				if not valid_attack_cells.has(next_cell) or new_cost < valid_attack_cells[next_cell]:
 					valid_attack_cells[next_cell] = new_cost
-					open_list.append({ "cell": next_cell, "cost": new_cost })
+					_insert_sorted(open_list, { "cell": next_cell, "cost": new_cost })
 
 	# 高亮所有可攻击角色
 	for cell in valid_attack_cells.keys():
 		var enemy = main.find_cell_occupant(cell)
 		if cell != start_cell and enemy and is_enemy(enemy):
 			var hex = Polygon2D.new()
-			var r = 68.0
+			var r = HexUtils.HEX_RADIUS
 			var pts: PackedVector2Array = []
 			for k in range(6):
 				var a = deg_to_rad(60 * k - 30)
@@ -343,11 +335,13 @@ func show_attack_range():
 				enemy.add_child(hex)
 			highlight_overlays.append(hex)
 
+# 清除移动范围高亮
 func hide_move_range():
 	valid_move_cells.clear()
 	if highlight_layer:
 		highlight_layer.clear()
 		
+# 清除攻击范围高亮
 func hide_attack_range():
 	valid_attack_cells.clear()
 	for h in highlight_overlays:
@@ -379,12 +373,7 @@ func _is_mouse_over_ui() -> bool:
 		ctrl = ctrl.get_parent()
 	return false
 
-func _char_label(c) -> String:
-	if not c:
-		return "?"
-	var is_player_side = c.name.begins_with("Host") == GlobalGameData.is_host
-	return ("玩家/" if is_player_side else "对手/") + c.character_name
-
+# 处理移动输入：点击有效移动格子后开始寻路移动
 func handle_move():
 	if hp <= 0:
 		return
@@ -427,13 +416,14 @@ func handle_move():
 			
 			var target_local = grid_layer.map_to_local(cell_coord)
 			target_world = grid_layer.to_global(target_local)
-			print("[Move] %s → (%d, %d) 消耗 %d" % [_char_label(self), cell_coord.x, cell_coord.y, valid_move_cells[cell_coord]])
+			print("[Move] %s → (%d, %d) 消耗 %d" % [GlobalGameData.get_char_label(self), cell_coord.x, cell_coord.y, valid_move_cells[cell_coord]])
 			GlobalGameData.character_move_used[name] = true
 			GlobalGameData.character_move_used_num += 1
 		hide_move_range()
 		main.unselect_character(self)
 		main.check_move()
 	
+# 处理攻击输入：点击敌人执行 _play_attack_animation → perform_attack
 func handle_attack():
 	if hp <= 0:
 		return
@@ -473,7 +463,7 @@ func handle_attack():
 					main.check_attack()
 				else:
 					main.show_toast("超出攻击范围")
-					print("[Warn] %s 目标超出攻击范围！" % _char_label(self))
+					print("[Warn] %s 目标超出攻击范围！" % GlobalGameData.get_char_label(self))
 				return
 			main.unselect_character(self)
 
@@ -486,6 +476,7 @@ func _consume_extra_attack():
 	_extra_attacks -= 1
 
 @rpc("any_peer", "call_local", "reliable")
+# RPC — 执行攻击：计算伤害，调用目标 take_damage，记录战斗统计
 func perform_attack(target_path: NodePath):
 	var target = get_node_or_null(target_path)
 	if not target or not target is CharacterBody2D:
@@ -501,7 +492,7 @@ func perform_attack(target_path: NodePath):
 	if main:
 		main.last_attacker = self
 	target.take_damage(effective_attack)
-	print("[Combat] %s → %s 造成 %d 点伤害" % [_char_label(self), _char_label(target), effective_attack])
+	print("[Combat] %s → %s 造成 %d 点伤害" % [GlobalGameData.get_char_label(self), GlobalGameData.get_char_label(target), effective_attack])
 	
 	# 同步动画（所有客户端）
 	if multiplayer.has_multiplayer_peer():
@@ -509,6 +500,7 @@ func perform_attack(target_path: NodePath):
 	else:
 		_play_attack_animation(target_path)
 
+# 安全调用：根据是否联机选择 RPC 或本地调用
 func perform_attack_safe(target_path: NodePath) -> void:
 	if multiplayer.has_multiplayer_peer():
 		rpc("perform_attack", target_path)
@@ -522,6 +514,7 @@ func take_damage_safe(damage: int) -> void:
 		take_damage(damage)
 
 @rpc("call_local", "reliable")
+# 播放攻击动画（移向目标 → 短暂停留 → 回到原位）
 func _play_attack_animation(target_path: NodePath):
 	var target_node = get_node_or_null(target_path)
 	if not target_node or not target_node.has_node("Sprite2D"):
@@ -584,7 +577,10 @@ func _play_vfx(color: Color, duration: float = 0.2):
 	hit_tween.tween_property(sprite, "modulate", restore, duration)
 
 func _shake_camera(intensity: float):
-	var cam = get_tree().current_scene.find_child("Camera", true, false)
+	var scene = get_tree().current_scene if get_tree() else null
+	if not scene:
+		return
+	var cam = scene.find_child("Camera", true, false)
 	if cam and cam.has_method("shake"):
 		cam.shake(intensity)
 
@@ -592,21 +588,24 @@ func _spawn_float(value: int, heal: bool = false, shield: bool = false):
 	var num = FLOATING_NUM.instantiate()
 	num.global_position = global_position + Vector2(190, -220)
 	num.z_index = 100
-	get_tree().current_scene.add_child(num)
+	var scene = get_tree().current_scene if get_tree() else null
+	if scene:
+		scene.add_child(num)
 	num.show_value(value, heal, shield)
 
 @rpc("any_peer", "call_local", "reliable")
+# 受击：计算标记/防御/护盾减免，同步 HP 和护盾，记录战斗统计
 func take_damage(damage: int):
 	var is_host = name.begins_with("Host")
 	if damage <= 0:
 		hp = min(max_hp, hp - damage)
 		_spawn_float(-damage, true)
 		if _am: _am.play_sfx("heal", self)
-		if multiplayer.is_server() or GlobalGameData.is_ai_mode:
+		if GlobalGameData.is_ai_mode or multiplayer.is_server():
 			var key = "host_healing_done" if is_host else "client_healing_done"
 			GlobalGameData.battle_stats[key] += -damage
-			print("[Combat] %s 恢复 %d 点 HP [%d/%d]" % [_char_label(self), -damage, hp, max_hp])
-		if multiplayer.is_server():
+			print("[Combat] %s 恢复 %d 点 HP [%d/%d]" % [GlobalGameData.get_char_label(self), -damage, hp, max_hp])
+		if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 			rpc_id(0, "_sync_hp", hp)
 		return
 	
@@ -614,16 +613,16 @@ func take_damage(damage: int):
 	var mark_pct = buff_manager.get_total_by_type(self, BuffData.BuffType.MARK) if buff_manager else 0
 	if mark_pct > 0:
 		damage = damage * (100 + mark_pct) / 100
-		print("[Buff] %s 被标记，额外承受 %d%% 伤害！" % [_char_label(self), mark_pct])
+		print("[Buff] %s 被标记，额外承受 %d%% 伤害！" % [GlobalGameData.get_char_label(self), mark_pct])
 	
 	# 防御减免：defense_buff 为正数减伤，负数易伤
 	var def_val = buff_manager.get_total(self, "defense_buff") if buff_manager else 0
 	if def_val != 0:
 		damage = max(1, damage - def_val)
 		if def_val > 0:
-			print("[Buff] %s 防御减免 %d 点伤害" % [_char_label(self), def_val])
+			print("[Buff] %s 防御减免 %d 点伤害" % [GlobalGameData.get_char_label(self), def_val])
 		else:
-			print("[Buff] %s 易伤额外承受 %d 点伤害" % [_char_label(self), -def_val])
+			print("[Buff] %s 易伤额外承受 %d 点伤害" % [GlobalGameData.get_char_label(self), -def_val])
 	
 	var absorbed = min(shield, damage)
 	shield -= absorbed
@@ -631,27 +630,27 @@ func take_damage(damage: int):
 	if absorbed > 0:
 		_spawn_float(absorbed, false, true)
 		if _am: _am.play_sfx("shield", self)
-		if multiplayer.is_server():
-			print("[Combat] %s 护盾吸收 %d 点伤害，剩余护盾: %d" % [_char_label(self), absorbed, shield])
+		if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
+			print("[Combat] %s 护盾吸收 %d 点伤害，剩余护盾: %d" % [GlobalGameData.get_char_label(self), absorbed, shield])
 	
 	hp = max(0, hp - damage)
 	_spawn_float(damage)
 	_shake_camera(3.0)
-	if multiplayer.is_server() or GlobalGameData.is_ai_mode:
+	if GlobalGameData.is_ai_mode or multiplayer.is_server():
 		var key = "host_damage_dealt" if not is_host else "client_damage_dealt"
 		GlobalGameData.battle_stats[key] += damage
-		print("[Combat] %s 受到 %d 点伤害，剩余 HP: %d" % [_char_label(self), damage, hp])
+		print("[Combat] %s 受到 %d 点伤害，剩余 HP: %d" % [GlobalGameData.get_char_label(self), damage, hp])
 	if hp <= 0:
 		if not visible:
 			return
 		if _am: _am.play_sfx("death", self)
 		hide()
 		collision_layer = 0
-		if multiplayer.is_server() or GlobalGameData.is_ai_mode:
+		if GlobalGameData.is_ai_mode or multiplayer.is_server():
 			var killer_key = "client_kills" if is_host else "host_kills"
 			GlobalGameData.battle_stats[killer_key] += 1
 		main.unregister_character(self)
-	if multiplayer.is_server():
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 		rpc_id(0, "_sync_hp", hp)
 		rpc_id(0, "_sync_shield", shield)
 
@@ -688,18 +687,19 @@ var effective_move_points: int:
 			base += buff_manager.get_total(self, "extra_move")
 		return max(1, base)
 
+# 对 buff_manager 执行一次计时，应用 DOT/HOT 伤害/治疗
 func process_buffs():
 	if not buff_manager:
 		return
 	var ticks = buff_manager.process(self)
-	if multiplayer.is_server() or GlobalGameData.is_ai_mode:
+	if GlobalGameData.is_ai_mode or multiplayer.is_server():
 		buff_manager._sync_and_emit(self)
 	# apply DOT/HOT ticks
 	for t in ticks:
 		if t.is_damage:
-			rpc("take_damage", t.value)
+			take_damage_safe(t.value)
 		else:
-			rpc("take_damage", -t.value)
+			take_damage_safe(-t.value)
 
 @rpc("any_peer", "call_local", "reliable")
 func _sync_shield(new_shield: int):
@@ -771,7 +771,7 @@ func _finish_move_to_target():
 	global_position = target_world
 	velocity = Vector2.ZERO
 	is_moving = false
-	if is_multiplayer_authority() and multiplayer.has_multiplayer_peer():
+	if multiplayer.has_multiplayer_peer() and is_multiplayer_authority():
 		rpc("_sync_position", global_position)
 	main.unreserve_move_cell(self)
 	var cell = get_current_cell()
