@@ -22,6 +22,3 @@
 | `06-data-format-reference.md` | 角色/Buff 数据字段速查 |
 | `08-ai-mode.md` | AI 策略分支注册 |
 | `09-audio-system.md` | 音效添加与调用 |
-
-## 更新流程
-`计划 -> 询问修改 -> 确定规划细则 -> 执行，修改项目-> 检查语法与逻辑错误 -> 修改 readme.md -> 提交 git`

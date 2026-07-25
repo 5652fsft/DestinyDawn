@@ -514,7 +514,6 @@ func take_damage_safe(damage: int) -> void:
 		take_damage(damage)
 
 @rpc("call_local", "reliable")
-# 播放攻击动画（移向目标 → 短暂停留 → 回到原位）
 func _play_attack_animation(target_path: NodePath):
 	var target_node = get_node_or_null(target_path)
 	if not target_node or not target_node.has_node("Sprite2D"):
@@ -524,18 +523,69 @@ func _play_attack_animation(target_path: NodePath):
 	if not target_sprite:
 		return
 
-	var dir = sign(target_node.global_position.x - global_position.x)
-	var lurch = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	lurch.tween_property(sprite, "offset:x", dir * 12.0, 0.04)
-	lurch.tween_property(sprite, "offset:x", 0.0, 0.06)
-
 	if _am: _am.play_sfx(attack_sfx, self)
-	# 攻击者白色闪烁
-	var atk_flash = create_tween().set_parallel(true)
-	atk_flash.tween_property(sprite, "self_modulate", Color(1.6, 1.6, 1.3), 0.03)
-	atk_flash.tween_property(sprite, "self_modulate", Color.WHITE, 0.08).set_delay(0.03)
 
-	# 受击反馈
+	var dir = sign(target_node.global_position.x - global_position.x)
+	var pm = main.projectile_manager if main and main.has_method("_init_projectile_manager") else null
+
+	match attack_sfx:
+		"attack_sword":
+			var lurch = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+			lurch.tween_property(sprite, "offset:x", dir * 18.0, 0.05)
+			lurch.tween_property(sprite, "offset:x", 0.0, 0.08)
+			var atk = create_tween().set_parallel(true)
+			atk.tween_property(sprite, "self_modulate", Color(1.6, 1.6, 1.3), 0.03)
+			atk.tween_property(sprite, "self_modulate", Color.WHITE, 0.08).set_delay(0.03)
+			if vfx_manager and vfx_manager.has_method("play"):
+				vfx_manager.play(target_node, "hit")
+
+		"attack_largesword":
+			var lurch = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+			lurch.tween_property(sprite, "offset:x", dir * 24.0, 0.06)
+			lurch.tween_property(sprite, "offset:x", 0.0, 0.1)
+			var atk = create_tween().set_parallel(true)
+			atk.tween_property(sprite, "self_modulate", Color(1.8, 1.8, 1.3), 0.04)
+			atk.tween_property(sprite, "self_modulate", Color.WHITE, 0.1).set_delay(0.04)
+			if vfx_manager and vfx_manager.has_method("play"):
+				vfx_manager.play(target_node, "hit")
+			_shake_camera(8.0)
+
+		"attack_gun":
+			if pm and pm.has_method("fire"):
+				pm.fire(global_position, target_node, "bullet", 0.2)
+			var atk = create_tween().set_parallel(true)
+			atk.tween_property(sprite, "self_modulate", Color(1.6, 1.6, 1.3), 0.03)
+			atk.tween_property(sprite, "self_modulate", Color.WHITE, 0.06).set_delay(0.03)
+
+		"attack_handgun":
+			if pm and pm.has_method("fire"):
+				pm.fire(global_position, target_node, "bullet", 0.15)
+			var atk = create_tween().set_parallel(true)
+			atk.tween_property(sprite, "self_modulate", Color(1.6, 1.6, 1.3), 0.02)
+			atk.tween_property(sprite, "self_modulate", Color.WHITE, 0.04).set_delay(0.02)
+
+		"attack_magic":
+			if pm and pm.has_method("fire"):
+				pm.fire(global_position, target_node, "magic_bolt", 0.3)
+			var atk = create_tween().set_parallel(true)
+			atk.tween_property(sprite, "self_modulate", Color(1.3, 1.3, 1.6), 0.03)
+			atk.tween_property(sprite, "self_modulate", Color.WHITE, 0.08).set_delay(0.03)
+
+		"attack_digital":
+			if pm and pm.has_method("fire"):
+				pm.fire(global_position, target_node, "dark_bolt", 0.25)
+			var atk = create_tween().set_parallel(true)
+			atk.tween_property(sprite, "self_modulate", Color(1.3, 1.3, 1.6), 0.02)
+			atk.tween_property(sprite, "self_modulate", Color.WHITE, 0.06).set_delay(0.02)
+
+		_:
+			var lurch = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+			lurch.tween_property(sprite, "offset:x", dir * 12.0, 0.04)
+			lurch.tween_property(sprite, "offset:x", 0.0, 0.06)
+			if vfx_manager and vfx_manager.has_method("play"):
+				vfx_manager.play(target_node, "hit")
+
+	# 受击反馈（通用）
 	if target_node.hit_tween and target_node.hit_tween.is_running():
 		target_node.hit_tween.kill()
 
@@ -543,12 +593,8 @@ func _play_attack_animation(target_path: NodePath):
 	target_node.hit_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_LINEAR)
 	target_node.hit_tween.tween_property(target_sprite, "modulate", Color(1.6, 1.0, 1.0), 0.04)
 	target_node.hit_tween.tween_property(target_sprite, "modulate", target_color, 0.1).set_delay(0.04)
-	# 受击缩放（弹性）
 	target_node.hit_tween.tween_property(target_sprite, "scale", Vector2(1.08, 1.08), 0.04)
 	target_node.hit_tween.tween_property(target_sprite, "scale", Vector2(0.95, 0.95), 0.06).set_delay(0.04)
-
-	if vfx_manager and vfx_manager.has_method("play"):
-		vfx_manager.play(target_node, "hit")
 
 	_shake_camera(5.0)
 

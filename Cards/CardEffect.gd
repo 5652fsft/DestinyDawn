@@ -81,6 +81,7 @@ static func _execute_damage(card: CardData, target: Node, main: Node) -> bool:
 	if not target or not target.has_method("take_damage"):
 		return false
 	_rpc_take_damage(target, card.effect_value)
+	_card_projectile(main, target, "magic_bolt")
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
@@ -104,6 +105,7 @@ static func _execute_fireball(card: CardData, target: Node, main: Node) -> bool:
 		return false
 	_rpc_take_damage(target, card.effect_value)
 	_apply_temp_buff(target, "burn", 5, 2)
+	_card_projectile(main, target, "fireball")
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
@@ -112,6 +114,8 @@ static func _execute_ice_shard(card: CardData, target: Node) -> bool:
 		return false
 	_rpc_take_damage(target, card.effect_value)
 	_apply_temp_buff(target, "move_debuff", -2, 1)
+	var main = _get_main(target)
+	_card_projectile(main, target, "ice_shard")
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
@@ -131,6 +135,8 @@ static func _execute_heal(card: CardData, target: Node) -> bool:
 		target.play_vfx_preset_safe("heal")
 	elif target.multiplayer and target.multiplayer.has_multiplayer_peer():
 		target.rpc("_play_vfx_preset", "heal")
+	var main = _get_main(target)
+	_card_projectile_arc(main, target, "heal_orb")
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("heal", target)
 	return true
 
@@ -545,3 +551,21 @@ static func _execute_cleanse(target: Node) -> bool:
 	if target.multiplayer and target.multiplayer.has_multiplayer_peer():
 		target.rpc("_sync_buffs", {})
 	return true
+
+static func _get_main(node: Node) -> Node:
+	if node and node.get_tree():
+		return node.get_tree().current_scene
+	return null
+
+static func _card_vfx(main: Node, target: Node, effect: String):
+	if not target or not main:
+		return
+	var vfx = main.get_node_or_null("VFXManager")
+	if vfx and vfx.has_method("play_at"):
+		vfx.play_at(target.global_position, effect)
+
+static func _card_projectile(main: Node, target: Node, preset: String):
+	_card_vfx(main, target, "hit")
+
+static func _card_projectile_arc(main: Node, target: Node, preset: String):
+	_card_vfx(main, target, "heal")

@@ -38,6 +38,7 @@ var _pending_skill: BaseSkill = null
 var buff_manager: Node = null
 var vfx_manager: Node = null
 var field_effect_manager: Node = null
+var projectile_manager: Node = null
 @onready var skill_panel = $UI/SkillPanel
 @onready var move_button = $UI/MoveButton
 @onready var attack_button = $UI/AttackButton
@@ -133,6 +134,7 @@ func _ready():
 	_init_buff_manager()
 	_init_vfx_manager()
 	_init_field_effect_manager()
+	_init_projectile_manager()
 
 	if GlobalGameData.is_ai_mode:
 		_log("AI 模式初始化开始", "Mode")
@@ -312,6 +314,13 @@ func _init_field_effect_manager():
 	fm.set_script(load("res://Global/FieldEffectManager.gd"))
 	add_child(fm)
 	field_effect_manager = fm
+
+func _init_projectile_manager():
+	var pm = Node.new()
+	pm.name = "ProjectileManager"
+	pm.set_script(load("res://Effects/ProjectileManager.gd"))
+	add_child(pm)
+	projectile_manager = pm
 
 func _on_client_joined(id: int):
 	print("[Net] 客户端 %d 加入" % id)

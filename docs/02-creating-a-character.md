@@ -85,6 +85,14 @@ CharacterBody2D (input_pickable=true, script=NewChar.gd)
 
 ---
 
+## G) 角色音效
+
+---
+
+## H) 角色特效
+
+---
+
 ## 检查清单
 
 - [ ] `CharacterData.gd`: DATA 条目
