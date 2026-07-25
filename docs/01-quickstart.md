@@ -18,7 +18,7 @@
 | `02-creating-a-character.md` | 角色数据/脚本/技能/AI 注册 |
 | `03-creating-a-card.md` | 卡牌注册/效果/描述规范 |
 | `04-creating-ui.md` | 按钮/面板/字体规范 |
-| `05-rpc-conventions.md` | **先读** — RPC 模式/AI 模式短路规则 |
+| `05-rpc-conventions.md` | RPC 模式/AI 模式短路规则 |
 | `06-data-format-reference.md` | 角色/Buff 数据字段速查 |
 | `08-ai-mode.md` | AI 策略分支注册 |
 | `09-audio-system.md` | 音效添加与调用 |
