@@ -9,12 +9,13 @@ func fire(from_pos: Vector2, target: Node, preset: String = "magic_bolt",
 	get_tree().current_scene.add_child(p)
 	_setup_visual(p, preset)
 
-	var dist = from_pos.distance_to(target.global_position)
+	var target_pos = target.global_position + Vector2(0, -80)
+	var dist = from_pos.distance_to(target_pos)
 	var duration = dist / 2000.0 * speed * 10.0
 	duration = clamp(duration, 0.15, 1.0)
 
 	var tween = create_tween().set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_SINE)
-	tween.tween_property(p, "global_position", target.global_position, duration)
+	tween.tween_property(p, "global_position", target_pos, duration)
 	tween.parallel().tween_property(p, "scale", Vector2(0.8, 0.8), duration * 0.8).set_delay(duration * 0.2)
 	tween.tween_callback(func():
 		if target is Node and is_instance_valid(target):
@@ -33,7 +34,7 @@ func fire_arc(from_pos: Vector2, target: Node, preset: String = "heal_orb",
 	_setup_visual(p, preset)
 
 	var start = from_pos
-	var end = target.global_position
+	var end = target.global_position + Vector2(0, -80)
 	var mid = (start + end) * 0.5 + Vector2(0, -height)
 	var dist = start.distance_to(end)
 	var duration = clamp(dist / 1500.0, 0.2, 0.8)
@@ -89,12 +90,16 @@ func _setup_visual(p: Node2D, preset: String):
 			sprite.self_modulate = Color(0.3, 0.6, 1.0)
 			sprite.scale = Vector2(0.25, 0.25)
 			sprite.z_index = 15
+			_add_glow(p, Color(0.2, 0.5, 1.0, 0.25), 0.5)
+			_add_trail(p, Color(0.2, 0.5, 1.0, 0.3), 4, 0.2, 10.0)
 
 		"fireball":
 			sprite.texture = _tex("circle")
 			sprite.self_modulate = Color(1.0, 0.5, 0.1)
 			sprite.scale = Vector2(0.25, 0.25)
 			sprite.z_index = 15
+			_add_glow(p, Color(1.0, 0.3, 0.0, 0.3), 0.6)
+			_add_trail(p, Color(1.0, 0.4, 0.0, 0.35), 5, 0.25, 12.0)
 
 		"ice_shard":
 			sprite.texture = _tex("diamond")
@@ -107,6 +112,7 @@ func _setup_visual(p: Node2D, preset: String):
 			sprite.self_modulate = Color(0.6, 0.2, 0.8)
 			sprite.scale = Vector2(0.25, 0.25)
 			sprite.z_index = 15
+			_add_trail(p, Color(0.5, 0.1, 0.6, 0.3), 4, 0.2, 10.0)
 
 		"arrow":
 			sprite.texture = _tex("spark")
@@ -119,6 +125,15 @@ func _setup_visual(p: Node2D, preset: String):
 			sprite.self_modulate = Color(0.2, 1.0, 0.4)
 			sprite.scale = Vector2(0.25, 0.25)
 			sprite.z_index = 15
+			_add_glow(p, Color(0.0, 1.0, 0.3, 0.2), 0.5)
+
+func _add_glow(parent: Node2D, color: Color, scale_factor: float):
+	var glow = Sprite2D.new()
+	glow.texture = _tex("circle_soft")
+	glow.self_modulate = color
+	glow.scale = Vector2(scale_factor, scale_factor)
+	glow.z_index = 14
+	parent.add_child(glow)
 
 func _add_trail(parent: Node2D, color: Color, amount: int, lifetime: float, velocity: float):
 	var trail = GPUParticles2D.new()
@@ -146,16 +161,17 @@ func _make_trail_mat(color: Color, vel: float) -> ParticleProcessMaterial:
 	return m
 
 func _play_impact(p: Node2D, preset: String, target: Node):
+	var hit_pos = target.global_position + Vector2(0, -80)
 	var vfx = target.get_node_or_null("VFXManager") if target.has_node("VFXManager") else null
 	if not vfx:
 		vfx = get_tree().current_scene.get_node_or_null("VFXManager")
 	if vfx and vfx.has_method("play"):
 		match preset:
-			"fireball": vfx.play_at(target.global_position, "explosion")
-			"ice_shard": vfx.play_at(target.global_position, "hit")
-			"dark_bolt": vfx.play_at(target.global_position, "debuff")
+			"fireball": vfx.play_at(hit_pos, "explosion")
+			"ice_shard": vfx.play_at(hit_pos, "hit")
+			"dark_bolt": vfx.play_at(hit_pos, "debuff")
 			_:
-				vfx.play_at(target.global_position, "hit")
+				vfx.play_at(hit_pos, "hit")
 
 func _quadratic_bezier(a: Vector2, b: Vector2, c: Vector2, t: float) -> Vector2:
 	var q = 1.0 - t

@@ -527,6 +527,7 @@ func _play_attack_animation(target_path: NodePath):
 
 	var dir = sign(target_node.global_position.x - global_position.x)
 	var pm = main.projectile_manager if main and main.has_method("_init_projectile_manager") else null
+	var src_pos = global_position + Vector2(0, -80)
 
 	match attack_sfx:
 		"attack_sword":
@@ -552,28 +553,28 @@ func _play_attack_animation(target_path: NodePath):
 
 		"attack_gun":
 			if pm and pm.has_method("fire"):
-				pm.fire(global_position, target_node, "bullet", 0.2)
+				pm.fire(src_pos, target_node, "bullet", 0.2)
 			var atk = create_tween().set_parallel(true)
 			atk.tween_property(sprite, "self_modulate", Color(1.6, 1.6, 1.3), 0.03)
 			atk.tween_property(sprite, "self_modulate", Color.WHITE, 0.06).set_delay(0.03)
 
 		"attack_handgun":
 			if pm and pm.has_method("fire"):
-				pm.fire(global_position, target_node, "bullet", 0.15)
+				pm.fire(src_pos, target_node, "bullet", 0.15)
 			var atk = create_tween().set_parallel(true)
 			atk.tween_property(sprite, "self_modulate", Color(1.6, 1.6, 1.3), 0.02)
 			atk.tween_property(sprite, "self_modulate", Color.WHITE, 0.04).set_delay(0.02)
 
 		"attack_magic":
 			if pm and pm.has_method("fire"):
-				pm.fire(global_position, target_node, "magic_bolt", 0.3)
+				pm.fire(src_pos, target_node, "magic_bolt", 0.3)
 			var atk = create_tween().set_parallel(true)
 			atk.tween_property(sprite, "self_modulate", Color(1.3, 1.3, 1.6), 0.03)
 			atk.tween_property(sprite, "self_modulate", Color.WHITE, 0.08).set_delay(0.03)
 
 		"attack_digital":
 			if pm and pm.has_method("fire"):
-				pm.fire(global_position, target_node, "dark_bolt", 0.25)
+				pm.fire(src_pos, target_node, "dark_bolt", 0.25)
 			var atk = create_tween().set_parallel(true)
 			atk.tween_property(sprite, "self_modulate", Color(1.3, 1.3, 1.6), 0.02)
 			atk.tween_property(sprite, "self_modulate", Color.WHITE, 0.06).set_delay(0.02)
