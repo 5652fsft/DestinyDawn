@@ -196,6 +196,8 @@ static func _anpan_active(character: Node, target: Node, main: Node) -> bool:
 	if not dm or not es:
 		return false
 	var pid = 1 if character in GlobalGameData.host_characters else 2
+	var anpan_data = CharacterData.get_data("anpan")
+	var energy_cost = anpan_data.get("skill_energy", 4)
 	# 能量检查
 	var reason = get_skill_block_reason(character, main)
 	if reason:
@@ -203,7 +205,7 @@ static func _anpan_active(character: Node, target: Node, main: Node) -> bool:
 		if main and main.has_method("show_toast"):
 			main.show_toast(reason)
 		return false
-	es.spend_energy(pid, 6)
+	es.spend_energy(pid, energy_cost)
 	# 抽牌至上限
 	var hand = dm.get_hand(pid)
 	var to_draw = dm.hand_limit - hand.size()
@@ -215,7 +217,7 @@ static func _anpan_active(character: Node, target: Node, main: Node) -> bool:
 		bm.apply_buff(character, "soften", 20, 3, character)
 	var _am = Engine.get_singleton("AudioManager")
 	if _am: _am.play_sfx("anpan_skill", character)
-	print("[Skill] あんパン [极速高温烘焙] 消耗 6 能量，抽 %d 张牌，回满能量，获得 [松软]" % to_draw)
+	print("[Skill] あんパン [极速高温烘焙] 消耗 %d 能量，抽 %d 张牌，回满能量，获得 [松软]" % [energy_cost, to_draw])
 	character.play_vfx_preset_safe("buff")
 	return true
 
@@ -296,10 +298,12 @@ static func get_skill_block_reason(character: Node, main: Node) -> String:
 	var name = character.character_name if "character_name" in character else ""
 	match name:
 		"あんパン":
+			var anpan_data = CharacterData.get_data("anpan")
+			var energy_cost = anpan_data.get("skill_energy", 4)
 			var es = main.get_node_or_null("EnergySystem")
 			if es:
 				var pid = 1 if character in GlobalGameData.host_characters else 2
-				if es.get_energy(pid) < 6:
+				if es.get_energy(pid) < energy_cost:
 					return "能量不足"
 	return ""
 

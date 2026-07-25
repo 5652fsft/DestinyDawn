@@ -31,8 +31,8 @@ const DATA = {
 	"Richardovo":{"name":"Richardovo", "hp":70,  "move":7, "atk":14, "range":1,
 		"skill":"突破", "skill_desc":"消除自身所有效果，每消除 1 个效果获得 1 次额外行动", "skill_cd":2,
 		"passive":"闭麦", "passive_desc":"回合开始时若自身无增益效果，则获得 [我独自升级]，效果为伤害 +20%"},
-	"anpan":   {"name":"あんパン", "hp":65,  "move":5, "atk":13, "range":3,
-		"skill":"极速高温烘焙", "skill_desc":"消耗 6 点能量，立即抽取卡牌至上限，并为自身恢复能量至上限。获得 [松软]，效果为受到伤害 +20%，持续 3 回合", "skill_cd":3,
+	"anpan":   {"name":"あんパン", "hp":65,  "move":5, "atk":13, "range":3, "skill_energy":4,
+		"skill":"极速高温烘焙", "skill_desc":"消耗 4 点能量，立即抽取卡牌至上限，并为自身恢复能量至上限。获得 [松软]，效果为受到伤害 +20%，持续 3 回合", "skill_cd":3,
 		"passive":"面包大家族", "passive_desc":"每使用 2 张卡牌摸取 1 张卡牌，不超过手牌数量上限，并恢复 1 点能量。攻击敌方目标后，对目标施加 [高温烫嘴]，持续两回合，效果为受到伤害 +5%"},
 }
 
