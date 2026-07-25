@@ -17,7 +17,7 @@ label.add_theme_font_override("font", font)
 
 ### 按钮
 
-所有按钮使用 `ButtonTheme` 单例的 `apply_menu()` / `apply_small()` 方法设置外观，按钮预设样式在 `Global/ButtonTheme.gd` 中定义。
+所有按钮使用 `ButtonTheme` 单例的 `apply_menu()` / `apply_battle()` 方法设置外观，按钮预设样式在 `Global/ButtonTheme.gd` 中定义。
 
 ### 面板 / 卡片
 

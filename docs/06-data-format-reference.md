@@ -38,29 +38,29 @@ const DATA = {
 | M1DorG | M1DorG | 72 | 6 | 11 | 1 | 我玩蔚蓝去了 | 4 | SELF | Intel工程师 |
 | Richardovo | Richardovo | 70 | 7 | 14 | 1 | 突破 | 2 | SELF | 闭麦 |
 
-## Buff 数据 — `Global/BuffDatabase.gd`
+## Buff 数据 — `Global/BuffDatabase.gd` / `BuffData.gd`
 
-```gdscript
-"buff_id": { "name":"显示名", "type":BuffType, "is_harmful":bool }
-```
+Buff 定义在 `BuffDatabase.gd` 中，各字段：
 
-### Buff 类型
+- `id`: 唯一标识（如 `"attack_buff"`）
+- `name`: 显示名
+- `type`: `BuffData.BuffType` 枚举
+- `category`: `BuffData.Category`（POSITIVE / NEGATIVE / NEUTRAL）
+- `is_harmful`: 是否为有害效果
+- `max_stacks`: 最大叠加层数
+- `has_tick`: 是否有每回合 tick 效果
 
-| BuffType | 说明 | 效果 |
-|---|---|---|
-| ATTACK_BUFF | 攻击增益/减益 | 影响 `effective_attack` |
-| DEFENSE_BUFF | 防御增益/减益 | `take_damage` 中减免 |
-| MARK | 标记 | 受伤 +% |
-| MOVE_BUFF | 移动增益/减益 | 影响 `effective_move_points` |
-| REGEN | 持续治疗 | `process_buffs` tick |
-| POISON | 持续伤害 | `process_buffs` tick |
-| SHIELD_OVERLOAD | 护盾过载 | shield 翻倍 |
-| BLOODTHIRST | 嗜血 | 攻击 +% |
-| MAGIC_FLOW | 魔力充盈 | 攻击 +% |
-| SOFTEN | 松软 | 受伤 +% |
-| ASCEND | 攀升 | 受伤 -% |
-| EXTRA_MOVE | 额外移动 | 移动力 +格 |
-| TAUNT | 嘲讽 | 强制攻击目标 |
+### BuffType 枚举 (`BuffData.gd`)
+
+| 枚举值 | 说明 | 效果 |
+|--------|------|------|
+| `ATTACK_BUFF` | 攻击增益 | `effective_attack` 计算 |
+| `ATTACK_DEBUFF` | 攻击减益 | `effective_attack` 计算 |
+| `DEFENSE_BUFF` | 防御增益/减益 | `take_damage` 中减免 |
+| `MOVE_DEBUFF` | 移动减益 | `effective_move_points` 计算 |
+| `DAMAGE_OVER_TIME` | 持续伤害 | `process_buffs` tick |
+| `HEAL_OVER_TIME` | 持续治疗 | `process_buffs` tick |
+| `MARK` | 标记 | 受伤 +% |
 
 ## 卡牌数据 — `Cards/CardDatabase.gd`
 

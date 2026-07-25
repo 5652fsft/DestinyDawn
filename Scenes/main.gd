@@ -103,7 +103,7 @@ func _build_deck_from_selection():
 	default_deck = GlobalGameData.selected_deck.duplicate()
 
 func _generate_ai_team_and_deck():
-	var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster", "karrigan", "zephyr", "anpan"]
+	var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster", "karrigan", "zephyr", "anpan", "M1DorG", "Richardovo"]
 	all_chars.shuffle()
 	GlobalGameData.client_team = []
 	GlobalGameData.client_team.assign(all_chars.slice(0, 3))
