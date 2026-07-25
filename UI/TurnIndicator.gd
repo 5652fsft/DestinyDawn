@@ -27,6 +27,7 @@ func _is_my_turn() -> bool:
 
 func update_turn_display():
 	var phase = GlobalGameData.current_turn_phase
+	var round = GlobalGameData.battle_stats.get("turns_taken", 0)
 
 	# 检测回合切换，播放过渡动画
 	if phase != _last_phase and phase != GlobalGameData.TurnPhase.NONE and phase != GlobalGameData.TurnPhase.START_ROUND and phase != GlobalGameData.TurnPhase.GAME_OVER:
@@ -38,14 +39,14 @@ func update_turn_display():
 		show()
 		end_turn_button.hide()
 	elif _is_my_turn():
-		turn_label.text = "你的回合"
+		turn_label.text = "第 %d 回合 - 你的回合" % round
 		show()
 		end_turn_button.show()
 		end_turn_button.disabled = false
 	elif phase == GlobalGameData.TurnPhase.NONE or phase == GlobalGameData.TurnPhase.START_ROUND:
 		hide()
 	else:
-		turn_label.text = "对方回合"
+		turn_label.text = "第 %d 回合 - 对方回合" % round
 		show()
 		end_turn_button.show()
 		end_turn_button.disabled = true

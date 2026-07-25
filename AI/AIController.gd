@@ -50,6 +50,8 @@ func _pan_to(chara: Node):
 
 
 func _focus_on_player_characters():
+	if GlobalGameData.is_host_turn and GlobalGameData.battle_stats.get("turns_taken", 0) <= 1:
+		return
 	var alive = []
 	for c in GlobalGameData.host_characters:
 		if is_instance_valid(c) and c.hp > 0:

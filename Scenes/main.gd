@@ -1251,8 +1251,8 @@ func advance_turn_phase():
 			start_new_round()
 	
 	if multiplayer.has_multiplayer_peer():
-		rpc_id(0, "_sync_turn_phase", GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn)
-	_sync_turn_phase(GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn)
+		rpc_id(0, "_sync_turn_phase", GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats)
+	_sync_turn_phase(GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats)
 
 @rpc("call_local", "reliable")
 func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn, stats: Dictionary = {}):
@@ -1272,9 +1272,12 @@ func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn,
 		return
 	if phase == GlobalGameData.TurnPhase.PLAYER_TURN or phase == GlobalGameData.TurnPhase.ENEMY_TURN:
 		if _am: _am.play_sfx("turn_start")
-	# 回合提示
-		var is_enemy_phase = phase == GlobalGameData.TurnPhase.ENEMY_TURN
-		var is_my_turn = (host_turn == GlobalGameData.is_host) != is_enemy_phase
+	var is_enemy_phase = phase == GlobalGameData.TurnPhase.ENEMY_TURN
+	var is_my_turn = (host_turn == GlobalGameData.is_host) != is_enemy_phase
+	if is_my_turn and GlobalGameData.is_ai_mode:
+		var ai = $AIController
+		if ai and ai.has_method("_focus_on_player_characters"):
+			ai._focus_on_player_characters()
 	update_ui_turn_indicator()
 
 func update_ui_turn_indicator():

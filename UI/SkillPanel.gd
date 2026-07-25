@@ -18,6 +18,8 @@ signal skill_cancelled()
 @onready var cooldown_label = $VBoxContainer/CooldownLabel
 
 func _ready():
+	passive_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	skill_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	ButtonTheme.apply_menu(use_button)
 	ButtonTheme.set_font(use_button, 18)
 	use_button.pressed.connect(_on_use_button_pressed)
@@ -47,9 +49,7 @@ func show_for(character: Node):
 	if has_passive:
 		var ps = character.passive_skill
 		passive_name_label.text = "天赋·%s" % ps.skill_name
-		passive_name_label.add_theme_font_override("font", FONT)
 		passive_desc_label.text = ps.description
-		passive_desc_label.add_theme_font_override("normal_font", FONT)
 
 	var has_active = "active_skill" in character and character.active_skill
 	skill_name_label.visible = has_active
@@ -59,10 +59,8 @@ func show_for(character: Node):
 	if has_active:
 		active_skill = character.active_skill
 		skill_name_label.text = active_skill.skill_name
-		skill_name_label.add_theme_font_override("font", FONT)
 		skill_desc_label.text = active_skill.description
-		skill_desc_label.add_theme_font_override("font", FONT)
-		cooldown_label.add_theme_font_override("font", FONT)
+
 		_targeting = false
 		use_button.text = "使用技能"
 		_update_cooldown()

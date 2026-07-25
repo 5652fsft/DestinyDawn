@@ -9,7 +9,8 @@ var _base_offset: Vector2 = Vector2.ZERO
 
 func _ready():
 	zoom = Vector2(scaleNum, scaleNum)
-	_base_offset = offset
+	offset = startCameraPosition
+	_base_offset = startCameraPosition
 	make_current()
 
 func shake(intensity: float = 5.0, duration: float = 0.15):
