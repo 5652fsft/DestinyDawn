@@ -565,7 +565,19 @@ static func _card_vfx(main: Node, target: Node, effect: String):
 		vfx.play_at(target.global_position, effect)
 
 static func _card_projectile(main: Node, target: Node, preset: String):
+	var caster = main.get("selected_character") if main and "selected_character" in main else null
+	if caster and is_instance_valid(caster) and caster.has_method("get_global_position"):
+		var pm = main.get_node_or_null("ProjectileManager") if main else null
+		if pm and pm.has_method("fire"):
+			pm.fire(caster.global_position, target, preset, 0.3)
+			return
 	_card_vfx(main, target, "hit")
 
 static func _card_projectile_arc(main: Node, target: Node, preset: String):
+	var caster = main.get("selected_character") if main and "selected_character" in main else null
+	if caster and is_instance_valid(caster) and caster.has_method("get_global_position"):
+		var pm = main.get_node_or_null("ProjectileManager") if main else null
+		if pm and pm.has_method("fire_arc"):
+			pm.fire_arc(caster.global_position, target, preset, 0.35, 120.0)
+			return
 	_card_vfx(main, target, "heal")
