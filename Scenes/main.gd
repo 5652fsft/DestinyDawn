@@ -392,7 +392,6 @@ func unregister_character(chara: CharacterBody2D):
 		if highlight_layer:
 			highlight_layer.clear()
 	if (GlobalGameData.is_ai_mode or multiplayer.is_server()) and check_victory():
-		_battle_over = true
 		if multiplayer.has_multiplayer_peer():
 			rpc("advance_turn_phase")
 		else:
