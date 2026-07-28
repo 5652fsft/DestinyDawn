@@ -7,8 +7,8 @@ const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 @onready var master_slider = $VBoxContainer/MasterSlider
 @onready var bgm_slider = $VBoxContainer/BGMSlider
 @onready var sfx_slider = $VBoxContainer/SFXSlider
-@onready var save_btn = $VBoxContainer/SaveButton
-@onready var back_btn = $VBoxContainer/BackButton
+@onready var back_btn = $BackButton
+@onready var save_btn = $SaveButton
 @onready var bg_option = $VBoxContainer/BgOption
 
 func _ready():

@@ -95,14 +95,24 @@ text = "菜单背景"
 [node name="BgOption" type="OptionButton" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="SaveButton" type="Button" parent="VBoxContainer"]
-layout_mode = 2
+[node name="BackButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 600.0
+offset_right = 200.0
+offset_bottom = 640.0
 theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 20
-text = "保存"
+theme_override_font_sizes/font_size = 18
+text = "←返回"
+alignment = 0
 
-[node name="BackButton" type="Button" parent="VBoxContainer"]
-layout_mode = 2
+[node name="SaveButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 1000.0
+offset_top = 600.0
+offset_right = 1240.0
+offset_bottom = 640.0
 theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 20
-text = "返回"
+theme_override_font_sizes/font_size = 18
+text = "保存"
+alignment = 0

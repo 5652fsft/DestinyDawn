@@ -6,7 +6,7 @@
 func _ready():
 	ButtonTheme.apply_menu(back_btn)
 	ButtonTheme.apply_glass_blue(back_btn)
-	ButtonTheme.set_font(back_btn, 20)
+	ButtonTheme.set_font(back_btn, 18)
 	back_btn.pressed.connect(_on_back_pressed)
 	_load_guide()
 	
