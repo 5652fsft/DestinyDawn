@@ -69,19 +69,7 @@ static func _process_line(line: String) -> String:
 	elif p.begins_with(">"):
 		p = "[i][color=#aabbcc]%s[/color][/i]" % p.trim_prefix(">").trim_prefix(" ")
 
-	var bold_start = p.find("**")
-	if bold_start >= 0:
-		var bold_end = p.find("**", bold_start + 2)
-		if bold_end >= 0:
-			p = p.left(bold_start) + "[b][font_size=17]" + p.substr(bold_start + 2, bold_end - bold_start - 2) + "[/font_size][/b]" + p.substr(bold_end + 2)
-
-	var code_start = p.find("`")
-	if code_start >= 0:
-		var code_end = p.find("`", code_start + 1)
-		if code_end >= 0:
-			p = p.left(code_start) + "[code]" + p.substr(code_start + 1, code_end - code_start - 1) + "[/code]" + p.substr(code_end + 1)
-
-	return p
+	return _apply_inline_formatting(p)
 
 
 static func _build_table(rows: Array) -> String:
@@ -111,16 +99,33 @@ static func _build_table(rows: Array) -> String:
 	var bbcode = "[table=%d]" % col_count
 
 	for cell in cells:
-		bbcode += "[cell][b]%s[/b][/cell]" % cell.strip_edges()
+		bbcode += "[cell][b]%s[/b][/cell]" % _apply_inline_formatting(cell.strip_edges())
 
 	for row in data_rows:
 		bbcode += "\n"
 		cells = _parse_table_row(row)
 		for cell in cells:
-			bbcode += "[cell]%s[/cell]" % cell.strip_edges()
+			bbcode += "[cell]%s[/cell]" % _apply_inline_formatting(cell.strip_edges())
 
 	bbcode += "\n[/table]"
 	return bbcode
+
+
+static func _apply_inline_formatting(t: String) -> String:
+	var p = t
+	var bold_start = p.find("**")
+	if bold_start >= 0:
+		var bold_end = p.find("**", bold_start + 2)
+		if bold_end >= 0:
+			p = p.left(bold_start) + "[b][font_size=17]" + p.substr(bold_start + 2, bold_end - bold_start - 2) + "[/font_size][/b]" + p.substr(bold_end + 2)
+
+	var code_start = p.find("`")
+	if code_start >= 0:
+		var code_end = p.find("`", code_start + 1)
+		if code_end >= 0:
+			p = p.left(code_start) + "[code]" + p.substr(code_start + 1, code_end - code_start - 1) + "[/code]" + p.substr(code_end + 1)
+
+	return p
 
 
 static func _parse_table_row(line: String) -> Array:
