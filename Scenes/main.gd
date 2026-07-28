@@ -1242,12 +1242,12 @@ func advance_turn_phase():
 		return
 		
 	if check_victory():
-		_battle_over = true
 		print("[Phase] 游戏结束")
 		GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.GAME_OVER
 		if multiplayer.has_multiplayer_peer():
 			rpc_id(0, "_sync_turn_phase", GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats)
 		_sync_turn_phase(GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats)
+		_battle_over = true
 		return
 	
 	match GlobalGameData.current_turn_phase:
