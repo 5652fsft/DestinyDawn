@@ -67,7 +67,7 @@ static func _process_line(line: String) -> String:
 	elif p.begins_with("---"):
 		p = "──────────────────────────────"
 	elif p.begins_with(">"):
-		p = "[i][color=#aabbcc]%s[/color][/i]" % p.trim_prefix(">").trim_prefix(" ")
+		p = "[i][color=#ffffff]%s[/color][/i]" % p.trim_prefix(">").trim_prefix(" ")
 
 	return _apply_inline_formatting(p)
 

@@ -41,7 +41,7 @@ offset_bottom = 580.0
 
 [node name="RosterGrid" type="GridContainer" parent="RosterScroll"]
 layout_mode = 2
-columns = 3
+columns = 4
 
 [node name="SlotLabel" type="Label" parent="."]
 layout_mode = 0
