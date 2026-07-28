@@ -100,16 +100,16 @@ const DEFAULT_BATTLE_STATS: Dictionary = {
 # 战斗统计（每局重置）
 var battle_stats: Dictionary = DEFAULT_BATTLE_STATS.duplicate()
 
-# 角色出生点
+# 角色出生点（通过 map_to_local 从格子坐标转换）
 var host_birth_point = [
-	Vector2(-252, -37),   # cell (-3, 2)
-	Vector2(-252, 404),   # cell (-1, 4)
-	Vector2(252, 404),    # cell (3, 0)
+	Vector2(-252, -478),  # cell (-5, 0)
+	Vector2(-315, -147),  # cell (-4, 2)
+	Vector2(-252, 184),   # cell (-2, 3)
 ]
 var client_birth_point = [
-	Vector2(756, -698),   # cell (2, -9)
-	Vector2(1260, -698),  # cell (6, -13)
-	Vector2(1260, -257),  # cell (8, -11)
+	Vector2(1134, -478),  # cell (6, -11)
+	Vector2(1197, -147),  # cell (8, -10)
+	Vector2(1134, 184),   # cell (9, -8)
 ]
 
 func get_char_label(c, ai_suffix: bool = false) -> String:
