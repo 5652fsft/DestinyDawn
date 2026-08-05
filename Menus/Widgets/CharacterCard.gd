@@ -18,8 +18,8 @@ func setup(id: String, data: Dictionary):
 	$CardFront/NameLabel.text = data.name
 	$CardFront/HPLabel.text = "生命值: %d" % data.hp
 	$CardFront/ATKLabel.text = "攻击力: %d" % data.atk
-	$CardFront/MoveLabel.text = "移动: %d" % data.move
-	$CardFront/RangeLabel.text = "射程: %d" % data.get("range", 1)
+	$CardFront/MoveLabel.text = "移动范围: %d" % data.move
+	$CardFront/RangeLabel.text = "攻击范围: %d" % data.get("range", 1)
 	$CardFront/SkillLabel.text = data.skill
 	$CardFront/PassiveLabel.text = "天赋·%s" % data.get("passive", "")
 	$InfoButton.icon = preload("res://Assets/Icons/info.png")
@@ -29,8 +29,8 @@ func setup(id: String, data: Dictionary):
 	$CardBack/Scroll/VBox/NameLabel.text = data.name
 	$CardBack/Scroll/VBox/HPLabel.text = "生命值: %d" % data.hp
 	$CardBack/Scroll/VBox/ATKLabel.text = "攻击力: %d" % data.atk
-	$CardBack/Scroll/VBox/MoveLabel.text = "移动: %d" % data.move
-	$CardBack/Scroll/VBox/RangeLabel.text = "射程: %d" % data.get("range", 1)
+	$CardBack/Scroll/VBox/MoveLabel.text = "移动范围: %d" % data.move
+	$CardBack/Scroll/VBox/RangeLabel.text = "攻击范围: %d" % data.get("range", 1)
 	$CardBack/Scroll/VBox/SkillLabel.text = data.skill
 	$CardBack/Scroll/VBox/SkillLabel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	$CardBack/Scroll/VBox/SkillDescLabel.text = "%s (CD: %d)" % [data.get("skill_desc", ""), data.get("skill_cd", 0)]
