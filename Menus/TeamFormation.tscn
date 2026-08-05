@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://d4g0syi1puwjw" path="res://Menus/TeamFormation.gd" id="1"]
 [ext_resource type="FontFile" uid="uid://dlxgpw6sc1ln5" path="res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf" id="2"]
 
-[node name="TeamFormation" type="Control"]
+[node name="TeamFormation" type="Control" unique_id=662628131]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,7 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
 
-[node name="Title" type="Label" parent="."]
+[node name="Title" type="Label" parent="." unique_id=478610606]
 layout_mode = 0
 offset_left = 40.0
 offset_top = 20.0
@@ -22,7 +22,7 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 28
 text = "编队管理"
 
-[node name="RosterLabel" type="Label" parent="."]
+[node name="RosterLabel" type="Label" parent="." unique_id=569906170]
 layout_mode = 0
 offset_left = 40.0
 offset_top = 60.0
@@ -32,35 +32,35 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 22
 text = "可选角色"
 
-[node name="RosterScroll" type="ScrollContainer" parent="."]
+[node name="RosterScroll" type="ScrollContainer" parent="." unique_id=722127477]
 layout_mode = 0
 offset_left = 40.0
 offset_top = 100.0
-offset_right = 640.0
+offset_right = 840.0
 offset_bottom = 580.0
 
-[node name="RosterGrid" type="GridContainer" parent="RosterScroll"]
+[node name="RosterGrid" type="GridContainer" parent="RosterScroll" unique_id=924174588]
 layout_mode = 2
 columns = 4
 
-[node name="SlotLabel" type="Label" parent="."]
+[node name="SlotLabel" type="Label" parent="." unique_id=1925922907]
 layout_mode = 0
-offset_left = 720.0
+offset_left = 920.0
 offset_top = 60.0
-offset_right = 1020.0
-offset_bottom = 90.0
+offset_right = 1220.0
+offset_bottom = 93.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 22
 text = "我的队伍"
 
-[node name="SlotContainer" type="VBoxContainer" parent="."]
+[node name="SlotContainer" type="VBoxContainer" parent="." unique_id=1774729621]
 layout_mode = 0
-offset_left = 720.0
+offset_left = 920.0
 offset_top = 100.0
-offset_right = 980.0
+offset_right = 1180.0
 offset_bottom = 380.0
 
-[node name="HintLabel" type="Label" parent="."]
+[node name="HintLabel" type="Label" parent="." unique_id=1713851024]
 layout_mode = 0
 offset_left = 400.0
 offset_top = 60.0
@@ -70,7 +70,7 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 
-[node name="BackButton" type="Button" parent="."]
+[node name="BackButton" type="Button" parent="." unique_id=205140076]
 layout_mode = 0
 offset_left = 40.0
 offset_top = 600.0
@@ -80,7 +80,7 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 18
 text = "←返回"
 
-[node name="SaveButton" type="Button" parent="."]
+[node name="SaveButton" type="Button" parent="." unique_id=1096939496]
 layout_mode = 0
 offset_left = 1000.0
 offset_top = 600.0
