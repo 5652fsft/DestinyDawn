@@ -144,7 +144,7 @@ static func _seele_active(character: Node, target: Node, main: Node) -> bool:
 static func _elaina_active(character: Node, target: Node, main: Node) -> bool:
 	if not target or not main:
 		return false
-	var dmg = 25
+	var dmg = int(character.effective_attack * 1.25)
 	var is_caster_host = character.name.begins_with("Host")
 	# 主要目标
 	if target.has_method("take_damage"):
@@ -166,7 +166,7 @@ static func _elaina_active(character: Node, target: Node, main: Node) -> bool:
 static func _firefly_active(character: Node, target: Node, main: Node) -> bool:
 	if not target:
 		return false
-	target.take_damage_safe(25)
+	target.take_damage_safe(int(character.effective_attack * 1.8))
 	var svfx = load("res://Effects/SkillVFX.gd")
 	svfx.firefly_charge(character, target)
 	svfx.firefly_impact(target)
@@ -174,7 +174,8 @@ static func _firefly_active(character: Node, target: Node, main: Node) -> bool:
 	var bm = main.get_node_or_null("BuffManager") if main else null
 	if bm and bm.has_method("apply_buff"):
 		bm.apply_buff(target, "burn", 5, 2, character)
-	print("[Skill] %s [烈焰冲锋] → %s 造成 25 伤害 + 灼烧" % [GlobalGameData.get_char_label(character), GlobalGameData.get_char_label(target)])
+	var dmg = int(character.effective_attack * 1.8)
+	print("[Skill] %s [烈焰冲锋] → %s 造成 %d 伤害 + 灼烧" % [GlobalGameData.get_char_label(character), GlobalGameData.get_char_label(target), dmg])
 	return true
 
 # === 银狼 主动：系统入侵 ===
