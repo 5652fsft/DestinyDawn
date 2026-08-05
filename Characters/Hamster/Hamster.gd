@@ -33,17 +33,15 @@ func use_active_skill(target: Node) -> bool:
 func _consumes_attack_on_skill() -> bool:
 	return false
 
-func _get_extra_attacks() -> int:
-	return _extra_attacks
-
-func _consume_extra_attack():
-	_extra_attacks -= 1
-
 @rpc("any_peer", "call_local", "reliable")
 func perform_attack(target_path: NodePath):
 	super(target_path)
+	# 被动只在服务端执行一次（权威），客户端经广播同步，避免额外行动重复叠加
+	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
+		return
 	var target = get_node_or_null(target_path)
 	if target and target.hp <= 0 and not target.visible and main and main.buff_manager:
 		_extra_attacks += 1
+		sync_extra_attacks_safe(_extra_attacks)
 		main.buff_manager.apply_buff(self, "bloodthirst", 50, 2, self)
 		print("[Skill] %s [钢铁直架] 击杀获得1次额外行动，1层嗜血成性" % GlobalGameData.get_char_label(self))

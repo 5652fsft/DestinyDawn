@@ -2,6 +2,42 @@ extends Node
 
 static var _tex: Dictionary = {}
 
+# 统一特效分发器：任意端以相同参数调用，跨端通过 play_skill_vfx_safe 广播重放
+static func play(fx_name: String, character: Node, extra: Node = null, cell_pos: Vector2 = Vector2.ZERO):
+	if not character:
+		return
+	match fx_name:
+		"bronya_shield":
+			bronya_shield(character, extra if extra else character)
+		"seele_blink":
+			seele_blink(character)
+		"seele_strike":
+			seele_strike(extra if extra else character)
+		"elaina_starburst":
+			elaina_starburst(extra if extra else character)
+		"firefly_charge":
+			firefly_charge(character, extra if extra else character)
+		"firefly_impact":
+			firefly_impact(extra if extra else character)
+		"silverwolf_hack":
+			silverwolf_hack(extra if extra else character)
+		"hamster_surge":
+			hamster_surge(character)
+		"karrigan_smoke":
+			karrigan_smoke(character, cell_pos)
+		"zephyr_sacrifice":
+			zephyr_sacrifice(character)
+		"m1dorg_away":
+			m1dorg_away(character)
+		"richardovo_break":
+			richardovo_break(character)
+		"anpan_bake":
+			anpan_bake(character)
+		"anjing_luck":
+			anjing_luck(character)
+		_:
+			push_warning("[SkillVFX] 未知特效: ", fx_name)
+
 static func _ensure_tex():
 	if _tex.is_empty():
 		var ptg = load("res://Global/ParticleTextureGenerator.gd")
@@ -170,3 +206,20 @@ static func anpan_bake(character: Node):
 	var m = p.process_material as ParticleProcessMaterial
 	m.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE; m.emission_sphere_radius = 50.0
 	_emit(p, character, character.global_position)
+
+# === Anjing ===
+static func anjing_luck(character: Node):
+	var p = _particle("spark", 16, 0.6,
+		[Color(1,0.9,0.3,1.0), Color(1,0.75,0.1,0.85), Color(0.9,0.5,0.0,0)],
+		360, Vector2(), 140, 0.3, 0.7, 90.0, [0.0, 1.3, 0.0])
+	var m = p.process_material as ParticleProcessMaterial
+	m.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE; m.emission_sphere_radius = 55.0
+	_emit(p, character, character.global_position)
+
+	var ring = _particle("circle", 10, 0.5,
+		[Color(1,0.85,0.2,1.0), Color(1,0.65,0.1,0.8), Color(0.8,0.5,0.0,0)],
+		0, Vector2(), 40, 0.4, 0.8, 30.0)
+	var m2 = ring.process_material as ParticleProcessMaterial
+	m2.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_RING
+	m2.emission_ring_radius = 30.0; m2.emission_ring_inner_radius = 10.0
+	_emit(ring, character, character.global_position)

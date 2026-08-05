@@ -58,6 +58,7 @@ const CHARACTER_ZEPHYR = preload("res://Characters/Zephyr/Zephyr.tscn")
 const CHARACTER_ANPAN = preload("res://Characters/Anpan/Anpan.tscn")
 const CHARACTER_M1DORG = preload("res://Characters/M1DorG/M1DorG.tscn")
 const CHARACTER_RICHARDOVO = preload("res://Characters/Richardovo/Richardovo.tscn")
+const CHARACTER_ANJING = preload("res://Characters/Anjing/Anjing.tscn")
 
 var team_roster: Array[PackedScene] = []
 var enemy_roster: Array[PackedScene] = []
@@ -82,6 +83,7 @@ func _build_team_from_selection():
 		"karrigan": CHARACTER_KARRIGAN, "zephyr": CHARACTER_ZEPHYR,
 		"anpan": CHARACTER_ANPAN,
 		"M1DorG": CHARACTER_M1DORG, "Richardovo": CHARACTER_RICHARDOVO,
+		"anjing": CHARACTER_ANJING,
 	}
 	if not GlobalGameData.selected_team.is_empty():
 		for cid in GlobalGameData.selected_team:
@@ -105,7 +107,7 @@ func _build_deck_from_selection():
 	default_deck = GlobalGameData.selected_deck.duplicate()
 
 func _generate_ai_team_and_deck():
-	var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster", "karrigan", "zephyr", "anpan", "M1DorG", "Richardovo"]
+	var all_chars = ["bronya", "seele", "elaina", "firefly", "silverwolf", "hamster", "karrigan", "zephyr", "anpan", "M1DorG", "Richardovo", "anjing"]
 	all_chars.shuffle()
 	GlobalGameData.client_team = []
 	GlobalGameData.client_team.assign(all_chars.slice(0, 3))
@@ -136,6 +138,7 @@ func _ready():
 	_init_vfx_manager()
 	_init_field_effect_manager()
 	_init_projectile_manager()
+	energy_system.energy_spent.connect(_grant_energy_luck)
 
 	if GlobalGameData.is_ai_mode:
 		_log("AI 模式初始化开始", "Mode")
@@ -200,6 +203,14 @@ func _update_action_buttons(chara):
 	var extra = chara._get_extra_attacks() if chara.has_method("_get_extra_attacks") else 0
 	attack_button.disabled = not is_active or (atk_used and extra <= 0)
 	attack_button.modulate = Color(1, 1, 1, 0.5) if attack_button.disabled else Color(1, 1, 1)
+
+# 额外行动/行动状态变化时刷新选中角色 UI（由 _sync_extra_attacks 等广播触发）
+func refresh_character_ui(chara):
+	if not chara:
+		return
+	if selected_character == chara:
+		character_info_panel.refresh()
+		_update_action_buttons(chara)
 
 func _on_move_pressed():
 	if not selected_character:
@@ -576,8 +587,17 @@ func _try_select_cell():
 	var marker = Node2D.new()
 	Characters.add_child(marker)
 	marker.global_position = ground_layer.to_global(ground_layer.map_to_local(cell))
-	selected_character.use_active_skill(marker)
+	if multiplayer.has_multiplayer_peer():
+		rpc("_server_execute_skill", selected_character.get_path(), "", marker.global_position)
+		marker.queue_free()
+		cancel_targeting()
+		return
+	var ok = selected_character.use_active_skill(marker)
 	marker.queue_free()
+	if not ok:
+		show_toast("技能释放失败")
+		cancel_targeting()
+		return
 	_active_skill_post_exec(_pending_skill)
 	cancel_targeting()
 
@@ -745,7 +765,14 @@ func _on_target_selected(target: Node):
 			show_toast("目标选择无效")
 			cancel_targeting()
 			return
-		selected_character.use_active_skill(target)
+		if multiplayer.has_multiplayer_peer():
+			rpc("_server_execute_skill", selected_character.get_path(), target.get_path(), Vector2.ZERO)
+			cancel_targeting()
+			return
+		if not selected_character.use_active_skill(target):
+			show_toast("技能释放失败（超出范围或条件不满足）")
+			cancel_targeting()
+			return
 		_active_skill_post_exec(skill)
 		cancel_targeting()
 
@@ -764,6 +791,80 @@ func _server_play_card(player_id: int, card_id: String, target_path: String):
 	if not multiplayer.is_server():
 		return
 	_execute_play_card(player_id, card_id, target_path)
+
+# 技能效果统一在服务端执行（与出牌同构）：操作端 rpc 转发，服务端执行 SkillEffect + 广播状态同步
+@rpc("any_peer", "call_local", "reliable")
+func _server_execute_skill(character_path: String, target_path: String, cell_pos: Vector2):
+	if not multiplayer.is_server():
+		return
+	var character = get_node_or_null(character_path)
+	if not character or not "active_skill" in character or not character.active_skill:
+		rpc("_sync_skill_failed", "技能状态无效")
+		return
+	var skill = character.active_skill
+	var target: Node = null
+	var marker: Node = null
+	if target_path != "":
+		target = get_node_or_null(target_path)
+	elif skill.target_type == BaseSkill.SkillTarget.CELL:
+		marker = Node2D.new()
+		marker.name = "SkillTargetMarker"
+		Characters.add_child(marker)
+		marker.global_position = cell_pos
+		target = marker
+	var ok = character.use_active_skill(target)
+	if marker:
+		marker.queue_free()
+	if not ok:
+		rpc("_sync_skill_failed", "技能释放失败（超出范围或条件不满足）")
+		return
+	# 服务端逻辑：冷却 & 行动点消耗
+	skill.current_cooldown = skill.cooldown
+	var consumes_attack = not character.has_method("_consumes_attack_on_skill") or character._consumes_attack_on_skill()
+	if consumes_attack:
+		GlobalGameData.character_attack_used[character.name] = true
+		GlobalGameData.character_attack_used_num += 1
+	# 同步手牌 / 能量（服务端权威数据）
+	var pid = SkillEffect.get_character_pid(character)
+	var hand = deck_manager.get_hand(pid) if deck_manager else []
+	var energy = energy_system.get_energy(pid) if energy_system else 0
+	rpc("_sync_hand", pid, hand)
+	_sync_hand(pid, hand)
+	rpc("_sync_energy", pid, energy)
+	_sync_energy(pid, energy)
+	# 广播技能结果状态到所有端
+	rpc("_sync_skill_state", character_path, skill.cooldown, consumes_attack, skill.skill_name)
+
+@rpc("call_local", "reliable")
+func _sync_skill_state(character_path: String, cooldown: int, attack_consumed: bool, skill_name: String):
+	var character = get_node_or_null(character_path)
+	if character:
+		if "active_skill" in character and character.active_skill:
+			character.active_skill.current_cooldown = cooldown
+		if attack_consumed:
+			GlobalGameData.character_attack_used[character.name] = true
+			GlobalGameData.character_attack_used_num += 1
+		if selected_character == character:
+			skill_panel._update_cooldown()
+			character_info_panel.refresh()
+			_update_action_buttons(character)
+	_cancel_move_mode()
+	_cancel_attack_mode()
+	if selected_character and selected_character.has_method("hide_attack_range"):
+		selected_character.hide_attack_range()
+	show_toast("释放 [%s]" % skill_name, 1.0)
+	check_attack()
+	_update_player_panels()
+	cancel_targeting()
+	_update_skill_button()
+
+@rpc("call_local", "reliable")
+func _sync_skill_failed(reason: String):
+	if multiplayer.is_server():
+		return
+	show_toast(reason)
+	cancel_targeting()
+	_update_skill_button()
 
 func _execute_play_card(player_id: int, card_id: String, target_path: String):
 	var card_data = CardDatabase.get_card(card_id)
@@ -841,7 +942,15 @@ func _on_skill_used(skill: BaseSkill, target_type: int):
 		selected_character.hide_attack_range()
 	match target_type:
 		BaseSkill.SkillTarget.NONE, BaseSkill.SkillTarget.SELF:
-			selected_character.use_active_skill(selected_character)
+			if multiplayer.has_multiplayer_peer():
+				rpc("_server_execute_skill", selected_character.get_path(), selected_character.get_path(), Vector2.ZERO)
+				cancel_targeting()
+				_update_skill_button()
+				return
+			if not selected_character.use_active_skill(selected_character):
+				show_toast("技能释放失败")
+				_update_skill_button()
+				return
 			_active_skill_post_exec(skill)
 			_update_skill_button()
 		BaseSkill.SkillTarget.ALLY_SINGLE, BaseSkill.SkillTarget.ENEMY_SINGLE:
@@ -934,6 +1043,19 @@ func highlight_skill_targets():
 
 func _update_player_energy():
 	_update_player_panels()
+
+func _grant_energy_luck(player_id: int, cost: int):
+	if cost <= 0:
+		return
+	var allies = GlobalGameData.host_characters if player_id == 1 else GlobalGameData.client_characters
+	var bm = get_node_or_null("BuffManager")
+	for c in allies:
+		if c and c.character_name == "Anjing" and c.hp > 0:
+			if bm and bm.has_method("apply_buff"):
+				for i in range(cost):
+					bm.apply_buff(c, "luck", 2, 2, c)
+			print("[Passive] Anjing [贪玩雀神] 消耗 %d 点能量，获得 %d 层[牌运]" % [cost, cost])
+			return
 
 func _check_anpan_passive(player_id: int):
 	if GlobalGameData.cards_played_this_turn <= 0 or GlobalGameData.cards_played_this_turn % 2 != 0:

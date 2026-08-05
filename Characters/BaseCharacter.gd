@@ -474,6 +474,20 @@ func _get_extra_attacks() -> int:
 
 func _consume_extra_attack():
 	_extra_attacks -= 1
+	sync_extra_attacks_safe(_extra_attacks)
+
+@rpc("any_peer", "call_local", "reliable")
+func _sync_extra_attacks(value: int):
+	_extra_attacks = value
+	if main and main.has_method("refresh_character_ui"):
+		main.refresh_character_ui(self)
+
+# 额外行动计数同步：服务端执行技能/被动后广播到所有端（操作端本地校验依赖该值）
+func sync_extra_attacks_safe(value: int):
+	if multiplayer.has_multiplayer_peer():
+		rpc("_sync_extra_attacks", value)
+	else:
+		_extra_attacks = value
 
 @rpc("any_peer", "call_local", "reliable")
 # RPC — 执行攻击：计算伤害，调用目标 take_damage，记录战斗统计
@@ -610,6 +624,23 @@ func play_vfx_preset_safe(preset: String) -> void:
 	else:
 		_play_vfx_preset(preset)
 
+# 技能特效广播：任意端以 SkillVFX.play 参数重放（服务端执行技能时客户端也能看到特效）
+func play_skill_vfx_safe(fx_name: String, extra: Node = null, cell_pos: Vector2 = Vector2.ZERO, extra_path: String = "") -> void:
+	if extra_path == "" and extra:
+		extra_path = extra.get_path()
+	if multiplayer.has_multiplayer_peer():
+		rpc("_play_skill_vfx", fx_name, extra_path, cell_pos)
+	else:
+		_play_skill_vfx(fx_name, extra_path, cell_pos)
+
+@rpc("any_peer", "call_local", "reliable")
+func _play_skill_vfx(fx_name: String, extra_path: String, cell_pos: Vector2) -> void:
+	var extra_node: Node = null
+	if extra_path and extra_path != "":
+		extra_node = get_node_or_null(extra_path)
+	var svfx = load("res://Effects/SkillVFX.gd")
+	svfx.play(fx_name, self, extra_node, cell_pos)
+
 @rpc("any_peer", "call_local", "reliable")
 func _play_vfx(color: Color, duration: float = 0.2):
 	if not sprite:
@@ -726,6 +757,7 @@ var effective_attack: int:
 			var sl = buff_manager.get_total(self, "solo_leveling")
 			if sl > 0:
 				base += int(attack * sl / 100.0)
+			base += buff_manager.get_total(self, "luck")
 		return max(0, base)
 
 var effective_move_points: int:
@@ -828,7 +860,20 @@ func _finish_move_to_target():
 		main.field_effect_manager.on_move_complete(self, cell)
 	main.end_character_move()
 
-@rpc("call_local", "reliable")
+@rpc("any_peer", "call_local", "reliable")
 func _sync_position(pos: Vector2):
 	target_world = pos
 	global_position = pos
+
+# 位移统一入口：任意端调用时广播位置到所有端（技能/卡牌位移使用，避免 authority 拒绝）
+func teleport_safe(world_pos: Vector2):
+	velocity = Vector2.ZERO
+	if is_moving:
+		is_moving = false
+		if main:
+			main.unreserve_move_cell(self)
+			main.end_character_move()
+	if multiplayer.has_multiplayer_peer():
+		rpc("_sync_position", world_pos)
+	else:
+		_sync_position(world_pos)

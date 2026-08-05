@@ -34,7 +34,6 @@ ButtonTheme="*res://Global/ButtonTheme.gd"
 AudioManager="*res://Global/AudioManager.gd"
 BackgroundManager="*res://Global/BackgroundManager.gd"
 BackgroundSingleton="*res://Global/BackgroundSingleton.gd"
-MCPRuntimeProbe="*res://addons/godot_mcp/runtime/mcp_runtime_probe.gd"
 
 [display]
 

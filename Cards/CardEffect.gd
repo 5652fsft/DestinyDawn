@@ -271,8 +271,8 @@ static func _execute_teleport(card: CardData, target: Node, main: Node) -> bool:
 		return false
 	var pick = valid[randi() % valid.size()]
 	var world_pos = gl.to_global(gl.map_to_local(pick))
-	target.global_position = world_pos
-	target.target_world = world_pos
+	if target.has_method("teleport_safe"):
+		target.teleport_safe(world_pos)
 	if target.has_method("play_vfx_preset_safe"):
 		target.play_vfx_preset_safe("entrance")
 	elif target.multiplayer and target.multiplayer.has_multiplayer_peer():
@@ -318,9 +318,8 @@ static func _execute_shadowstep_new(card: CardData, target: Node, main: Node) ->
 	if best_cell == null:
 		return false
 	var world_pos = gl.to_global(gl.map_to_local(best_cell))
-	target.global_position = world_pos
-	target.target_world = world_pos
-	target.velocity = Vector2.ZERO
+	if target.has_method("teleport_safe"):
+		target.teleport_safe(world_pos)
 	if furthest_enemy.has_method("take_damage"):
 		_rpc_take_damage(furthest_enemy, card.effect_value)
 	if target.has_method("play_vfx_preset_safe"):
@@ -353,11 +352,10 @@ static func _execute_swap(card: CardData, target: Node, main: Node) -> bool:
 		return false
 	var target_pos = target.global_position
 	var swap_pos = swap_with.global_position
-	target.global_position = swap_pos
-	target.target_world = swap_pos
-	swap_with.global_position = target_pos
-	if swap_with.has_method("move_toward_target"):
-		swap_with.target_world = target_pos
+	if target.has_method("teleport_safe"):
+		target.teleport_safe(swap_pos)
+	if swap_with.has_method("teleport_safe"):
+		swap_with.teleport_safe(target_pos)
 	if target.has_method("play_vfx_preset_safe"):
 		target.play_vfx_preset_safe("entrance")
 	elif target.multiplayer and target.multiplayer.has_multiplayer_peer():
@@ -387,7 +385,7 @@ static func _execute_overload(card: CardData, target: Node, main: Node) -> bool:
 		return false
 	var energy_node = main.get_node_or_null("EnergySystem")
 	if energy_node and energy_node.has_method("set_energy"):
-		var pid = 1 if _is_host_side(target) else 2
+		var pid = SkillEffect.get_character_pid(target)
 		var cur = energy_node.get_energy(pid)
 		energy_node.set_energy(pid, cur + 2)
 	if target and target.has_method("take_damage"):

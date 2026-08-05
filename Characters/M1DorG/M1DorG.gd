@@ -46,7 +46,7 @@ func _get_deselect_color() -> Color:
 func _sync_away_state(value: int):
 	_away_turns_left = value
 	var spr = get_node_or_null("Sprite2D")
-	if spr and not is_selected:
+	if spr:
 		spr.modulate = Color(0.5, 0.5, 0.5) if value > 0 else Color.WHITE
 	if has_signal("buffs_changed"):
 		buffs_changed.emit()

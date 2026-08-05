@@ -97,7 +97,7 @@
 - 所有 `rpc()` / `rpc_id()` 前检查 `multiplayer.has_multiplayer_peer()`
 - 卡牌效果仅在服务端执行（`_server_play_card`）
 - `call_local` 函数内部不要再调 `rpc()`
-- 服务端 peer=1，客户端 peer=2，端口 1145
+- 服务端 peer=1，客户端 peer 随机生成，端口 1145
 
 ## Git 规范
 
