@@ -63,6 +63,7 @@ CharacterBody2D (input_pickable=true, script=NewChar.gd)
 
 ## D) 素材准备
 
+从 `C:\Users\10932\Documents\5652\DestinyDawn\character` 和 `C:\Users\10932\Documents\5652\DestinyDawn\standee` 及 `C:\Users\10932\Documents\5652\DestinyDawn\audio` 中导入素材
 `Assets/Sprites/Characters/{id}_Blue.png`（友方）/ `{id}_Red.png`（敌方），运行时通过 `_update_sprite_texture()` 加载。立绘放在 `Assets/Sprites/Standee/{id}_Standee.png`。
 
 ---

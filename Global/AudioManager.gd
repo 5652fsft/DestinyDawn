@@ -51,7 +51,7 @@ func load_all_audio():
 		"attack_handgun", "attack_largesword",
 		"bronya_skill", "seele_skill", "elaina_skill", "firefly_skill",
 		"silverwolf_skill", "hamster_skill",
-		"karrigan_skill", "zephyr_skill", "anpan_skill",
+		"karrigan_skill", "zephyr_skill", "anpan_skill", "anjing_skill",
 	]
 	for name in sfx_list:
 		_load_sfx(name)

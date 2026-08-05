@@ -148,6 +148,8 @@ func _buff_desc(key: String, entry: Dictionary) -> String:
 			return "[color=#8cbf8c][拧绳][/color] karrigan给队友的护身符，分摊30%的伤害（%d回合）" % [dur]
 		"solo_leveling":
 			return "[color=#ffcc00][我独自升级][/color] 伤害+%d%%（%d回合）" % [val, dur]
+		"luck":
+			return "[color=#ffd700][牌运][/color] 攻击力+%d（%d回合）" % [val, dur]
 	return "%s%d（%d回合）" % [key, val, dur]
 
 func _on_CloseButton_pressed():

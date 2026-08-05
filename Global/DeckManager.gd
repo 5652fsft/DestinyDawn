@@ -92,3 +92,48 @@ func _recycle_discard(player_id: int):
 
 func init_initial_draw(player_id: int):
 	draw_cards(player_id, initial_draw)
+
+# 抽取指定类型的增益效果牌（BUFF/HEAL/SHIELD），受手牌上限约束，牌堆不足时回收弃牌堆
+@rpc("authority", "call_local", "reliable")
+func draw_beneficial_cards(player_id: int, count: int) -> Array[String]:
+	var drawn: Array[String] = []
+	if not player_decks.has(player_id) or not player_hands.has(player_id):
+		return drawn
+	var deck: Array[String] = []
+	deck.assign(player_decks[player_id])
+	var hand: Array[String] = []
+	hand.assign(player_hands[player_id])
+
+	for _i in range(count):
+		if hand.size() >= hand_limit:
+			break
+		var idx = _find_beneficial_index(deck)
+		if idx < 0:
+			_recycle_discard(player_id)
+			deck.clear()
+			deck.assign(player_decks.get(player_id, [] as Array[String]))
+			idx = _find_beneficial_index(deck)
+		if idx < 0:
+			break
+		var card_id: String = deck[idx]
+		deck.remove_at(idx)
+		hand.append(card_id)
+		drawn.append(card_id)
+
+	player_decks[player_id] = deck
+	player_hands[player_id] = hand
+	return drawn
+
+static func is_beneficial_card(card_id: String) -> bool:
+	var card = CardDatabase.get_card(card_id)
+	if not card:
+		return false
+	return card.card_type == CardData.CardType.BUFF \
+		or card.card_type == CardData.CardType.HEAL \
+		or card.card_type == CardData.CardType.SHIELD
+
+func _find_beneficial_index(deck: Array[String]) -> int:
+	for i in range(deck.size()):
+		if is_beneficial_card(deck[i]):
+			return i
+	return -1

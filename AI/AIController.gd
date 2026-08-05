@@ -302,7 +302,9 @@ func _execute_skill(chara: Node, target: Node):
 		_log("%s 技能目标无效" % _char_label(chara), "Skill")
 		return
 	_log("%s 使用技能 -> %s" % [_char_label(chara), _char_label(target)], "Skill")
-	chara.use_active_skill(target)
+	if not chara.use_active_skill(target):
+		_log("%s 技能释放失败，不消耗行动" % _char_label(chara), "Skill")
+		return
 	if chara.active_skill:
 		chara.active_skill.current_cooldown = chara.active_skill.cooldown
 	# 确保行动次数消耗
@@ -516,6 +518,8 @@ func _evaluate_skill_target(chara: Node) -> Node:
 		"M1DorG":
 			target = chara
 		"Richardovo":
+			target = chara
+		"Anjing":
 			target = chara
 		_:
 			return null

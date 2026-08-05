@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://imeb1g8w0h7e"]
+
+[ext_resource type="Script" uid="uid://bbqwjfivbpfcc" path="res://Characters/Anjing/Anjing.gd" id="1_l5uo8"]
+[ext_resource type="PackedScene" uid="uid://dgleh5lfnpj7g" path="res://Characters/FloatingBar.tscn" id="3_l5uo8"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_xobsb"]
+radius = 59.0
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_l5uo8"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+
+[node name="Anjing" type="CharacterBody2D"]
+input_pickable = true
+script = ExtResource("1_l5uo8")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+shape = SubResource("CircleShape2D_xobsb")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.95, 0.95)
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_l5uo8")
+
+[node name="FloatingBar" parent="." instance=ExtResource("3_l5uo8")]
+z_index = 50

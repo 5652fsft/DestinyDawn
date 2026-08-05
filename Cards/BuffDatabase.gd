@@ -92,4 +92,9 @@ static func _all_buffs() -> Dictionary:
 	b.category = BuffData.Category.SPECIAL; b.is_harmful = false; b.max_stacks = 1
 	out["solo_leveling"] = b
 
+	b = BuffData.new()
+	b.id = "luck"; b.name = "牌运"; b.type = BuffData.BuffType.ATTACK_BUFF
+	b.category = BuffData.Category.SPECIAL; b.is_harmful = false; b.max_stacks = 4
+	out["luck"] = b
+
 	return out

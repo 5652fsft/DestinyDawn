@@ -3,7 +3,7 @@ class_name CharacterData
 const DATA = {
 	"bronya":    {"name":"布洛妮娅", "hp":68,  "move":5, "atk":15, "range":1,
 		"skill":"护卫指令", "skill_desc":"为友方单体提供30点护盾", "skill_cd":3,
-		"passive":"铁壁", "passive_desc":"受到伤害-20%，当生命值<50%时受到伤害-35%"},
+		"passive":"铁壁", "passive_desc":"受到伤害-20%，当生命值低于50%时受到伤害-35%"},
 	"seele":     {"name":"希儿",    "hp":65,  "move":6, "atk":18, "range":1,
 		"skill":"相位突进", "skill_desc":"瞬移至10格范围内选定的敌方单体目标旁，并为目标造成120%攻击力的伤害", "skill_cd":3,
 		"passive":"暗影突袭", "passive_desc":"攻击满血敌人时伤害+50%"},
@@ -34,6 +34,9 @@ const DATA = {
 	"anpan":   {"name":"あんパン", "hp":65,  "move":5, "atk":13, "range":3, "skill_energy":4,
 		"skill":"极速高温烘焙", "skill_desc":"消耗4点能量，立即抽取卡牌至上限，并为自身恢复能量至上限。获得[松软]，效果为受到伤害+20%，持续3回合", "skill_cd":3,
 		"passive":"面包大家族", "passive_desc":"每使用2张卡牌摸取1张卡牌，不超过手牌数量上限，并恢复1点能量。攻击敌方目标后，为目标施加[高温烫嘴]，持续两回合，效果为受到伤害+5%"},
+	"anjing":  {"name":"Anjing", "hp":63,  "move":5, "atk":10, "range":3, "skill_energy":2,
+		"skill":"不打气不气", "skill_desc":"消耗2点能量（此次能量消耗不触发天赋[贪玩雀神]），移除所有[牌运]，抽取等同于移除层数的增益效果牌，对敌方群体造成50%攻击力+当前手牌数量×3点伤害", "skill_cd":2,
+		"passive":"贪玩雀神", "passive_desc":"每消耗1点能量即获得1层[牌运]，效果为攻击力+2，持续2回合，最多可叠加4层"},
 }
 
 static func get_data(id: String) -> Dictionary:
