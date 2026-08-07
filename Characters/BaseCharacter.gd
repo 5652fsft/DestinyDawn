@@ -439,15 +439,22 @@ func handle_attack():
 		
 		var results = space_state.intersect_point(query)
 		
-		# 在 attack 模式中跳过所有非 enemy 点击（交给 handle_move 处理）
+		# 在 attack 模式中：点击敌人执行攻击；点击友方提示无效目标并退出攻击模式（保持选中）；点击自身/空白提示并取消选中
 		
 		if is_selected and main.is_attack_mode:
 			var clicked_enemy = null
+			var clicked_self = false
+			var clicked_ally = null
 			for r in results:
 				var other = r.collider
-				if other is CharacterBody2D and is_enemy(other) and other.hp > 0:
+				if not (other is CharacterBody2D) or other.hp <= 0:
+					continue
+				if is_enemy(other):
 					clicked_enemy = other
-					break
+				elif other == self:
+					clicked_self = true
+				elif clicked_ally == null:
+					clicked_ally = other
 			if clicked_enemy:
 				if GlobalGameData.character_attack_used.get(name, false) and _get_extra_attacks() <= 0:
 					main.unselect_character(self)
@@ -465,6 +472,12 @@ func handle_attack():
 				else:
 					main.show_toast("超出攻击范围")
 					print("[Warn] %s 目标超出攻击范围！" % GlobalGameData.get_char_label(self))
+				return
+			elif clicked_self:
+				main.show_toast("目标选择无效")
+			elif clicked_ally:
+				main.show_toast("目标选择无效")
+				main._cancel_attack_mode()
 				return
 			main.unselect_character(self)
 

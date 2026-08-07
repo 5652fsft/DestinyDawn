@@ -530,10 +530,14 @@ func _process(delta):
 func _input(event: InputEvent):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		if _cell_targeting:
+			if _is_mouse_over_skill_button():
+				return
 			_try_select_cell()
 			get_viewport().set_input_as_handled()
 			return
 		if is_targeting:
+			if _is_mouse_over_skill_button():
+				return
 			_try_select_target(event.position)
 			get_viewport().set_input_as_handled()
 			return
@@ -555,24 +559,6 @@ func _input(event: InputEvent):
 			_hide_surrender_dialog()
 		else:
 			_show_surrender_dialog()
-
-func _unhandled_input(event: InputEvent):
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
-		if _cell_targeting or is_targeting:
-			cancel_targeting()
-			get_viewport().set_input_as_handled()
-		elif is_move_mode:
-			_cancel_move_mode()
-			get_viewport().set_input_as_handled()
-		elif is_attack_mode:
-			_cancel_attack_mode()
-			get_viewport().set_input_as_handled()
-		return
-	if not is_targeting:
-		return
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		_try_select_target(event.position)
-		get_viewport().set_input_as_handled()
 
 func _try_select_cell():
 	if not selected_character or not _pending_skill:
@@ -652,6 +638,19 @@ func _try_select_character(_pos: Vector2):
 			select_character(clicked_enemy, true)
 	elif selected_character:
 		unselect_character(selected_character, true)
+
+func _is_mouse_over_skill_button() -> bool:
+	if not skill_panel:
+		return false
+	var use_button = skill_panel.get_node_or_null("VBoxContainer/UseButton")
+	if not use_button:
+		return false
+	var ctrl = get_viewport().gui_get_hovered_control()
+	while ctrl:
+		if ctrl == use_button:
+			return true
+		ctrl = ctrl.get_parent()
+	return false
 
 func _my_id() -> int:
 	return multiplayer.get_unique_id() if multiplayer.has_multiplayer_peer() else (1 if GlobalGameData.is_host else 2)

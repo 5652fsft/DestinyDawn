@@ -56,7 +56,7 @@ func show_for(character: Node):
 	use_button.visible = has_active
 	if has_active:
 		active_skill = character.active_skill
-		skill_name_label.text = active_skill.skill_name
+		skill_name_label.text = "技能·%s" % active_skill.skill_name
 		skill_desc_label.text = active_skill.description
 
 		_targeting = false
@@ -122,6 +122,7 @@ func _update_cooldown():
 	use_button.text = "使用技能"
 
 func _on_use_button_pressed():
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	if not active_skill:
 		return
 	if _targeting:
