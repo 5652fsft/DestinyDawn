@@ -89,7 +89,7 @@
 - 技能能量消耗从 `CharacterData.get_data(id).get("skill_energy", 0)` 读取，不硬编码
 - 卡牌效果函数签名 `static func _execute_xxx(card, target, main)` —**无 caster 参数**
 - AOE 阵营判定用 `main.current_card_player_id`，**不使用 `GlobalGameData.is_host`**
-- 卡牌描述格式：恢复→**为**，造成→**为**，术语统一
+- 卡牌描述格式：恢复→**为**，造成/施加→**为我方施加，对我方造成，对敌方造成，对敌方施加**，术语统一
 
 ## RPC 与网络关键规则
 
