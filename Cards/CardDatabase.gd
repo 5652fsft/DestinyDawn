@@ -86,10 +86,6 @@ static func _register_cards():
 			CardData.TargetType.ALLY_SINGLE, "移除我方单体目标身上的所有减益效果",
 			CardData.EffectType.CLEANSE, 0),
 
-		_create_card("card_taunt", "嘲讽", CardData.CardType.TACTICAL, 1,
-			CardData.TargetType.ALLY_SINGLE, "为我方单体目标施加[嘲讽]，效果为强制敌方只能攻击该角色（持续1回合）",
-			CardData.EffectType.TAUNT, 1, 1),
-
 		# ========== 费用 2 — 攻击 ==========
 		_create_card("card_fireball", "火球术", CardData.CardType.ATTACK, 2,
 			CardData.TargetType.ENEMY_SINGLE, "为敌方单体目标造成20点伤害，施加[灼烧]，效果为每回合受到5点伤害（持续2回合）",

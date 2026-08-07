@@ -130,8 +130,6 @@ func _buff_desc(key: String, entry: Dictionary) -> String:
 			return "[color=#734d80][标记][/color] 受到伤害+%d%%（%d回合）" % [val, dur]
 		"extra_move":
 			return "[color=#4d808c][加速][/color] 移动范围+%d（%d回合）" % [val, dur]
-		"taunt":
-			return "[color=#8c804d][嘲讽][/color] 强制攻击（%d回合）" % [dur]
 		"magic_flow":
 			return "[color=#668066][魔力充盈][/color] 攻击力+%d%%（%d回合）" % [val, dur]
 		"bloodthirst":

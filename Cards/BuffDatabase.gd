@@ -58,11 +58,6 @@ static func _all_buffs() -> Dictionary:
 	out["magic_flow"] = b
 
 	b = BuffData.new()
-	b.id = "taunt"; b.name = "嘲讽"; b.type = BuffData.BuffType.ATTACK_DEBUFF
-	b.category = BuffData.Category.SPECIAL; b.is_harmful = true; b.max_stacks = 1
-	out["taunt"] = b
-
-	b = BuffData.new()
 	b.id = "legacy"; b.name = "传承"; b.type = BuffData.BuffType.ATTACK_BUFF
 	b.category = BuffData.Category.SPECIAL; b.is_harmful = false; b.max_stacks = 3
 	out["legacy"] = b

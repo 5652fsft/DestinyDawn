@@ -69,8 +69,6 @@ static func execute(card: CardData, target: Node, main: Node) -> bool:
 			return _execute_linear_aoe(card, target, main)
 		CardData.EffectType.MARK:
 			return _apply_temp_buff(target, "mark", card.effect_value, card.effect_duration)
-		CardData.EffectType.TAUNT:
-			return _apply_temp_buff(target, "taunt", card.effect_value, card.effect_duration)
 		_:
 			push_warning("未知卡牌效果类型: ", card.effect_type)
 			return false
@@ -515,7 +513,7 @@ static func _apply_magic_resonance(card: CardData, main: Node):
 	]
 	var debuff_types = [
 		CardData.EffectType.DEBUFF_ATTACK, CardData.EffectType.DEBUFF_MOVE,
-		CardData.EffectType.MARK, CardData.EffectType.TAUNT
+		CardData.EffectType.MARK
 	]
 	if not (card.effect_type in attack_types or card.effect_type in debuff_types):
 		return
