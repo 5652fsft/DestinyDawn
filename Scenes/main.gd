@@ -150,7 +150,7 @@ func _ready():
 		for i in range(team_roster.size()):
 			_spawn_character(team_roster[i].resource_path, "HostCharacter_%d" % i, 1, GlobalGameData.host_birth_point[i])
 		for i in range(enemy_roster.size()):
-			_spawn_character(enemy_roster[i].resource_path, "ClientCharacter_%d" % i, 1, GlobalGameData.client_birth_point[i])
+			_spawn_character(enemy_roster[i].resource_path, "ClientCharacter_%d" % i, GlobalGameData.client_peer_id if GlobalGameData.client_peer_id > 1 else 2, GlobalGameData.client_birth_point[i])
 		_init_player_card_systems_ai()
 		_log("双方角色已生成，卡牌系统已初始化", "Mode")
 		_setup_action_buttons()
@@ -284,6 +284,7 @@ func _spawn_character(scene_path: String, char_name: String, authority: int, pos
 		return
 	var chara = scene.instantiate()
 	chara.name = char_name
+	chara.owner_pid = authority
 	chara.set_multiplayer_authority(authority)
 	chara.position = pos
 	Characters.add_child(chara)
@@ -369,8 +370,8 @@ func _request_client_setup():
 func _spawn_client_characters(id: int):
 	_build_team_from_selection()
 	for i in range(enemy_roster.size()):
-		_spawn_character(enemy_roster[i].resource_path, "Client%dCharacter_%d" % [id, i], id, GlobalGameData.client_birth_point[i])
-		rpc("_spawn_character_remote", enemy_roster[i].resource_path, "Client%dCharacter_%d" % [id, i], id, GlobalGameData.client_birth_point[i])
+		_spawn_character(enemy_roster[i].resource_path, "ClientCharacter_%d" % i, id, GlobalGameData.client_birth_point[i])
+		rpc("_spawn_character_remote", enemy_roster[i].resource_path, "ClientCharacter_%d" % i, id, GlobalGameData.client_birth_point[i])
 	print("[Info] 开始游戏")
 	_hide_waiting_overlay()
 	rpc("advance_turn_phase")

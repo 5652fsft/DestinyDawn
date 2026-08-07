@@ -68,4 +68,4 @@ play_vfx_preset_safe("hit")   # 同上
 | `_sync_skill_state(character_path, cooldown, attack_consumed, skill_name)` | `call_local` | Server → All | 广播冷却/行动点/UI 刷新，全端执行 |
 | `_sync_skill_failed(reason)` | `call_local` | Server → Client | 服务端校验失败提示（服务端跳过，避免重复 toast） |
 
-客户端 pid 从角色名解析（`Client{pid}Character_{i}`），统一用 `SkillEffect.get_character_pid()`，**不假设 pid == 2**。
+角色归属 pid 在生成时由 `main._spawn_character` 记录到 `BaseCharacter.owner_pid`（Host=1，联机 Client=其 peer id，AI 敌方=`client_peer_id`），统一用 `SkillEffect.get_character_pid()` 读取，**不假设 pid == 2**。角色名仅表身份（`HostCharacter_{i}` / `ClientCharacter_{i}`），不再内嵌 pid。

@@ -99,10 +99,11 @@ var is_selected: bool = false:
 			hide_move_range()
 			hide_attack_range()
 
+# 归属玩家 pid（生成时写入，不靠角色名解析）：Host=1，联机 Client=其 peer id，AI 敌方=GlobalGameData.client_peer_id(2)
+var owner_pid: int = 1
+
 func _enter_tree():
-	if name.begins_with("Client"):
-		var peer_id_str = name.get_slice("Client", 1).get_slice("Character", 0)
-		set_multiplayer_authority(int(peer_id_str))
+	set_multiplayer_authority(owner_pid)
 
 func _ready():
 	_hp = max_hp

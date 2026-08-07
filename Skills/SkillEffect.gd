@@ -354,17 +354,11 @@ static func _do_anjing_active(character: Node, main: Node) -> bool:
 	print("[Skill] Anjing [不打气不气] 消耗 %d 能量，移除 %d 层[牌运]，抽 %d 张增益牌，当前手牌 %d 张，对 %d 名敌人造成 %d 点伤害" % [energy_cost, luck_stacks, drawn.size(), hand_count, hit_count, dmg])
 	return true
 
-# 根据角色归属计算玩家 pid：Host 恒为 1，Client 从角色名解析真实 peer id（AI 模式无后缀则回退 client_peer_id）
+# 返回角色归属玩家 pid（owner_pid，生成时由 main._spawn_character 写入；服务端/主机角色也恒有该字段）
 static func get_character_pid(character: Node) -> int:
 	if not character:
 		return 0
-	var name = character.name
-	if name.begins_with("Client"):
-		var slice = name.get_slice("Client", 1).get_slice("Character", 0)
-		if slice.is_valid_int():
-			return int(slice)
-		return GlobalGameData.client_peer_id if GlobalGameData.client_peer_id > 1 else 2
-	return 1
+	return character.owner_pid
 
 # 查询技能是否被阻挡（能量不足等），返回 "" 表示可用，否则返回原因文本
 static func get_skill_block_reason(character: Node, main: Node) -> String:
