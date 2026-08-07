@@ -15,6 +15,8 @@ func setup(cid: String, name_text: String, cost: int, type_text: String, desc: S
 	_card_type = type_index
 	$CostCircle/CostNumber.text = str(cost)
 	$MarginContainer/VBoxContainer/NameLabel.text = name_text
+	$MarginContainer/VBoxContainer/DescLabel.autowrap_mode = TextServer.AUTOWRAP_ARBITRARY
+	$MarginContainer/VBoxContainer/DescLabel.custom_maximum_size = Vector2(116, -1)
 	$MarginContainer/VBoxContainer/DescLabel.text = desc
 	$TypeLabel.text = type_text if type_index < 0 else CardTheme.TYPE_TAG_TEXT.get(type_index, type_text)
 	_reset_scale()

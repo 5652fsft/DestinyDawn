@@ -68,6 +68,8 @@ func setup(data: CardData):
 	card_data = data
 	cost_number.text = str(data.cost)
 	name_label.text = data.card_name
+	desc_label.autowrap_mode = TextServer.AUTOWRAP_ARBITRARY
+	desc_label.custom_maximum_size = Vector2(128, -1)
 	desc_label.text = data.description
 
 	var ct = data.card_type
