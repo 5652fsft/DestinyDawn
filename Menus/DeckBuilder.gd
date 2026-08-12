@@ -32,9 +32,9 @@ func _build_pool():
 		var data = CardDatabase.get_card(cid)
 		if not data: continue
 		var w = CARD_SCENE.instantiate()
-		w.setup(cid, data.card_name, data.cost, TYPE_NAMES.get(data.card_type, "?"), data.description, data.card_type)
 		w.clicked.connect(_on_pool_card_clicked)
 		grid.add_child(w)
+		w.setup(cid, data.card_name, data.cost, TYPE_NAMES.get(data.card_type, "?"), data.description, data.card_type)
 		pool_widgets[cid] = w
 
 func _on_pool_card_clicked(cid: String):
@@ -58,11 +58,11 @@ func _on_deck_card_clicked(cid: String):
 	_show_toast("已移出卡组")
 
 func _update_ui():
-	# 更新牌库显示
+	# 更新牌库显示（已加入卡组的卡显示选中态）
 	for cid in pool_widgets.keys():
 		var w = pool_widgets[cid]
 		if is_instance_valid(w):
-			w.set_in_deck_mode(cid not in deck_ids)
+			w.set_in_deck_mode(cid in deck_ids)
 		else:
 			pool_widgets.erase(cid)
 	# 重建出战卡组
@@ -81,22 +81,22 @@ func _update_ui():
 	for c in to_free:
 		deck_grid.remove_child(c)
 		c.queue_free()
-	# 确保现有卡牌scale正确
+	# 确保现有卡牌scale正确（出战卡组区不显示选中高亮）
 	for c in deck_grid.get_children():
 		if "card_id" in c and c.has_method("_reset_scale"):
 			c._reset_scale()
 			if c.card_id in deck_ids:
-				c.set_in_deck_mode(true)
+				c.set_in_deck_mode(false)
 	# 添加缺失的卡牌（到末尾）
 	for cid in deck_ids:
 		if cid in existing_ids: continue
 		var data = CardDatabase.get_card(cid)
 		if not data: continue
 		var w = CARD_SCENE.instantiate()
-		w.setup(cid, data.card_name, data.cost, TYPE_NAMES.get(data.card_type, "?"), data.description, data.card_type)
 		w.clicked.connect(_on_deck_card_clicked)
-		w.set_in_deck_mode(true)
 		deck_grid.add_child(w)
+		w.setup(cid, data.card_name, data.cost, TYPE_NAMES.get(data.card_type, "?"), data.description, data.card_type)
+		w.set_in_deck_mode(false)
 		existing_ids.append(cid)
 	var card_count = existing_ids.size()
 	for i in range(DECK_SIZE - card_count):

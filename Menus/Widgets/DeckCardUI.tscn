@@ -9,6 +9,14 @@ clip_contents = true
 scale = Vector2(0.95, 0.95)
 script = ExtResource("1")
 
+[node name="CardPattern" type="TextureRect" parent="." unique_id=78257878]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 26.0
+offset_right = 118.0
+offset_bottom = 84.0
+mouse_filter = 2
+
 [node name="CardImage" type="TextureRect" parent="." unique_id=78257877]
 layout_mode = 0
 offset_left = 7.0
@@ -18,9 +26,11 @@ offset_bottom = 84.0
 expand_mode = 2
 stretch_mode = 6
 
-[node name="BorderOverlay" type="Panel" parent="." unique_id=290545763]
+[node name="CardPatternBottom" type="TextureRect" parent="." unique_id=78257879]
 layout_mode = 0
-offset_right = 125.0
+offset_left = 5.0
+offset_top = 108.0
+offset_right = 120.0
 offset_bottom = 183.0
 mouse_filter = 2
 
@@ -58,33 +68,44 @@ theme_override_font_sizes/font_size = 9
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=388366819]
+[node name="NameDivider" type="Panel" parent="." unique_id=388366821]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 84.0
+offset_right = 125.0
+offset_bottom = 86.0
+mouse_filter = 2
+
+[node name="NameLabel" type="Label" parent="." unique_id=947716886]
 layout_mode = 0
 offset_left = 5.0
 offset_top = 88.0
-offset_right = 121.0
-offset_bottom = 125.0
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1349758733]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=947716886]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.9, 0.9, 0.92, 1)
+offset_right = 118.0
+offset_bottom = 106.0
+theme_override_colors/font_color = Color(0.2, 0.2, 0.26, 1)
 theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 text = "卡牌名"
-horizontal_alignment = 1
+horizontal_alignment = 0
+vertical_alignment = 1
 
-[node name="DescLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=344810226]
-custom_maximum_size = Vector2(116, -1)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.75, 0.75, 0.8, 1)
+[node name="DescLabel" type="Label" parent="." unique_id=344810226]
+custom_maximum_size = Vector2(115, -1)
+layout_mode = 0
+offset_left = 5.0
+offset_top = 108.0
+offset_right = 120.0
+offset_bottom = 172.0
+theme_override_colors/font_color = Color(0.35, 0.35, 0.42, 1)
 theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 9
+theme_override_font_sizes/font_size = 8
+theme_override_constants/line_spacing = 2
 text = "描述"
+horizontal_alignment = 0
 autowrap_mode = 2
+
+[node name="BorderOverlay" type="Panel" parent="." unique_id=290545763]
+layout_mode = 0
+offset_right = 125.0
+offset_bottom = 183.0
+mouse_filter = 2

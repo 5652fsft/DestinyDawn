@@ -23,7 +23,7 @@ func _ready():
 	BackgroundSingleton.setup(BackgroundManager.get_current_bg_path())
 
 func _build_roster():
-	var grid = $RosterScroll/RosterGrid
+	var grid = $RosterScroll/Margin/RosterGrid
 	for cid in CharData.DATA:
 		var data = CharData.DATA[cid]
 		var card = CARD_SCENE.instantiate()

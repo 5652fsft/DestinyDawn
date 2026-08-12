@@ -39,9 +39,18 @@ offset_top = 100.0
 offset_right = 840.0
 offset_bottom = 580.0
 
-[node name="RosterGrid" type="GridContainer" parent="RosterScroll" unique_id=924174588]
+[node name="Margin" type="MarginContainer" parent="RosterScroll" unique_id=722127478]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="RosterGrid" type="GridContainer" parent="RosterScroll/Margin" unique_id=924174588]
 layout_mode = 2
 columns = 4
+theme_override_constants/h_separation = 5
+theme_override_constants/v_separation = 5
 
 [node name="SlotLabel" type="Label" parent="." unique_id=1925922907]
 layout_mode = 0

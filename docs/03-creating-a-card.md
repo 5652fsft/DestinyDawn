@@ -82,3 +82,26 @@ _create_card("card_new_id", "显示名称", CardData.CardType.ATTACK, 2,
 - [ ] （如需要） `CardEffect.gd`: match 分支 + 实现
 - [ ] （如需要） `main.gd`: 目标选择/高亮
 - [ ] （如需要） `DeckBuilder.gd`: TYPE_NAMES
+
+---
+
+## E) 卡面图生成（SD WebUI）
+
+卡面图路径 `Assets/Sprites/Cards/{card_id}.png`（文件名 = 卡牌 id，`CardUIBase._load_card_image` 按此加载）。**必须为透明背景 PNG**（卡面区域下方有白色六边形底纹，透明处透出）。
+
+### 生成管线（一次配置，可复用）
+
+1. **工具**：SD WebUI（`C:\Users\10932\Documents\5652\sd-webui-aki-v4.10`），模型 `minimax_h3_fl2va_pruned_int8_convrot.safetensors`，API 端口 7860。
+2. **提示词**：34 张卡的 prompt 模板在 `C:\Users\10932\AppData\Local\Temp\opencode\card_prompts.json`（非项目内，重生成可参照）。统一风格 = "动漫角色施展对应魔法/元素 + 深色背景 + 居中构图"；负面词禁 text/watermark/logo/multiple characters/complex background。
+3. **生成参数**：1024×576，steps 28，cfg 5.5，sampler `dpmpp_2m`。
+4. **抠图（透明化）**：模型输出 RGB（无 alpha），用 rembg 批处理：
+   - venv: `sd-webui-aki-v4.10\venv\Scripts\python.exe`（已装 rembg[cpu]）
+   - 抠图模型 `bria-rmbg-2.0.onnx` 放 `C:\Users\10932\.u2net\`（国内网络从 hf-mirror 下载 RMBG-1.4/2.0 的 `onnx/model.onnx`）
+   - 批处理脚本模式：`new_session('bria-rmbg')` + `remove(img, session=s)`
+5. **替换**：透明 PNG 覆盖 `Assets/Sprites/Cards/{id}.png`，Godot 自动重新导入（运行时会重建 `.import` 缓存）。
+
+### 注意
+
+- 生成图主体**略偏左/尺寸小**属正常（抠图后居中裁剪可缓解）；构图严重不符才需重生成（固定 seed 微调 prompt）。
+- 卡面显示区 120×67（横向条幅），生成图 1024×576 比例匹配。
+- minimax 为角色模型：纯元素类 prompt（火球/盾牌）易画出角色持物，可接受；如需纯物品图标需更强约束（`icon, emblem, no people`）或换模型。
