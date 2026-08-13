@@ -20,7 +20,7 @@ offset_right = 300.0
 offset_bottom = 56.0
 theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 28
-text = "编队管理"
+text = "编队"
 
 [node name="RosterLabel" type="Label" parent="." unique_id=569906170]
 layout_mode = 0
@@ -48,9 +48,9 @@ theme_override_constants/margin_bottom = 10
 
 [node name="RosterGrid" type="GridContainer" parent="RosterScroll/Margin" unique_id=924174588]
 layout_mode = 2
-columns = 4
 theme_override_constants/h_separation = 5
 theme_override_constants/v_separation = 5
+columns = 4
 
 [node name="SlotLabel" type="Label" parent="." unique_id=1925922907]
 layout_mode = 0
@@ -62,12 +62,18 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 22
 text = "我的队伍"
 
-[node name="SlotContainer" type="VBoxContainer" parent="." unique_id=1774729621]
+[node name="SlotGlassPanel" type="Panel" parent="." unique_id=1774729621]
+offset_left = 910.0
+offset_top = 92.0
+offset_right = 1190.0
+offset_bottom = 360.0
+
+[node name="SlotContainer" type="VBoxContainer" parent="SlotGlassPanel"]
 layout_mode = 0
-offset_left = 920.0
-offset_top = 100.0
-offset_right = 1180.0
-offset_bottom = 380.0
+offset_left = 10.0
+offset_top = 8.0
+offset_right = -10.0
+offset_bottom = -8.0
 
 [node name="HintLabel" type="Label" parent="." unique_id=1713851024]
 layout_mode = 0

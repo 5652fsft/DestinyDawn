@@ -1,6 +1,5 @@
 extends Control
 
-const FONT = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
 const CARD_SCENE = preload("res://Menus/Widgets/DeckCardUI.tscn")
 
 const TYPE_NAMES = {0:"攻击",1:"治疗",2:"增益",3:"减益",4:"位移",5:"护盾",6:"战术"}
@@ -14,6 +13,9 @@ func _ready():
 	var transparent = StyleBoxEmpty.new()
 	$VBoxContainer/DeckPanel.add_theme_stylebox_override("panel", transparent)
 	$VBoxContainer/CardPool.add_theme_stylebox_override("panel", transparent)
+	_apply_deck_glass()
+	$VBoxContainer/DeckPanel/DeckGlassPanel/DeckGrid.resized.connect(func():
+		_ensure_scale_later($VBoxContainer/DeckPanel/DeckGlassPanel/DeckGrid))
 	_build_pool()
 	_update_ui()
 
@@ -24,6 +26,21 @@ func _ready():
 	
 	# 初始化单例背景
 	BackgroundSingleton.setup(BackgroundManager.get_current_bg_path())
+
+# 出战卡组区：浅色毛玻璃底色（参照主菜单按钮玻璃样式）
+func _apply_deck_glass():
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.4, 0.4, 0.43, 0.45)
+	style.border_width_top = 1
+	style.border_width_bottom = 1
+	style.border_width_left = 1
+	style.border_width_right = 1
+	style.border_color = Color(0.6, 0.6, 0.65, 0.4)
+	style.corner_radius_top_left = 12
+	style.corner_radius_top_right = 12
+	style.corner_radius_bottom_left = 12
+	style.corner_radius_bottom_right = 12
+	$VBoxContainer/DeckPanel/DeckGlassPanel.add_theme_stylebox_override("panel", style)
 
 func _build_pool():
 	var grid = $VBoxContainer/CardPool/PoolScroll/GridContainer
@@ -42,20 +59,16 @@ func _on_pool_card_clicked(cid: String):
 	if cid in deck_ids:
 		deck_ids.erase(cid)
 		_update_ui()
-		_show_toast("已移出卡组")
 		return
 	if deck_ids.size() >= DECK_SIZE:
-		_show_toast("卡组已满")
 		return
 	deck_ids.append(cid)
 	_update_ui()
-	_show_toast("已加入卡组")
 
 func _on_deck_card_clicked(cid: String):
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("deck_select")
 	deck_ids.erase(cid)
 	_update_ui()
-	_show_toast("已移出卡组")
 
 func _update_ui():
 	# 更新牌库显示（已加入卡组的卡显示选中态）
@@ -66,7 +79,7 @@ func _update_ui():
 		else:
 			pool_widgets.erase(cid)
 	# 重建出战卡组
-	var deck_grid = $VBoxContainer/DeckPanel/DeckGrid
+	var deck_grid = $VBoxContainer/DeckPanel/DeckGlassPanel/DeckGrid
 	var existing_ids: Array[String] = []
 	var to_free: Array[Node] = []
 	for c in deck_grid.get_children():
@@ -82,11 +95,7 @@ func _update_ui():
 		deck_grid.remove_child(c)
 		c.queue_free()
 	# 确保现有卡牌scale正确（出战卡组区不显示选中高亮）
-	for c in deck_grid.get_children():
-		if "card_id" in c and c.has_method("_reset_scale"):
-			c._reset_scale()
-			if c.card_id in deck_ids:
-				c.set_in_deck_mode(false)
+	_ensure_scale(deck_grid)
 	# 添加缺失的卡牌（到末尾）
 	for cid in deck_ids:
 		if cid in existing_ids: continue
@@ -102,6 +111,8 @@ func _update_ui():
 	for i in range(DECK_SIZE - card_count):
 		var empty = Panel.new()
 		empty.custom_minimum_size = Vector2(125, 183)
+		empty.scale = Vector2(0.93, 0.93)
+		empty.position.y = 6
 		var es = StyleBoxFlat.new()
 		es.bg_color = Color(0.15, 0.15, 0.25, 0.3)
 		es.corner_radius_top_left = 8
@@ -110,31 +121,33 @@ func _update_ui():
 		es.corner_radius_bottom_right = 8
 		empty.add_theme_stylebox_override("panel", es)
 		deck_grid.add_child(empty)
+	# Container 布局会把子节点 scale 重置为 1.0，且布局消息在同步代码之后执行，
+	# 等两帧布局完全稳定后再修正占位格 scale
+	_ensure_scale_later(deck_grid)
 	$VBoxContainer/DeckPanel/CountLabel.text = "%d / %d" % [deck_ids.size(), DECK_SIZE]
+	
+	
 	var sb = get_node_or_null("SaveButton")
 	if sb: sb.disabled = deck_ids.size() < DECK_SIZE
 
-func _show_toast(msg: String):
-	var label = Label.new()
-	label.text = msg
-	label.add_theme_font_override("font", FONT)
-	label.add_theme_font_size_override("font_size", 18)
-	label.horizontal_alignment = 1
-	label.modulate = Color(1, 1, 0.85, 1)
-	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
-	label.add_theme_constant_override("shadow_offset_x", 2)
-	label.add_theme_constant_override("shadow_offset_y", 2)
-	label.custom_minimum_size = Vector2(700, 0)
-	label.position = Vector2(290, 16)
-	add_child(label)
-	var tw = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	tw.tween_property(label, "modulate:a", 0.0, 0.35).set_delay(1.2)
-	tw.finished.connect(func():
-		if is_instance_valid(label): label.queue_free())
+func _ensure_scale_later(grid):
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_ensure_scale(grid)
+
+func _ensure_scale(deck_grid):
+	# 确保现有卡牌scale正确（出战卡组区不显示选中高亮）
+	for c in deck_grid.get_children():
+		if "card_id" in c and c.has_method("_reset_scale"):
+			c._reset_scale()
+			if c.card_id in deck_ids:
+				c.set_in_deck_mode(false)
+		elif not "card_id" in c:
+			c.scale = Vector2(0.93, 0.93)
+			c.position.y = 6
 
 func _on_save_pressed():
 	if deck_ids.size() < DECK_SIZE:
-		_show_toast("请选择 %d 张卡牌" % DECK_SIZE)
 		return
 	GlobalGameData.selected_deck = deck_ids.duplicate()
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")

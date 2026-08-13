@@ -49,6 +49,10 @@ func setup(id: String, data: Dictionary):
 	_apply_style()
 
 func _apply_style():
+	var pattern = CardArtGenerator.make_hex_pattern_faded(
+		CardTheme.PATTERN_COLOR, CardTheme.PATTERN_HEX_RADIUS, Vector2i(180, 290))
+	$CardFront/CardPattern.texture = pattern
+	$CardBack/CardPattern.texture = pattern
 	var p = StyleBoxFlat.new()
 	p.bg_color = Color(0.15, 0.15, 0.25, 0.8)
 	p.corner_radius_top_left = CardTheme.CARD_BORDER_RADIUS
@@ -96,6 +100,7 @@ func _ready():
 	_base_scale = scale
 	_full_scale = scale
 	z_index = 5
+	$CardBack/Scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 
 func _gui_input(event: InputEvent):
 	if _flipped:

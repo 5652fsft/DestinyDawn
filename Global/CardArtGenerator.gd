@@ -78,6 +78,31 @@ static func make_hex_pattern(color: Color, hex_radius: float = 16.0) -> ImageTex
 	_pattern_cache[key] = tex
 	return tex
 
+# 六边形网格底纹 + 从右下向左上渐隐 + 只在下半部分显示
+# 右下角透明度最强，向左上角逐渐归零；同时纹路只覆盖下部 fade_height 比例，向上渐隐消失
+# size 为完整卡面尺寸，tile 周期复用 make_hex_pattern 的小纹理，逐像素叠加渐隐系数
+static func make_hex_pattern_faded(color: Color, hex_radius: float, size: Vector2i, fade_height: float = 0.5) -> ImageTexture:
+	var key := "%s|%.1f|%d|%d|fade%.2f" % [color.to_html(), hex_radius, size.x, size.y, fade_height]
+	if _pattern_cache.has(key):
+		return _pattern_cache[key]
+	var tile := make_hex_pattern(color, hex_radius)
+	var tile_img := tile.get_image()
+	var tw := tile_img.get_width()
+	var th := tile_img.get_height()
+	var img := Image.create(size.x, size.y, false, Image.FORMAT_RGBA8)
+	for y in size.y:
+		for x in size.x:
+			var tp: Color = tile_img.get_pixel(x % tw, y % th)
+			# 从右下向左上渐隐：沿左上角(0,0)->右下角(w,h)对角线，右下角为 1，左上角为 0
+			var f1: float = clamp((x + y) / float(size.x + size.y), 0.0, 1.0)
+			# 垂直范围收缩：底部满值，向上在 fade_height 高度处渐隐到 0
+			var f2: float = clamp((y - (1.0 - fade_height) * size.y) / (fade_height * size.y), 0.0, 1.0)
+			var f: float = f1 * f2
+			img.set_pixel(x, y, Color(tp.r, tp.g, tp.b, tp.a * f))
+	var tex := ImageTexture.create_from_image(img)
+	_pattern_cache[key] = tex
+	return tex
+
 # 坐标取模到 [0, size)（平铺环绕）
 static func _wrap_point(p: Vector2, size: Vector2) -> Vector2:
 	var x := fmod(p.x, size.x)
