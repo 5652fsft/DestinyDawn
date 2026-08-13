@@ -70,3 +70,48 @@ static func find_nearest_free_cell(
 			visited[n] = cost + 1
 			queue.append(n)
 	return Vector2i(-1, -1)
+
+# 加权可达范围搜索（地形消耗 + 占用判定），返回 {cell: 最小消耗}
+static func get_reachable_cells(
+	grid_layer: TileMapLayer, start_cell: Vector2i, max_points: int,
+	is_occupied: Callable, get_cost: Callable
+) -> Dictionary:
+	var result: Dictionary = { start_cell: 0 }
+	var closed: Dictionary = {}
+	var open_list = [{ "cell": start_cell, "cost": 0 }]
+	while open_list.size() > 0:
+		var current = open_list.pop_front()
+		var cell: Vector2i = current.cell
+		var total_cost: int = current.cost
+		if closed.has(cell):
+			continue
+		closed[cell] = true
+		for d in HEX_DIRS:
+			var next_cell: Vector2i = cell + d
+			if closed.has(next_cell):
+				continue
+			if is_occupied.call(next_cell):
+				closed[next_cell] = true
+				continue
+			var cost = get_cost.call(next_cell)
+			if cost <= 0:
+				closed[next_cell] = true
+				continue
+			var new_cost = total_cost + cost
+			if new_cost <= max_points:
+				if not result.has(next_cell) or new_cost < result[next_cell]:
+					result[next_cell] = new_cost
+					_insert_sorted(open_list, { "cell": next_cell, "cost": new_cost })
+	return result
+
+# 开销优先插入（二分查找）
+static func _insert_sorted(arr: Array, item: Dictionary) -> void:
+	var lo = 0
+	var hi = arr.size()
+	while lo < hi:
+		var mid = (lo + hi) / 2
+		if arr[mid].cost < item.cost:
+			lo = mid + 1
+		else:
+			hi = mid
+	arr.insert(lo, item)

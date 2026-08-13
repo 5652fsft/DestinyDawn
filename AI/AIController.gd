@@ -378,30 +378,13 @@ func _bfs_reachable(chara: Node, max_move: int) -> Array[Vector2i]:
 	var start = chara.get_current_cell()
 	if start == Vector2i(-1, -1):
 		return []
+	var reachable: Dictionary = HexUtils.get_reachable_cells(gl, start, max_move,
+		func(c: Vector2i) -> bool: return _main.is_cell_occupied(c, chara),
+		func(c: Vector2i) -> int: return chara.get_move_cost(c))
+	reachable.erase(start)
 	var result: Array[Vector2i] = []
-	var visited: Dictionary = {}
-	visited[start] = true
-	var queue = [{ "cell": start, "cost": 0 }]
-
-	while queue.size() > 0:
-		var current = queue.pop_front()
-		for d in HexUtils.HEX_DIRS:
-			var next = current.cell + d
-			if visited.has(next):
-				continue
-			var cost = chara.get_move_cost(next)
-			if cost <= 0:
-				visited[next] = true
-				continue
-			if current.cost + cost > max_move:
-				continue
-			if _main.is_cell_occupied(next, chara):
-				visited[next] = true
-				continue
-			visited[next] = true
-			result.append(next)
-			queue.append({ "cell": next, "cost": current.cost + cost })
-
+	for c in reachable.keys():
+		result.append(c)
 	return result
 
 

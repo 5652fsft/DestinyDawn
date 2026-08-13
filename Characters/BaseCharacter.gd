@@ -214,19 +214,7 @@ func get_move_cost(cell: Vector2i) -> int:
 		"wall": return -1
 		_: return 1
 
-# 开销优先插入（二分查找）
-func _insert_sorted(arr: Array, item: Dictionary) -> void:
-	var lo = 0
-	var hi = arr.size()
-	while lo < hi:
-		var mid = (lo + hi) / 2
-		if arr[mid].cost < item.cost:
-			lo = mid + 1
-		else:
-			hi = mid
-	arr.insert(lo, item)
-
-# BFS 寻路：计算并高亮有效移动格子
+# 计算并高亮有效移动格子（加权可达搜索委托给 HexUtils）
 func show_move_range():
 	valid_move_cells.clear()
 	var char_local = grid_layer.to_local(global_position)
@@ -236,83 +224,21 @@ func show_move_range():
 		print("[Warn] 起始格不可通行")
 		return
 
-	valid_move_cells[start_cell] = 0
-
-	var open_list = []
-	var closed: Dictionary = {}
-	open_list.append({ "cell": start_cell, "cost": 0 })
-
-	while open_list.size() > 0:
-		var current = open_list.pop_front()
-		var cell: Vector2i = current.cell
-		var total_cost: int = current.cost
-		
-		if closed.has(cell):
-			continue
-		closed[cell] = true
-
-		for d in HexUtils.HEX_DIRS:
-			var next_cell: Vector2i = cell + d
-			if closed.has(next_cell):
-				continue
-
-			# 检查是否被其他角色占据
-			if main.is_cell_occupied(next_cell, self):
-				closed[next_cell] = true
-				continue
-
-			var cost = get_move_cost(next_cell)
-			if cost <= 0:
-				closed[next_cell] = true
-				continue
-
-			var new_cost = total_cost + cost
-			if new_cost <= move_points:
-				# 允许更优路径更新
-				if not valid_move_cells.has(next_cell) or new_cost < valid_move_cells[next_cell]:
-					valid_move_cells[next_cell] = new_cost
-					_insert_sorted(open_list, { "cell": next_cell, "cost": new_cost })
+	valid_move_cells = HexUtils.get_reachable_cells(grid_layer, start_cell, move_points,
+		func(c: Vector2i) -> bool: return main.is_cell_occupied(c, self),
+		func(c: Vector2i) -> int: return get_move_cost(c))
 
 	# 高亮所有可达格子（跳过起始格）
 	for cell in valid_move_cells.keys():
 		if cell != start_cell:
 			highlight_layer.set_cell(cell, 0, Vector2i.ZERO)
 
-# BFS 寻路：计算可攻击范围并高亮敌人
+# 计算可攻击范围并高亮敌人（范围搜索委托给 HexUtils）
 func show_attack_range():
 	valid_attack_cells.clear()
 	var char_local = grid_layer.to_local(global_position)
 	var start_cell: Vector2i = grid_layer.local_to_map(char_local)
-	valid_attack_cells[start_cell] = 0
-
-	var open_list = []
-	var closed: Dictionary = {}  # 只记录已处理或已排除的格子（值为 true）
-	open_list.append({ "cell": start_cell, "cost": 0 })
-
-	while open_list.size() > 0:
-		var current = open_list.pop_front()
-		var cell: Vector2i = current.cell
-		var total_cost: int = current.cost
-		
-		if closed.has(cell):
-			continue
-		closed[cell] = true
-
-		for d in HexUtils.HEX_DIRS:
-			var next_cell: Vector2i = cell + d
-			if closed.has(next_cell):
-				continue
-			var cost = 1
-			if cost <= 0:
-				closed[next_cell] = true
-				continue
-
-			var new_cost = total_cost + cost
-			if new_cost <= attack_range:
-				# 允许更优路径更新
-				if not valid_attack_cells.has(next_cell) or new_cost < valid_attack_cells[next_cell]:
-					valid_attack_cells[next_cell] = new_cost
-					_insert_sorted(open_list, { "cell": next_cell, "cost": new_cost })
+	valid_attack_cells = HexUtils.get_cells_in_range(grid_layer, start_cell, attack_range)
 
 	# 高亮所有可攻击角色
 	for cell in valid_attack_cells.keys():
