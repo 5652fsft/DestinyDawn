@@ -13,6 +13,9 @@
 /macos/
 /export/
 
+# opencode
+.opencode/
+
 # IDE
 .idea/
 .vscode/
