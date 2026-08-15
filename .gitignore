@@ -16,6 +16,9 @@
 # opencode
 .opencode/
 
+# dev plugin (local toolchain)
+/addons/godot_mcp/
+
 # IDE
 .idea/
 .vscode/
