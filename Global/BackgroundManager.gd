@@ -36,6 +36,9 @@ func get_current_bg_path() -> String:
 	var filename = get_current_bg_filename()
 	if filename.is_empty():
 		return ""
+	if OS.has_feature("android"):
+		# 安卓端禁用 .ogv 视频背景（Theora 移动端解码性能差），回退静态背景
+		return ""
 	if OS.has_feature("editor"):
 		return "res://Assets/Video/" + filename
 	var exe_dir = OS.get_executable_path().get_base_dir()

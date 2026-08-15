@@ -96,8 +96,12 @@ func _ready():
 
 func _init_bg_option():
 	var bgs = BackgroundManager.get_available_backgrounds()
+	var is_mobile = OS.has_feature("android")
 	var idx = 0
 	for bg in bgs:
+		# 安卓端不提供视频背景选项（适量功能阉割）
+		if is_mobile and bg.get("filename", "") != "":
+			continue
 		bg_option.add_item(bg.name, idx)
 		if bg.id == BackgroundManager.current_id:
 			bg_option.select(idx)
@@ -106,8 +110,15 @@ func _init_bg_option():
 
 func _on_bg_selected(index: int):
 	var bgs = BackgroundManager.get_available_backgrounds()
-	if index >= 0 and index < bgs.size():
-		BackgroundManager.set_background(bgs[index].id)
+	var is_mobile = OS.has_feature("android")
+	var real_index = 0
+	for bg in bgs:
+		if is_mobile and bg.get("filename", "") != "":
+			continue
+		if real_index == index:
+			BackgroundManager.set_background(bg.id)
+			return
+		real_index += 1
 
 func _on_master_volume_changed(v: float):
 	var am = Engine.get_singleton("AudioManager")

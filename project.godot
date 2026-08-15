@@ -21,7 +21,7 @@ run/main_scene="res://Menus/MainMenu.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 boot_splash/stretch_mode=0
 boot_splash/image="uid://2dneoriv6emu"
-config/icon="uid://cct4qh8lvbssb"
+config/icon="uid://bu83jis5cn8nl"
 
 [audio]
 
@@ -34,7 +34,7 @@ ButtonTheme="*res://Global/ButtonTheme.gd"
 AudioManager="*res://Global/AudioManager.gd"
 BackgroundManager="*res://Global/BackgroundManager.gd"
 BackgroundSingleton="*res://Global/BackgroundSingleton.gd"
-MCPRuntimeProbe="*res://addons/godot_mcp/runtime/mcp_runtime_probe.gd"
+TouchInputBridge="*res://Global/TouchInputBridge.gd"
 
 [display]
 
@@ -57,4 +57,5 @@ Click={
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
+textures/vram_compression/import_etc2_astc=true
 anti_aliasing/quality/msaa_2d=1

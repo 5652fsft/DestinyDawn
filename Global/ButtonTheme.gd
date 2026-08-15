@@ -39,6 +39,16 @@ static func apply_glass_blue(btn: Button):
 	btn.add_theme_stylebox_override("hover", hover)
 	btn.add_theme_stylebox_override("pressed", pressed)
 
+# 小型图标按钮样式（全状态无底色、无边框、无焦点环，仅显示图标本身，用于移动端功能按钮）
+static func apply_icon_small(btn: Button):
+	btn.focus_mode = Control.FOCUS_NONE
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0, 0, 0, 0)
+	for state in ["normal", "hover", "pressed", "focus", "disabled"]:
+		btn.add_theme_stylebox_override(state, style)
+	btn.add_theme_constant_override("icon_max_width", 26)
+	btn.add_theme_constant_override("icon_max_height", 26)
+
 static func apply_glass_edit(le: LineEdit):
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color(0.32, 0.4, 0.52, 0.45)

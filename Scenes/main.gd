@@ -192,6 +192,59 @@ func _setup_action_buttons():
 	attack_button.text = "普通攻击"
 	move_button.pressed.connect(_on_move_pressed)
 	attack_button.pressed.connect(_on_attack_pressed)
+	_setup_mobile_buttons()
+
+# === 移动端（Android）补充 UI ===
+func _is_mobile() -> bool:
+	return OS.has_feature("android")
+
+func _setup_mobile_buttons():
+	if not _is_mobile():
+		return
+	var hand_btn = get_node_or_null("UI/HandToggleButton")
+	var menu_btn = get_node_or_null("UI/SurrenderMenuButton")
+	if hand_btn is Button:
+		ButtonTheme.apply_icon_small(hand_btn)
+		hand_btn.icon = preload("res://Assets/Icons/hand.png")
+		hand_btn.text = ""
+		hand_btn.expand_icon = true
+		# 移动端图标按钮：仅安卓使用
+		hand_btn.pressed.connect(_toggle_hand)
+		hand_btn.show()
+	if menu_btn is Button:
+		ButtonTheme.apply_icon_small(menu_btn)
+		menu_btn.icon = preload("res://Assets/Icons/menu.png")
+		menu_btn.text = ""
+		menu_btn.expand_icon = true
+		menu_btn.pressed.connect(_toggle_surrender_menu)
+		menu_btn.show()
+	_apply_safe_area()
+
+# 刘海屏安全区：把边缘 UI 面板向内容区内侧收拢
+func _apply_safe_area():
+	var bridge = get_node_or_null("/root/TouchInputBridge")
+	if not bridge or not bridge.has_method("get_content_safe_insets"):
+		return
+	var insets: Vector4 = bridge.get_content_safe_insets()
+	if insets == Vector4.ZERO:
+		return
+	for btn in [move_button, attack_button, get_node_or_null("UI/HandToggleButton"), get_node_or_null("UI/SurrenderMenuButton")]:
+		if btn is Control:
+			btn.offset_left += insets.x
+			btn.offset_right += insets.x
+	if client_player_panel is Control:
+		client_player_panel.offset_left += insets.z
+		client_player_panel.offset_right -= insets.z
+	if host_player_panel is Control:
+		host_player_panel.offset_right -= insets.z
+
+# 移动端功能按钮显隐（投降菜单/结算等全屏界面打开时隐藏，避免悬空叠层；仅安卓生效）
+func _set_mobile_buttons_visible(v: bool):
+	if not _is_mobile():
+		return
+	for btn in [get_node_or_null("UI/HandToggleButton"), get_node_or_null("UI/SurrenderMenuButton")]:
+		if btn is Control:
+			btn.visible = v
 
 func _update_action_buttons(chara):
 	if not chara:
@@ -543,22 +596,9 @@ func _input(event: InputEvent):
 			return
 		_try_select_character(event.position)
 	if event is InputEventKey and event.keycode == KEY_F and event.pressed and not event.echo:
-		if GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.GAME_OVER:
-			return
-		_hand_hidden = not _hand_hidden
-		hand_panel.visible = not _hand_hidden
-		if _am: _am.play_sfx("deck_select")
-		if _hand_hidden:
-			show_toast("卡牌已收起，按 F 恢复", 2.0)
-		else:
-			show_toast("卡牌已展开，按 F 收起", 2.0)
+		_toggle_hand()
 	if event is InputEventKey and event.keycode == KEY_ESCAPE and event.pressed and not event.echo:
-		if GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.GAME_OVER:
-			return
-		if _surrender_dialog and _surrender_dialog.visible:
-			_hide_surrender_dialog()
-		else:
-			_show_surrender_dialog()
+		_toggle_surrender_menu()
 
 func _try_select_cell():
 	if not selected_character or not _pending_skill:
@@ -1202,6 +1242,27 @@ func _hide_hand():
 	_hand_hidden = true
 	hand_panel.visible = false
 
+# 收起/展开手牌（F 键与移动端按钮共用）
+func _toggle_hand():
+	if GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.GAME_OVER:
+		return
+	_hand_hidden = not _hand_hidden
+	hand_panel.visible = not _hand_hidden
+	if _am: _am.play_sfx("deck_select")
+	if _hand_hidden:
+		show_toast("卡牌已收起，按 F 恢复" if not _is_mobile() else "卡牌已收起，点击手牌按钮恢复", 2.0)
+	else:
+		show_toast("卡牌已展开，按 F 收起" if not _is_mobile() else "卡牌已展开，点击手牌按钮收起", 2.0)
+
+# 投降菜单开关（ESC 与移动端按钮共用）
+func _toggle_surrender_menu():
+	if GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.GAME_OVER:
+		return
+	if _surrender_dialog and _surrender_dialog.visible:
+		_hide_surrender_dialog()
+	else:
+		_show_surrender_dialog()
+
 # === 投降 ===
 func _show_surrender_dialog():
 	if _surrender_dialog:
@@ -1210,6 +1271,8 @@ func _show_surrender_dialog():
 		skill_panel.hide()
 		move_button.hide()
 		attack_button.hide()
+		# 延迟到事件处理结束后再隐藏按钮，避免 pressed 回调链中移除命中控件导致 dialog 异常
+		_set_mobile_buttons_visible.call_deferred(false)
 		return
 	_surrender_dialog = load("res://UI/SurrenderDialog.tscn").instantiate()
 	$UI.add_child(_surrender_dialog)
@@ -1217,11 +1280,14 @@ func _show_surrender_dialog():
 	skill_panel.hide()
 	move_button.hide()
 	attack_button.hide()
+	_set_mobile_buttons_visible.call_deferred(false)
 	if _am: _am.play_sfx("click")
 
 func _hide_surrender_dialog():
 	if _surrender_dialog:
 		_surrender_dialog.hide()
+	if not _battle_over:
+		_set_mobile_buttons_visible.call_deferred(true)
 
 func _confirm_surrender():
 	_hide_surrender_dialog()
@@ -1308,6 +1374,8 @@ func show_battle_result(from_surrender: bool = false, surrendering_is_host: bool
 	skill_panel.hide()
 	move_button.hide()
 	attack_button.hide()
+	# 延迟隐藏：避免覆盖 _hide_surrender_dialog 排队的 call_deferred(true)，确保结算时按钮最终隐藏
+	_set_mobile_buttons_visible.call_deferred(false)
 	var is_multiplayer = multiplayer.has_multiplayer_peer()
 	if $UI.has_node("BattleResult"):
 		$UI/BattleResult.show_result(i_win, GlobalGameData.battle_stats, is_multiplayer)

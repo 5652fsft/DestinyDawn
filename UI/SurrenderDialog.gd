@@ -39,4 +39,8 @@ func _on_cancel_pressed():
 			main._hand_hidden = false
 			var hand = main.get_node_or_null("UI/HandPanel")
 			if hand: hand.show()
-	hide()
+	var main = get_tree().current_scene if get_tree() else null
+	if main and main.has_method("_hide_surrender_dialog"):
+		main._hide_surrender_dialog()
+	else:
+		hide()

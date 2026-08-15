@@ -120,4 +120,26 @@ theme_override_fonts/font = ExtResource("15_font")
 theme_override_font_sizes/font_size = 16
 text = "普通攻击"
 
+[node name="HandToggleButton" type="Button" parent="UI" unique_id=1685000001]
+visible = false
+offset_left = 20.0
+offset_top = 640.0
+offset_right = 60.0
+offset_bottom = 680.0
+theme = ExtResource("12_p4fma")
+theme_override_fonts/font = ExtResource("15_font")
+theme_override_font_sizes/font_size = 16
+text = ""
+
+[node name="SurrenderMenuButton" type="Button" parent="UI" unique_id=1685000002]
+visible = false
+offset_left = 70.0
+offset_top = 640.0
+offset_right = 110.0
+offset_bottom = 680.0
+theme = ExtResource("12_p4fma")
+theme_override_fonts/font = ExtResource("15_font")
+theme_override_font_sizes/font_size = 16
+text = ""
+
 [connection signal="skill_used" from="UI/SkillPanel" to="." method="_on_skill_used"]

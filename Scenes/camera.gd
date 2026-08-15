@@ -12,6 +12,20 @@ func _ready():
 	offset = start_camera_position
 	_base_offset = start_camera_position
 	make_current()
+	add_to_group("touch_camera")
+
+# === 触摸双指手势接口（由 TouchInputBridge 调用，桌面端不受影响） ===
+
+# 双指平移：screen_delta 为屏幕位移（viewport 坐标），换算到世界位移
+func touch_pan(screen_delta: Vector2):
+	position += screen_delta * scale_num ** 0.5
+
+# 双指捏合缩放：factor 为距离变化倍数
+func touch_zoom(factor: float):
+	if factor <= 0.0:
+		return
+	scale_num = clampf(scale_num * factor, 0.4, 1.0)
+	start_mouse_position = Vector2.ZERO
 
 func shake(intensity: float = 5.0, duration: float = 0.15):
 	if _shake_tween:
