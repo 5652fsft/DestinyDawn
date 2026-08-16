@@ -62,11 +62,10 @@ Godot 4.7 中 `Input.emulate_mouse_from_touch`（注意：旧名 `use_emulated_m
 
 | 功能 | 处理 | 位置 |
 |------|------|------|
-| 设置页背景选项 | 安卓过滤视频项，仅保留静态背景 | `Menus/SettingsScene.gd:_init_bg_option()` |
 | 键盘快捷键 | F/ESC 无键盘替代，改为右上角「手牌」「菜单」按钮（仅安卓显示） | `Scenes/scene.tscn` + `main.gd:_setup_mobile_buttons()` |
 | 右键拖视角/滚轮缩放 | 双指手势替代（见 2.3） | `TouchInputBridge.gd` |
 
-> 注：菜单视频背景守卫已于 v1.5.3 移除（Theora 720p 可解码，官方认可移动端 720p；现有视频码率 ~10Mbps 偏高，低端机若卡顿需重编码降码率）。
+> 注：菜单视频背景守卫与设置页视频选项过滤已移除（Theora 720p 可解码，官方认可移动端 720p；现有视频码率 ~10Mbps 偏高，低端机若卡顿需重编码降码率）。
 
 ## 4. 导出配置
 
