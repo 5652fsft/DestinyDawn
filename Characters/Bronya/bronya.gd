@@ -11,6 +11,7 @@ func _ready():
 	hp = _cd.hp
 	move_points = _cd.move
 	attack = _cd.atk
+	attack_range = _cd.range
 	attack_sfx = "attack_gun"
 
 	passive_skill = BaseSkill.new()

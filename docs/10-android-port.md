@@ -1,6 +1,6 @@
 # Android 移植文档
 
-> 状态：已实现，待真机验证 | 适用版本：Godot 4.7 | 最后更新：v1.5.0
+> 状态：已实现，待真机验证 | 适用版本：Godot 4.7 | 最后更新：v1.5.3
 
 ## 1. 目标与原则
 
@@ -36,17 +36,19 @@ Godot 4.7 中 `Input.emulate_mouse_from_touch`（注意：旧名 `use_emulated_m
 
 **滚动区域适配**：`ScrollContainer` 原生触摸滚动依赖 `InputEventScreenDrag` 直达其 `_gui_input`，会被子控件（如卡牌按钮）拦截且与鼠标桥冲突，故桥内统一处理——按下时若悬停控件祖先含 `ScrollContainer` 则进入滚动模式，拖动 delta 直接写入 `scroll_vertical/scroll_horizontal`（自然滚动方向），超过死区（8px）补发鼠标释放取消误触，抬起/双指介入结束滚动。编队 `RosterScroll`、卡组 `PoolScroll`、角色卡牌描述 `CardBack/Scroll` 均自动生效。
 
-**移动端图标按钮**：`ButtonTheme.apply_icon_small` 全状态无底色/边框并 `FOCUS_NONE`（不显示任何"框"）；投降菜单打开与战斗结算时 `_set_mobile_buttons_visible(false)` 隐藏，关闭（未结算）恢复——仅安卓生效。
+**移动端图标按钮**：`ButtonTheme.apply_icon_small` 全状态无底色/边框并 `FOCUS_NONE`（不显示任何"框"）；投降菜单打开与战斗结算时 `_set_mobile_buttons_visible(false)` 隐藏，关闭（未结算）恢复——仅安卓生效。位置：右上角敌方玩家信息面板左侧（锚点右上，菜单键贴面板、手牌键再左），刘海安全区适配用右侧 insets。
 
 ### 2.3 双指手势
 
 | 手势 | 事件 → 行为 |
 |------|-------------|
-| 双指捏合 | `touch_zoom(factor)` → `camera.gd` 的 `scale_num` 限制 0.4~1.0（与滚轮一致） |
-| 双指平移 | `touch_pan(screen_delta)` → `camera.gd` 的 `position`（与右键拖拽同公式） |
+| 双指捏合 | `touch_zoom(factor, center)` → 以**双指中心为聚焦点**缩放（`_zoom_at`），`scale_num` 限制 0.4~1.0（与滚轮一致） |
+| 双指平移 | `touch_pan(screen_delta)` → `position -= screen_delta * scale_num ** 0.5`（反向=跟手，速度系数与右键拖拽一致） |
 
 - 相机通过 `add_to_group("touch_camera")` 注册，桥用 `call_group` 调用；其他场景无相机时调用自动落空，无副作用
 - 双指模式期间主指不再发 `motion`，防止视角/点击互相打架；任一指抬起即退出双指模式
+- **统一"目标位置"机制（v1.5.3）**：`camera.gd` 用 `_target_position` 作为唯一位置目标，滚轮聚焦/双指/右键拖拽/AI 镜头均写该目标，`_process` 中 `position = lerp(position, _target_position, 8*delta)` 平滑跟随——**无任何 tween kill 竞争，后写者赢**（AI 镜头播放中玩家操作以 AI 渐变继续为准）
+- **聚焦缩放**：`_zoom_at(screen_pos, new_scale)` 保持 screen_pos 处世界点缩放前后屏幕位置不变；视口中心必须用 `ProjectSettings` 的设计分辨率（`get_viewport_rect()` 返回窗口尺寸，非 1280×720 窗口下会偏左上）
 
 ### 2.4 安全区
 
@@ -60,10 +62,11 @@ Godot 4.7 中 `Input.emulate_mouse_from_touch`（注意：旧名 `use_emulated_m
 
 | 功能 | 处理 | 位置 |
 |------|------|------|
-| 菜单视频背景 | 安卓返回空路径，回退静态背景（Theora 移动端解码性能差） | `BackgroundManager.gd:get_current_bg_path()` |
 | 设置页背景选项 | 安卓过滤视频项，仅保留静态背景 | `Menus/SettingsScene.gd:_init_bg_option()` |
-| 键盘快捷键 | F/ESC 无键盘替代，改为左下角「手牌」「菜单」按钮（仅安卓显示） | `Scenes/scene.tscn` + `main.gd:_setup_mobile_buttons()` |
+| 键盘快捷键 | F/ESC 无键盘替代，改为右上角「手牌」「菜单」按钮（仅安卓显示） | `Scenes/scene.tscn` + `main.gd:_setup_mobile_buttons()` |
 | 右键拖视角/滚轮缩放 | 双指手势替代（见 2.3） | `TouchInputBridge.gd` |
+
+> 注：菜单视频背景守卫已于 v1.5.3 移除（Theora 720p 可解码，官方认可移动端 720p；现有视频码率 ~10Mbps 偏高，低端机若卡顿需重编码降码率）。
 
 ## 4. 导出配置
 
@@ -76,7 +79,7 @@ Godot 4.7 中 `Input.emulate_mouse_from_touch`（注意：旧名 `use_emulated_m
 | `texture_format/etc2_astc` | true | Android 纹理压缩 |
 | `screen/immersive_mode` | true | 全屏沉浸 |
 | `display/window/handheld/orientation` | 0 | 横屏 |
-| `permissions/internet` | true | 联机（ENet/UPnP） |
+| `permissions/internet` | true | 联机（ENet/UPnP/HTTP 公网 IP）。**必须开启**：v1.5.3 曾为 false，APK 无 INTERNET 权限 → 移动端建主机报"端口不可用"、HTTP 公网 IP 获取失败 |
 | `package/signed` | false | **测试用 debug 签名**；正式发布前需配置 release keystore 并改 true |
 | `package/unique_name` | `com.destinydawn.game` | 按需修改 |
 
@@ -95,8 +98,8 @@ Godot 4.7 中 `Input.emulate_mouse_from_touch`（注意：旧名 `use_emulated_m
 ## 6. 已知限制与预留
 
 - **悬停兜底**：桥的"motion 先行"策略理论上让 `gui_get_hovered_control()` 正常；若真机出现 UI 穿透，在 `BaseCharacter._is_mouse_over_ui()` 等 4 处补"触摸按下位置点检"兜底（桥已预留 `static var touch_active` / `last_touch_pos`）
-- **联机 NAT**：移动网络下 UPnP 大概率失败，官方方案为 VPN 房间码
-- **视频背景**：安卓永久禁用；若未来需要，可改为静态图轮播或 WebM（VP9 硬解）方案
+- **联机 NAT**：移动网络下 UPnP 大概率失败属正常；跨网联机（移动端 ↔ 电脑）推荐**蒲公英组网**（贝锐，国内免费，电脑+手机装 App 组虚拟局域网，房间码直接输虚拟 IP）
+- **视频背景**：若未来需要改进，可改为静态图轮播或 WebM（VP9 硬解）方案
 - **卡牌大图**：34 张 500-900KB PNG 是移动端内存/加载的主要压力，后续可压缩或转 WebP/ASTC
 
 ## 7. Godot 4.7 兼容性注意（踩坑记录）

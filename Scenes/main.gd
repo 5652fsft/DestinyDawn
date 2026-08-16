@@ -228,10 +228,14 @@ func _apply_safe_area():
 	var insets: Vector4 = bridge.get_content_safe_insets()
 	if insets == Vector4.ZERO:
 		return
-	for btn in [move_button, attack_button, get_node_or_null("UI/HandToggleButton"), get_node_or_null("UI/SurrenderMenuButton")]:
+	for btn in [move_button, attack_button]:
 		if btn is Control:
 			btn.offset_left += insets.x
 			btn.offset_right += insets.x
+	for btn in [get_node_or_null("UI/HandToggleButton"), get_node_or_null("UI/SurrenderMenuButton")]:
+		if btn is Control:
+			btn.offset_left += insets.z
+			btn.offset_right += insets.z
 	if client_player_panel is Control:
 		client_player_panel.offset_left += insets.z
 		client_player_panel.offset_right -= insets.z

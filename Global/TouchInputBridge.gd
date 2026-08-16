@@ -106,7 +106,7 @@ func _update_two_finger():
 	var dist = ps[0].distance_to(ps[1])
 	if _last_dist > 0.0:
 		get_tree().call_group("touch_camera", "touch_pan", center - _last_center)
-		get_tree().call_group("touch_camera", "touch_zoom", dist / _last_dist)
+		get_tree().call_group("touch_camera", "touch_zoom", dist / _last_dist, center)
 	_last_center = center
 	_last_dist = dist
 

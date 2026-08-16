@@ -117,8 +117,8 @@ static func _register_cards():
 			CardData.EffectType.SHIELD, 16),
 
 		_create_card("card_ice_shield", "冰盾", CardData.CardType.SHIELD, 2,
-			CardData.TargetType.ALLY_SINGLE, "为我方单体目标施加18点护盾",
-			CardData.EffectType.SHIELD, 18),
+			CardData.TargetType.ALLY_SINGLE, "为我方单体目标施加16点护盾",
+			CardData.EffectType.SHIELD, 16),
 
 		# ========== 费用 2 — Buff/Debuff ==========
 		_create_card("card_iron_wall", "铁壁形态", CardData.CardType.BUFF, 2,
@@ -136,12 +136,12 @@ static func _register_cards():
 
 		# ========== 费用 3 ==========
 		_create_card("card_firestorm", "烈焰风暴", CardData.CardType.ATTACK, 3,
-			CardData.TargetType.NONE, "对敌方全体目标造成24点伤害",
-			CardData.EffectType.AOE_DAMAGE, 24),
+			CardData.TargetType.NONE, "对敌方全体目标造成12点伤害",
+			CardData.EffectType.AOE_DAMAGE, 12),
 
 		_create_card("card_arrow_rain", "箭雨", CardData.CardType.ATTACK, 3,
-			CardData.TargetType.NONE, "对敌方全体目标造成16点伤害",
-			CardData.EffectType.AOE_DAMAGE, 16),
+			CardData.TargetType.NONE, "对敌方全体目标造成12点伤害",
+			CardData.EffectType.AOE_DAMAGE, 12),
 
 		_create_card("card_chain_lightning", "闪电链", CardData.CardType.ATTACK, 3,
 			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标造成20点伤害，其周围1格的敌方目标受到10点伤害，周围2格的敌方目标受到5点伤害",

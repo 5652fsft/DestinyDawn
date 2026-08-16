@@ -1,14 +1,14 @@
 class_name CharacterData
 
 const DATA = {
-	"bronya":    {"name":"布洛妮娅", "hp":68,  "move":5, "atk":15, "range":1,
+	"bronya":    {"name":"布洛妮娅", "hp":68,  "move":5, "atk":15, "range":3,
 		"skill":"护卫指令", "skill_desc":"为友方单体提供30点护盾", "skill_cd":3,
 		"passive":"铁壁", "passive_desc":"受到伤害-20%，当生命值低于50%时受到伤害-35%"},
-	"seele":     {"name":"希儿",    "hp":65,  "move":6, "atk":18, "range":1,
+	"seele":     {"name":"希儿",    "hp":65,  "move":6, "atk":18, "range":4,
 		"skill":"相位突进", "skill_desc":"瞬移至10格范围内选定的敌方单体目标旁，并为目标造成120%攻击力的伤害", "skill_cd":3,
 		"passive":"暗影突袭", "passive_desc":"攻击满血敌人时伤害+50%"},
-	"elaina":    {"name":"伊蕾娜",  "hp":60,  "move":5, "atk":20, "range":3,
-		"skill":"星尘爆裂", "skill_desc":"为6格范围内目标及周围1格敌人造成125%攻击力的伤害", "skill_cd":4,
+	"elaina":    {"name":"伊蕾娜",  "hp":60,  "move":5, "atk":20, "range":5,
+		"skill":"星尘爆裂", "skill_desc":"对6格范围内目标及周围2格敌人造成125%攻击力的伤害", "skill_cd":4,
 		"passive":"魔力共鸣", "passive_desc":"使用攻击/减益卡牌时，获得一层[魔力充盈]，效果为攻击力+15%，持续2回合，最多可叠加3层"},
 	"firefly":   {"name":"流萤",    "hp":85,  "move":5, "atk":14, "range":1,
 		"skill":"烈焰冲锋", "skill_desc":"为6格范围内目标造成180%攻击力的伤害并附加灼烧2回合", "skill_cd":3,

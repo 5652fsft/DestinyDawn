@@ -38,7 +38,7 @@ func _pan_to(chara: Node):
 	if _camera_tween and _camera_tween.is_valid():
 		_camera_tween.kill()
 	_camera_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_camera_tween.tween_property(_camera, "position", chara.position, 0.4)
+	_camera_tween.tween_property(_camera, "_target_position", chara.position, 0.4)
 	_camera_tween.finished.connect(func(): _camera_tween = null, CONNECT_ONE_SHOT)
 
 
@@ -59,7 +59,7 @@ func _focus_on_player_characters():
 		if _camera_tween and _camera_tween.is_valid():
 			_camera_tween.kill()
 		_camera_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-		_camera_tween.tween_property(_camera, "position", avg, 0.6)
+		_camera_tween.tween_property(_camera, "_target_position", avg, 0.6)
 		_camera_tween.finished.connect(func(): _camera_tween = null, CONNECT_ONE_SHOT)
 
 func stop_camera_tween():

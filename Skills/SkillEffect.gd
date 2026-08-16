@@ -143,7 +143,7 @@ static func _elaina_active(character: Node, target: Node, main: Node) -> bool:
 	if target.has_method("take_damage"):
 		target.take_damage_safe(dmg)
 	var target_cell = main._get_character_cell(target)
-	var aoe_cells = get_cells_in_range(character.grid_layer, target_cell, 1)
+	var aoe_cells = get_cells_in_range(character.grid_layer, target_cell, 2)
 	for c in main.get_tree().get_nodes_in_group("characters"):
 		if c != target and c.hp > 0 and c.name.begins_with("Host") != is_caster_host:
 			var c_cell = main._get_character_cell(c)
