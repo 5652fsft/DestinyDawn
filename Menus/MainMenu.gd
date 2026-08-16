@@ -386,7 +386,9 @@ func _get_lan_ip() -> String:
 	# 普通局域网 IP（排除 VPN 虚拟 IP）
 	for ip in IP.get_local_addresses():
 		var first = ip.get_slice(".", 0)
-		if first == "26" or first == "27" or first == "28" or first == "10":
+		var second = ip.get_slice(".", 1)
+		if first == "26" or first == "27" or first == "28" or first == "10" \
+				or (first == "172" and second == "47"):
 			continue
 		if ip != "127.0.0.1" and not ip.begins_with("169.254") and ip.count(".") == 3:
 			return ip
@@ -395,9 +397,12 @@ func _get_lan_ip() -> String:
 func _get_vpn_ip() -> String:
 	for ip in IP.get_local_addresses():
 		var first = ip.get_slice(".", 0)
-		if first == "26" or first == "27" or first == "28" or first == "10":
-			if ip.count(".") == 3:
-				return ip
+		var second = ip.get_slice(".", 1)
+		# EasyTier(10.x) / 蒲公英(172.47.x) / redminVPN(26-28.x)
+		var is_vpn = first == "26" or first == "27" or first == "28" or first == "10" \
+			or (first == "172" and second == "47")
+		if is_vpn and ip.count(".") == 3:
+			return ip
 	return ""
 
 
