@@ -31,13 +31,15 @@ func _ready():
 func take_damage(damage: int):
 	if damage > 0 and not _burn_armor_used:
 		_burn_armor_used = true
-		if randi() % 2 == 0 and buff_manager:
+		var d = CharacterData.get_data("firefly")
+		# 被动 [燃烧装甲]：每回合首次受击必然反击灼烧
+		if buff_manager:
 			# find attacker — use the one who damaged us
 			var main_node = get_tree().current_scene
 			var last = main_node.get("last_attacker") if main_node else null
 			if last:
-				buff_manager.apply_buff(last, "burn", 5, 2, self)
-				print("[Skill] %s [燃烧装甲] → %s 灼烧 5×2回合" % [GlobalGameData.get_char_label(self), GlobalGameData.get_char_label(last)])
+				buff_manager.apply_buff(last, "burn", d["passive_buff_value"], d["passive_buff_duration"], self)
+				print("[Skill] %s [燃烧装甲] → %s 灼烧 %d×%d回合" % [GlobalGameData.get_char_label(self), GlobalGameData.get_char_label(last), d["passive_buff_value"], d["passive_buff_duration"]])
 	super(damage)
 
 func use_active_skill(target: Node) -> bool:

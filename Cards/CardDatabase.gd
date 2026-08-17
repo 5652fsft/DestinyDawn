@@ -8,7 +8,7 @@ static func _register_cards():
 		# ========== 费用 0 ==========
 		_create_card("card_overload", "能量过载", CardData.CardType.TACTICAL, 0,
 			CardData.TargetType.ALLY_SINGLE, "对我方单体目标造成5点伤害，获得2点能量",
-			CardData.EffectType.DRAW_CARD, 1),
+			CardData.EffectType.DRAW_CARD, 1, 1, 0, 5, 2),
 
 		# ========== 费用 1 — 攻击 ==========
 		_create_card("card_ice_shard", "冰晶碎片", CardData.CardType.ATTACK, 1,
@@ -17,11 +17,11 @@ static func _register_cards():
 
 		_create_card("card_siphon", "法力汲取", CardData.CardType.ATTACK, 1,
 			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标造成6点伤害，并抽1张牌",
-			CardData.EffectType.DRAW_CARD, 1),
+			CardData.EffectType.DRAW_CARD, 1, 1, 0, 6),
 
 		_create_card("card_poison_blade", "毒刃", CardData.CardType.ATTACK, 1,
 			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标造成4点伤害，施加[中毒]，效果为每回合受到6点伤害，持续3回合",
-			CardData.EffectType.DAMAGE_OVER_TIME, 6, 3),
+			CardData.EffectType.DAMAGE_OVER_TIME, 6, 3, 0, 4),
 
 		_create_card("card_reckoning", "惩戒", CardData.CardType.ATTACK, 1,
 			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标造成6×目标身上效果数量的伤害",
@@ -89,7 +89,7 @@ static func _register_cards():
 		# ========== 费用 2 — 攻击 ==========
 		_create_card("card_fireball", "火球术", CardData.CardType.ATTACK, 2,
 			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标造成20点伤害，施加[灼烧]，效果为每回合受到5点伤害，持续2回合",
-			CardData.EffectType.DAMAGE, 20),
+			CardData.EffectType.DAMAGE, 20, 1, 0, 5, 0, 2),
 
 		_create_card("card_aim", "瞄准射击", CardData.CardType.ATTACK, 2,
 			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标造成28点伤害",
@@ -97,7 +97,7 @@ static func _register_cards():
 
 		_create_card("card_frostbite", "冰冻术", CardData.CardType.ATTACK, 2,
 			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标造成12点伤害，施加[迟缓]，效果为移动范围-2，持续2回合",
-			CardData.EffectType.DEBUFF_MOVE, 2, 2),
+			CardData.EffectType.DEBUFF_MOVE, 2, 2, 0, 12),
 
 		_create_card("card_shadowstep", "暗影步", CardData.CardType.DISPLACE, 2,
 			CardData.TargetType.ALLY_SINGLE, "使我方单体目标瞬移至距离最远的敌方目标旁，并对该敌方目标造成12点伤害",
@@ -145,7 +145,7 @@ static func _register_cards():
 
 		_create_card("card_chain_lightning", "闪电链", CardData.CardType.ATTACK, 3,
 			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标造成20点伤害，其周围1格的敌方目标受到10点伤害，周围2格的敌方目标受到5点伤害",
-			CardData.EffectType.CHAIN_DAMAGE, 20),
+			CardData.EffectType.CHAIN_DAMAGE, 20, 1, 0, 10, 5),
 
 		_create_card("card_mass_heal", "群体治愈", CardData.CardType.HEAL, 3,
 			CardData.TargetType.NONE, "为我方全体目标恢复14点生命值",
@@ -165,7 +165,10 @@ static func _create_card(
 	effect_type: CardData.EffectType,
 	effect_value: int,
 	effect_duration: int = 1,
-	effect_radius: int = 0
+	effect_radius: int = 0,
+	secondary_value: int = 0,
+	extra_value: int = 0,
+	secondary_duration: int = 0
 ) -> CardData:
 	var card = CardData.new()
 	card.id = id
@@ -178,6 +181,9 @@ static func _create_card(
 	card.effect_value = effect_value
 	card.effect_duration = effect_duration
 	card.effect_radius = effect_radius
+	card.secondary_value = secondary_value
+	card.extra_value = extra_value
+	card.secondary_duration = secondary_duration
 	return card
 
 static func get_card(card_id: String) -> CardData:

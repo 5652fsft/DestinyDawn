@@ -87,5 +87,6 @@ func perform_attack(target_path: NodePath):
 	var remove_bid = harmful_bids[randi() % harmful_bids.size()]
 	if bm.has_method("remove_buff"):
 		bm.remove_buff(target_ally, remove_bid, 0)
-	target_ally.take_damage(-10)
-	print("[Passive] %s [Intel工程师] 移除 %s 的 [%s]，恢复 10 点生命值" % [GlobalGameData.get_char_label(self), GlobalGameData.get_char_label(target_ally), remove_bid])
+	var heal = CharacterData.get_data("M1DorG")["passive_heal"]
+	target_ally.take_damage(-heal)
+	print("[Passive] %s [Intel工程师] 移除 %s 的 [%s]，恢复 %d 点生命值" % [GlobalGameData.get_char_label(self), GlobalGameData.get_char_label(target_ally), remove_bid, heal])

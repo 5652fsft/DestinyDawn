@@ -142,8 +142,6 @@ func _buff_desc(key: String, entry: Dictionary) -> String:
 			return "[color=#996633][高温烫嘴][/color] 受到伤害+%d%%（%d回合）" % [val, dur]
 		"soften":
 			return "[color=#994d4d][松软][/color] 受到伤害+%d%%（%d回合）" % [val, dur]
-		"rope":
-			return "[color=#8cbf8c][拧绳][/color] karrigan给队友的护身符，分摊30%的伤害（%d回合）" % [dur]
 		"solo_leveling":
 			return "[color=#ffcc00][我独自升级][/color] 伤害+%d%%（%d回合）" % [val, dur]
 		"luck":

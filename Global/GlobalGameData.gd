@@ -43,7 +43,7 @@ const DEFAULT_DECK: Array[String] = [
 # Phase 6 — 主菜单配置
 var selected_team: Array[String] = []    # 编队：角色ID列表
 var selected_deck: Array[String] = []    # 卡组：卡牌ID列表
-var player_name: String = "玩家"
+var player_name: String = ""
 var opponent_name: String = "对手"
 var server_ip: String = "127.0.0.1"
 var server_port: int = 1145
@@ -60,6 +60,21 @@ func load_defaults_if_empty():
 		selected_team = DEFAULT_TEAM.duplicate()
 	if selected_deck.is_empty():
 		selected_deck = DEFAULT_DECK.duplicate()
+
+# 首次进入默认昵称：常见人名随机（可在设置中修改，改后本局生效）
+const RANDOM_NICKNAMES: Array[String] = [
+	"迈克尔", "科比", "乔治", "詹姆斯", "托马斯", "威廉", "罗伯特",
+	"约瑟夫", "大卫", "理查德", "安德鲁", "丹尼尔", "克里斯", "奥利弗",
+	"杰克", "亨利", "塞缪尔", "亚当", "本杰明", "埃里克",
+]
+
+func _ready():
+	if player_name.is_empty():
+		player_name = random_nickname()
+
+# 从常见人名池随机取一个昵称（AI 对手取名 / 玩家默认名共用）
+func random_nickname() -> String:
+	return RANDOM_NICKNAMES[randi() % RANDOM_NICKNAMES.size()]
 
 func reset_battle_state():
 	current_turn_phase = TurnPhase.NONE
@@ -116,5 +131,5 @@ func get_char_label(c, ai_suffix: bool = false) -> String:
 	if not c:
 		return "?"
 	var is_player_side = c.name.begins_with("Host") == is_host
-	var enemy = "AI/" if ai_suffix else "对手/"
-	return ("玩家/" if is_player_side else enemy) + c.character_name
+	var enemy = "AI/" if ai_suffix else (opponent_name + "/")
+	return ((player_name + "/") if is_player_side else enemy) + c.character_name

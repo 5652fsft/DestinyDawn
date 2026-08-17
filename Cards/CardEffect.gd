@@ -102,7 +102,7 @@ static func _execute_fireball(card: CardData, target: Node, main: Node) -> bool:
 	if not target or not target.has_method("take_damage"):
 		return false
 	_rpc_take_damage(target, card.effect_value)
-	_apply_temp_buff(target, "burn", 5, 2)
+	_apply_temp_buff(target, "burn", card.secondary_value, card.secondary_duration)
 	_card_projectile(main, target, "fireball")
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
@@ -169,11 +169,11 @@ static func _execute_shield(card: CardData, target: Node) -> bool:
 	if not "shield" in target:
 		target.set("shield", 0)
 	target.shield = target.shield + card.effect_value
-	if target.has_method("rpc"):
+	if target.multiplayer and target.multiplayer.has_multiplayer_peer():
 		target.rpc("_sync_shield", target.shield)
 	if target.has_method("play_vfx_preset_safe"):
 		target.play_vfx_preset_safe("shield")
-	elif target.has_method("rpc"):
+	elif target.multiplayer and target.multiplayer.has_multiplayer_peer():
 		target.rpc("_play_vfx_preset", "shield")
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("shield", target)
 	return true
@@ -215,7 +215,7 @@ static func _execute_debuff_move(card: CardData, target: Node) -> bool:
 
 static func _execute_frostbite(card: CardData, target: Node) -> bool:
 	if target and target.has_method("take_damage"):
-		_rpc_take_damage(target, 12)
+		_rpc_take_damage(target, card.secondary_value)
 	_apply_temp_buff(target, "move_debuff", -card.effect_value, card.effect_duration)
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
@@ -223,7 +223,7 @@ static func _execute_frostbite(card: CardData, target: Node) -> bool:
 static func _execute_poison_blade(card: CardData, target: Node) -> bool:
 	if not target or not target.has_method("take_damage"):
 		return false
-	_rpc_take_damage(target, 4)
+	_rpc_take_damage(target, card.secondary_value)
 	_apply_temp_buff(target, "poison", card.effect_value, card.effect_duration)
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_sword", target)
 	return true
@@ -372,7 +372,7 @@ static func _execute_draw_card(card: CardData, main: Node) -> bool:
 
 static func _execute_siphon(card: CardData, target: Node, main: Node) -> bool:
 	if target and target.has_method("take_damage"):
-		_rpc_take_damage(target, 6)
+		_rpc_take_damage(target, card.secondary_value)
 	if main and main.has_method("draw_extra_card"):
 		main.draw_extra_card(null, 1)
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
@@ -385,9 +385,9 @@ static func _execute_overload(card: CardData, target: Node, main: Node) -> bool:
 	if energy_node and energy_node.has_method("set_energy"):
 		var pid = SkillEffect.get_character_pid(target)
 		var cur = energy_node.get_energy(pid)
-		energy_node.set_energy(pid, cur + 2)
+		energy_node.set_energy(pid, cur + card.extra_value)
 	if target and target.has_method("take_damage"):
-		_rpc_take_damage(target, 5)
+		_rpc_take_damage(target, card.secondary_value)
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
 	return true
 
@@ -434,9 +434,9 @@ static func _execute_chain_lightning_new(card: CardData, primary: Node, main: No
 			continue
 		var dist = _hex_distance(primary_cell, c_cell)
 		if dist == 1:
-			_rpc_take_damage(c, 10)
+			_rpc_take_damage(c, card.secondary_value)
 		elif dist == 2:
-			_rpc_take_damage(c, 5)
+			_rpc_take_damage(c, card.extra_value)
 	if primary.has_method("play_vfx_preset_safe"):
 		primary.play_vfx_preset_safe("explosion")
 	elif primary.multiplayer and primary.multiplayer.has_multiplayer_peer():

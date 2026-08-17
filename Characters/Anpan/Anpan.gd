@@ -37,5 +37,5 @@ func perform_attack(target_path: NodePath):
 	if not target:
 		return
 	if main and main.buff_manager and main.buff_manager.has_method("apply_buff"):
-		main.buff_manager.apply_buff(target, "hot_burn", 5, 2, self)
+		main.buff_manager.apply_buff(target, "hot_burn", CharacterData.get_data("anpan")["passive_hot_burn_value"], CharacterData.get_data("anpan")["passive_hot_burn_duration"], self)
 		print("[Passive] あんパン [面包大家族] 对 %s 施加高温烫嘴" % GlobalGameData.get_char_label(target))

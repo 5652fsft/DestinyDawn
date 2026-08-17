@@ -44,12 +44,13 @@ func perform_attack(target_path: NodePath):
 		return
 	if GlobalGameData.character_attack_used.get(name, false) and _get_extra_attacks() <= 0:
 		return
-	var bonus = int((max_hp - hp) * 0.6)
+	var d = CharacterData.get_data("zephyr")
+	var bonus = int((max_hp - hp) * d["passive_damage_pct"])
 	var total_damage = effective_attack + bonus
 	if main:
 		main.last_attacker = self
 	target.take_damage(total_damage)
-	print("[Passive] Zephyr [血煞逆锋] 造成 %d 点伤害（基础 %d + 已损 %d HP × 40%%）" % [total_damage, effective_attack, max_hp - hp])
+	print("[Passive] Zephyr [血煞逆锋] 造成 %d 点伤害（基础 %d + 已损 %d HP × %d%%）" % [total_damage, effective_attack, max_hp - hp, int(d["passive_damage_pct"] * 100)])
 	if multiplayer.has_multiplayer_peer():
 		rpc_id(0, "_play_attack_animation", target_path)
 	else:
@@ -60,7 +61,10 @@ func take_damage(damage: int):
 	if damage > 0 and buff_manager:
 		var ascend_val = buff_manager.get_total(self, "ascend")
 		if ascend_val > 0:
-			var reduction = clamp(ascend_val, 0, 20)
+			var ascend_bd = BuffDatabase.get_buff_data("ascend")
+			var max_stacks = ascend_bd.max_stacks if ascend_bd else 2
+			var max_reduction = CharacterData.get_data("zephyr")["skill_buff_value"] * max_stacks
+			var reduction = clamp(ascend_val, 0, max_reduction)
 			damage = max(1, damage * (100 - reduction) / 100)
 			print("[Buff] Zephyr [攀升] 减免 %d%% 伤害" % reduction)
 	super(damage)

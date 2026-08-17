@@ -611,6 +611,31 @@ func _spawn_float(value: int, heal: bool = false, shield: bool = false):
 		scene.add_child(num)
 	num.show_value(value, heal, shield)
 
+# 死亡特效：爆炸粒子 + "阵亡"飘字 + 精灵幽灵变灰淡出（在场景层播放，不阻塞战斗逻辑）
+func _play_death_effect():
+	var death_pos = global_position
+	if vfx_manager and vfx_manager.has_method("play_at"):
+		vfx_manager.play_at(death_pos, "explosion")
+	if sprite and sprite.texture and is_inside_tree():
+		var ghost = Sprite2D.new()
+		ghost.texture = sprite.texture
+		ghost.offset = sprite.offset
+		ghost.scale = sprite.scale
+		ghost.flip_h = sprite.flip_h
+		ghost.modulate = Color(0.45, 0.45, 0.45, 1.0)
+		get_parent().add_child(ghost)
+		ghost.global_position = death_pos
+		var tw = ghost.create_tween()
+		tw.tween_property(ghost, "modulate:a", 0.0, 0.55)
+		tw.tween_callback(ghost.queue_free)
+	var num = FLOATING_NUM.instantiate()
+	num.global_position = death_pos + Vector2(190, -220)
+	num.z_index = 100
+	var scene = get_tree().current_scene if get_tree() else null
+	if scene:
+		scene.add_child(num)
+	num.show_text("阵亡", Color(0.65, 0.65, 0.65))
+
 @rpc("any_peer", "call_local", "reliable")
 # 受击：计算标记/防御/护盾减免，同步 HP 和护盾，记录战斗统计
 func take_damage(damage: int):
@@ -666,9 +691,11 @@ func take_damage(damage: int):
 		if _am: _am.play_sfx("death", self)
 		hide()
 		collision_layer = 0
+		_play_death_effect()
 		if GlobalGameData.is_ai_mode or multiplayer.is_server():
 			var killer_key = "client_kills" if is_host else "host_kills"
 			GlobalGameData.battle_stats[killer_key] += 1
+			print("[Combat] %s 阵亡！" % GlobalGameData.get_char_label(self))
 		main.unregister_character(self)
 	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 		rpc_id(0, "_sync_hp", hp)

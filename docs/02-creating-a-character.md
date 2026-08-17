@@ -34,6 +34,7 @@
 - 被动在 `perform_attack` / `take_damage` 中覆写，调用 `super()` 后追加逻辑
 - 攻击加成用 `effective_attack`（含 buff 计算），不直接读 `attack`
 - 技能能量消耗不硬编码，从 `CharacterData.get_data(character_name).get("skill_energy")` 读取
+- **技能/被动数值软编码**：数值写入 `CharacterData` 的 `skill_*` / `passive_*` 键（键列表见 `docs/06-data-format-reference.md`），执行器、角色脚本、AI（`Strategist.simulate_damage` / `Playbook`）统一 `CharacterData.get_data(id).get("键", 原默认值)` 读取；无对应键的数值（如倍率=1.0、护盾值=0）也要写键并让执行器读，避免多处漂移
 
 ### 技能范围
 

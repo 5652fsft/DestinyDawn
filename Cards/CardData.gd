@@ -16,3 +16,9 @@ enum EffectType { DAMAGE, HEAL, BUFF_ATTACK, BUFF_DEFENSE, DEBUFF_ATTACK, DEBUFF
 @export var effect_duration: int = 1
 @export var effect_radius: int = 0
 @export var icon_path: String = ""
+# 副数值（effect_value 被其他语义占用时的直伤/灼烧值等），如 siphon=6、frostbite=12、fireball 灼烧=5
+@export var secondary_value: int = 0
+# 第三数值（overload 回能=2、chain 二段溅射=5）
+@export var extra_value: int = 0
+# 副数值持续时间（fireball 灼烧=2）
+@export var secondary_duration: int = 0

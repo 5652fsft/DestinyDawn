@@ -44,7 +44,7 @@ func on_turn_start():
 		print("[Passive] %s [闭麦] 跳过（buff_manager 为空）" % GlobalGameData.get_char_label(self))
 		return
 	if buffs.keys().size() == 0:
-		bm.apply_buff(self, "solo_leveling", 20, 1, self)
+		bm.apply_buff(self, "solo_leveling", CharacterData.get_data("Richardovo")["passive_solo_value"], 1, self)
 		print("[Passive] %s [闭麦] 获得 [我独自升级]，伤害 +20%%" % GlobalGameData.get_char_label(self))
 	else:
 		print("[Passive] %s [闭麦] 已有 %d 个效果，跳过" % [GlobalGameData.get_char_label(self), buffs.keys().size()])

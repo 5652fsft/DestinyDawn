@@ -72,11 +72,12 @@ static func get_passive_modifier(character: Node, modifier_key: String, base_val
 static func _bronya_passive(character: Node, modifier_key: String, base_value: int) -> int:
 	if modifier_key != "incoming_damage":
 		return base_value
-	var reduction = 0.2
-	var label = "铁壁 [20%]"
-	if character.hp < character.max_hp * 0.5:
-		reduction = 0.35
-		label = "铁壁 [35%]"
+	var d = CharacterData.get_data("bronya")
+	var reduction = d["passive_reduction"]
+	var label = "铁壁 [%d%%]" % int(reduction * 100)
+	if character.hp < character.max_hp * d["passive_low_hp"]:
+		reduction = d["passive_reduction_low"]
+		label = "铁壁 [%d%%]" % int(reduction * 100)
 	print("[Skill] %s [%s] 减免 %d%% 伤害" % [GlobalGameData.get_char_label(character), label, int(reduction * 100)])
 	return int(base_value * (1.0 - reduction))
 
@@ -86,12 +87,12 @@ static func _bronya_active(character: Node, target: Node) -> bool:
 		return false
 	if not "shield" in target:
 		target.set("shield", 0)
-	target.shield += 30
+	target.shield += CharacterData.get_data("bronya")["skill_value"]
 	if target.has_method("rpc") and target.multiplayer and target.multiplayer.has_multiplayer_peer():
 		target.rpc("_sync_shield", target.shield)
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("bronya_skill", target)
 	character.play_skill_vfx_safe("bronya_shield", target)
-	print("[Skill] %s [护卫指令] → %s 护盾 +30" % [GlobalGameData.get_char_label(character), GlobalGameData.get_char_label(target)])
+	print("[Skill] %s [护卫指令] → %s 护盾 +%d" % [GlobalGameData.get_char_label(character), GlobalGameData.get_char_label(target), CharacterData.get_data("bronya")["skill_value"]])
 	return true
 
 # === 希儿 被动：暗影突袭 ===
@@ -101,8 +102,9 @@ static func _seele_passive(character: Node, modifier_key: String, base_value: in
 	if not "last_target_hp" in character:
 		return base_value
 	if character.last_target_hp == null or character.last_target_hp >= character.last_target_max_hp:
-		print("[Skill] %s [暗影突袭] 攻击满血目标，伤害 +50%%" % GlobalGameData.get_char_label(character))
-		return int(base_value * 1.5)
+		var bonus = CharacterData.get_data("seele")["passive_full_hp_bonus"]
+		print("[Skill] %s [暗影突袭] 攻击满血目标，伤害 +%d%%" % [GlobalGameData.get_char_label(character), int(bonus * 100)])
+		return int(base_value * (1.0 + bonus))
 	return base_value
 
 # === 希儿 主动：相位突进 ===
@@ -126,7 +128,7 @@ static func _seele_active(character: Node, target: Node, main: Node) -> bool:
 	character.play_skill_vfx_safe("seele_blink")
 	character.teleport_safe(world_pos)
 	if target.has_method("take_damage"):
-		var bonus = int(character.attack * 1.2)
+		var bonus = int(character.effective_attack * CharacterData.get_data("seele")["skill_multiplier"])
 		target.take_damage_safe(bonus)
 		target.play_skill_vfx_safe("seele_strike")
 		var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("seele_skill", target)
@@ -137,13 +139,14 @@ static func _seele_active(character: Node, target: Node, main: Node) -> bool:
 static func _elaina_active(character: Node, target: Node, main: Node) -> bool:
 	if not target or not main:
 		return false
-	var dmg = int(character.effective_attack * 1.25)
+	var d = CharacterData.get_data("elaina")
+	var dmg = int(character.effective_attack * d["skill_multiplier"])
 	var is_caster_host = character.name.begins_with("Host")
 	# 主要目标
 	if target.has_method("take_damage"):
 		target.take_damage_safe(dmg)
 	var target_cell = main._get_character_cell(target)
-	var aoe_cells = get_cells_in_range(character.grid_layer, target_cell, 2)
+	var aoe_cells = get_cells_in_range(character.grid_layer, target_cell, d["skill_radius"])
 	for c in main.get_tree().get_nodes_in_group("characters"):
 		if c != target and c.hp > 0 and c.name.begins_with("Host") != is_caster_host:
 			var c_cell = main._get_character_cell(c)
@@ -158,14 +161,15 @@ static func _elaina_active(character: Node, target: Node, main: Node) -> bool:
 static func _firefly_active(character: Node, target: Node, main: Node) -> bool:
 	if not target:
 		return false
-	target.take_damage_safe(int(character.effective_attack * 1.8))
+	var d = CharacterData.get_data("firefly")
+	target.take_damage_safe(int(character.effective_attack * d["skill_multiplier"]))
 	character.play_skill_vfx_safe("firefly_charge", target)
 	target.play_skill_vfx_safe("firefly_impact")
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("firefly_skill", target)
 	var bm = main.get_node_or_null("BuffManager") if main else null
 	if bm and bm.has_method("apply_buff"):
-		bm.apply_buff(target, "burn", 5, 2, character)
-	var dmg = int(character.effective_attack * 1.8)
+		bm.apply_buff(target, d["skill_buff_id"], d["skill_buff_value"], d["skill_buff_duration"], character)
+	var dmg = int(character.effective_attack * d["skill_multiplier"])
 	print("[Skill] %s [烈焰冲锋] → %s 造成 %d 伤害 + 灼烧" % [GlobalGameData.get_char_label(character), GlobalGameData.get_char_label(target), dmg])
 	return true
 
@@ -173,10 +177,11 @@ static func _firefly_active(character: Node, target: Node, main: Node) -> bool:
 static func _silverwolf_active(character: Node, target: Node, main: Node) -> bool:
 	if not target:
 		return false
+	var d = CharacterData.get_data("silverwolf")
 	var bm = main.get_node_or_null("BuffManager") if main else null
 	if bm and bm.has_method("apply_buff"):
-		bm.apply_buff(target, "attack_debuff", -8, 3, character)
-		bm.apply_buff(target, "move_debuff", -2, 3, character)
+		bm.apply_buff(target, "attack_debuff", -d["skill_attack_value"], d["skill_duration"], character)
+		bm.apply_buff(target, "move_debuff", -d["skill_move_value"], d["skill_duration"], character)
 	target.play_skill_vfx_safe("silverwolf_hack")
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("silverwolf_skill", target)
 	print("[Skill] %s [系统入侵] → %s 虚弱+迟缓 3 回合" % [GlobalGameData.get_char_label(character), GlobalGameData.get_char_label(target)])
@@ -185,7 +190,7 @@ static func _silverwolf_active(character: Node, target: Node, main: Node) -> boo
 # === 芝士仓鼠 主动：动作如潮 ===
 static func _hamster_active(character: Node, target: Node, main: Node) -> bool:
 	if "_extra_attacks" in character:
-		character._extra_attacks += 1
+		character._extra_attacks += CharacterData.get_data("hamster")["skill_extra_actions"]
 		character.sync_extra_attacks_safe(character._extra_attacks)
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("hamster_skill", character)
 	print("[Skill] %s [动作如潮] 获得额外行动" % GlobalGameData.get_char_label(character))
@@ -200,7 +205,7 @@ static func _anpan_active(character: Node, target: Node, main: Node) -> bool:
 		return false
 	var pid = get_character_pid(character)
 	var anpan_data = CharacterData.get_data("anpan")
-	var energy_cost = anpan_data.get("skill_energy", 4)
+	var energy_cost = anpan_data.get("skill_energy", 0)
 	# 能量检查
 	var reason = get_skill_block_reason(character, main)
 	if reason:
@@ -217,7 +222,8 @@ static func _anpan_active(character: Node, target: Node, main: Node) -> bool:
 	# 回能至上限
 	es.set_energy(pid, 10)
 	if bm and bm.has_method("apply_buff"):
-		bm.apply_buff(character, "soften", 20, 3, character)
+		var d = CharacterData.get_data("anpan")
+		bm.apply_buff(character, "soften", d["skill_buff_value"], d["skill_buff_duration"], character)
 	var _am = Engine.get_singleton("AudioManager")
 	if _am: _am.play_sfx("anpan_skill", character)
 	print("[Skill] あんパン [极速高温烘焙] 消耗 %d 能量，抽 %d 张牌，回满能量，获得 [松软]" % [energy_cost, to_draw])
@@ -225,7 +231,8 @@ static func _anpan_active(character: Node, target: Node, main: Node) -> bool:
 	return true
 
 static func _zephyr_active(character: Node, target: Node, main: Node) -> bool:
-	var self_dmg = max(1, int(character.hp * 0.2))
+	var d = CharacterData.get_data("zephyr")
+	var self_dmg = max(1, int(character.hp * d["skill_self_damage_pct"]))
 	# 自伤为真实伤害，跳过攀升减免
 	character.hp = max(1, character.hp - self_dmg)
 	if character.has_method("_spawn_float"):
@@ -236,7 +243,7 @@ static func _zephyr_active(character: Node, target: Node, main: Node) -> bool:
 		character.rpc("_sync_hp", character.hp)
 	var bm = main.get_node_or_null("BuffManager") if main else null
 	if bm and bm.has_method("apply_buff"):
-		bm.apply_buff(character, "ascend", 10, 2, character)
+		bm.apply_buff(character, "ascend", d["skill_buff_value"], d["skill_buff_duration"], character)
 	var _am = Engine.get_singleton("AudioManager")
 	if _am: _am.play_sfx("zephyr_skill", character)
 	print("[Skill] Zephyr [引煞赴烬] 自伤 %d，获得 1 层攀升" % self_dmg)
@@ -249,13 +256,16 @@ static func _karrigan_active(character: Node, target: Node, main: Node) -> bool:
 	var target_cell = character.grid_layer.local_to_map(character.grid_layer.to_local(target.global_position))
 	if character.grid_layer.get_cell_source_id(target_cell) == -1:
 		return false
+	var d = CharacterData.get_data("karrigan")
+	var radius = d["skill_radius"]
+	var duration = d["skill_duration"]
 	var fm = main.get_node_or_null("FieldEffectManager") if main else null
 	if fm and fm.has_method("place_smoke"):
-		fm.place_smoke(target_cell, 3, 2, character.grid_layer)
+		fm.place_smoke(target_cell, radius, duration, character.grid_layer)
 	else:
-		var smoke_cells = HexUtils.get_cells_in_radius(target_cell, 3, character.grid_layer)
+		var smoke_cells = HexUtils.get_cells_in_radius(target_cell, radius, character.grid_layer)
 		for cell in smoke_cells:
-			GlobalGameData.smoke_cells[cell] = 2
+			GlobalGameData.smoke_cells[cell] = duration
 	var cell_world_pos = character.grid_layer.to_global(character.grid_layer.map_to_local(target_cell))
 	character.play_skill_vfx_safe("karrigan_smoke", null, cell_world_pos)
 	var _am = Engine.get_singleton("AudioManager")
@@ -266,7 +276,7 @@ static func _karrigan_active(character: Node, target: Node, main: Node) -> bool:
 static func _M1DorG_active(character: Node, target: Node, main: Node) -> bool:
 	if not character:
 		return false
-	character._away_turns_left = 2
+	character._away_turns_left = CharacterData.get_data("M1DorG")["skill_away_turns"]
 	if character.has_method("_sync_away_state") and character.multiplayer and character.multiplayer.has_multiplayer_peer():
 		character.rpc("_sync_away_state", character._away_turns_left)
 	var spr = character.get_node_or_null("Sprite2D")
@@ -318,7 +328,7 @@ static func _do_anjing_active(character: Node, main: Node) -> bool:
 		return false
 	var pid = get_character_pid(character)
 	var anjing_data = CharacterData.get_data("anjing")
-	var energy_cost = anjing_data.get("skill_energy", 2)
+	var energy_cost = anjing_data.get("skill_energy", 0)
 	# 能量检查
 	var reason = get_skill_block_reason(character, main)
 	if reason:
@@ -339,7 +349,7 @@ static func _do_anjing_active(character: Node, main: Node) -> bool:
 	# 对敌方群体造成 50% 攻击力 + 当前手牌数量×3 伤害（牌运已移除）
 	# 手牌/能量同步交由 main 的 _active_skill_post_exec 统一处理（与旧角色一致）
 	var hand_count = dm.get_hand(pid).size()
-	var dmg = int(character.effective_attack * 0.5) + hand_count * 3
+	var dmg = int(character.effective_attack * anjing_data["skill_multiplier"]) + hand_count * anjing_data["skill_hand_damage"]
 	var is_caster_host = character.name.begins_with("Host")
 	var hit_count = 0
 	for c in main.get_tree().get_nodes_in_group("characters"):
@@ -368,7 +378,7 @@ static func get_skill_block_reason(character: Node, main: Node) -> String:
 	match name:
 		"あんパン":
 			var anpan_data = CharacterData.get_data("anpan")
-			var energy_cost = anpan_data.get("skill_energy", 4)
+			var energy_cost = anpan_data.get("skill_energy", 0)
 			var es = main.get_node_or_null("EnergySystem")
 			if es:
 				var pid = get_character_pid(character)
@@ -376,7 +386,7 @@ static func get_skill_block_reason(character: Node, main: Node) -> String:
 					return "能量不足"
 		"Anjing":
 			var anjing_data = CharacterData.get_data("anjing")
-			var energy_cost = anjing_data.get("skill_energy", 2)
+			var energy_cost = anjing_data.get("skill_energy", 0)
 			var es = main.get_node_or_null("EnergySystem")
 			if es:
 				var pid = get_character_pid(character)

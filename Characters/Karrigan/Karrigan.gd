@@ -32,16 +32,6 @@ func use_active_skill(target: Node) -> bool:
 
 @rpc("any_peer", "call_local", "reliable")
 func take_damage(damage: int):
-	var is_host = name.begins_with("Host")
 	if damage > 0 and hp - damage <= 0:
 		GlobalGameData.karrigan_death_flag = true
-		var allies = main._get_my_characters() if main else []
-		# 移除所有友方的[拧绳]
-		for c in allies:
-			if c == self: continue
-			if c.hp > 0 and c.has_method("get_buffs"):
-				var bm = main.get_node_or_null("BuffManager") if main else null
-				if bm and bm.has_method("remove_buff"):
-					while bm.remove_buff(c, "rope"):
-						pass
 	super(damage)

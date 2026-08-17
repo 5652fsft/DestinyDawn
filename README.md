@@ -137,4 +137,4 @@
 ## 平台支持
 
 - **Windows**：完整功能（详见上方操作指南）
-- **Android**：完整玩法 + 触摸适配（详见 [docs/10-android-port.md](docs/10-android-port.md)）
+- **Android**：完整玩法 + 触摸适配

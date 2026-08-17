@@ -20,9 +20,9 @@ _create_card("card_new_id", "显示名称", CardData.CardType.ATTACK, 2,
 
 ### 参数顺序
 
-`id, name, type, cost, target_type, desc, effect_type, effect_value, duration=1, radius=0`
+`id, name, type, cost, target_type, desc, effect_type, effect_value, duration=1, radius=0, secondary_value=0, extra_value=0, secondary_duration=0`
 
-各参数含义见 `CardData.gd` 对应枚举。`radius` 仅用于 AOE 效果。
+各参数含义见 `CardData.gd` 对应枚举。`radius` 仅用于 AOE 效果；`secondary_value`/`extra_value`/`secondary_duration` 用于"effect_value 被主语义占用、卡牌还有副数值"的情况（如直伤卡 siphon 的直伤、fireball 的灼烧值/回合、overload 的回能），执行器与 AI 评分统一读卡牌数据，不硬编码。
 
 ### 描述格式规范
 

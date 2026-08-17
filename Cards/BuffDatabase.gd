@@ -78,11 +78,6 @@ static func _all_buffs() -> Dictionary:
 	out["soften"] = b
 
 	b = BuffData.new()
-	b.id = "rope"; b.name = "拧绳"; b.type = BuffData.BuffType.MARK
-	b.category = BuffData.Category.SPECIAL; b.is_harmful = false; b.max_stacks = 99
-	out["rope"] = b
-
-	b = BuffData.new()
 	b.id = "solo_leveling"; b.name = "我独自升级"; b.type = BuffData.BuffType.ATTACK_BUFF
 	b.category = BuffData.Category.SPECIAL; b.is_harmful = false; b.max_stacks = 1
 	out["solo_leveling"] = b

@@ -7,8 +7,11 @@ func _log(msg: String, category: String = "AI"):
 func _char_label(c) -> String:
 	if not c:
 		return "?"
+	var cname = c.get("character_name")
+	if cname == null or cname == "":
+		return str(c.name)
 	var is_player_side = c.name.begins_with("Host") == GlobalGameData.is_host
-	return ("玩家/" if is_player_side else "AI/") + c.character_name
+	return ((GlobalGameData.player_name + "/") if is_player_side else (GlobalGameData.opponent_name + "/")) + str(cname)
 
 var _action_queue: Array[Dictionary] = []
 var _action_timer: float = 0.0
@@ -22,6 +25,9 @@ var _energy_system: Node = null
 var _deck_manager: Node = null
 var _camera: Node2D = null
 var _camera_tween: Tween = null
+
+# 本回合出牌失败记录（防止无限重试同一张卡）
+var _card_skip: Dictionary = {}
 
 
 func _ready():
@@ -82,6 +88,7 @@ func _process(_delta):
 			_log("回合变化: %d -> %d，清理旧队列" % [_current_phase, GlobalGameData.current_turn_phase])
 		_action_queue.clear()
 		_busy = false
+		_card_skip.clear()
 		_current_phase = GlobalGameData.current_turn_phase
 
 	if not _is_ai_phase():
@@ -97,7 +104,7 @@ func _process(_delta):
 		return
 
 	if _action_queue.is_empty():
-		_build_action_queue()
+		_plan_and_queue()
 		if _action_queue.is_empty():
 			_log("无待执行动作，结束回合", "EndTurn")
 			_end_phase()
@@ -117,47 +124,32 @@ func _is_ai_turn() -> bool:
 		return GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.PLAYER_TURN
 
 
-# ==================== 动作队列构建 ====================
+# ==================== 决策规划（Strategist + Playbook） ====================
 
-func _build_action_queue():
+# 回合内动作编排：先出牌（buff/能量联动），再按价值从高到低执行角色单元
+func _plan_and_queue():
 	_action_queue.clear()
-	var ai_chars = _get_ai_alive()
+	var ai_chars = AIStrategist.get_ai_alive(_main)
+	_log("规划动作，AI 存活角色: %d" % ai_chars.size(), "Queue")
 
-	# 移动队列
-	_log("构建移动队列，AI 存活角色: %d" % ai_chars.size(), "Queue")
-	for chara in ai_chars:
-		if GlobalGameData.character_move_used.get(chara.name, false):
-			continue
-		var target = _evaluate_move_target(chara)
-		if target != Vector2i(-1, -1):
-			_action_queue.append({
-				"type": "move", "character": chara, "cell": target
-			})
-		else:
-			_log("%s 无可用移动目标" % _char_label(chara))
+	# 1. 卡牌规划（先铺 buff / 回能 / 治疗，与技能能量联动）
+	var card_actions = AIStrategist.plan_cards(_main, _card_skip)
+	for action in card_actions:
+		_action_queue.append(action)
+		_log("AI 将使用卡牌: %s" % action.get("card_id", "?"), "Queue")
 
-	# 攻击/技能/卡牌队列
-	_log("构建攻击队列，AI 存活角色: %d" % ai_chars.size(), "Queue")
+	# 2. 角色单元规划（技能 + 攻击 + 移动组合），按总价值排序
+	var units = []
 	for chara in ai_chars:
-		if _should_use_skill(chara):
-			var skill_target = _evaluate_skill_target(chara)
-			if skill_target != null and is_instance_valid(skill_target) and skill_target.hp > 0:
-				_action_queue.append({
-					"type": "skill", "character": chara, "target": skill_target
-				})
-				_log("%s 将使用技能 -> %s" % [_char_label(chara), _char_label(skill_target)])
-		if _should_play_card(chara):
-			var card_action = _evaluate_best_card(chara)
-			if not card_action.is_empty():
-				_action_queue.append(card_action)
-				_log("AI 将使用卡牌: %s" % card_action.get("card_id", "?"))
-		if not GlobalGameData.character_attack_used.get(chara.name, false) or (chara.has_method("_get_extra_attacks") and chara._get_extra_attacks() > 0):
-			var attack_target = _evaluate_attack_target(chara)
-			if attack_target != null:
-				_action_queue.append({
-					"type": "attack", "character": chara, "target": attack_target
-				})
-				_log("%s 将攻击 -> %s" % [_char_label(chara), _char_label(attack_target)])
+		var plan = AIStrategist.plan_unit(chara, _main)
+		if not plan.get("actions", []).is_empty():
+			units.append({"actions": plan.actions, "value": plan.value})
+	units.sort_custom(func(a, b): return a.value > b.value)
+	for u in units:
+		for action in u.actions:
+			_action_queue.append(action)
+			var desc = action.get("type", "?")
+			_log("AI %s 动作: %s" % [_char_label(action.get("character")), desc], "Queue")
 
 
 # ==================== 动作执行 ====================
@@ -170,7 +162,7 @@ func _execute_current_action():
 	var action = _action_queue.pop_front()
 	var chara = action.get("character")
 
-	if not is_instance_valid(chara) or chara.hp <= 0:
+	if chara != null and (not is_instance_valid(chara) or chara.hp <= 0):
 		_log("跳过动作：角色已死亡或无效", "Execute")
 		if _action_queue.is_empty():
 			_busy = false
@@ -198,10 +190,10 @@ func _execute_current_action():
 			_execute_attack(chara, action.target)
 		"skill":
 			_pan_to(chara)
-			_execute_skill(chara, action.target)
+			_execute_skill(chara, action.target, action.get("cell", Vector2i(-1, -1)))
 		"card":
 			_pan_to(chara)
-			_execute_card(chara, action.card_id, action.get("target"))
+			_execute_card(action.card_id, action.get("target"))
 
 	var phase_after = GlobalGameData.current_turn_phase
 
@@ -214,11 +206,14 @@ func _execute_current_action():
 		_action_timer = ACTION_DELAY
 
 
-# 执行移动：防重叠、占位、同步
+# 执行移动：防重叠、占位、同步；停在烟格则重置移动（免费再动）
 func _execute_move(chara: Node, cell: Vector2i):
 	var gl = chara.grid_layer
 	if not gl:
 		_log("%s 移动失败：无 grid_layer" % _char_label(chara), "Move")
+		return
+
+	if cell == Vector2i(-1, -1):
 		return
 
 	# 防重叠：目标格子被占用时找最近空闲格子
@@ -250,6 +245,10 @@ func _execute_move(chara: Node, cell: Vector2i):
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("move", chara)
 	GlobalGameData.character_move_used[chara.name] = true
 	GlobalGameData.character_move_used_num += 1
+	# 烟格：停留后免费再动（与玩家规则一致）
+	if GlobalGameData.smoke_cells.has(cell):
+		GlobalGameData.character_move_used[chara.name] = false
+		_log("%s 进入烟格，重置移动次数" % _char_label(chara), "Move")
 	_log("%s 移动到 (%d, %d)，位置 %s" % [_char_label(chara), cell.x, cell.y, world_pos], "Move")
 
 
@@ -274,7 +273,7 @@ func _find_nearest_free_cell(chara: Node, target: Vector2i, start: Vector2i) -> 
 	return Vector2i(-1, -1)
 
 
-# 执行攻击：调用角色 perform_attack_safe
+# 执行攻击：格子距离射程校验 + 调用 perform_attack_safe
 func _execute_attack(chara: Node, target: Node):
 	if not is_instance_valid(target) or target.hp <= 0:
 		_log("%s 攻击目标无效" % _char_label(chara), "Attack")
@@ -284,6 +283,13 @@ func _execute_attack(chara: Node, target: Node):
 		if extra <= 0:
 			_log("%s 已无行动次数，跳过攻击" % _char_label(chara), "Attack")
 			return
+	# 射程校验：统一用六边形格子距离（与玩家侧一致）
+	var c_cell = chara.get_current_cell()
+	var t_cell = target.get_current_cell()
+	if c_cell == Vector2i(-1, -1) or t_cell == Vector2i(-1, -1) \
+			or HexUtils.hex_distance(c_cell, t_cell) > chara.attack_range:
+		_log("%s 攻击目标 %s 超出射程，跳过" % [_char_label(chara), _char_label(target)], "Attack")
+		return
 	_log("%s 攻击 -> %s" % [_char_label(chara), _char_label(target)], "Attack")
 	chara.perform_attack(target.get_path())
 	# 确保行动次数消耗（perform_attack 内部可能因 multiplayer 判断跳过）
@@ -296,13 +302,27 @@ func _execute_attack(chara: Node, target: Node):
 			GlobalGameData.character_attack_used_num += 1
 
 
-# 执行技能：调用角色 use_active_skill
-func _execute_skill(chara: Node, target: Node):
-	if not is_instance_valid(target) or target.hp <= 0:
+# 执行技能：支持 CELL 型技能（构造临时 marker 定位，与 _server_execute_skill 同构）
+func _execute_skill(chara: Node, target: Node, cell: Vector2i = Vector2i(-1, -1)):
+	if target != null and (not is_instance_valid(target) or target.hp <= 0):
 		_log("%s 技能目标无效" % _char_label(chara), "Skill")
 		return
-	_log("%s 使用技能 -> %s" % [_char_label(chara), _char_label(target)], "Skill")
-	if not chara.use_active_skill(target):
+	var skill_target = target
+	var marker: Node = null
+	if skill_target == null and cell != Vector2i(-1, -1) and chara.active_skill \
+			and chara.active_skill.target_type == BaseSkill.SkillTarget.CELL:
+		marker = Node2D.new()
+		marker.name = "AISkillTargetMarker"
+		_main.Characters.add_child(marker)
+		var gl = chara.grid_layer
+		marker.global_position = gl.to_global(gl.map_to_local(cell))
+		skill_target = marker
+	var target_desc = "格(%d,%d)" % [cell.x, cell.y] if skill_target == null else _char_label(skill_target)
+	_log("%s 使用技能 -> %s" % [_char_label(chara), target_desc], "Skill")
+	var ok = chara.use_active_skill(skill_target)
+	if marker:
+		marker.queue_free()
+	if not ok:
 		_log("%s 技能释放失败，不消耗行动" % _char_label(chara), "Skill")
 		return
 	if chara.active_skill:
@@ -314,21 +334,30 @@ func _execute_skill(chara: Node, target: Node):
 			GlobalGameData.character_attack_used_num += 1
 
 
-# 执行卡牌：通过 DeckManager 打出
-func _execute_card(chara: Node, card_id: String, target: Node):
+# 执行卡牌：通过 DeckManager 打出（失败记入 skip，本回合不再尝试）
+func _execute_card(card_id: String, target: Node):
 	var card_data = CardDatabase.get_card(card_id)
 	if not card_data:
 		_log("卡牌 %s 不存在，跳过" % card_id, "Card")
+		_card_skip[card_id] = true
 		return
-	var hand = _deck_manager.get_hand(2)
+	var hand = _deck_manager.get_hand(AIStrategist.AI_PID)
 	if card_id not in hand:
 		_log("[%s] 已不在手牌中，跳过" % card_data.card_name, "Card")
+		_card_skip[card_id] = true
 		return
-	if not _energy_system.can_afford(2, card_data.cost):
+	if not _energy_system.can_afford(AIStrategist.AI_PID, card_data.cost):
 		_log("能量不足，无法使用 [%s]（需 %d）" % [card_data.card_name, card_data.cost], "Card")
+		_card_skip[card_id] = true
 		return
 	if target != null and (not is_instance_valid(target) or target.hp <= 0):
 		_log("[%s] 目标已死亡，跳过" % card_data.card_name, "Card")
+		_card_skip[card_id] = true
+		return
+	var ai_chars = AIStrategist.get_ai_alive(_main)
+	var chara = ai_chars[0] if not ai_chars.is_empty() else null
+	if not chara:
+		_log("无存活角色，跳过出牌", "Card")
 		return
 	var target_path = ""
 	if target != null and is_instance_valid(target):
@@ -336,378 +365,8 @@ func _execute_card(chara: Node, card_id: String, target: Node):
 	_log("AI 使用 [%s]，目标: %s" % [card_data.card_name, _char_label(target) if target and is_instance_valid(target) else "无"], "Card")
 	var prev_selected = _main.selected_character
 	_main.selected_character = chara
-	_main._execute_play_card(2, card_id, target_path)
+	_main._execute_play_card(AIStrategist.AI_PID, card_id, target_path)
 	_main.selected_character = prev_selected
-
-
-# ==================== 移动评估 ====================
-
-# 评估最佳移动目标：就近或按策略
-func _evaluate_move_target(chara: Node) -> Vector2i:
-	var gl = chara.grid_layer
-	if not gl:
-		return Vector2i(-1, -1)
-	var start = chara.get_current_cell()
-	if start == Vector2i(-1, -1):
-		return Vector2i(-1, -1)
-
-	var max_move = chara.effective_move_points
-	var reachable = _bfs_reachable(chara, max_move)
-	if reachable.is_empty():
-		return Vector2i(-1, -1)
-
-	var nearest_enemy = _find_nearest_enemy(chara)
-	if not nearest_enemy:
-		return _pick_farthest_from_start(reachable, start)
-
-	var enemy_cell = nearest_enemy.get_current_cell()
-	if enemy_cell == Vector2i(-1, -1):
-		return _pick_farthest_from_start(reachable, start)
-
-	if chara.attack_range <= 1:
-		return _pick_closest_to_target(reachable, enemy_cell)
-	else:
-		var in_range = _filter_in_attack_range(reachable, enemy_cell, chara.attack_range)
-		if in_range.is_empty():
-			return _pick_closest_to_target(reachable, enemy_cell)
-		return _pick_farthest_from_target(in_range, enemy_cell)
-
-
-func _bfs_reachable(chara: Node, max_move: int) -> Array[Vector2i]:
-	var gl = chara.grid_layer
-	var start = chara.get_current_cell()
-	if start == Vector2i(-1, -1):
-		return []
-	var reachable: Dictionary = HexUtils.get_reachable_cells(gl, start, max_move,
-		func(c: Vector2i) -> bool: return _main.is_cell_occupied(c, chara),
-		func(c: Vector2i) -> int: return chara.get_move_cost(c))
-	reachable.erase(start)
-	var result: Array[Vector2i] = []
-	for c in reachable.keys():
-		result.append(c)
-	return result
-
-
-func _pick_closest_to_target(cells: Array[Vector2i], target: Vector2i) -> Vector2i:
-	var best = cells[0]
-	var best_dist = best.distance_squared_to(target)
-	for c in cells:
-		var d = c.distance_squared_to(target)
-		if d < best_dist:
-			best_dist = d
-			best = c
-	return best
-
-
-func _pick_farthest_from_target(cells: Array[Vector2i], target: Vector2i) -> Vector2i:
-	var best = cells[0]
-	var best_dist = best.distance_squared_to(target)
-	for c in cells:
-		var d = c.distance_squared_to(target)
-		if d > best_dist:
-			best_dist = d
-			best = c
-	return best
-
-
-func _pick_farthest_from_start(cells: Array[Vector2i], start: Vector2i) -> Vector2i:
-	var best = cells[0]
-	var best_dist = best.distance_squared_to(start)
-	for c in cells:
-		var d = c.distance_squared_to(start)
-		if d > best_dist:
-			best_dist = d
-			best = c
-	return best
-
-
-func _filter_in_attack_range(cells: Array[Vector2i], enemy_cell: Vector2i, attack_range: int) -> Array[Vector2i]:
-	var result: Array[Vector2i] = []
-	for c in cells:
-		var dist = c.distance_squared_to(enemy_cell)
-		if dist <= attack_range * attack_range:
-			result.append(c)
-	return result
-
-
-# ==================== 攻击评估 ====================
-
-# 评估最佳攻击目标：低血量优先
-func _evaluate_attack_target(chara: Node) -> Node:
-	var enemies = _get_enemies_in_attack_range(chara)
-	if enemies.is_empty():
-		return null
-	enemies.sort_custom(func(a, b): return a.hp < b.hp)
-	return enemies[0]
-
-
-func _get_enemies_in_attack_range(chara: Node) -> Array:
-	var result = []
-	var enemies = _get_enemy_alive()
-	var chara_cell = chara.get_current_cell()
-	if chara_cell == Vector2i(-1, -1):
-		return result
-	for e in enemies:
-		var e_cell = e.get_current_cell()
-		if e_cell == Vector2i(-1, -1):
-			continue
-		var dist = chara_cell.distance_squared_to(e_cell)
-		if dist <= chara.attack_range * chara.attack_range:
-			result.append(e)
-	return result
-
-
-# ==================== 技能评估 ====================
-
-# 判断是否应该使用技能
-func _should_use_skill(chara: Node) -> bool:
-	if not chara.active_skill:
-		return false
-	if chara.active_skill.current_cooldown > 0:
-		return false
-	if GlobalGameData.character_attack_used.get(chara.name, false):
-		if not chara.has_method("_consumes_attack_on_skill") or chara._consumes_attack_on_skill():
-			return false
-	var reason = SkillEffect.get_skill_block_reason(chara, _main)
-	if reason:
-		_log("%s 技能被阻挡: %s" % [_char_label(chara), reason])
-		return false
-	return true
-
-
-# 评估技能目标（治疗/增益/伤害）
-func _evaluate_skill_target(chara: Node) -> Node:
-	var name = chara.character_name
-	var target: Node = null
-	match name:
-		"布洛妮娅":
-			target = _find_lowest_hp_ally()
-		"希儿":
-			target = _find_killable_with_bonus(chara)
-		"伊蕾娜":
-			target = _find_best_aoe_target(chara)
-		"流萤":
-			target = _find_highest_value_enemy()
-		"银狼":
-			target = _find_highest_attack_enemy()
-		"芝士仓鼠":
-			target = _evaluate_attack_target(chara)
-		"karrigan":
-			target = _find_highest_value_enemy()
-		"Zephyr":
-			target = chara
-		"あんパン":
-			target = chara
-		"M1DorG":
-			target = chara
-		"Richardovo":
-			target = chara
-		"Anjing":
-			target = chara
-		_:
-			return null
-	if target and _is_skill_out_of_range(chara, target):
-		_log("%s 技能目标 %s 超出范围" % [_char_label(chara), _char_label(target)])
-		return null
-	return target
-
-
-func _find_lowest_hp_ally() -> Node:
-	var allies = _get_ai_alive()
-	if allies.is_empty():
-		return null
-	allies.sort_custom(func(a, b): return a.hp < b.hp)
-	return allies[0]
-
-
-func _find_killable_with_bonus(chara: Node) -> Node:
-	var enemies = _get_enemy_alive()
-	var bonus_dmg = int(chara.attack * 1.2)
-	for e in enemies:
-		if e.hp <= bonus_dmg:
-			return e
-	return _find_lowest_hp_enemy()
-
-
-func _find_best_aoe_target(chara: Node) -> Node:
-	var enemies = _get_enemy_alive()
-	var best = null
-	var best_count = -1
-	for e in enemies:
-		var count = _count_enemies_near(e, HexUtils.HEX_SPACING)
-		if count > best_count:
-			best_count = count
-			best = e
-	return best if best_count >= 1 else _find_lowest_hp_enemy()
-
-
-func _find_highest_value_enemy() -> Node:
-	var enemies = _get_enemy_alive()
-	if enemies.is_empty():
-		return null
-	enemies.sort_custom(func(a, b):
-		var score_a = a.hp + a.attack + a.shield
-		var score_b = b.hp + b.attack + b.shield
-		return score_a > score_b)
-	return enemies[0]
-
-
-func _find_highest_attack_enemy() -> Node:
-	var enemies = _get_enemy_alive()
-	if enemies.is_empty():
-		return null
-	enemies.sort_custom(func(a, b): return a.attack > b.attack)
-	return enemies[0]
-
-
-func _find_lowest_hp_enemy() -> Node:
-	var enemies = _get_enemy_alive()
-	if enemies.is_empty():
-		return null
-	enemies.sort_custom(func(a, b): return a.hp < b.hp)
-	return enemies[0]
-
-
-func _is_skill_out_of_range(chara: Node, target: Node) -> bool:
-	var skill = chara.active_skill
-	if not skill or skill.skill_range <= 0:
-		return false
-	var chara_cell = chara.get_current_cell()
-	var target_cell = target.get_current_cell()
-	if chara_cell == Vector2i(-1, -1) or target_cell == Vector2i(-1, -1):
-		return true
-	var reachable = SkillEffect.get_cells_in_range(chara.grid_layer, chara_cell, skill.skill_range)
-	return not reachable.has(target_cell)
-
-
-func _count_enemies_near(center: Node, radius: float) -> int:
-	var count = 0
-	var enemies = _get_enemy_alive()
-	for e in enemies:
-		if e == center:
-			continue
-		if center.global_position.distance_to(e.global_position) <= radius:
-			count += 1
-	return count
-
-
-# ==================== 卡牌评估 ====================
-
-# 判断是否应该出牌
-func _should_play_card(chara: Node) -> bool:
-	var hand = _deck_manager.get_hand(2)
-	if hand.is_empty():
-		return false
-	for card_id in hand:
-		var card = CardDatabase.get_card(card_id)
-		if card and _energy_system.can_afford(2, card.cost):
-			return true
-	return false
-
-
-# 评估最佳可用卡牌：按分数排序
-func _evaluate_best_card(chara: Node) -> Dictionary:
-	var hand = _deck_manager.get_hand(2)
-	var best_action: Dictionary = {}
-	var best_score = -999
-
-	for card_id in hand:
-		var card = CardDatabase.get_card(card_id)
-		if not card:
-			continue
-		if not _energy_system.can_afford(2, card.cost):
-			continue
-
-		var target = _pick_target_for_card(card)
-		var score = _score_card(card, chara, target)
-
-		if score > best_score:
-			best_score = score
-			best_action = {
-				"type": "card",
-				"character": chara,
-				"card_id": card_id,
-				"target": target
-			}
-
-	if best_score >= 20:
-		_log("最佳卡牌 %s 评分: %d" % [best_action.get("card_id", "?"), best_score], "CardEval")
-		return best_action
-	return {}
-
-
-func _pick_target_for_card(card: CardData) -> Node:
-	match card.target_type:
-		CardData.TargetType.NONE:
-			return null
-		CardData.TargetType.ALLY_SINGLE:
-			return _find_lowest_hp_ally()
-		CardData.TargetType.ALLY_ALL:
-			return _get_first_ai_alive()
-		CardData.TargetType.ENEMY_SINGLE:
-			return _find_lowest_hp_enemy()
-		CardData.TargetType.ENEMY_ALL:
-			return _get_first_enemy_alive()
-		CardData.TargetType.ALL_CHARACTERS:
-			return _get_first_enemy_alive()
-		_:
-			return null
-
-
-func _score_card(card: CardData, chara: Node, target: Node) -> int:
-	var score = 0
-	match card.card_type:
-		CardData.CardType.ATTACK:
-			if target and is_instance_valid(target) and target.hp <= card.effect_value:
-				score += 100
-			else:
-				score += card.effect_value + 10
-		CardData.CardType.HEAL:
-			if target and is_instance_valid(target):
-				var hp_pct = float(target.hp) / target.max_hp
-				if hp_pct < 0.3:
-					score += 80
-				elif hp_pct < 0.5:
-					score += 60
-				elif hp_pct < 0.75:
-					score += 30
-				else:
-					score += 10
-			else:
-				score += 10
-		CardData.CardType.SHIELD:
-			if target and is_instance_valid(target):
-				var hp_pct = float(target.hp) / target.max_hp
-				if hp_pct < 0.4:
-					score += 60
-				elif hp_pct < 0.7:
-					score += 40
-				else:
-					score += 20
-			else:
-				score += 20
-		CardData.CardType.BUFF:
-			score += 30
-		CardData.CardType.DEBUFF:
-			if target and is_instance_valid(target) and target.hp > 0:
-				score += 40
-			else:
-				score += 10
-		CardData.CardType.TACTICAL:
-			var hand_size = _deck_manager.get_hand(2).size()
-			if hand_size <= 2:
-				score += 50
-			elif hand_size <= 4:
-				score += 30
-			else:
-				score += 10
-		CardData.CardType.DISPLACE:
-			var enemies_near = _count_enemies_near(_get_first_ai_alive(), 200.0) if _get_first_ai_alive() else 0
-			score += enemies_near * 20
-		_:
-			score += 10
-
-	return score
 
 
 # ==================== 辅助函数 ====================
@@ -716,49 +375,3 @@ func _end_phase():
 	_log("AI 结束当前回合，调用 advance_turn_phase", "EndTurn")
 	_main.unselect_character(null, true)
 	_main.advance_turn_phase()
-
-
-func _get_ai_alive() -> Array:
-	var result = []
-	for c in GlobalGameData.client_characters:
-		if is_instance_valid(c) and c.hp > 0:
-			result.append(c)
-	return result
-
-
-func _get_enemy_alive() -> Array:
-	var result = []
-	for c in GlobalGameData.host_characters:
-		if is_instance_valid(c) and c.hp > 0:
-			result.append(c)
-	return result
-
-
-func _get_first_ai_alive() -> Node:
-	var alive = _get_ai_alive()
-	return alive[0] if alive.size() > 0 else null
-
-
-func _get_first_enemy_alive() -> Node:
-	var alive = _get_enemy_alive()
-	return alive[0] if alive.size() > 0 else null
-
-
-func _find_nearest_enemy(chara: Node) -> Node:
-	var enemies = _get_enemy_alive()
-	if enemies.is_empty():
-		return null
-	var nearest = null
-	var min_dist = INF
-	var chara_cell = chara.get_current_cell()
-	if chara_cell == Vector2i(-1, -1):
-		return null
-	for e in enemies:
-		var e_cell = e.get_current_cell()
-		if e_cell == Vector2i(-1, -1):
-			continue
-		var dist = chara_cell.distance_squared_to(e_cell)
-		if dist < min_dist:
-			min_dist = dist
-			nearest = e
-	return nearest

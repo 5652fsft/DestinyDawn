@@ -39,10 +39,7 @@ func refresh_name():
 	if is_local:
 		player_name_label.text = GlobalGameData.player_name
 	else:
-		if GlobalGameData.is_ai_mode:
-			player_name_label.text = "AI"
-		else:
-			player_name_label.text = GlobalGameData.opponent_name
+		player_name_label.text = GlobalGameData.opponent_name
 
 func refresh(is_my_turn: bool, energy: int = -1):
 	turn_highlight.visible = is_my_turn

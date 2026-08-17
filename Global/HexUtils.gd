@@ -12,6 +12,20 @@ const HEX_RADIUS: float = 68.0
 # 六边形格子中心间距
 const HEX_SPACING: float = 130.0
 
+# 六边形格子距离（步数，与 BFS 搜索结果一致，奇数列偏移）
+static func hex_distance(a: Vector2i, b: Vector2i) -> int:
+	var ac = _offset_to_cube(a)
+	var bc = _offset_to_cube(b)
+	return max(abs(ac.x - bc.x), abs(ac.y - bc.y), abs(ac.z - bc.z))
+
+static func _offset_to_cube(cell: Vector2i) -> Vector3i:
+	var col = cell.x
+	var row = cell.y
+	var x = col - (row - (row & 1)) / 2
+	var z = row
+	var y = -x - z
+	return Vector3i(x, y, z)
+
 # BFS 范围搜索，返回 {cell: 距离}，只算步数不计算地形消耗
 static func get_cells_in_range(grid_layer: TileMapLayer, start_cell: Vector2i, max_range: int) -> Dictionary:
 	var cells: Dictionary = {}
