@@ -14,14 +14,26 @@ func _ready():
 	BackgroundSingleton.setup(BackgroundManager.get_current_bg_path())
 
 func _load_guide():
-	var text = ""
-	var file = FileAccess.open("res://README.md", FileAccess.READ)
-	if file:
-		text = file.get_as_text()
-		file.close()
-	else:
+	var text = _read_readme()
+	if text.is_empty():
 		text = "游戏指南文件未找到。\n请访问 GitHub 仓库查看最新指南：\nhttps://github.com/5652fsft/DestinyDawn"
 	guide_text.text = MarkdownConverter.to_bbcode(text)
+
+# 读取优先级：包内 res:// → 桌面端 exe 同目录 → 空则走 GitHub 兜底
+func _read_readme() -> String:
+	var file = FileAccess.open("res://README.md", FileAccess.READ)
+	if file:
+		var text = file.get_as_text()
+		file.close()
+		return text
+	if OS.get_name() in ["Windows", "macOS", "Linux"]:
+		var side_path = OS.get_executable_path().get_base_dir().path_join("README.md")
+		file = FileAccess.open(side_path, FileAccess.READ)
+		if file:
+			var text = file.get_as_text()
+			file.close()
+			return text
+	return ""
 
 func _on_back_pressed():
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")

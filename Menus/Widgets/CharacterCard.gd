@@ -110,8 +110,6 @@ func _gui_input(event: InputEvent):
 
 func set_team_status(in_team: bool):
 	_in_team = in_team
-	if _flipped:
-		return
 	modulate = Color.WHITE
 	_apply_selected_style(_in_team)
 

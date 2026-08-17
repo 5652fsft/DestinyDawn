@@ -81,6 +81,7 @@ Godot 4.7 中 `Input.emulate_mouse_from_touch`（注意：旧名 `use_emulated_m
 | `permissions/internet` | true | 联机（ENet/UPnP/HTTP 公网 IP）。**必须开启**：v1.5.3 曾为 false，APK 无 INTERNET 权限 → 移动端建主机报"端口不可用"、HTTP 公网 IP 获取失败 |
 | `package/signed` | false | **测试用 debug 签名**；正式发布前需配置 release keystore 并改 true |
 | `package/unique_name` | `com.destinydawn.game` | 按需修改 |
+| `include_filter` | `README.md` | **两个预设（Windows/Android）均需设置**。`export_filter="all_resources"` 只导出 Godot 资源类型，`.md` 非资源文件默认不进包 → 打包后游戏指南读取 `res://README.md` 失败（电脑端可放 exe 旁兜底，安卓无解）。include filter 是官方打包非资源文件的机制 |
 
 **导出前置**：Godot 编辑器 → 项目 → 导出 → 安装 Android 导出模板。
 
