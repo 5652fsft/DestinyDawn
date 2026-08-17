@@ -1,6 +1,9 @@
 class_name MarkdownConverter
 extends Node
 
+const HEADING_SIZES := [34, 27, 21, 18, 16, 16]
+const QUOTE_COLOR := "#A6A6B3"
+
 static func to_bbcode(t: String) -> String:
 	var lines = t.split("\n")
 	var result = []
@@ -52,24 +55,33 @@ static func to_bbcode(t: String) -> String:
 static func _process_line(line: String) -> String:
 	var p = line
 
-	if p.begins_with("# "):
-		p = "[b][u][font_size=26]%s[/font_size][/u][/b]" % p.trim_prefix("# ").trim_prefix("#")
-	elif p.begins_with("##"):
-		p = p.trim_prefix("#").trim_prefix("#").trim_prefix(" ").trim_prefix("#").trim_prefix(" ")
-		p = "[b][u][font_size=22]%s[/font_size][/u][/b]" % p
-	elif p.begins_with("###"):
-		p = p.trim_prefix("#").trim_prefix("#").trim_prefix("#").trim_prefix(" ")
-		p = "[b][u][font_size=18]%s[/font_size][/u][/b]" % p
-	elif p.begins_with("**") and p.ends_with("**"):
-		p = "[b][font_size=17]%s[/font_size][/b]" % p.trim_prefix("**").trim_suffix("**")
-	elif p.begins_with("- "):
+	if p.begins_with("#"):
+		var heading = _parse_heading(p)
+		if heading != "":
+			return heading
+
+	if p.begins_with("- "):
 		p = "  •  %s" % p.trim_prefix("- ")
 	elif p.begins_with("---"):
 		p = "──────────────────────────────"
 	elif p.begins_with(">"):
-		p = "[i][color=#ffffff]%s[/color][/i]" % p.trim_prefix(">").trim_prefix(" ")
+		var quote = p.trim_prefix(">").trim_prefix(" ")
+		if quote.is_empty():
+			return ""
+		p = "[color=%s]%s[/color]" % [QUOTE_COLOR, quote]
 
 	return _apply_inline_formatting(p)
+
+
+# 标题：`#` 后必须跟空格（与 markdown 一致），按层级放大字号并加粗
+static func _parse_heading(p: String) -> String:
+	var level := 0
+	while level < p.length() and p[level] == "#":
+		level += 1
+	if level > 6 or level >= p.length() or p[level] != " ":
+		return ""
+	var text := p.substr(level + 1)
+	return "[b][font_size=%d]%s[/font_size][/b]" % [HEADING_SIZES[level - 1], text]
 
 
 static func _build_table(rows: Array) -> String:
@@ -113,17 +125,23 @@ static func _build_table(rows: Array) -> String:
 
 static func _apply_inline_formatting(t: String) -> String:
 	var p = t
-	var bold_start = p.find("**")
-	if bold_start >= 0:
+	while true:
+		var bold_start = p.find("**")
+		if bold_start < 0:
+			break
 		var bold_end = p.find("**", bold_start + 2)
-		if bold_end >= 0:
-			p = p.left(bold_start) + "[b][font_size=17]" + p.substr(bold_start + 2, bold_end - bold_start - 2) + "[/font_size][/b]" + p.substr(bold_end + 2)
+		if bold_end < 0:
+			break
+		p = p.left(bold_start) + "[b][font_size=17]" + p.substr(bold_start + 2, bold_end - bold_start - 2) + "[/font_size][/b]" + p.substr(bold_end + 2)
 
-	var code_start = p.find("`")
-	if code_start >= 0:
+	while true:
+		var code_start = p.find("`")
+		if code_start < 0:
+			break
 		var code_end = p.find("`", code_start + 1)
-		if code_end >= 0:
-			p = p.left(code_start) + "[code]" + p.substr(code_start + 1, code_end - code_start - 1) + "[/code]" + p.substr(code_end + 1)
+		if code_end < 0:
+			break
+		p = p.left(code_start) + "[code]" + p.substr(code_start + 1, code_end - code_start - 1) + "[/code]" + p.substr(code_end + 1)
 
 	return p
 
