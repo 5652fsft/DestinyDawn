@@ -32,11 +32,26 @@ const PORT_RANGE = 10
 @onready var connect_button = $JoinPanel/VBox/JoinButtonRow/ConnectButton
 @onready var cancel_join_button = $JoinPanel/VBox/JoinButtonRow/CancelJoinButton
 
+@onready var update_backdrop = $UpdateBackdrop
+@onready var update_panel = $UpdatePanel
+@onready var update_version_label = $UpdatePanel/VBox/UpdateVersionLabel
+@onready var update_progress_label = $UpdatePanel/VBox/UpdateProgressLabel
+@onready var download_button = $UpdatePanel/VBox/UpdateButtonRow/DownloadButton
+@onready var later_button = $UpdatePanel/VBox/UpdateButtonRow/LaterButton
+@onready var version_label = $VersionLabel
+
+var _update_downloaded: bool = false
+var _update_check_timer: Timer = null
+
 
 
 func _ready():
 	_cleanup_multiplayer_peer()
 	GlobalGameData.load_defaults_if_empty()
+	SaveManager.load_all()
+
+	# 版本角标
+	version_label.text = "v" + UpdateManager.VERSION
 
 	# 应用按钮样式
 	var main_buttons = [
@@ -71,6 +86,21 @@ func _ready():
 	connect_button.pressed.connect(_on_connect_to_room)
 	cancel_join_button.pressed.connect(_on_cancel_join)
 	room_code_input.text_submitted.connect(_on_connect_to_room)
+
+	# 更新面板
+	download_button.pressed.connect(_on_download_pressed)
+	later_button.pressed.connect(_on_later_pressed)
+	UpdateManager.check_state_changed.connect(_on_update_check_state)
+	UpdateManager.download_state_changed.connect(_on_update_download_state)
+
+	# 启动静默检查（延迟避免卡启动）
+	if GlobalGameData.auto_update:
+		_update_check_timer = Timer.new()
+		_update_check_timer.one_shot = true
+		_update_check_timer.wait_time = 1.5
+		_update_check_timer.timeout.connect(UpdateManager.check_for_update)
+		add_child(_update_check_timer)
+		_update_check_timer.start()
 
 
 
@@ -151,6 +181,7 @@ func _apply_glass_style():
 	style_glass.bg_color = Color(0.4, 0.4, 0.43, 0.55)
 	lobby_panel.add_theme_stylebox_override("panel", style_glass)
 	join_panel.add_theme_stylebox_override("panel", style_glass)
+	update_panel.add_theme_stylebox_override("panel", style_glass)
 
 	# 联机面板按钮样式（浅蓝毛玻璃 + 左对齐 + 字体 + 左边距）
 	var font_btn = preload("res://Assets/Fonts/SourceHanSerifCN-Heavy-4.otf")
@@ -163,7 +194,7 @@ func _apply_glass_style():
 	var style_btn_pressed_pad = style_blue_pressed.duplicate()
 	style_btn_pressed_pad.content_margin_left = 12
 	style_btn_pressed_pad.border_width_left = 0
-	for btn in [copy_button, cancel_host_button, connect_button, cancel_join_button]:
+	for btn in [copy_button, cancel_host_button, connect_button, cancel_join_button, download_button, later_button]:
 		ButtonTheme.apply_menu(btn)
 		for state in ["normal", "focus", "disabled"]:
 			btn.add_theme_stylebox_override(state, style_btn_pad)
@@ -683,3 +714,74 @@ func _on_settings_pressed():
 func _on_guide_pressed():
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	get_tree().change_scene_to_file("res://Menus/GuideScene.tscn")
+
+
+# ============================================================
+#  自动更新（弹窗参照联机面板样式）
+# ============================================================
+
+func _show_update_panel(show: bool):
+	update_backdrop.visible = show
+	update_panel.visible = show
+
+func _on_update_check_state(state: int, message: String):
+	if state == UpdateManager.CheckState.UPDATE_AVAILABLE:
+		_update_downloaded = false
+		update_version_label.text = "当前 v%s → 最新 v%s" % [UpdateManager.VERSION, message]
+		update_progress_label.text = ""
+		download_button.text = "前往下载页" if _is_android() else "下载更新"
+		download_button.disabled = false
+		_show_update_panel(true)
+
+func _on_update_download_state(state: int, progress: int, total: int, message: String):
+	match state:
+		UpdateManager.DownloadState.DOWNLOADING:
+			download_button.disabled = true
+			download_button.text = "下载中..."
+			if total > 0:
+				var pct = int(progress * 100.0 / max(total, 1))
+				update_progress_label.text = "正在下载 %d%%（%s / %s）" % [pct, _fmt_size(progress), _fmt_size(total)]
+			else:
+				update_progress_label.text = "正在下载 %s" % _fmt_size(progress)
+		UpdateManager.DownloadState.READY:
+			_update_downloaded = true
+			download_button.disabled = false
+			download_button.text = "安装并重启"
+			update_progress_label.text = "下载完成（%s），点击安装并重启" % _fmt_size(progress)
+		UpdateManager.DownloadState.ERROR:
+			download_button.disabled = false
+			download_button.text = "重试下载"
+			update_progress_label.text = message
+		UpdateManager.DownloadState.INSTALLING:
+			download_button.disabled = true
+			download_button.text = "正在安装..."
+			update_progress_label.text = "正在替换游戏文件，即将重启..."
+		_:
+			pass
+
+func _on_download_pressed():
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
+	if _is_android():
+		UpdateManager.open_release_page()
+		_show_update_panel(false)
+		return
+	if _update_downloaded:
+		UpdateManager.install_update()
+	else:
+		UpdateManager.download_update()
+
+func _on_later_pressed():
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
+	_show_update_panel(false)
+
+func _is_android() -> bool:
+	return OS.get_name() == "Android"
+
+func _fmt_size(bytes: int) -> String:
+	if bytes >= 1024 * 1024 * 1024:
+		return "%.1f GB" % (bytes / 1073741824.0)
+	if bytes >= 1024 * 1024:
+		return "%.1f MB" % (bytes / 1048576.0)
+	if bytes >= 1024:
+		return "%.1f KB" % (bytes / 1024.0)
+	return "%d B" % bytes

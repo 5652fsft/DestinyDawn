@@ -410,6 +410,88 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "取消"
 
+[node name="UpdateBackdrop" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0.06, 0.06, 0.1, 0.6)
+
+[node name="UpdatePanel" type="Panel" parent="."]
+visible = false
+layout_mode = 0
+offset_left = 340.0
+offset_top = 235.0
+offset_right = 940.0
+offset_bottom = 475.0
+
+[node name="VBox" type="VBoxContainer" parent="UpdatePanel"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 16.0
+offset_right = 580.0
+offset_bottom = 220.0
+theme_override_constants/separation = 8
+
+[node name="UpdateTitle" type="Label" parent="UpdatePanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2")
+theme_override_font_sizes/font_size = 24
+text = "发现新版本"
+
+[node name="UpdateVersionLabel" type="Label" parent="UpdatePanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2")
+theme_override_font_sizes/font_size = 20
+text = "当前版本 → 最新版本"
+
+[node name="UpdateNoteLabel" type="Label" parent="UpdatePanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
+theme_override_fonts/font = ExtResource("2")
+theme_override_font_sizes/font_size = 14
+text = "更新将自动下载并替换游戏文件"
+
+[node name="UpdateProgressLabel" type="Label" parent="UpdatePanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
+theme_override_fonts/font = ExtResource("2")
+theme_override_font_sizes/font_size = 14
+text = ""
+
+[node name="UpdateButtonRow" type="HBoxContainer" parent="UpdatePanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="DownloadButton" type="Button" parent="UpdatePanel/VBox/UpdateButtonRow"]
+custom_minimum_size = Vector2(150, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "下载更新"
+
+[node name="LaterButton" type="Button" parent="UpdatePanel/VBox/UpdateButtonRow"]
+custom_minimum_size = Vector2(150, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "稍后"
+
+[node name="VersionLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 700.0
+offset_right = 120.0
+offset_bottom = 716.0
+theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 0.8)
+theme_override_fonts/font = ExtResource("2")
+theme_override_font_sizes/font_size = 12
+text = "v1.7.0"
+
 [connection signal="pressed" from="SettingsButton" to="." method="_on_settings_pressed"]
 [connection signal="pressed" from="GuideButton" to="." method="_on_guide_pressed"]
 [connection signal="pressed" from="ButtonPanel/TopRow/TeamButton" to="." method="_on_team_pressed"]

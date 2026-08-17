@@ -8,8 +8,6 @@
 
 config_version=5
 
-menu_background="elaina"
-
 [animation]
 
 compatibility/default_parent_skeleton_in_mesh_instance_3d=true
@@ -30,6 +28,8 @@ buses/default_bus_layout="uid://dpvo0w48xjncy"
 [autoload]
 
 GlobalGameData="*res://Global/GlobalGameData.gd"
+SaveManager="*res://Global/SaveManager.gd"
+UpdateManager="*res://Global/UpdateManager.gd"
 ButtonTheme="*res://Global/ButtonTheme.gd"
 AudioManager="*res://Global/AudioManager.gd"
 BackgroundManager="*res://Global/BackgroundManager.gd"

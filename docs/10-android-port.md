@@ -85,6 +85,8 @@ Godot 4.7 中 `Input.emulate_mouse_from_touch`（注意：旧名 `use_emulated_m
 
 **导出前置**：Godot 编辑器 → 项目 → 导出 → 安装 Android 导出模板。
 
+**更新策略**：Android 无法自动替换 apk（需系统安装权限），自动更新仅做「检测 + 提示 + 跳转浏览器」：检测到新版本时主菜单弹出提示，点击「前往下载页」用系统浏览器打开 GitHub release 页手动下载安装。设置页可关闭自动检查，详见 `docs/11-save-and-update.md`。
+
 ## 5. 真机测试清单（待执行）
 
 - [ ] 单指：选角色、移动、攻击、技能、拖牌出牌、目标点选

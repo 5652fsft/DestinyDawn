@@ -40,7 +40,7 @@ const DEFAULT_DECK: Array[String] = [
 	"card_shield", "card_strength", "card_weakness", "card_regen",
 ]
 
-# Phase 6 — 主菜单配置
+# 主菜单配置
 var selected_team: Array[String] = []    # 编队：角色ID列表
 var selected_deck: Array[String] = []    # 卡组：卡牌ID列表
 var player_name: String = ""
@@ -54,6 +54,16 @@ var client_peer_id: int = 2
 var audio_volume_master: float = 0.8
 var audio_volume_bgm: float = 0.3
 var audio_volume_sfx: float = 0.8
+
+# 菜单背景（默认伊蕾娜，由 SaveManager 持久化）
+var menu_background: String = "elaina"
+
+# 自动更新设置（由 SaveManager 持久化）
+var auto_update: bool = true
+var proxy_mode: String = "direct"  # direct / ghfast / ghproxy / custom
+var proxy_prefix: String = ""
+var update_proxy_host: String = ""  # HTTP 代理（如本地 Clash 127.0.0.1），可空
+var update_proxy_port: int = 0
 
 func load_defaults_if_empty():
 	if selected_team.is_empty():

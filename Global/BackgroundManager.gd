@@ -1,28 +1,24 @@
 extends Node
 
-const SETTING_KEY = "menu_background"
-
 var backgrounds: Array[Dictionary] = [
 	{"id": "bronya_seele", "name": "布洛妮娅 & 希儿", "filename": "BronyaAndSeele1.ogv"},
 	{"id": "elaina",       "name": "伊蕾娜",           "filename": "Elaina1.ogv"},
 	{"id": "static",       "name": "静态背景",          "filename": ""},
 ]
 
-var current_id: String = "bronya_seele"
+var current_id: String = "elaina"
 
 func _ready():
-	if ProjectSettings.has_setting(SETTING_KEY):
-		var saved = ProjectSettings.get_setting(SETTING_KEY)
-		if saved and typeof(saved) == TYPE_STRING:
-			current_id = saved
+	# 背景选择由 GlobalGameData + SaveManager 持久化（user://settings.cfg）
+	if GlobalGameData.menu_background != "":
+		current_id = GlobalGameData.menu_background
 
 func set_background(id: String):
 	for bg in backgrounds:
 		if bg.id == id:
 			current_id = id
-			if OS.has_feature("editor"):
-				ProjectSettings.set_setting(SETTING_KEY, id)
-				ProjectSettings.save()
+			GlobalGameData.menu_background = id
+			SaveManager.save_all()
 			get_tree().call_group("menu_bg", "_on_background_changed", id)
 			return
 

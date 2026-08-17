@@ -150,6 +150,7 @@ func _on_save_pressed():
 	if deck_ids.size() < DECK_SIZE:
 		return
 	GlobalGameData.selected_deck = deck_ids.duplicate()
+	SaveManager.save_all()
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	get_tree().change_scene_to_file("res://Menus/MainMenu.tscn")
 

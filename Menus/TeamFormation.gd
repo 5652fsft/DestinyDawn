@@ -148,6 +148,7 @@ func _on_save_pressed():
 		$HintLabel.hide()
 		return
 	GlobalGameData.selected_team = slots.duplicate()
+	SaveManager.save_all()
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	get_tree().change_scene_to_file("res://Menus/MainMenu.tscn")
 
