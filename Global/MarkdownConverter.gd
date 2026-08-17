@@ -1,7 +1,7 @@
 class_name MarkdownConverter
 extends Node
 
-const HEADING_SIZES := [34, 27, 21, 18, 16, 16]
+const HEADING_SIZES := [36, 27, 21, 18, 16, 16]
 const QUOTE_COLOR := "#A6A6B3"
 
 static func to_bbcode(t: String) -> String:
