@@ -945,15 +945,10 @@ func _execute_play_card(player_id: int, card_id: String, target_path: String):
 	var hand = deck_manager.get_hand(player_id)
 	var energy = energy_system.get_energy(player_id)
 	if multiplayer.has_multiplayer_peer():
-		rpc("_sync_card_play", player_id, card_id, target_path)
 		rpc("_sync_energy", player_id, energy)
 		rpc("_sync_hand", player_id, hand)
 	_sync_hand(player_id, hand)
 	_sync_energy(player_id, energy)
-
-@rpc("call_local", "reliable")
-func _sync_card_play(_player_id: int, _card_id: String, _target_path: String):
-	pass
 
 @rpc("call_local", "reliable")
 func _sync_energy(player_id: int, value: int):
