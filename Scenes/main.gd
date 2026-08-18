@@ -584,6 +584,8 @@ func _process(delta):
 
 func _input(event: InputEvent):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		if is_input_locked:
+			return
 		if _cell_targeting:
 			if _is_mouse_over_skill_button():
 				return
@@ -598,7 +600,8 @@ func _input(event: InputEvent):
 			return
 		_try_select_character(event.position)
 	if event is InputEventKey and event.keycode == KEY_F and event.pressed and not event.echo:
-		_toggle_hand()
+		if not is_input_locked and not _battle_over:
+			_toggle_hand()
 	if event is InputEventKey and event.keycode == KEY_ESCAPE and event.pressed and not event.echo:
 		_toggle_surrender_menu()
 
@@ -1258,12 +1261,14 @@ func _toggle_hand():
 
 # 投降菜单开关（ESC 与移动端按钮共用）
 func _toggle_surrender_menu():
-	if GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.GAME_OVER:
+	if _battle_over:
 		return
 	if _surrender_dialog and _surrender_dialog.visible:
 		_hide_surrender_dialog()
-	else:
-		_show_surrender_dialog()
+		return
+	if is_input_locked:
+		return
+	_show_surrender_dialog()
 
 # === 投降 ===
 func _show_surrender_dialog():
