@@ -211,15 +211,21 @@ func _init_proxy_option():
 	proxy_option.add_item("直连 GitHub", 0)
 	proxy_option.add_item("镜像 gh-proxy.com", 1)
 	proxy_option.add_item("镜像 gh.ddlc.top", 2)
-	proxy_option.add_item("自定义镜像", 3)
+	proxy_option.add_item("镜像 ghfast.top", 3)
+	proxy_option.add_item("镜像 gh.zwy.one", 4)
+	proxy_option.add_item("镜像 mirror.ghproxy.com", 5)
+	proxy_option.add_item("自定义镜像", 6)
 	var mode = GlobalGameData.proxy_mode
 	var idx = 0
-	if mode == "ghfast": idx = 1
-	elif mode == "zwy": idx = 2
-	elif mode == "custom": idx = 3
+	if mode == "ghproxy": idx = 1
+	elif mode == "ghddlc": idx = 2
+	elif mode == "ghfast": idx = 3
+	elif mode == "zwy": idx = 4
+	elif mode == "ghproxy_mirror": idx = 5
+	elif mode == "custom": idx = 6
 	proxy_option.select(idx)
 	proxy_edit.text = GlobalGameData.proxy_prefix
-	_update_proxy_edit_state(idx == 3)
+	_update_proxy_edit_state(idx == 6)
 	proxy_host_edit.text = GlobalGameData.update_proxy_host
 	proxy_port_edit.text = str(GlobalGameData.update_proxy_port) if GlobalGameData.update_proxy_port > 0 else ""
 
@@ -230,11 +236,14 @@ func _update_proxy_edit_state(enabled: bool):
 
 func _on_proxy_selected(index: int):
 	match index:
-		1: GlobalGameData.proxy_mode = "ghfast"
-		2: GlobalGameData.proxy_mode = "zwy"
-		3: GlobalGameData.proxy_mode = "custom"
+		1: GlobalGameData.proxy_mode = "ghproxy"
+		2: GlobalGameData.proxy_mode = "ghddlc"
+		3: GlobalGameData.proxy_mode = "ghfast"
+		4: GlobalGameData.proxy_mode = "zwy"
+		5: GlobalGameData.proxy_mode = "ghproxy_mirror"
+		6: GlobalGameData.proxy_mode = "custom"
 		_: GlobalGameData.proxy_mode = "direct"
-	_update_proxy_edit_state(index == 3)
+	_update_proxy_edit_state(index == 6)
 
 func _on_auto_toggle_toggled(on: bool):
 	GlobalGameData.auto_update = on
