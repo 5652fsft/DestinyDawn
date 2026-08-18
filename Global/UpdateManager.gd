@@ -15,7 +15,7 @@ const MIRROR_URLS: Dictionary = {
 
 const UPDATE_DIR_NAME = ".dd_update"
 const CHUNK_SIZE = 64 * 1024
-const CONNECT_TIMEOUT_MS = 15000
+const CONNECT_TIMEOUT_MS = 8000
 const READ_TIMEOUT_MS = 30000
 
 enum CheckState { IDLE, CHECKING, UP_TO_DATE, UPDATE_AVAILABLE, ERROR }
@@ -84,7 +84,7 @@ func check_for_update() -> void:
 	release_url = ""
 
 	var body: Dictionary = {"ok": false, "code": 0, "body": ""}
-	for url in _url_candidates(API_URL):
+	for url in _check_url_candidates(API_URL):
 		body = await _http_get(url)
 		if body.ok:
 			break
@@ -424,15 +424,25 @@ func open_release_page() -> void:
 #  工具
 # ============================================================
 
-# 依据当前代理设置生成候选 URL 列表（镜像优先，直连兜底）
+# 下载候选：镜像优先（大文件加速），直连兜底
 func _url_candidates(original: String) -> Array[String]:
+	var out := _mirror_urls(original)
+	out.append(original)
+	return out
+
+# 检查候选：直连优先（api.github.com 小请求直连通常更快，镜像对 api 支持不稳），镜像兜底
+func _check_url_candidates(original: String) -> Array[String]:
+	var out: Array[String] = [original]
+	out.append_array(_mirror_urls(original))
+	return out
+
+func _mirror_urls(original: String) -> Array[String]:
 	var out: Array[String] = []
 	var mode: String = GlobalGameData.proxy_mode
 	if mode == "custom" and not GlobalGameData.proxy_prefix.is_empty():
 		out.append(GlobalGameData.proxy_prefix + original)
 	elif mode != "direct" and MIRROR_URLS.has(mode):
 		out.append(MIRROR_URLS[mode] + original)
-	out.append(original)
 	return out
 
 func _is_platform_asset(name: String) -> bool:
