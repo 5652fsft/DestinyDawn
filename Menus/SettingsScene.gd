@@ -308,11 +308,11 @@ func _on_download_pressed():
 	else:
 		UpdateManager.download_update()
 
-# 发现新版本的状态文本：电脑端附加可点击的网页下载链接（自助兜底）
+# 发现新版本的状态文本：电脑端附加可点击的网页下载链接（自助兜底，独立一行避免拆断）
 func _update_available_text(version: String) -> String:
 	if OS.get_name() == "Android":
 		return "发现新版本 v" + version
-	return "发现新版本 v%s　[color=#6EB8FF][url=release]点此跳转下载页[/url][/color]" % version
+	return "发现新版本 v%s\n[color=#6EB8FF][url=release]点此跳转下载页[/url][/color]" % version
 
 func _on_status_meta_clicked(meta: Variant):
 	if meta == "release":
@@ -334,7 +334,7 @@ func _on_download_state_changed(state: int, progress: int, total: int, message: 
 			if total > 0:
 				var pct = int(progress * 100.0 / max(total, 1))
 				download_btn.text = "下载中 %d%%" % pct
-				update_status_label.text = "正在下载 %d%%（%s / %s%s）" % [pct, _fmt_size(progress), _fmt_size(total), ("　" + message) if not message.is_empty() else ""]
+				update_status_label.text = "正在下载 %d%%（%s / %s%s）" % [pct, _fmt_size(progress).replace(" ", ""), _fmt_size(total).replace(" ", ""), ("　" + message) if not message.is_empty() else ""]
 			else:
 				download_btn.text = "下载中..."
 				update_status_label.text = "正在下载..."

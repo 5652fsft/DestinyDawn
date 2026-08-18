@@ -452,6 +452,7 @@ theme_override_font_sizes/font_size = 20
 text = "当前版本 → 最新版本"
 
 [node name="UpdateNoteLabel" type="RichTextLabel" parent="UpdatePanel/VBox"]
+custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 theme_override_colors/default_color = Color(0.7, 0.7, 0.75, 1)
 theme_override_fonts/normal_font = ExtResource("2")

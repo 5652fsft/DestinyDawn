@@ -747,7 +747,7 @@ func _on_update_download_state(state: int, progress: int, total: int, message: S
 			download_button.text = "下载中..."
 			if total > 0:
 				var pct = int(progress * 100.0 / max(total, 1))
-				update_progress_label.text = "正在下载 %d%%（%s / %s%s）" % [pct, _fmt_size(progress), _fmt_size(total), ("　" + message) if not message.is_empty() else ""]
+				update_progress_label.text = "正在下载 %d%%（%s / %s%s）" % [pct, _fmt_size(progress).replace(" ", ""), _fmt_size(total).replace(" ", ""), ("　" + message) if not message.is_empty() else ""]
 			else:
 				update_progress_label.text = "正在下载 %s" % _fmt_size(progress)
 		UpdateManager.DownloadState.READY:
