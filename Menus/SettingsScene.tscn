@@ -240,14 +240,14 @@ layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="CheckUpdateButton" type="Button" parent="UpdatePanel/VBox/UpdateRow" unique_id=1376134501]
-custom_minimum_size = Vector2(110, 36)
+custom_minimum_size = Vector2(100, 36)
 layout_mode = 2
 size_flags_vertical = 4
 text = "检查更新"
 
 [node name="DownloadButton" type="Button" parent="UpdatePanel/VBox/UpdateRow" unique_id=1376134502]
 visible = false
-custom_minimum_size = Vector2(110, 36)
+custom_minimum_size = Vector2(100, 36)
 layout_mode = 2
 size_flags_vertical = 4
 text = "下载更新"
