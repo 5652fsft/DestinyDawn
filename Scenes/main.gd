@@ -772,7 +772,7 @@ func _is_valid_target(target_type: int, is_ally: bool, hit: Node = null) -> bool
 
 func _update_skill_button():
 	if skill_panel and skill_panel.has_method("set_targeting_mode"):
-		skill_panel.set_targeting_mode(is_targeting)
+		skill_panel.set_targeting_mode(is_targeting or _cell_targeting)
 
 func cancel_targeting():
 	pending_card_data = null

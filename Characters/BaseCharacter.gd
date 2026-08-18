@@ -317,6 +317,27 @@ func handle_move():
 			return
 		
 		var mouse_pos = get_global_mouse_position()
+		# 移动模式中：点击其他角色退出移动模式（保持选中，与攻击模式一致）；点击自身提示无效
+		var space_state = get_world_2d().direct_space_state
+		var query = PhysicsPointQueryParameters2D.new()
+		query.position = mouse_pos
+		query.collision_mask = click_layer
+		var results = space_state.intersect_point(query)
+		var clicked_chara = null
+		for r in results:
+			var other = r.collider
+			if other is CharacterBody2D and other.hp > 0:
+				clicked_chara = other
+				break
+		if clicked_chara != null:
+			main.show_toast("目标选择无效")
+			if clicked_chara != self:
+				main._cancel_move_mode()
+				return
+			# 点击自身：取消选中（与攻击模式一致）
+			hide_move_range()
+			main.unselect_character(self)
+			return
 		if grid_layer:
 			var local_mouse = grid_layer.to_local(mouse_pos)
 			var cell_coord: Vector2i = grid_layer.local_to_map(local_mouse)

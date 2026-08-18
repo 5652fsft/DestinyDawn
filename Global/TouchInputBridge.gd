@@ -2,9 +2,11 @@ extends Node
 
 # 触摸输入桥（Android 专用，Autoload）
 # 职责：
-#  1. 将单指触摸转换为鼠标左键事件（点击/拖动），复用现有全部鼠标交互逻辑
+#  1. 单指触摸 → 鼠标事件由引擎内置转换（emulate_mouse_from_touch=true）完成，
+#     覆盖主界面与弹出子窗口（PopupMenu），桥不再重复注入点击/移动
 #  2. 双指手势：捏合缩放 + 双指平移视角（调 camera.gd 的 touch_* 接口）
-#  3. 提供刘海屏安全区计算（get_content_safe_insets）
+#  3. ScrollContainer 触摸拖动滚动（引擎不处理，需桥实现）
+#  4. 提供刘海屏安全区计算（get_content_safe_insets）
 # 守卫：仅在 android 平台激活；桌面端完全旁路，不影响现有体验。
 
 var _active: bool = false
@@ -28,8 +30,9 @@ func _ready():
 	if not _active:
 		set_process_input(false)
 		return
-	# 桥自行转换触摸为鼠标事件，关闭内置模拟，避免事件重复触发
-	Input.emulate_mouse_from_touch = false
+	# 单指触摸→鼠标由引擎内置转换（覆盖 PopupMenu 等子窗口）；
+	# 桥仅补充引擎不做的双指手势与 ScrollContainer 拖动滚动
+	Input.emulate_mouse_from_touch = true
 
 func _input(event: InputEvent):
 	if not _active:
@@ -41,12 +44,7 @@ func _input(event: InputEvent):
 			if _touches.size() == 1:
 				_primary_index = event.index
 				touch_active = true
-				# 先发 motion 更新 hover，再检测滚动容器，最后发按下
-				_send_motion(event.position)
 				_try_begin_scroll(event.position)
-				if OS.has_feature("android"):
-					print("[Touch] down pos=", event.position, " hover=", get_viewport().gui_get_hovered_control())
-				_send_button(MOUSE_BUTTON_LEFT, true, event.position)
 			else:
 				_two_finger = true
 				_cancel_scroll()
@@ -58,8 +56,6 @@ func _input(event: InputEvent):
 				if _touches.is_empty():
 					_primary_index = -1
 					touch_active = false
-					# 抬起未配对时补发释放，防止鼠标按键卡死
-					_send_button(MOUSE_BUTTON_LEFT, false, event.position)
 				else:
 					_primary_index = _touches.keys()[0]
 			elif event.index == _primary_index:
@@ -67,8 +63,6 @@ func _input(event: InputEvent):
 				touch_active = false
 				if _scrolling:
 					_end_scroll()
-				else:
-					_send_button(MOUSE_BUTTON_LEFT, false, event.position)
 	elif event is InputEventScreenDrag:
 		if not _touches.has(event.index):
 			return
@@ -82,12 +76,10 @@ func _input(event: InputEvent):
 				var delta: Vector2 = event.position - prev
 				if not _scrolling and delta.length() > _SCROLL_DEADZONE:
 					_scrolling = true
-					# 超过死区进入滚动：取消已按下的鼠标点击，避免误触内容控件
+					# 超过死区进入滚动：取消引擎已按下的鼠标点击，避免误触内容控件
 					_send_button(MOUSE_BUTTON_LEFT, false, event.position)
 				if _scrolling:
 					_apply_scroll(delta)
-			else:
-				_send_motion(event.position)
 
 # === 双指手势 ===
 
@@ -110,7 +102,7 @@ func _update_two_finger():
 	_last_center = center
 	_last_dist = dist
 
-# === 事件转换 ===
+# === 事件转换（仅滚动取消点击使用） ===
 
 # viewport 坐标（触摸事件在 _input() 中已由 Godot 转换为此坐标系）→ window 坐标
 # Input.parse_input_event 期望 window/屏幕坐标（注入后 Viewport 会再转回 viewport 给 GUI），
@@ -120,13 +112,6 @@ func _to_window(vp_pos: Vector2) -> Vector2:
 	if vp == null:
 		return vp_pos
 	return vp.get_screen_transform() * vp_pos
-
-func _send_motion(pos: Vector2):
-	var ev := InputEventMouseMotion.new()
-	var win_pos := _to_window(pos)
-	ev.position = win_pos
-	ev.global_position = win_pos
-	Input.parse_input_event(ev)
 
 func _send_button(button: int, pressed: bool, pos: Vector2):
 	var ev := InputEventMouseButton.new()
@@ -163,11 +148,10 @@ func _apply_scroll(delta: Vector2):
 	if sc.scroll_horizontal > 0 or sc.horizontal_scroll_mode != ScrollContainer.SCROLL_MODE_DISABLED:
 		sc.scroll_horizontal = sc.scroll_horizontal - int(delta.x)
 
-# 结束滚动（手指抬起或双指介入）：清理状态并补发鼠标释放，保证鼠标按键干净
+# 结束滚动（手指抬起或双指介入）：清理状态，鼠标释放由引擎 emulation 负责
 func _end_scroll():
 	_scrolling = false
 	_scroll_container = null
-	_send_button(MOUSE_BUTTON_LEFT, false, last_touch_pos)
 
 func _cancel_scroll():
 	_scrolling = false
