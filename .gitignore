@@ -16,6 +16,9 @@
 # opencode
 .opencode/
 
+# AI 协作说明（本地私有，不纳入版本管理）
+AGENTS.md
+
 # dev plugin (local toolchain)
 /addons/godot_mcp/
 
