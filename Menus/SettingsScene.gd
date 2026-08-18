@@ -210,13 +210,15 @@ func _refresh_auto_toggle_text():
 func _init_proxy_option():
 	proxy_option.add_item("直连 GitHub", 0)
 	proxy_option.add_item("镜像 ghfast.top", 1)
-	proxy_option.add_item("镜像 ghproxy.net", 2)
-	proxy_option.add_item("自定义镜像", 3)
+	proxy_option.add_item("镜像 gh.zwy.one", 2)
+	proxy_option.add_item("镜像 mirror.ghproxy.com", 3)
+	proxy_option.add_item("自定义镜像", 4)
 	var mode = GlobalGameData.proxy_mode
 	var idx = 0
 	if mode == "ghfast": idx = 1
-	elif mode == "ghproxy": idx = 2
-	elif mode == "custom": idx = 3
+	elif mode == "zwy": idx = 2
+	elif mode == "ghproxy_mirror": idx = 3
+	elif mode == "custom": idx = 4
 	proxy_option.select(idx)
 	proxy_edit.text = GlobalGameData.proxy_prefix
 	_update_proxy_edit_state(idx == 3)
@@ -231,10 +233,11 @@ func _update_proxy_edit_state(enabled: bool):
 func _on_proxy_selected(index: int):
 	match index:
 		1: GlobalGameData.proxy_mode = "ghfast"
-		2: GlobalGameData.proxy_mode = "ghproxy"
-		3: GlobalGameData.proxy_mode = "custom"
+		2: GlobalGameData.proxy_mode = "zwy"
+		3: GlobalGameData.proxy_mode = "ghproxy_mirror"
+		4: GlobalGameData.proxy_mode = "custom"
 		_: GlobalGameData.proxy_mode = "direct"
-	_update_proxy_edit_state(index == 3)
+	_update_proxy_edit_state(index == 4)
 
 func _on_auto_toggle_toggled(on: bool):
 	GlobalGameData.auto_update = on

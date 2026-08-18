@@ -20,7 +20,7 @@
 | game | selected_team | `selected_team` | 编队（角色 id 数组） |
 | game | selected_deck | `selected_deck` | 卡组（卡牌 id 数组） |
 | update | auto_update | `auto_update` | 启动自动检查更新开关 |
-| update | proxy_mode | `proxy_mode` | 更新通道：direct / ghfast / ghproxy / custom（**默认 ghfast**，仅首次启动生效；已保存过设置的用户保留原选择） |
+| update | proxy_mode | `proxy_mode` | 更新通道：direct / ghfast / zwy / ghproxy_mirror / custom（**默认 ghfast**，仅首次启动生效；已保存过设置的用户保留原选择） |
 | update | proxy_prefix | `proxy_prefix` | 自定义镜像前缀（custom 时生效） |
 | update | update_proxy_host | `update_proxy_host` | HTTP 代理地址（如本地 Clash `127.0.0.1`），可空 |
 | update | update_proxy_port | `update_proxy_port` | HTTP 代理端口（如 `7897`） |
@@ -72,14 +72,17 @@
 
 设置页「更新通道」：
 - 直连 GitHub
-- 镜像 ghfast.top / ghproxy.net（内置前缀，主要代理 release 下载路径，api 查询可能被镜像拒绝）
+- 镜像 ghfast.top（默认）/ gh.zwy.one / mirror.ghproxy.com（内置前缀，主要代理 release 下载路径，api 查询可能被镜像拒绝）
 - 自定义镜像（输入形如 `https://ghfast.top/` 的前缀，拼接规则：前缀 + 原始 URL）
 - **HTTP 代理**（单独输入框）：填本地代理地址与端口（如 `127.0.0.1:7897`），直连与镜像都不通时可用。Godot 不走系统代理，需在此手动填写
+
+> 镜像站可能随时停服，ghproxy.net 已于 2025 年停服移除；候选列表会依次尝试、自动跳过失败的镜像。
+> 内置镜像名单依据 2026-05 实测速度选择（gh.zwy.one 7119KB/s 最快，mirror.ghproxy.com 老牌稳定支持断点续传），未来失效可在设置页切换或替换 `UpdateManager.MIRROR_URLS`。
 
 **默认通道为 ghfast 镜像**（`GlobalGameData.proxy_mode` 初始值）。
 候选 URL 策略按请求类型区分：
 - **检查更新（小 JSON）**：直连 `api.github.com` 优先（直连更快，镜像对 api 支持不稳），镜像兜底
-- **下载（大文件）**：选定镜像优先（加速），直连兜底
+- **下载（大文件）**：**用户所选通道优先** → 其余内置镜像兜底 → 直连最后兜底
 连接超时 8s，单个候选失败立即换下一个。
 镜像仅用于更新检查/下载，不影响联机等其它功能。
 

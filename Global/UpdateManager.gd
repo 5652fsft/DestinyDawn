@@ -7,11 +7,16 @@ const REPO = "5652fsft/DestinyDawn"
 const API_URL = "https://api.github.com/repos/%s/releases/latest" % REPO
 
 # 内置加速镜像（格式：镜像前缀 + 原始 URL）
+# 注意：镜像站可能随时停服，候选顺序自动跳过失败的；ghproxy.net 已于 2025 年停服移除
 const MIRROR_URLS: Dictionary = {
 	"direct": "",
 	"ghfast": "https://ghfast.top/",
-	"ghproxy": "https://ghproxy.net/",
+	"zwy": "https://gh.zwy.one/",
+	"ghproxy_mirror": "https://mirror.ghproxy.com/",
 }
+
+# 内置镜像兜底顺序（用户所选通道优先，其余按此顺序追加）
+const MIRROR_FALLBACK_ORDER: Array[String] = ["ghfast", "zwy", "ghproxy_mirror"]
 
 const UPDATE_DIR_NAME = ".dd_update"
 const CHUNK_SIZE = 64 * 1024
@@ -436,13 +441,19 @@ func _check_url_candidates(original: String) -> Array[String]:
 	out.append_array(_mirror_urls(original))
 	return out
 
+# 镜像候选：用户所选通道优先，其余内置镜像兜底（失败自动跳过）
 func _mirror_urls(original: String) -> Array[String]:
 	var out: Array[String] = []
-	var mode: String = GlobalGameData.proxy_mode
-	if mode == "custom" and not GlobalGameData.proxy_prefix.is_empty():
+	if GlobalGameData.proxy_mode == "custom" and not GlobalGameData.proxy_prefix.is_empty():
 		out.append(GlobalGameData.proxy_prefix + original)
-	elif mode != "direct" and MIRROR_URLS.has(mode):
-		out.append(MIRROR_URLS[mode] + original)
+	for key in MIRROR_FALLBACK_ORDER:
+		var prefix: String = MIRROR_URLS[key]
+		if prefix.is_empty():
+			continue
+		if GlobalGameData.proxy_mode == key:
+			out.insert(0, prefix + original)
+		elif not out.has(prefix + original):
+			out.append(prefix + original)
 	return out
 
 func _is_platform_asset(name: String) -> bool:

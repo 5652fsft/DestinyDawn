@@ -60,7 +60,7 @@ var menu_background: String = "elaina"
 
 # 自动更新设置（由 SaveManager 持久化）
 var auto_update: bool = true
-var proxy_mode: String = "ghfast"  # direct / ghfast / ghproxy / custom，默认走 ghfast 镜像加速
+var proxy_mode: String = "ghfast"  # direct / ghfast / zwy / ghproxy_mirror / custom，默认走 ghfast 镜像加速
 var proxy_prefix: String = ""
 var update_proxy_host: String = ""  # HTTP 代理（如本地 Clash 127.0.0.1），可空
 var update_proxy_port: int = 0
