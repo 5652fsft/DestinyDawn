@@ -94,3 +94,9 @@ func _drop_card():
 	if _ghost:
 		_ghost.queue_free()
 		_ghost = null
+
+# 拖拽中卡片被删除（如对手回合手牌同步）时清理幽灵副本，避免泄漏
+func _exit_tree():
+	if _ghost and is_instance_valid(_ghost):
+		_ghost.queue_free()
+		_ghost = null

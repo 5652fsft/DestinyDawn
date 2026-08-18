@@ -1,7 +1,14 @@
 class_name BuffDatabase
 
+# 惰性缓存：首次查询构建后复用（BuffData 为只读数据，无调用方修改）
+static var _cache: Dictionary = {}
+static var _cache_built: bool = false
+
 static func get_buff_data(buff_id: String) -> BuffData:
-	return _all_buffs().get(buff_id, null)
+	if not _cache_built:
+		_cache = _all_buffs()
+		_cache_built = true
+	return _cache.get(buff_id, null)
 
 static func _all_buffs() -> Dictionary:
 	var out: Dictionary = {}

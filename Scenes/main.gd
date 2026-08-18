@@ -962,7 +962,6 @@ func _sync_energy(player_id: int, value: int):
 @rpc("call_local", "reliable")
 func _sync_hand(player_id: int, hand: Array):
 	var my_pid = _my_id()
-	print("[Sync] 同步手牌 player_id=", player_id, " my_pid=", my_pid, " hand=", hand)
 	if player_id == my_pid:
 		var typed: Array[String] = []
 		typed.assign(hand)

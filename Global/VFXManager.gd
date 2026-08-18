@@ -13,6 +13,9 @@ const PRESET_COLORS = {
 static var _textures: Dictionary = {}
 static var _textures_loaded: bool = false
 
+# 预设模板缓存：首次创建后复用，播放时 duplicate（材质/纹理只读共享，发射状态在实例上）
+var _templates: Dictionary = {}
+
 static func _ensure_textures():
 	if _textures_loaded:
 		return
@@ -50,15 +53,26 @@ func play_at(pos: Vector2, preset: String) -> GPUParticles2D:
 	return p
 
 func _create(preset: String) -> GPUParticles2D:
+	var tpl = _get_template(preset)
+	if not tpl:
+		return null
+	return tpl.duplicate() as GPUParticles2D
+
+func _get_template(preset: String) -> GPUParticles2D:
+	if _templates.has(preset):
+		return _templates[preset]
+	var p: GPUParticles2D = null
 	match preset:
-		"hit": return _make_hit()
-		"heal": return _make_heal()
-		"shield": return _make_shield()
-		"buff": return _make_buff()
-		"debuff": return _make_debuff()
-		"entrance": return _make_entrance()
-		"explosion": return _make_explosion()
-		_: return null
+		"hit": p = _make_hit()
+		"heal": p = _make_heal()
+		"shield": p = _make_shield()
+		"buff": p = _make_buff()
+		"debuff": p = _make_debuff()
+		"entrance": p = _make_entrance()
+		"explosion": p = _make_explosion()
+	if p:
+		_templates[preset] = p
+	return p
 
 func _base() -> GPUParticles2D:
 	var p = GPUParticles2D.new()

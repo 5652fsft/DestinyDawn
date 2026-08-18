@@ -28,6 +28,10 @@ var attack_sfx: String = "attack_sword"
 
 const FLOATING_BAR = preload("res://Characters/FloatingBar.tscn")
 const FLOATING_NUM = preload("res://Effects/FloatingNumber.tscn")
+const SKILL_VFX = preload("res://Effects/SkillVFX.gd")
+
+# 相机引用惰性缓存（战斗场景中常驻，首次使用时查找）
+var _camera: Node = null
 var floating_bar: Node2D = null
 
 # === 外部依赖 ===
@@ -64,6 +68,9 @@ var is_attacking: bool = false
 var hit_tween: Tween = null
 var hover_tween: Tween = null
 var _is_hovered: bool = false
+var _last_hover_mouse := Vector2.INF
+var _last_hover_pos := Vector2.INF
+var _last_hover_collision_layer: int = -1
 var _fb_origin_y: float = 0.0
 var _base_sprite_scale: Vector2 = Vector2.ONE
 var _shield: int = 0
@@ -599,7 +606,7 @@ func _play_skill_vfx(fx_name: String, extra_path: String, cell_pos: Vector2) -> 
 	var extra_node: Node = null
 	if extra_path and extra_path != "":
 		extra_node = get_node_or_null(extra_path)
-	var svfx = load("res://Effects/SkillVFX.gd")
+	var svfx = SKILL_VFX
 	svfx.play(fx_name, self, extra_node, cell_pos)
 
 @rpc("any_peer", "call_local", "reliable")
@@ -616,12 +623,13 @@ func _play_vfx(color: Color, duration: float = 0.2):
 	hit_tween.tween_property(sprite, "modulate", restore, duration)
 
 func _shake_camera(intensity: float):
-	var scene = get_tree().current_scene if get_tree() else null
-	if not scene:
-		return
-	var cam = scene.find_child("Camera", true, false)
-	if cam and cam.has_method("shake"):
-		cam.shake(intensity)
+	if not _camera:
+		var scene = get_tree().current_scene if get_tree() else null
+		if not scene:
+			return
+		_camera = scene.find_child("Camera", true, false)
+	if _camera and _camera.has_method("shake"):
+		_camera.shake(intensity)
 
 func _spawn_float(value: int, heal: bool = false, shield: bool = false):
 	var num = FLOATING_NUM.instantiate()
@@ -779,6 +787,16 @@ func _sync_buffs(new_buffs: Dictionary):
 	buffs = new_buffs
 	buffs_changed.emit()
 
+# 悬停检测缓存：鼠标位置/自身位置/碰撞层任一变化才做物理查询（死亡置 0 碰撞层会自动退出悬停）
+func _check_hover_if_needed():
+	var mouse = get_global_mouse_position()
+	if mouse == _last_hover_mouse and global_position == _last_hover_pos and collision_layer == _last_hover_collision_layer:
+		return
+	_last_hover_mouse = mouse
+	_last_hover_pos = global_position
+	_last_hover_collision_layer = collision_layer
+	_check_hover()
+
 func _check_hover():
 	var space = get_world_2d().direct_space_state
 	var mouse_pos = get_global_mouse_position()
@@ -799,7 +817,7 @@ func _check_hover():
 		_on_hover_exit()
 
 func _process(delta):
-	_check_hover()
+	_check_hover_if_needed()
 	if not multiplayer or not multiplayer.has_multiplayer_peer():
 		if GlobalGameData.is_ai_mode:
 			if name.begins_with("Host"):

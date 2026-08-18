@@ -35,6 +35,9 @@ func _disconnect_buffs():
 	if current_character and current_character.has_signal("buffs_changed") and current_character.buffs_changed.is_connected(refresh):
 		current_character.buffs_changed.disconnect(refresh)
 
+var _last_attr_text := ""
+var _last_buff_text := ""
+
 func refresh():
 	if not current_character:
 		return
@@ -86,7 +89,10 @@ func refresh():
 	if "shield" in current_character and current_character.shield > 0:
 		attr_lines.append("护盾: %d" % current_character.shield)
 
-	attr_rich_label.text = "\n".join(attr_lines)
+	var attr_text = "\n".join(attr_lines)
+	if attr_text != _last_attr_text:
+		_last_attr_text = attr_text
+		attr_rich_label.text = attr_text
 
 	_update_buffs()
 
@@ -99,10 +105,14 @@ func _update_buffs():
 			var list = current_character.buffs[key]
 			for entry in list:
 				lines.append(_buff_desc(key, entry))
+	var text: String
 	if lines.is_empty():
-		buff_rich_label.text = "[color=#808080]暂无效果[/color]"
+		text = "[color=#808080]暂无效果[/color]"
 	else:
-		buff_rich_label.text = "\n".join(lines)
+		text = "\n".join(lines)
+	if text != _last_buff_text:
+		_last_buff_text = text
+		buff_rich_label.text = text
 
 func _buff_desc(key: String, entry: Dictionary) -> String:
 	var dur = entry.get("remaining", 0)
