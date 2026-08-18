@@ -20,7 +20,7 @@
 | game | selected_team | `selected_team` | 编队（角色 id 数组） |
 | game | selected_deck | `selected_deck` | 卡组（卡牌 id 数组） |
 | update | auto_update | `auto_update` | 启动自动检查更新开关 |
-| update | proxy_mode | `proxy_mode` | 更新通道：direct / ghproxy / ghddlc / ghfast / zwy / ghproxy_mirror / custom（**默认 ghproxy**，仅首次启动生效；已保存过设置的用户保留原选择） |
+| update | proxy_mode | `proxy_mode` | 更新通道：direct / ghproxy / ghddlc / ghfast / zwy / ghproxy_mirror / custom（**默认 direct 直连**，仅首次启动生效；已保存过设置的用户保留原选择） |
 | update | proxy_prefix | `proxy_prefix` | 自定义镜像前缀（custom 时生效） |
 | update | update_proxy_host | `update_proxy_host` | HTTP 代理地址（如本地 Clash `127.0.0.1`），可空 |
 | update | update_proxy_port | `update_proxy_port` | HTTP 代理端口（如 `7897`） |
@@ -79,7 +79,7 @@
 > 镜像站可能随时停服：ghproxy.net 已于 2025 年停服移除；2026-08 实测 gh-proxy.com / gh.ddlc.top 可用，ghfast.top / gh.zwy.one / mirror.ghproxy.com 暂时不可用（保留在候选列表兜底，可能恢复）。候选列表会依次尝试、自动跳过失败的镜像。
 > 镜像字段名与实际域名一致（`ghproxy` → gh-proxy.com），失效可替换 `UpdateManager.MIRROR_URLS`。
 
-**默认通道为 ghfast 镜像**（`GlobalGameData.proxy_mode` 初始值）。
+**默认通道为直连**（`GlobalGameData.proxy_mode` 初始值，直连不可用时自动尝试镜像）。
 候选 URL 策略按请求类型区分：
 - **检查更新（小 JSON）**：直连 `api.github.com` 优先（直连更快，镜像对 api 支持不稳），镜像兜底
 - **下载（大文件）**：**用户所选通道优先** → 其余内置镜像兜底 → 直连最后兜底
