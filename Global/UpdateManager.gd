@@ -7,16 +7,17 @@ const REPO = "5652fsft/DestinyDawn"
 const API_URL = "https://api.github.com/repos/%s/releases/latest" % REPO
 
 # 内置加速镜像（格式：镜像前缀 + 原始 URL）
-# 注意：镜像站可能随时停服，候选顺序自动跳过失败的；ghproxy.net 已于 2025 年停服移除
+# 注意：镜像站可能随时停服，候选顺序自动跳过失败的；
+# 2026-08 实测 ghfast.top / gh.zwy.one / mirror.ghproxy.com 已不可用，替换为 gh-proxy.com 与 gh.ddlc.top
 const MIRROR_URLS: Dictionary = {
 	"direct": "",
-	"ghfast": "https://ghfast.top/",
-	"zwy": "https://gh.zwy.one/",
-	"ghproxy_mirror": "https://mirror.ghproxy.com/",
+	"ghfast": "https://gh-proxy.com/",
+	"zwy": "https://gh.ddlc.top/",
+	"ghproxy_mirror": "",
 }
 
 # 内置镜像兜底顺序（用户所选通道优先，其余按此顺序追加）
-const MIRROR_FALLBACK_ORDER: Array[String] = ["ghfast", "zwy", "ghproxy_mirror"]
+const MIRROR_FALLBACK_ORDER: Array[String] = ["ghfast", "zwy"]
 
 const UPDATE_DIR_NAME = ".dd_update"
 const CHUNK_SIZE = 64 * 1024
