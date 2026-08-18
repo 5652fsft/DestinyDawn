@@ -44,7 +44,6 @@
 ### 版本号
 
 - 唯一来源：`Global/UpdateManager.gd` 的 `const VERSION`，发布时同步 `export_presets.cfg` 导出路径
-- 发布脚本 `tools/publish.ps1` 会自动从 UpdateManager.gd 提取版本号
 
 ### 检查更新
 
@@ -86,23 +85,6 @@
 | `download_state_changed` | (state, progress, total, message) | IDLE/DOWNLOADING/READY/INSTALLING/ERROR |
 
 ## 3. 发布流程
-
-### 一键脚本（推荐）
-
-前置：Godot 4.7（已装导出模板）、[gh CLI](https://cli.github.com/) 已登录（`gh auth login`）
-
-```powershell
-# 仅 Windows（内嵌 pck 单 exe）
-.\tools\publish.ps1
-
-# 同时导出并上传 Android apk
-.\tools\publish.ps1 -Android
-
-# 指定 Godot 可执行文件路径
-.\tools\publish.ps1 -GodotExe "D:\Godot\godot.exe"
-```
-
-脚本步骤：提取 VERSION → 无头导出 → 确认 → `gh release create vX.Y.Z <exe> [apk] --generate-notes --target master`
 
 ### 手动发布
 
