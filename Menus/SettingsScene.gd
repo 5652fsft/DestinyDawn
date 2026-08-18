@@ -331,12 +331,11 @@ func _on_download_state_changed(state: int, progress: int, total: int, message: 
 	match state:
 		UpdateManager.DownloadState.DOWNLOADING:
 			download_btn.disabled = true
+			download_btn.text = "下载中..."
 			if total > 0:
 				var pct = int(progress * 100.0 / max(total, 1))
-				download_btn.text = "下载中 %d%%" % pct
 				update_status_label.text = "正在下载 %d%%\n（%s / %s%s）" % [pct, _fmt_size(progress).replace(" ", ""), _fmt_size(total).replace(" ", ""), ("　" + message) if not message.is_empty() else ""]
 			else:
-				download_btn.text = "下载中..."
 				update_status_label.text = "正在下载..."
 		UpdateManager.DownloadState.READY:
 			_downloaded = true
