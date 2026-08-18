@@ -55,6 +55,9 @@ func _play_turn_transition():
 	var is_my = _is_my_turn()
 	transition_label.text = "你的回合" if is_my else "敌方回合"
 
+	# 过渡期间锁定棋盘输入（遮罩之外还需代码级锁：角色点击为每帧轮询物理查询）
+	main.is_input_locked = true
+
 	# 过渡期间隐藏手牌，结束后恢复
 	var hand_panel = main.get_node_or_null("UI/HandPanel")
 	var had_hand = hand_panel and hand_panel.visible and not ("_hand_hidden" in main and main._hand_hidden)
@@ -81,6 +84,9 @@ func _play_turn_transition():
 	tw.tween_callback(func():
 		transition.hide()
 		transition_mask.position.x = 1280
+		# 仅当投降菜单未打开时解锁（ESC 可在过渡期间打开菜单）
+		if not (main._surrender_dialog and main._surrender_dialog.visible):
+			main.is_input_locked = false
 		# 恢复手牌（仅当用户未主动用 F 隐藏）
 		if hand_panel and had_hand and not ("_hand_hidden" in main and main._hand_hidden):
 			hand_panel.show()

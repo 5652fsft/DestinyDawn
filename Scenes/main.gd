@@ -20,6 +20,8 @@ var is_viewing_enemy: bool = false
 var _hand_hidden: bool = false
 var _surrender_dialog: Panel = null
 var _battle_over: bool = false
+# 输入锁：回合过渡/投降菜单/战斗结算期间禁止棋盘点击（GUI 遮罩之外的代码级锁）
+var is_input_locked: bool = false
 
 # === 卡牌系统 ===
 var pending_card_data: CardData = null
@@ -1265,6 +1267,7 @@ func _toggle_surrender_menu():
 
 # === 投降 ===
 func _show_surrender_dialog():
+	is_input_locked = true
 	if _surrender_dialog:
 		_surrender_dialog.show()
 		character_info_panel.hide()
@@ -1286,6 +1289,7 @@ func _show_surrender_dialog():
 func _hide_surrender_dialog():
 	if _surrender_dialog:
 		_surrender_dialog.hide()
+	is_input_locked = false
 	if not _battle_over:
 		_set_mobile_buttons_visible.call_deferred(true)
 
@@ -1358,6 +1362,7 @@ func show_battle_result(from_surrender: bool = false, surrendering_is_host: bool
 	if _battle_over:
 		return
 	_battle_over = true
+	is_input_locked = true
 	var i_win
 	if from_surrender:
 		i_win = GlobalGameData.is_host != surrendering_is_host

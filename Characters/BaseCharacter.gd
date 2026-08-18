@@ -311,6 +311,8 @@ func _is_mouse_over_ui() -> bool:
 func handle_move():
 	if hp <= 0:
 		return
+	if main.is_input_locked:
+		return
 	if Input.is_action_just_pressed("Click") and not _is_mouse_over_ui():
 		if main.is_targeting:
 			return
@@ -381,6 +383,8 @@ func handle_move():
 # 处理攻击输入：点击敌人执行 _play_attack_animation → perform_attack
 func handle_attack():
 	if hp <= 0:
+		return
+	if main.is_input_locked:
 		return
 	if Input.is_action_just_pressed("Click") and not _is_mouse_over_ui():
 		if main.is_targeting:
