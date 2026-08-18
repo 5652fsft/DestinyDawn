@@ -250,13 +250,15 @@ custom_minimum_size = Vector2(130, 36)
 layout_mode = 2
 text = "下载更新"
 
-[node name="UpdateStatusLabel" type="Label" parent="UpdatePanel/VBox/UpdateRow" unique_id=89947257]
+[node name="UpdateStatusLabel" type="RichTextLabel" parent="UpdatePanel/VBox/UpdateRow" unique_id=89947257]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.87, 0.88, 0.92, 1)
-theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 14
-vertical_alignment = 1
+theme_override_colors/default_color = Color(0.87, 0.88, 0.92, 1)
+theme_override_fonts/normal_font = ExtResource("2")
+theme_override_font_sizes/normal_font_size = 14
+bbcode_enabled = true
+scroll_active = false
+text = ""
 
 [node name="BackButton" type="Button" parent="." unique_id=246987257]
 layout_mode = 0

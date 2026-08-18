@@ -451,11 +451,13 @@ theme_override_fonts/font = ExtResource("2")
 theme_override_font_sizes/font_size = 20
 text = "当前版本 → 最新版本"
 
-[node name="UpdateNoteLabel" type="Label" parent="UpdatePanel/VBox"]
+[node name="UpdateNoteLabel" type="RichTextLabel" parent="UpdatePanel/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
-theme_override_fonts/font = ExtResource("2")
-theme_override_font_sizes/font_size = 14
+theme_override_colors/default_color = Color(0.7, 0.7, 0.75, 1)
+theme_override_fonts/normal_font = ExtResource("2")
+theme_override_font_sizes/normal_font_size = 14
+bbcode_enabled = true
+scroll_active = false
 text = "更新将自动下载并替换游戏文件"
 
 [node name="UpdateProgressLabel" type="Label" parent="UpdatePanel/VBox"]

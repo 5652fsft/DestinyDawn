@@ -2,7 +2,7 @@ extends Node
 # 自动更新：GitHub Release 检查 + 流式下载 + 安装（Windows 用 bat 延迟替换）
 # VERSION 为游戏内唯一版本来源，发布时同步修改 export_presets.cfg 路径。
 
-const VERSION = "1.7.2"
+const VERSION = "1.7.3"
 const REPO = "5652fsft/DestinyDawn"
 const API_URL = "https://api.github.com/repos/%s/releases/latest" % REPO
 
@@ -25,6 +25,9 @@ const UPDATE_DIR_NAME = ".dd_update"
 const CHUNK_SIZE = 64 * 1024
 const CONNECT_TIMEOUT_MS = 8000
 const READ_TIMEOUT_MS = 30000
+# 分段并发下载：镜像按连接限速（~80KB/s），8 段并发可提升至 ~640KB/s，断流只重试失败段
+const SEGMENT_COUNT = 8
+const SEGMENT_RETRIES = 2
 
 enum CheckState { IDLE, CHECKING, UP_TO_DATE, UPDATE_AVAILABLE, ERROR }
 enum DownloadState { IDLE, DOWNLOADING, READY, INSTALLING, ERROR }
@@ -45,6 +48,12 @@ var update_dismissed: bool = false
 var _checking: bool = false
 var _downloading: bool = false
 var _download_total: int = 0
+
+# 分段下载状态（每段已读字节 + 速度滑动窗口）
+var _seg_reads: Array[int] = []
+var _speed_mark_time: int = 0
+var _speed_mark_bytes: int = 0
+var _last_speed: float = 0.0
 
 # 状态更新入口：记录当前状态供 UI 查询，并广播信号
 func _set_check_state(state: int, message: String):
@@ -248,7 +257,7 @@ func download_update() -> void:
 
 	var ok: bool = false
 	for url in _url_candidates(latest_asset_url):
-		ok = await _stream_download(url, save_path)
+		ok = await _download_segmented(url, save_path)
 		if ok:
 			break
 
@@ -273,11 +282,11 @@ func _get_download_save_path() -> String:
 		return ""
 	return staging + "/" + latest_asset_name
 
-# 跟随重定向（GitHub release 下载 URL 会 302 到 objects.githubusercontent.com）
-func _stream_download(url: String, save_path: String) -> bool:
+# 分段并发下载：302 探测 → 8 段 Range 并发，断流只重试失败段
+func _download_segmented(url: String, save_path: String) -> bool:
 	var current_url = url
 	for i in range(6):
-		var result = await _stream_download_once(current_url, save_path)
+		var result = await _segment_batch(current_url, save_path)
 		if result.get("ok", false):
 			return true
 		var loc = result.get("redirect", "")
@@ -289,86 +298,234 @@ func _stream_download(url: String, save_path: String) -> bool:
 	print("[Update] 重定向次数过多，放弃下载")
 	return false
 
-func _stream_download_once(url: String, save_path: String) -> Dictionary:
+# 单候选 URL 的分段批处理：探测 → 8 段并发（单循环多路复用）→ 汇总结果
+func _segment_batch(url: String, save_path: String) -> Dictionary:
 	var parsed = _parse_url(url)
 	if parsed.is_empty():
 		return {"ok": false, "redirect": ""}
+	if latest_asset_size <= 0:
+		return {"ok": false, "redirect": ""}
+
+	# 302 探测：单连接小 Range，确认最终 URL
+	var probe = await _probe_segment(url, parsed)
+	if probe.has("redirect"):
+		return {"ok": false, "redirect": probe.redirect}
+	if not probe.get("ok", false):
+		return {"ok": false, "redirect": ""}
+
+	var f = FileAccess.open(save_path, FileAccess.WRITE)
+	if not f:
+		return {"ok": false, "redirect": ""}
+	f.close()
+
+	var seg_size = ceili(latest_asset_size / float(SEGMENT_COUNT))
+	var seg_start: Array[int] = []
+	var seg_target: Array[int] = []
+	for s in range(SEGMENT_COUNT):
+		var start = s * seg_size
+		var end = mini(start + seg_size, latest_asset_size) - 1
+		seg_start.append(start)
+		seg_target.append(end - start + 1)
+
+	_seg_reads.resize(SEGMENT_COUNT)
+	_seg_reads.fill(0)
+	_speed_mark_time = 0
+	_speed_mark_bytes = 0
+	_last_speed = 0.0
+
+	# 段状态：0=进行中 1=完成 2=永久失败
+	var seg_state: Array[int] = []
+	var clients: Array = []
+	var files: Array = []
+	var attempts: Array[int] = []
+	var last_activity: Array[int] = []
+	var requested: Array[bool] = []
+	for s in range(SEGMENT_COUNT):
+		seg_state.append(0)
+		clients.append(null)
+		files.append(null)
+		attempts.append(0)
+		last_activity.append(0)
+		requested.append(false)
+
+	# 启动所有段连接（request 在连接建立后发出）
+	for s in range(SEGMENT_COUNT):
+		clients[s] = _segment_start_client(parsed)
+		if clients[s] == null:
+			attempts[s] = SEGMENT_RETRIES + 1
+			seg_state[s] = 2
+		else:
+			files[s] = FileAccess.open(save_path, FileAccess.READ_WRITE)
+			last_activity[s] = Time.get_ticks_msec()
+
+	# 主循环：每帧 poll 全部段，交错读写（连接超时逐段判定，下载全程不设全局截止）
+	while true:
+		var now = Time.get_ticks_msec()
+		var all_settled = true
+		for s in range(SEGMENT_COUNT):
+			if seg_state[s] != 0:
+				continue
+			all_settled = false
+			var c = clients[s]
+			if c == null:
+				# 连接失败/断流 → 重试（关闭的段重连）
+				attempts[s] += 1
+				if attempts[s] > SEGMENT_RETRIES:
+					seg_state[s] = 2
+					continue
+				var file = files[s]
+				clients[s] = _segment_start_client(parsed)
+				if clients[s] == null:
+					seg_state[s] = 2
+					continue
+				files[s] = FileAccess.open(save_path, FileAccess.READ_WRITE) if file == null else file
+				requested[s] = false
+				last_activity[s] = now
+				continue
+			c.poll()
+			var st = c.get_status()
+			if st == HTTPClient.STATUS_CONNECTING or st == HTTPClient.STATUS_RESOLVING:
+				if now - last_activity[s] > CONNECT_TIMEOUT_MS:
+					_teardown_segment(s, clients, files)
+			elif st == HTTPClient.STATUS_CONNECTED:
+				if not requested[s]:
+					var err = c.request(HTTPClient.METHOD_GET, parsed.path, ["User-Agent: DestinyDawn/" + VERSION, "Range: bytes=%d-%d" % [seg_start[s], seg_start[s] + seg_target[s] - 1]])
+					if err != OK:
+						_teardown_segment(s, clients, files)
+					else:
+						requested[s] = true
+				elif now - last_activity[s] > READ_TIMEOUT_MS:
+					_teardown_segment(s, clients, files)
+			elif st == HTTPClient.STATUS_REQUESTING:
+				if now - last_activity[s] > READ_TIMEOUT_MS:
+					_teardown_segment(s, clients, files)
+			elif st == HTTPClient.STATUS_BODY:
+				if _seg_reads[s] == 0:
+					var code = c.get_response_code()
+					if code >= 300 and code < 400:
+						_teardown_segment(s, clients, files)
+						continue
+				var chunk = c.read_response_body_chunk()
+				if not chunk.is_empty():
+					var file = files[s]
+					file.seek(seg_start[s] + _seg_reads[s])
+					file.store_buffer(chunk)
+					_seg_reads[s] += chunk.size()
+					last_activity[s] = now
+					_emit_progress()
+					if _seg_reads[s] >= seg_target[s]:
+						_teardown_segment(s, clients, files)
+						seg_state[s] = 1
+				elif now - last_activity[s] > READ_TIMEOUT_MS:
+					_teardown_segment(s, clients, files)
+			elif st == HTTPClient.STATUS_DISCONNECTED or st == HTTPClient.STATUS_CANT_CONNECT or st == HTTPClient.STATUS_CANT_RESOLVE:
+				if _seg_reads[s] >= seg_target[s]:
+					seg_state[s] = 1
+				_teardown_segment(s, clients, files)
+			else:
+				_teardown_segment(s, clients, files)
+		if all_settled:
+			break
+		await get_tree().process_frame
+
+	# 汇总
+	var ok = true
+	for s in range(SEGMENT_COUNT):
+		if seg_state[s] == 2 or _seg_reads[s] < seg_target[s]:
+			ok = false
+			break
+	if ok:
+		print("[Update] 分段下载完成: ", _file_size(save_path), " / ", latest_asset_size)
+	return {"ok": ok, "redirect": ""}
+
+# 创建段连接（请求在连接建立后由主循环发出），失败返回 null
+func _segment_start_client(parsed: Dictionary) -> HTTPClient:
 	var client = HTTPClient.new()
 	_apply_proxy(client)
 	var tls_opts: TLSOptions = TLSOptions.client() if parsed.tls else null
 	var err = client.connect_to_host(parsed.host, parsed.port, tls_opts)
 	if err != OK:
 		client.close()
-		return {"ok": false, "redirect": ""}
+		return null
+	return client
 
+# 关闭段连接与文件句柄，置空（下轮走重试分支）
+func _teardown_segment(s: int, clients: Array, files: Array):
+	var c = clients[s]
+	if c:
+		c.close()
+		clients[s] = null
+	var file = files[s]
+	if file:
+		file.close()
+		files[s] = null
+
+# 302 探测：请求 1 字节 Range，返回 {"ok"} 或 {"redirect"}
+func _probe_segment(url: String, parsed: Dictionary) -> Dictionary:
+	var client = HTTPClient.new()
+	_apply_proxy(client)
+	var tls_opts: TLSOptions = TLSOptions.client() if parsed.tls else null
+	var err = client.connect_to_host(parsed.host, parsed.port, tls_opts)
+	if err != OK:
+		client.close()
+		return {"ok": false}
 	var deadline = Time.get_ticks_msec() + CONNECT_TIMEOUT_MS
 	while client.get_status() == HTTPClient.STATUS_CONNECTING or client.get_status() == HTTPClient.STATUS_RESOLVING:
 		client.poll()
 		if Time.get_ticks_msec() > deadline:
 			client.close()
-			return {"ok": false, "redirect": ""}
+			return {"ok": false}
 		await get_tree().process_frame
-
 	if client.get_status() != HTTPClient.STATUS_CONNECTED:
 		client.close()
-		return {"ok": false, "redirect": ""}
-
-	err = client.request(HTTPClient.METHOD_GET, parsed.path, ["User-Agent: DestinyDawn/" + VERSION])
+		return {"ok": false}
+	err = client.request(HTTPClient.METHOD_GET, parsed.path, ["User-Agent: DestinyDawn/" + VERSION, "Range: bytes=0-0"])
 	if err != OK:
 		client.close()
-		return {"ok": false, "redirect": ""}
-
-	var file = FileAccess.open(save_path, FileAccess.WRITE)
-	if not file:
-		client.close()
-		return {"ok": false, "redirect": ""}
-
-	var total_len = 0
-	var total_read = 0
-	var last_activity = Time.get_ticks_msec()
-	var succeeded = false
+		return {"ok": false}
+	deadline = Time.get_ticks_msec() + READ_TIMEOUT_MS
 	while true:
 		client.poll()
 		var status = client.get_status()
 		if status == HTTPClient.STATUS_BODY:
-			if total_len == 0:
-				var code = client.get_response_code()
-				if code >= 300 and code < 400:
-					var loc = _extract_location(client)
-					file.close()
-					client.close()
-					if loc.is_empty():
-						return {"ok": false, "redirect": ""}
-					return {"ok": false, "redirect": _resolve_redirect(loc, parsed)}
-				total_len = client.get_response_body_length()
-				if total_len <= 0:
-					total_len = latest_asset_size
-			var chunk = client.read_response_body_chunk()
-			if not chunk.is_empty():
-				file.store_buffer(chunk)
-				total_read += chunk.size()
-				last_activity = Time.get_ticks_msec()
-				download_state_changed.emit(DownloadState.DOWNLOADING, total_read, total_len)
-			elif Time.get_ticks_msec() - last_activity > READ_TIMEOUT_MS:
-				break
-			if total_len > 0 and total_read >= total_len:
-				succeeded = true
-				break
-		elif status == HTTPClient.STATUS_DISCONNECTED:
-			succeeded = total_read >= total_len and total_len > 0
-			break
-		elif status == HTTPClient.STATUS_CONNECTED or status == HTTPClient.STATUS_REQUESTING:
-			if Time.get_ticks_msec() - last_activity > READ_TIMEOUT_MS:
-				break
-		elif status == HTTPClient.STATUS_CANT_CONNECT or status == HTTPClient.STATUS_CANT_RESOLVE:
-			break
-		else:
-			break
+			var code = client.get_response_code()
+			if code >= 300 and code < 400:
+				var loc = _extract_location(client)
+				client.close()
+				if loc.is_empty():
+					return {"ok": false}
+				return {"ok": false, "redirect": _resolve_redirect(loc, parsed)}
+			client.close()
+			return {"ok": true}
+		elif status == HTTPClient.STATUS_DISCONNECTED or status == HTTPClient.STATUS_CANT_CONNECT or status == HTTPClient.STATUS_CANT_RESOLVE:
+			client.close()
+			return {"ok": false}
+		elif Time.get_ticks_msec() > deadline:
+			client.close()
+			return {"ok": false}
 		await get_tree().process_frame
+	return {"ok": false}
 
-	file.close()
-	client.close()
-	return {"ok": succeeded, "redirect": ""}
+# 聚合各段进度并广播（message 携带 1s 滑动窗口速度）
+func _emit_progress():
+	var total_read = 0
+	for r in _seg_reads:
+		total_read += r
+	var now = Time.get_ticks_msec()
+	if _speed_mark_time == 0:
+		_speed_mark_time = now
+		_speed_mark_bytes = total_read
+	elif now - _speed_mark_time >= 1000:
+		_last_speed = (total_read - _speed_mark_bytes) * 1000.0 / float(now - _speed_mark_time)
+		_speed_mark_time = now
+		_speed_mark_bytes = total_read
+	var msg = _fmt_speed(_last_speed) if _last_speed > 0.0 else ""
+	download_state_changed.emit(DownloadState.DOWNLOADING, total_read, latest_asset_size, msg)
+
+func _fmt_speed(speed: float) -> String:
+	if speed >= 1024 * 1024:
+		return "%.2f MB/s" % (speed / 1048576.0)
+	return "%.0f KB/s" % (speed / 1024.0)
 
 # 从响应头提取 Location（HTTPClient 头格式 "Key: Value"）
 func _extract_location(client: HTTPClient) -> String:

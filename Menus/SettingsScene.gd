@@ -41,6 +41,7 @@ func _ready():
 	update_status_label.text = "当前版本 v" + UpdateManager.VERSION
 	UpdateManager.check_state_changed.connect(_on_check_state_changed)
 	UpdateManager.download_state_changed.connect(_on_download_state_changed)
+	update_status_label.meta_clicked.connect(_on_status_meta_clicked)
 	_sync_status_from_manager()
 
 	# 面板透明（无灰色底框，与主菜单风格一致）
@@ -267,7 +268,7 @@ func _sync_status_from_manager():
 			update_status_label.text = "已是最新版本 v" + UpdateManager.last_check_message
 			download_btn.visible = false
 		UpdateManager.CheckState.UPDATE_AVAILABLE:
-			update_status_label.text = "发现新版本 v" + UpdateManager.last_check_message + "，点击右侧按钮下载"
+			update_status_label.text = _update_available_text(UpdateManager.last_check_message)
 			download_btn.visible = true
 			download_btn.text = "前往下载页" if OS.get_name() == "Android" else "下载更新"
 			download_btn.disabled = false
@@ -287,7 +288,7 @@ func _on_check_state_changed(state: int, message: String):
 			update_status_label.text = "已是最新版本 v" + message
 			download_btn.visible = false
 		UpdateManager.CheckState.UPDATE_AVAILABLE:
-			update_status_label.text = "发现新版本 v" + message + "，点击右侧按钮下载"
+			update_status_label.text = _update_available_text(message)
 			download_btn.visible = true
 			download_btn.text = "前往下载页" if OS.get_name() == "Android" else "下载更新"
 			download_btn.disabled = false
@@ -307,6 +308,25 @@ func _on_download_pressed():
 	else:
 		UpdateManager.download_update()
 
+# 发现新版本的状态文本：电脑端附加可点击的网页下载链接（自助兜底）
+func _update_available_text(version: String) -> String:
+	if OS.get_name() == "Android":
+		return "发现新版本 v" + version
+	return "发现新版本 v%s　[color=#6EB8FF][url=release]点此跳转下载页[/url][/color]" % version
+
+func _on_status_meta_clicked(meta: Variant):
+	if meta == "release":
+		UpdateManager.open_release_page()
+
+func _fmt_size(bytes: int) -> String:
+	if bytes >= 1024 * 1024 * 1024:
+		return "%.1f GB" % (bytes / 1073741824.0)
+	if bytes >= 1024 * 1024:
+		return "%.1f MB" % (bytes / 1048576.0)
+	if bytes >= 1024:
+		return "%.1f KB" % (bytes / 1024.0)
+	return "%d B" % bytes
+
 func _on_download_state_changed(state: int, progress: int, total: int, message: String):
 	match state:
 		UpdateManager.DownloadState.DOWNLOADING:
@@ -314,8 +334,10 @@ func _on_download_state_changed(state: int, progress: int, total: int, message: 
 			if total > 0:
 				var pct = int(progress * 100.0 / max(total, 1))
 				download_btn.text = "下载中 %d%%" % pct
+				update_status_label.text = "正在下载 %d%%（%s / %s%s）" % [pct, _fmt_size(progress), _fmt_size(total), ("　" + message) if not message.is_empty() else ""]
 			else:
 				download_btn.text = "下载中..."
+				update_status_label.text = "正在下载..."
 		UpdateManager.DownloadState.READY:
 			_downloaded = true
 			download_btn.disabled = false

@@ -35,6 +35,7 @@ const PORT_RANGE = 10
 @onready var update_backdrop = $UpdateBackdrop
 @onready var update_panel = $UpdatePanel
 @onready var update_version_label = $UpdatePanel/VBox/UpdateVersionLabel
+@onready var update_note_label = $UpdatePanel/VBox/UpdateNoteLabel
 @onready var update_progress_label = $UpdatePanel/VBox/UpdateProgressLabel
 @onready var download_button = $UpdatePanel/VBox/UpdateButtonRow/DownloadButton
 @onready var later_button = $UpdatePanel/VBox/UpdateButtonRow/LaterButton
@@ -90,6 +91,7 @@ func _ready():
 	# 更新面板
 	download_button.pressed.connect(_on_download_pressed)
 	later_button.pressed.connect(_on_later_pressed)
+	update_note_label.meta_clicked.connect(_on_update_note_meta)
 	UpdateManager.check_state_changed.connect(_on_update_check_state)
 	UpdateManager.download_state_changed.connect(_on_update_download_state)
 	if UpdateManager.current_check_state == UpdateManager.CheckState.UPDATE_AVAILABLE:
@@ -733,6 +735,7 @@ func _on_update_check_state(state: int, message: String):
 		_update_downloaded = false
 		update_version_label.text = "当前 v%s → 最新 v%s" % [UpdateManager.VERSION, message]
 		update_progress_label.text = ""
+		update_note_label.text = "更新将自动下载并替换游戏文件　[color=#6EB8FF][url=release]或点此跳转下载页[/url][/color]" if not _is_android() else "更新将自动下载并替换游戏文件"
 		download_button.text = "前往下载页" if _is_android() else "下载更新"
 		download_button.disabled = false
 		_show_update_panel(true)
@@ -744,7 +747,7 @@ func _on_update_download_state(state: int, progress: int, total: int, message: S
 			download_button.text = "下载中..."
 			if total > 0:
 				var pct = int(progress * 100.0 / max(total, 1))
-				update_progress_label.text = "正在下载 %d%%（%s / %s）" % [pct, _fmt_size(progress), _fmt_size(total)]
+				update_progress_label.text = "正在下载 %d%%（%s / %s%s）" % [pct, _fmt_size(progress), _fmt_size(total), ("　" + message) if not message.is_empty() else ""]
 			else:
 				update_progress_label.text = "正在下载 %s" % _fmt_size(progress)
 		UpdateManager.DownloadState.READY:
@@ -778,6 +781,10 @@ func _on_later_pressed():
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	UpdateManager.update_dismissed = true
 	_show_update_panel(false)
+
+func _on_update_note_meta(meta: Variant):
+	if meta == "release":
+		UpdateManager.open_release_page()
 
 func _is_android() -> bool:
 	return OS.get_name() == "Android"

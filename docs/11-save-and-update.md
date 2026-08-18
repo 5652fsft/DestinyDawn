@@ -56,13 +56,20 @@
 
 ### 下载与安装（Windows）
 
-1. `HTTPClient` 流式下载（64KB 分块，避免 200MB+ 文件进内存），进度实时推送
+1. **分段并发下载（v1.7.3 起）**：`HTTPClient` 先做 1 字节 `Range: bytes=0-0` 探测（处理 GitHub 302 重定向，最多跟随 6 次），随后 8 段 `Range` 并发拉取（`SEGMENT_COUNT=8`），按偏移写入同一个文件，避免大文件进内存
+   - 原因：镜像按连接限速（实测 gh-proxy.com 完整下载仅 ~67KB/s 且 12.5MB 后断流），8 段并发实测峰值 ~945KB/s，237MB 约 4 分钟完成；某段断流只重试该段（`SEGMENT_RETRIES=2`），不中断其它段
+   - 进度实时推送（64KB 分块），message 参数携带 1s 滑动窗口速度（如 `640KB/s` / `1.20 MB/s`）
 2. 下载到 exe 旁 `.dd_update/` 临时目录，完成后与 release 资产 `size` 字段校验
 3. 写入 `install_update.bat`：等待 3 秒（旧进程退出）→ `move /y` 覆盖 exe → 启动新 exe → 自删
 4. `OS.create_process` 启动 bat 后游戏退出，由 bat 完成替换与重启
 5. 失败保护：`move` 失败不会删除旧 exe，游戏仍可正常运行
 
 注意：若游戏安装在受保护目录（如 `Program Files`），替换可能因权限失败，需以管理员运行一次或改放自定义目录。
+
+### 下载兜底（网页跳转）
+
+- 镜像全部不可用时下载会失败，为此 v1.7.3 起在**电脑端**提供网页兜底：主菜单更新面板与设置页状态文字附带可点击链接「点此跳转下载页」（`OS.shell_open` 打开浏览器），由用户手动下载安装；Android 原本就是「前往下载页」按钮
+- 实现：状态 Label 为 `RichTextLabel`（`bbcode_enabled`），`[url=release]` + `meta_clicked` 回调
 
 ### 下载与提示（Android）
 
@@ -83,7 +90,7 @@
 候选 URL 策略按请求类型区分：
 - **检查更新（小 JSON）**：直连 `api.github.com` 优先（直连更快，镜像对 api 支持不稳），镜像兜底
 - **下载（大文件）**：**用户所选通道优先** → 其余内置镜像兜底 → 直连最后兜底
-连接超时 8s，单个候选失败立即换下一个。
+连接超时 8s（连接阶段逐段判定），读超时 30s（读阶段逐段判定），单个候选失败立即换下一个。
 镜像仅用于更新检查/下载，不影响联机等其它功能。
 
 ### 状态信号
@@ -91,7 +98,7 @@
 | 信号 | 参数 | 说明 |
 |---|---|---|
 | `check_state_changed` | (state, message) | IDLE/CHECKING/UP_TO_DATE/UPDATE_AVAILABLE/ERROR |
-| `download_state_changed` | (state, progress, total, message) | IDLE/DOWNLOADING/READY/INSTALLING/ERROR |
+| `download_state_changed` | (state, progress, total, message) | IDLE/DOWNLOADING/READY/INSTALLING/ERROR；DOWNLOADING 时 message 为实时速度文本（空串表示暂未测出） |
 
 ## 3. 发布流程
 
