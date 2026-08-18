@@ -84,9 +84,6 @@ offset_bottom = 80.0
 theme = ExtResource("12_p4fma")
 player_side = "Client"
 
-[node name="TurnIndicator" parent="UI" unique_id=463834768 instance=ExtResource("5_yp48q")]
-theme = ExtResource("12_p4fma")
-
 [node name="Toast" parent="UI" unique_id=132693243 instance=ExtResource("13_p4fma")]
 layout_mode = 3
 anchors_preset = 5
@@ -147,5 +144,8 @@ offset_bottom = 52.0
 theme = ExtResource("12_p4fma")
 theme_override_fonts/font = ExtResource("15_font")
 theme_override_font_sizes/font_size = 16
+
+[node name="TurnIndicator" parent="UI" unique_id=463834768 instance=ExtResource("5_yp48q")]
+theme = ExtResource("12_p4fma")
 
 [connection signal="skill_used" from="UI/SkillPanel" to="." method="_on_skill_used"]
