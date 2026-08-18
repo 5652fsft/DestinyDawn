@@ -125,7 +125,21 @@ func check_for_update() -> void:
 	else:
 		_set_check_state(CheckState.UP_TO_DATE, latest_version)
 
+# 跟随重定向（GitHub release 下载 URL 会 302 到 objects.githubusercontent.com）
 func _http_get(url: String) -> Dictionary:
+	var current_url = url
+	for i in range(4):
+		var resp = await _http_get_once(current_url)
+		if resp.get("ok", false):
+			return resp
+		var loc = resp.get("redirect", "")
+		if loc.is_empty():
+			return resp
+		print("[Update] API 302 跟随: ", loc)
+		current_url = loc
+	return {"ok": false, "code": 0, "body": ""}
+
+func _http_get_once(url: String) -> Dictionary:
 	var parsed = _parse_url(url)
 	if parsed.is_empty():
 		return {"ok": false, "code": 0, "body": ""}
@@ -162,6 +176,14 @@ func _http_get(url: String) -> Dictionary:
 		client.poll()
 		var status = client.get_status()
 		if status == HTTPClient.STATUS_BODY:
+			if resp_body.is_empty():
+				var code = client.get_response_code()
+				if code >= 300 and code < 400:
+					var loc = _extract_location(client)
+					client.close()
+					if loc.is_empty():
+						return {"ok": false, "code": code, "body": ""}
+					return {"ok": false, "code": code, "body": "", "redirect": _resolve_redirect(loc, parsed)}
 			var chunk = client.read_response_body_chunk()
 			if not chunk.is_empty():
 				resp_body.append_array(chunk)
@@ -243,39 +265,55 @@ func _get_download_save_path() -> String:
 		return ""
 	return staging + "/" + latest_asset_name
 
+# 跟随重定向（GitHub release 下载 URL 会 302 到 objects.githubusercontent.com）
 func _stream_download(url: String, save_path: String) -> bool:
+	var current_url = url
+	for i in range(6):
+		var result = await _stream_download_once(current_url, save_path)
+		if result.get("ok", false):
+			return true
+		var loc = result.get("redirect", "")
+		if loc.is_empty():
+			print("[Update] 下载失败: ", current_url)
+			return false
+		print("[Update] 下载 302 跟随: ", loc)
+		current_url = loc
+	print("[Update] 重定向次数过多，放弃下载")
+	return false
+
+func _stream_download_once(url: String, save_path: String) -> Dictionary:
 	var parsed = _parse_url(url)
 	if parsed.is_empty():
-		return false
+		return {"ok": false, "redirect": ""}
 	var client = HTTPClient.new()
 	_apply_proxy(client)
 	var tls_opts: TLSOptions = TLSOptions.client() if parsed.tls else null
 	var err = client.connect_to_host(parsed.host, parsed.port, tls_opts)
 	if err != OK:
 		client.close()
-		return false
+		return {"ok": false, "redirect": ""}
 
 	var deadline = Time.get_ticks_msec() + CONNECT_TIMEOUT_MS
 	while client.get_status() == HTTPClient.STATUS_CONNECTING or client.get_status() == HTTPClient.STATUS_RESOLVING:
 		client.poll()
 		if Time.get_ticks_msec() > deadline:
 			client.close()
-			return false
+			return {"ok": false, "redirect": ""}
 		await get_tree().process_frame
 
 	if client.get_status() != HTTPClient.STATUS_CONNECTED:
 		client.close()
-		return false
+		return {"ok": false, "redirect": ""}
 
 	err = client.request(HTTPClient.METHOD_GET, parsed.path, ["User-Agent: DestinyDawn/" + VERSION])
 	if err != OK:
 		client.close()
-		return false
+		return {"ok": false, "redirect": ""}
 
 	var file = FileAccess.open(save_path, FileAccess.WRITE)
 	if not file:
 		client.close()
-		return false
+		return {"ok": false, "redirect": ""}
 
 	var total_len = 0
 	var total_read = 0
@@ -286,6 +324,14 @@ func _stream_download(url: String, save_path: String) -> bool:
 		var status = client.get_status()
 		if status == HTTPClient.STATUS_BODY:
 			if total_len == 0:
+				var code = client.get_response_code()
+				if code >= 300 and code < 400:
+					var loc = _extract_location(client)
+					file.close()
+					client.close()
+					if loc.is_empty():
+						return {"ok": false, "redirect": ""}
+					return {"ok": false, "redirect": _resolve_redirect(loc, parsed)}
 				total_len = client.get_response_body_length()
 				if total_len <= 0:
 					total_len = latest_asset_size
@@ -314,7 +360,21 @@ func _stream_download(url: String, save_path: String) -> bool:
 
 	file.close()
 	client.close()
-	return succeeded
+	return {"ok": succeeded, "redirect": ""}
+
+# 从响应头提取 Location（HTTPClient 头格式 "Key: Value"）
+func _extract_location(client: HTTPClient) -> String:
+	for h in client.get_response_headers():
+		var idx = h.find(":")
+		if idx > 0 and h.substr(0, idx).strip_edges().to_lower() == "location":
+			return h.substr(idx + 1).strip_edges()
+	return ""
+
+# 相对 Location 按当前 host 补全
+func _resolve_redirect(loc: String, parsed: Dictionary) -> String:
+	if loc.begins_with("http://") or loc.begins_with("https://"):
+		return loc
+	return ("https://" if parsed.tls else "http://") + parsed.host + loc
 
 # ============================================================
 #  安装（Windows：bat 延迟替换 exe；Android：浏览器下载）

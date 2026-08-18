@@ -244,6 +244,7 @@ func _on_auto_toggle_toggled(on: bool):
 func _on_check_update_pressed():
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	update_status_label.text = "正在检查更新..."
+	download_btn.visible = false
 	_downloaded = false
 	UpdateManager.update_dismissed = false
 	UpdateManager.check_for_update()
@@ -252,6 +253,7 @@ func _sync_status_from_manager():
 	match UpdateManager.current_check_state:
 		UpdateManager.CheckState.CHECKING:
 			update_status_label.text = "自动检查更新中..."
+			download_btn.visible = false
 		UpdateManager.CheckState.UP_TO_DATE:
 			update_status_label.text = "已是最新版本 v" + UpdateManager.last_check_message
 			download_btn.visible = false
@@ -271,6 +273,7 @@ func _on_check_state_changed(state: int, message: String):
 	match state:
 		UpdateManager.CheckState.CHECKING:
 			update_status_label.text = "正在检查更新..."
+			download_btn.visible = false
 		UpdateManager.CheckState.UP_TO_DATE:
 			update_status_label.text = "已是最新版本 v" + message
 			download_btn.visible = false
