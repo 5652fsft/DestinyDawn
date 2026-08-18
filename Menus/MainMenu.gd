@@ -92,6 +92,8 @@ func _ready():
 	later_button.pressed.connect(_on_later_pressed)
 	UpdateManager.check_state_changed.connect(_on_update_check_state)
 	UpdateManager.download_state_changed.connect(_on_update_download_state)
+	if UpdateManager.current_check_state == UpdateManager.CheckState.UPDATE_AVAILABLE:
+		_on_update_check_state(UpdateManager.CheckState.UPDATE_AVAILABLE, UpdateManager.last_check_message)
 
 	# 启动静默检查（延迟避免卡启动）
 	if GlobalGameData.auto_update:
@@ -726,6 +728,8 @@ func _show_update_panel(show: bool):
 
 func _on_update_check_state(state: int, message: String):
 	if state == UpdateManager.CheckState.UPDATE_AVAILABLE:
+		if UpdateManager.update_dismissed:
+			return
 		_update_downloaded = false
 		update_version_label.text = "当前 v%s → 最新 v%s" % [UpdateManager.VERSION, message]
 		update_progress_label.text = ""
@@ -772,6 +776,7 @@ func _on_download_pressed():
 
 func _on_later_pressed():
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
+	UpdateManager.update_dismissed = true
 	_show_update_panel(false)
 
 func _is_android() -> bool:

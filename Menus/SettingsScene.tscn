@@ -244,6 +244,12 @@ custom_minimum_size = Vector2(130, 36)
 layout_mode = 2
 text = "检查更新"
 
+[node name="DownloadButton" type="Button" parent="UpdatePanel/VBox/UpdateRow" unique_id=1376134502]
+visible = false
+custom_minimum_size = Vector2(130, 36)
+layout_mode = 2
+text = "下载更新"
+
 [node name="UpdateStatusLabel" type="Label" parent="UpdatePanel/VBox/UpdateRow" unique_id=89947257]
 layout_mode = 2
 size_flags_horizontal = 3

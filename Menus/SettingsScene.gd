@@ -23,7 +23,10 @@ const GLASS_BORDER := Color(0.5, 0.55, 0.65, 0.4)
 @onready var proxy_host_edit = $UpdatePanel/VBox/UpdateGrid/ProxyHostRow/ProxyHostEdit
 @onready var proxy_port_edit = $UpdatePanel/VBox/UpdateGrid/ProxyHostRow/ProxyPortEdit
 @onready var check_update_btn = $UpdatePanel/VBox/UpdateRow/CheckUpdateButton
+@onready var download_btn = $UpdatePanel/VBox/UpdateRow/DownloadButton
 @onready var update_status_label = $UpdatePanel/VBox/UpdateRow/UpdateStatusLabel
+
+var _downloaded: bool = false
 
 func _ready():
 	GlobalGameData.load_defaults_if_empty()
@@ -37,6 +40,8 @@ func _ready():
 	_init_proxy_option()
 	update_status_label.text = "当前版本 v" + UpdateManager.VERSION
 	UpdateManager.check_state_changed.connect(_on_check_state_changed)
+	UpdateManager.download_state_changed.connect(_on_download_state_changed)
+	_sync_status_from_manager()
 
 	# 面板透明（无灰色底框，与主菜单风格一致）
 	$BasePanel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
@@ -50,11 +55,16 @@ func _ready():
 	ButtonTheme.apply_menu(check_update_btn)
 	ButtonTheme.apply_glass_blue(check_update_btn)
 	ButtonTheme.set_font(check_update_btn, 16)
+	ButtonTheme.apply_menu(download_btn)
+	ButtonTheme.apply_glass_blue(download_btn)
+	ButtonTheme.set_font(download_btn, 16)
 	ButtonTheme.apply_menu(auto_toggle)
 	ButtonTheme.apply_glass_blue(auto_toggle)
 	ButtonTheme.set_font(auto_toggle, 16)
 	_unify_button_height(check_update_btn)
+	_unify_button_height(download_btn)
 	_unify_button_height(auto_toggle)
+	download_btn.pressed.connect(_on_download_pressed)
 
 	# 输入框统一（高度 36 / 字号 16 / 毛玻璃）
 	for le in [name_edit, port_edit, proxy_edit, proxy_host_edit, proxy_port_edit]:
@@ -234,7 +244,28 @@ func _on_auto_toggle_toggled(on: bool):
 func _on_check_update_pressed():
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
 	update_status_label.text = "正在检查更新..."
+	_downloaded = false
+	UpdateManager.update_dismissed = false
 	UpdateManager.check_for_update()
+
+func _sync_status_from_manager():
+	match UpdateManager.current_check_state:
+		UpdateManager.CheckState.CHECKING:
+			update_status_label.text = "自动检查更新中..."
+		UpdateManager.CheckState.UP_TO_DATE:
+			update_status_label.text = "已是最新版本 v" + UpdateManager.last_check_message
+			download_btn.visible = false
+		UpdateManager.CheckState.UPDATE_AVAILABLE:
+			update_status_label.text = "发现新版本 v" + UpdateManager.last_check_message + "，点击右侧按钮下载"
+			download_btn.visible = true
+			download_btn.text = "前往下载页" if OS.get_name() == "Android" else "下载更新"
+			download_btn.disabled = false
+		UpdateManager.CheckState.ERROR:
+			update_status_label.text = UpdateManager.last_check_message
+			download_btn.visible = false
+		_:
+			update_status_label.text = "当前版本 v" + UpdateManager.VERSION
+			download_btn.visible = false
 
 func _on_check_state_changed(state: int, message: String):
 	match state:
@@ -242,10 +273,50 @@ func _on_check_state_changed(state: int, message: String):
 			update_status_label.text = "正在检查更新..."
 		UpdateManager.CheckState.UP_TO_DATE:
 			update_status_label.text = "已是最新版本 v" + message
+			download_btn.visible = false
 		UpdateManager.CheckState.UPDATE_AVAILABLE:
-			update_status_label.text = "发现新版本 v" + message + "，可在此页或主菜单下载"
+			update_status_label.text = "发现新版本 v" + message + "，点击右侧按钮下载"
+			download_btn.visible = true
+			download_btn.text = "前往下载页" if OS.get_name() == "Android" else "下载更新"
+			download_btn.disabled = false
 		UpdateManager.CheckState.ERROR:
 			update_status_label.text = message
+			download_btn.visible = false
+		_:
+			pass
+
+func _on_download_pressed():
+	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("click")
+	if OS.get_name() == "Android":
+		UpdateManager.open_release_page()
+		return
+	if _downloaded:
+		UpdateManager.install_update()
+	else:
+		UpdateManager.download_update()
+
+func _on_download_state_changed(state: int, progress: int, total: int, message: String):
+	match state:
+		UpdateManager.DownloadState.DOWNLOADING:
+			download_btn.disabled = true
+			if total > 0:
+				var pct = int(progress * 100.0 / max(total, 1))
+				download_btn.text = "下载中 %d%%" % pct
+			else:
+				download_btn.text = "下载中..."
+		UpdateManager.DownloadState.READY:
+			_downloaded = true
+			download_btn.disabled = false
+			download_btn.text = "安装并重启"
+			update_status_label.text = "下载完成，点击「安装并重启」"
+		UpdateManager.DownloadState.ERROR:
+			download_btn.disabled = false
+			download_btn.text = "重试下载"
+			update_status_label.text = message
+		UpdateManager.DownloadState.INSTALLING:
+			download_btn.disabled = true
+			download_btn.text = "正在安装..."
+			update_status_label.text = "正在替换游戏文件，即将重启..."
 		_:
 			pass
 

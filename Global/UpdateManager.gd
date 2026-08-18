@@ -30,10 +30,19 @@ var latest_asset_url: String = ""
 var latest_asset_name: String = ""
 var latest_asset_size: int = 0
 var release_url: String = ""
+var current_check_state: int = CheckState.IDLE
+var last_check_message: String = ""
+var update_dismissed: bool = false
 
 var _checking: bool = false
 var _downloading: bool = false
 var _download_total: int = 0
+
+# 状态更新入口：记录当前状态供 UI 查询，并广播信号
+func _set_check_state(state: int, message: String):
+	current_check_state = state
+	last_check_message = message
+	check_state_changed.emit(state, message)
 
 # ============================================================
 #  版本比较
@@ -67,7 +76,7 @@ func check_for_update() -> void:
 	if _checking:
 		return
 	_checking = true
-	check_state_changed.emit(CheckState.CHECKING, "")
+	_set_check_state(CheckState.CHECKING, "")
 	latest_version = ""
 	latest_asset_url = ""
 	latest_asset_name = ""
@@ -83,21 +92,21 @@ func check_for_update() -> void:
 	if not body.ok:
 		_checking = false
 		if body.code == 404:
-			check_state_changed.emit(CheckState.ERROR, "未找到发布版本（仓库尚未发布 Release）")
+			_set_check_state(CheckState.ERROR, "未找到发布版本（仓库尚未发布 Release）")
 		else:
-			check_state_changed.emit(CheckState.ERROR, "网络连接失败，请检查网络或更换更新通道")
+			_set_check_state(CheckState.ERROR, "网络连接失败，请检查网络或更换更新通道")
 		return
 
 	var json = JSON.parse_string(body.body)
 	if not (json is Dictionary):
 		_checking = false
-		check_state_changed.emit(CheckState.ERROR, "更新服务器响应异常")
+		_set_check_state(CheckState.ERROR, "更新服务器响应异常")
 		return
 
 	var tag: String = json.get("tag_name", "")
 	if tag.is_empty():
 		_checking = false
-		check_state_changed.emit(CheckState.ERROR, "未找到发布版本")
+		_set_check_state(CheckState.ERROR, "未找到发布版本")
 		return
 	latest_version = tag.trim_prefix("v")
 	release_url = json.get("html_url", "")
@@ -112,9 +121,9 @@ func check_for_update() -> void:
 
 	_checking = false
 	if is_newer(VERSION, latest_version):
-		check_state_changed.emit(CheckState.UPDATE_AVAILABLE, latest_version)
+		_set_check_state(CheckState.UPDATE_AVAILABLE, latest_version)
 	else:
-		check_state_changed.emit(CheckState.UP_TO_DATE, latest_version)
+		_set_check_state(CheckState.UP_TO_DATE, latest_version)
 
 func _http_get(url: String) -> Dictionary:
 	var parsed = _parse_url(url)
