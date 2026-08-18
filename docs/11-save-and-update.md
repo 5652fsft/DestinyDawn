@@ -20,7 +20,7 @@
 | game | selected_team | `selected_team` | 编队（角色 id 数组） |
 | game | selected_deck | `selected_deck` | 卡组（卡牌 id 数组） |
 | update | auto_update | `auto_update` | 启动自动检查更新开关 |
-| update | proxy_mode | `proxy_mode` | 更新通道：direct / ghfast / ghproxy / custom |
+| update | proxy_mode | `proxy_mode` | 更新通道：direct / ghfast / ghproxy / custom（**默认 ghfast**，仅首次启动生效；已保存过设置的用户保留原选择） |
 | update | proxy_prefix | `proxy_prefix` | 自定义镜像前缀（custom 时生效） |
 | update | update_proxy_host | `update_proxy_host` | HTTP 代理地址（如本地 Clash `127.0.0.1`），可空 |
 | update | update_proxy_port | `update_proxy_port` | HTTP 代理端口（如 `7897`） |
@@ -49,8 +49,10 @@
 
 - 请求 `https://api.github.com/repos/5652fsft/DestinyDawn/releases/latest`（带 `User-Agent`，公开仓库无需 token）
 - 语义化比较 `a.b.c`，本地版本低于最新 tag 视为有更新
-- 主菜单启动时（若 `auto_update` 开启）延迟 1.5s 静默检查；发现新版本弹出更新面板（样式与联机面板一致）
-- 设置页有手动「检查更新」按钮
+- 主菜单启动时（若 `auto_update` 开启）延迟 1.5s 静默检查；发现新版本弹出更新面板（样式与联机面板一致），点「稍后」记录 `update_dismissed` 标记，本次会话不再弹（设置页手动检查会重置该标记）
+- 检查结果持久化在 `UpdateManager.current_check_state` / `last_check_message`：**重进主菜单或打开设置页时直接读取**，即使检查发生在上个场景也能正确显示
+- 设置页有手动「检查更新」按钮；状态文字与自动检查同步（自动检查进行中显示「自动检查更新中...」，完成后显示「发现新版本 vX」或「已是最新版本」）
+- 发现新版本后设置页出现「下载更新」按钮（Android 显示「前往下载页」，跳转浏览器）
 
 ### 下载与安装（Windows）
 
@@ -74,6 +76,7 @@
 - 自定义镜像（输入形如 `https://ghfast.top/` 的前缀，拼接规则：前缀 + 原始 URL）
 - **HTTP 代理**（单独输入框）：填本地代理地址与端口（如 `127.0.0.1:7897`），直连与镜像都不通时可用。Godot 不走系统代理，需在此手动填写
 
+**默认通道为 ghfast 镜像**（`GlobalGameData.proxy_mode` 初始值），直连已不再默认。
 所有候选 URL 按序尝试：选定镜像 → 直连兜底。
 镜像仅用于更新检查/下载，不影响联机等其它功能。
 
@@ -99,3 +102,19 @@
 - Android：`DestinyDawn-vX.Y.Z.apk`
 
 更新器按扩展名匹配资产：Windows 找 `.exe`，Android 找 `.apk`，请勿在 release 中上传其它同名后缀文件。
+
+### 覆盖重传（版本号不变）
+
+需要给已发布的版本补发修复（如 `v1.7.1`）时：
+1. 版本号**不升**，改代码后重新导出
+2. `gh release upload v1.7.1 <exe> --clobber` 覆盖同名资产
+3. 注意：已装同版本的玩家本地版本号相同，**不会**收到更新提示，仅新下载玩家受益
+
+### 测试自动更新
+
+本地版本必须**低于**远程版本才会触发更新提示，因此用正式版本号（与远程相同）测试是看不到弹窗的。测试方法：
+
+1. 临时把 `Global/UpdateManager.gd` 的 `VERSION` 改低（如 `1.6.9`）
+2. 运行游戏 → 主菜单 1.5s 后自动检查 → 应弹出「当前 v1.6.9 → 最新 vX」面板；或进设置页 → 「检查更新」→ 出现「发现新版本 vX」与「下载更新」按钮
+3. 完整链路测试：点击下载 → 进度 → 「安装并重启」（会真实替换 exe 并重启游戏）
+4. 测试完**必须**把 `VERSION` 改回正式值，再导出发布
