@@ -2,7 +2,7 @@ extends Node
 # 自动更新：GitHub Release 检查 + 流式下载 + 安装（Windows 用 bat 延迟替换）
 # VERSION 为游戏内唯一版本来源，发布时同步修改 export_presets.cfg 路径。
 
-const VERSION = "1.7.3"
+const VERSION = "1.7.4"
 const REPO = "5652fsft/DestinyDawn"
 const API_URL = "https://api.github.com/repos/%s/releases/latest" % REPO
 
@@ -557,16 +557,51 @@ func install_update() -> void:
 	var current_exe = OS.get_executable_path()
 	var bat_path = staging + "/install_update.bat"
 
+	# 新包体缺失（可能被杀毒软件隔离/拦截）：给出明确错误并引导网页下载
+	if not FileAccess.file_exists(new_exe):
+		download_state_changed.emit(DownloadState.ERROR, 0, 0, "更新包缺失（可能被杀毒软件拦截），请点击网页下载手动安装")
+		print("[Update] 更新包不存在: ", new_exe)
+		return
+
+	# bat 传参方式（%~1=新 exe，%~2=当前 exe）：
+	# 1) tasklist 循环等待旧进程真正退出（最多 12s，替代固定 3s 睡眠）
+	# 2) move 失败重试 ≤5 次（1s 间隔，抗杀软扫描锁/句柄未释放）
+	# 3) 每次关键步骤写 install.log（时间戳 + errorlevel），失败不删旧 exe
 	var bat = "@echo off\r\n"
+	bat += "setlocal enabledelayedexpansion\r\n"
 	bat += "rem DestinyDawn auto update installer\r\n"
-	bat += "timeout /t 3 /nobreak >nul\r\n"
-	bat += "move /y \"" + new_exe + "\" \"" + current_exe + "\" >nul 2>&1\r\n"
-	bat += "if errorlevel 1 goto :fail\r\n"
-	bat += "start \"\" \"" + current_exe + "\"\r\n"
-	bat += "del \"" + bat_path + "\"\r\n"
+	bat += "set \"NEW=%~1\"\r\n"
+	bat += "set \"CUR=%~2\"\r\n"
+	bat += "set \"LOG=%~dp0install.log\"\r\n"
+	bat += "echo [%date% %time%] install start NEW=%NEW% CUR=%CUR% >> \"%LOG%\"\r\n"
+	bat += "for %%F in (\"%CUR%\") do set \"CURNAME=%%~nxF\"\r\n"
+	bat += "set /a n=0\r\n"
+	bat += ":wait\r\n"
+	bat += "timeout /t 1 /nobreak >nul\r\n"
+	bat += "tasklist /FI \"IMAGENAME eq %CURNAME%\" | find /i \"%CURNAME%\" >nul\r\n"
+	bat += "if not errorlevel 1 (\r\n"
+	bat += "  set /a n+=1\r\n"
+	bat += "  if !n! lss 12 goto :wait\r\n"
+	bat += "  echo [%date% %time%] old process still running after 12s, continue anyway >> \"%LOG%\"\r\n"
+	bat += ")\r\n"
+	bat += "set /a n=0\r\n"
+	bat += ":try\r\n"
+	bat += "move /y \"%NEW%\" \"%CUR%\" >>\"%LOG%\" 2>&1\r\n"
+	bat += "if errorlevel 1 (\r\n"
+	bat += "  set /a n+=1\r\n"
+	bat += "  if !n! lss 5 (\r\n"
+	bat += "    timeout /t 1 /nobreak >nul\r\n"
+	bat += "    goto :try\r\n"
+	bat += "  )\r\n"
+	bat += "  echo [%date% %time%] move failed, old exe kept >> \"%LOG%\"\r\n"
+	bat += "  goto :fail\r\n"
+	bat += ")\r\n"
+	bat += "echo [%date% %time%] move ok, starting new version >> \"%LOG%\"\r\n"
+	bat += "start \"\" \"%CUR%\"\r\n"
+	bat += "del \"%~f0\"\r\n"
 	bat += "exit /b 0\r\n"
 	bat += ":fail\r\n"
-	bat += "del \"" + bat_path + "\"\r\n"
+	bat += "del \"%~f0\"\r\n"
 	bat += "exit /b 1\r\n"
 	var f = FileAccess.open(bat_path, FileAccess.WRITE)
 	if not f:
@@ -576,7 +611,7 @@ func install_update() -> void:
 	f.close()
 
 	download_state_changed.emit(DownloadState.INSTALLING, 0, 0, "")
-	OS.create_process("cmd.exe", ["/c", bat_path])
+	OS.create_process("cmd.exe", ["/c", bat_path, new_exe, current_exe])
 	get_tree().quit()
 
 # Android：无自动安装能力，交给系统浏览器打开 release 下载页

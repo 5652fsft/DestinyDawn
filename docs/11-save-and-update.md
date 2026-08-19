@@ -60,9 +60,14 @@
    - 原因：镜像按连接限速（实测 gh-proxy.com 完整下载仅 ~67KB/s 且 12.5MB 后断流），8 段并发实测峰值 ~945KB/s，237MB 约 4 分钟完成；某段断流只重试该段（`SEGMENT_RETRIES=2`），不中断其它段
    - 进度实时推送（64KB 分块），message 参数携带 1s 滑动窗口速度（如 `640KB/s` / `1.20 MB/s`）
 2. 下载到 exe 旁 `.dd_update/` 临时目录，完成后与 release 资产 `size` 字段校验
-3. 写入 `install_update.bat`：等待 3 秒（旧进程退出）→ `move /y` 覆盖 exe → 启动新 exe → 自删
-4. `OS.create_process` 启动 bat 后游戏退出，由 bat 完成替换与重启
-5. 失败保护：`move` 失败不会删除旧 exe，游戏仍可正常运行
+3. **安装（v1.7.4 起健壮化）**：生成 `install_update.bat` 并以参数传递新旧 exe 路径（`%~1`/`%~2`），bat 内：
+   - `tasklist` 循环等待旧进程真正退出（最长 12 秒，替代固定 3 秒睡眠）
+   - `move /y` 失败自动重试 ≤5 次（1 秒间隔，抗杀软扫描锁/句柄未释放）
+   - 每次关键步骤写入 `.dd_update/install.log`（时间戳 + errorlevel），失败不删旧 exe，游戏可继续运行
+   - 成功后 `start` 新 exe 并自删
+4. 安装前检查新包体存在：若缺失（如被杀毒软件隔离/拦截），直接提示错误并引导网页下载兜底，不再静默失败
+5. `OS.create_process` 启动 bat 后游戏退出，由 bat 完成替换与重启
+6. 失败保护：`move` 失败不会删除旧 exe，游戏仍可正常运行；排查请查看 `install.log`
 
 注意：若游戏安装在受保护目录（如 `Program Files`），替换可能因权限失败，需以管理员运行一次或改放自定义目录。
 

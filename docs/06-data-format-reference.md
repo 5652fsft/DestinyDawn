@@ -44,8 +44,7 @@ const DATA = {
 		"passive_hot_burn_duration":<int>,# あんパン=2
 		"passive_luck_value":    <int>,   # Anjing 牌运=2
 		"passive_luck_duration": <int>,   # Anjing=2
-		"passive_legacy_value":  <int>,   # karrigan 传承=50
-		"passive_legacy_duration":<int>,  # karrigan=2
+		"passive_rope_value":   <int>,   # karrigan 拧绳=5（攻击力+5，永久）
 		"passive_heal":          <int>,   # M1DorG 被动回血=10
 		"passive_solo_value":    <int>,   # Richardovo 我独自升级=20
 	},

@@ -44,6 +44,13 @@ play_vfx_preset_safe("hit")   # 同上
 
 主动技能同样由服务端执行：操作端通过 `_server_execute_skill` 转发（目标类型 SELF/NONE 传角色路径，CELL 传格子世界坐标），服务端执行 `use_active_skill`（含 SkillEffect 校验能量/范围/冷却），成功后统一广播 `_sync_skill_state` 与 `_sync_hand`/`_sync_energy`。AI 模式（无 peer）不经 RPC，直接本地执行。
 
+**服务端权威校验（v1.7.4）**：
+- `_server_execute_skill`：执行前校验技能冷却（`current_cooldown > 0` 拒绝）与行动次数（耗行动技能在 `character_attack_used` 已用且无额外行动时拒绝）。
+- `advance_turn_phase`：仅接受当前回合玩家（`get_current_player_id()`）的结束回合请求，防越权推进。
+- `_server_play_card`：远端发送者与 player_id 不符时按发送者校正，防伪造玩家身份消耗他人手牌/能量。
+- `process_all_buffs` / `process_buffs` 的 DOT/HOT tick 结算仅服务端执行（客户端只收 `_sync_buffs`/`take_damage` 广播），避免双倍结算。
+- karrigan 被动"老将·领袖气质"：`reset_character_state` 仅服务端按阵营发放 [拧绳]（攻击力+5，永久，max_stacks=1 幂等补发）；队伍含 karrigan（无论死活）即发放，客户端只收 `_sync_buffs` 广播。
+
 ### 4. `call_local` 函数内部不要再调 `rpc()`
 
 `@rpc("any_peer", "call_local")` 已在所有端执行，内部对同一数据的操作应直接调用（或用 `_safe` 封装），否则会重复触发。
