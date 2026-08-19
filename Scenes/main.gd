@@ -68,6 +68,8 @@ var default_deck: Array[String] = []
 
 var last_attacker: Node = null
 var skill_overlays: Array[Node] = []
+# 已处理过加入流程的客户端 id（防止定时器+信号双路径重复生成角色）
+var _joined_clients: Array[int] = []
 
 var _am:
 	get:
@@ -167,6 +169,7 @@ func _ready():
 		
 		_init_player_card_systems()
 		multiplayer.peer_connected.connect(_on_client_joined)
+		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 		if GlobalGameData.pending_client_id > 0:
 			var cid = GlobalGameData.pending_client_id
 			GlobalGameData.pending_client_id = -1
@@ -179,6 +182,7 @@ func _ready():
 			advance_turn_phase()
 	else:
 		_show_client_waiting()
+		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	
 	_setup_action_buttons()
 
@@ -391,6 +395,9 @@ func _init_projectile_manager():
 	projectile_manager = pm
 
 func _on_client_joined(id: int):
+	if _joined_clients.has(id):
+		return  # 幂等：定时器与 peer_connected 双路径只处理一次
+	_joined_clients.append(id)
 	print("[Net] 客户端 %d 加入" % id)
 	GlobalGameData.client_peer_id = id
 	rpc_id(id, "_sync_client_peer_id", id)
@@ -401,6 +408,27 @@ func _on_client_joined(id: int):
 	_init_player_card_systems()
 	for i in range(team_roster.size()):
 		rpc_id(id, "_spawn_character_remote", team_roster[i].resource_path, "HostCharacter_%d" % i, multiplayer.get_unique_id(), GlobalGameData.host_birth_point[i])
+
+# 断连处理：服务端按投降结算；客户端提示并返回主菜单，避免对局卡死
+func _on_peer_disconnected(id: int):
+	if _battle_over:
+		return
+	if multiplayer.is_server():
+		if id != GlobalGameData.client_peer_id:
+			return
+		print("[Net] 客户端 %d 断线，判定其投降" % id)
+		for c in GlobalGameData.client_characters.duplicate():
+			if is_instance_valid(c):
+				c.hp = 0
+				c.hide()
+				c.collision_layer = 0
+		show_battle_result(true, false)
+	else:
+		print("[Net] 服务端断开连接")
+		show_toast("连接已断开，返回主菜单", 2.0)
+		get_tree().create_timer(1.5).timeout.connect(func():
+			get_tree().change_scene_to_file("res://Menus/MainMenu.tscn")
+		)
 
 @rpc("any_peer", "reliable")
 func _sync_opponent_name(name: String):
@@ -835,6 +863,10 @@ func _target_play_card(card_data: CardData, target: Node):
 func _server_play_card(player_id: int, card_id: String, target_path: String):
 	if not multiplayer.is_server():
 		return
+	# 防伪造玩家身份：远端发送者与请求 player_id 不符时校正为发送者
+	var sender = multiplayer.get_remote_sender_id()
+	if sender != 0 and player_id != sender:
+		player_id = sender
 	_execute_play_card(player_id, card_id, target_path)
 
 # 技能效果统一在服务端执行（与出牌同构）：操作端 rpc 转发，服务端执行 SkillEffect + 广播状态同步
@@ -847,6 +879,13 @@ func _server_execute_skill(character_path: String, target_path: String, cell_pos
 		rpc("_sync_skill_failed", "技能状态无效")
 		return
 	var skill = character.active_skill
+	if skill.current_cooldown > 0:
+		rpc("_sync_skill_failed", "技能冷却中")
+		return
+	var consumes_attack = not character.has_method("_consumes_attack_on_skill") or character._consumes_attack_on_skill()
+	if consumes_attack and GlobalGameData.character_attack_used.get(character.name, false) and character._get_extra_attacks() <= 0:
+		rpc("_sync_skill_failed", "本回合行动次数已用尽")
+		return
 	var target: Node = null
 	var marker: Node = null
 	if target_path != "":
@@ -865,7 +904,6 @@ func _server_execute_skill(character_path: String, target_path: String, cell_pos
 		return
 	# 服务端逻辑：冷却 & 行动点消耗
 	skill.current_cooldown = skill.cooldown
-	var consumes_attack = not character.has_method("_consumes_attack_on_skill") or character._consumes_attack_on_skill()
 	if consumes_attack:
 		GlobalGameData.character_attack_used[character.name] = true
 		GlobalGameData.character_attack_used_num += 1
@@ -886,7 +924,8 @@ func _sync_skill_state(character_path: String, cooldown: int, attack_consumed: b
 	if character:
 		if "active_skill" in character and character.active_skill:
 			character.active_skill.current_cooldown = cooldown
-		if attack_consumed:
+		# 服务端已在 _server_execute_skill 计数，这里只给客户端计，避免双加
+		if attack_consumed and not multiplayer.is_server():
 			GlobalGameData.character_attack_used[character.name] = true
 			GlobalGameData.character_attack_used_num += 1
 		if selected_character == character:
@@ -919,6 +958,14 @@ func _execute_play_card(player_id: int, card_id: String, target_path: String):
 		return
 	if not deck_manager.play_card(player_id, card_id):
 		energy_system.set_energy(player_id, energy_system.get_energy(player_id) + card_data.cost)
+		# 退款后同步，避免两端手牌/能量不一致
+		var refund_hand = deck_manager.get_hand(player_id)
+		var refund_energy = energy_system.get_energy(player_id)
+		if multiplayer.has_multiplayer_peer():
+			rpc("_sync_energy", player_id, refund_energy)
+			rpc("_sync_hand", player_id, refund_hand)
+		_sync_hand(player_id, refund_hand)
+		_sync_energy(player_id, refund_energy)
 		return
 
 	current_card_player_id = player_id
@@ -1025,15 +1072,16 @@ func _active_skill_post_exec(skill: BaseSkill):
 	_update_action_buttons(selected_character)
 	character_info_panel.refresh()
 	_update_player_panels()
-	if not multiplayer.has_multiplayer_peer() or multiplayer.is_server():
-		var pid = _my_id()
-		var hand = deck_manager.get_hand(pid) if deck_manager else []
-		if multiplayer.has_multiplayer_peer():
-			rpc("_sync_hand", pid, hand)
-		else:
-			_sync_hand(pid, hand)
-	var energy = energy_system.get_energy(_my_id()) if energy_system else 0
-	_sync_energy(_my_id(), energy)
+	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
+		return
+	var pid = SkillEffect.get_character_pid(selected_character)
+	var hand = deck_manager.get_hand(pid) if deck_manager else []
+	if multiplayer.has_multiplayer_peer():
+		rpc("_sync_hand", pid, hand)
+	else:
+		_sync_hand(pid, hand)
+	var energy = energy_system.get_energy(pid) if energy_system else 0
+	_sync_energy(pid, energy)
 	cancel_targeting()
 
 func _make_hex_overlay(color: Color, r: float = HexUtils.HEX_RADIUS) -> Polygon2D:
@@ -1107,10 +1155,8 @@ func _check_anpan_passive(player_id: int):
 			var hand = deck_manager.get_hand(player_id)
 			var cur_energy = energy_system.get_energy(player_id)
 			energy_system.set_energy(player_id, cur_energy + 1)
-			if multiplayer.has_multiplayer_peer():
-				rpc("_sync_hand", player_id, hand)
-			else:
-				_sync_hand(player_id, hand)
+			# 手牌由调用方 _execute_play_card 统一广播，这里只刷新本地
+			_sync_hand(player_id, hand)
 			print("[Passive] あんパン [面包大家族] 触发: 抽1张 + 回1能量")
 			break
 
@@ -1118,7 +1164,8 @@ func draw_extra_card(_chara: Node, count: int = 1):
 	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
 		return
 	var pid = get_current_player_id()
-	pid = max(1, pid)
+	if pid <= 0:
+		return  # 阶段异常（START_ROUND/GAME_OVER）不补给，避免误发给主机
 	deck_manager.draw_cards(pid, count)
 	var hand = deck_manager.get_hand(pid) if deck_manager else []
 	if multiplayer.has_multiplayer_peer():
@@ -1185,8 +1232,10 @@ func start_new_round():
 	advance_turn_phase()
 
 @rpc("call_local", "reliable")
-# 所有角色减少 Buff 持续回合，移除过期 Buff
+# 所有角色减少 Buff 持续回合，移除过期 Buff；tick 结算仅服务端执行，避免联机双倍结算
 func process_all_buffs():
+	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
+		return
 	for chara in get_tree().get_nodes_in_group("characters"):
 		if chara.has_method("process_buffs"):
 			chara.process_buffs()
@@ -1406,25 +1455,27 @@ func reset_character_state() -> void:
 		GlobalGameData.character_attack_used[c.name] = false
 		if "_extra_attacks" in c:
 			c._extra_attacks = 0
+		if "_burn_armor_used" in c:
+			c._burn_armor_used = false
 		if "active_skill" in c and c.active_skill and c.active_skill.current_cooldown > 0:
 			c.active_skill.current_cooldown -= 1
 
-	# 凯瑞根死亡：给存活友方额外行动 + 传承
-	if GlobalGameData.karrigan_death_flag:
-		GlobalGameData.karrigan_death_flag = false
-		for c in characters:
-			if c.name.begins_with("Host") != GlobalGameData.is_host:
+	# 老将·领袖气质：队伍含 karrigan（无论死活）→ 该阵营存活全员获得[拧绳]（永久，幂等补发，净化后可重补）
+	if GlobalGameData.is_ai_mode or multiplayer.is_server():
+		var rope_value = int(CharacterData.get_data("karrigan").get("passive_rope_value", 5))
+		for side in [GlobalGameData.host_characters, GlobalGameData.client_characters]:
+			var has_karrigan = false
+			for c in side:
+				if c.character_name == "karrigan":
+					has_karrigan = true
+					break
+			if not has_karrigan:
 				continue
-			if c.hp <= 0:
-				continue
-			if c.character_name == "karrigan":
-				continue
-			if "_extra_attacks" in c:
-				c._extra_attacks += 1
-			if buff_manager and buff_manager.has_method("apply_buff"):
-				var karrigan_data = CharacterData.get_data("karrigan")
-				buff_manager.apply_buff(c, "legacy", karrigan_data["passive_legacy_value"], karrigan_data["passive_legacy_duration"], c)
-				print("[Passive] karrigan 死亡触发：%s 获得额外行动 + 传承" % GlobalGameData.get_char_label(c))
+			for c in side:
+				if c.hp <= 0:
+					continue
+				if buff_manager and buff_manager.has_method("apply_buff"):
+					buff_manager.apply_buff(c, "rope", rope_value, 999, c)
 
 	# 烟雾递减
 	if field_effect_manager and field_effect_manager.has_method("tick_smoke"):
@@ -1436,13 +1487,20 @@ func advance_turn_phase():
 		return
 	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
 		return
+	# 服务端校验：仅当前回合玩家可推进回合（防客户端越权/连点）
+	if multiplayer.has_multiplayer_peer() and multiplayer.get_remote_sender_id() != 0:
+		var sender = multiplayer.get_remote_sender_id()
+		var expected = get_current_player_id()
+		if expected > 0 and sender != expected:
+			print("[Warn] 拒绝非当前回合玩家 %d 推进回合" % sender)
+			return
 		
 	if check_victory():
 		print("[Phase] 游戏结束")
 		GlobalGameData.current_turn_phase = GlobalGameData.TurnPhase.GAME_OVER
 		if multiplayer.has_multiplayer_peer():
-			rpc_id(0, "_sync_turn_phase", GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats)
-		_sync_turn_phase(GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats)
+			rpc_id(0, "_sync_turn_phase", GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats, GlobalGameData.turn_has_been_drawn)
+		_sync_turn_phase(GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats, GlobalGameData.turn_has_been_drawn)
 		_battle_over = true
 		return
 	
@@ -1463,17 +1521,18 @@ func advance_turn_phase():
 			start_new_round()
 	
 	if multiplayer.has_multiplayer_peer():
-		rpc_id(0, "_sync_turn_phase", GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats)
-	_sync_turn_phase(GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats)
+		rpc_id(0, "_sync_turn_phase", GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats, GlobalGameData.turn_has_been_drawn)
+	_sync_turn_phase(GlobalGameData.current_turn_phase, GlobalGameData.is_host_turn, GlobalGameData.battle_stats, GlobalGameData.turn_has_been_drawn)
 
 @rpc("call_local", "reliable")
-func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn, stats: Dictionary = {}):
+func _sync_turn_phase(phase: int, host_turn: bool = GlobalGameData.is_host_turn, stats: Dictionary = {}, drawn: bool = false):
 	if _battle_over:
 		return
 	GlobalGameData.current_turn_phase = phase
 	GlobalGameData.is_host_turn = host_turn
 	if not stats.is_empty():
 		GlobalGameData.battle_stats = stats
+	GlobalGameData.turn_has_been_drawn = drawn
 	if selected_character:
 		selected_character.is_selected = false
 		selected_character = null

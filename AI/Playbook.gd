@@ -220,10 +220,14 @@ static func _skill_anpan(chara: Node, main: Node) -> Dictionary:
 
 # === Anjing [不打气不气]：耗 2 能量 → 群伤 + 抽增益牌（先出牌攒牌运再放） ===
 static func _skill_anjing(chara: Node, main: Node) -> Dictionary:
-	var luck_stacks = AIStrategist.buff_stack_count(chara, "luck")
+	# 层数口径与实战一致（get_buffs().size()，非数值之和）
+	var luck_stacks = chara.get_buffs("luck").size() if chara.has_method("get_buffs") else 0
 	if luck_stacks < 2 or AIStrategist.get_energy(main) < 2:
 		return _no_skill()
 	var enemies = AIStrategist.get_enemy_alive(main)
-	var dmg = int(chara.effective_attack * 0.5) + AIStrategist.get_hand(main).size() * 3
+	# 实战先移除牌运再计算伤害，评估时同样扣除牌运攻击加成
+	var a_data = CharacterData.get_data("anjing")
+	var real_atk = max(0, chara.effective_attack - luck_stacks * a_data["passive_luck_value"])
+	var dmg = int(real_atk * a_data["skill_multiplier"]) + AIStrategist.get_hand(main).size() * a_data["skill_hand_damage"]
 	var value = dmg * enemies.size() + luck_stacks * 15
 	return {"use": true, "target": chara, "cell": Vector2i(-1, -1), "value": value, "exclusive": false}

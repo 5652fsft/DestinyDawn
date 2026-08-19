@@ -208,6 +208,9 @@ func _execute_current_action():
 
 # 执行移动：防重叠、占位、同步；停在烟格则重置移动（免费再动）
 func _execute_move(chara: Node, cell: Vector2i):
+	# 离场（M1DorG 蔚蓝）角色不可被操作
+	if chara.has_method("get_current_phase") and chara.get_current_phase() != "Active":
+		return
 	var gl = chara.grid_layer
 	if not gl:
 		_log("%s 移动失败：无 grid_layer" % _char_label(chara), "Move")
@@ -275,6 +278,9 @@ func _find_nearest_free_cell(chara: Node, target: Vector2i, start: Vector2i) -> 
 
 # 执行攻击：格子距离射程校验 + 调用 perform_attack_safe
 func _execute_attack(chara: Node, target: Node):
+	# 离场（M1DorG 蔚蓝）角色不可被操作
+	if chara.has_method("get_current_phase") and chara.get_current_phase() != "Active":
+		return
 	if not is_instance_valid(target) or target.hp <= 0:
 		_log("%s 攻击目标无效" % _char_label(chara), "Attack")
 		return
@@ -291,19 +297,15 @@ func _execute_attack(chara: Node, target: Node):
 		_log("%s 攻击目标 %s 超出射程，跳过" % [_char_label(chara), _char_label(target)], "Attack")
 		return
 	_log("%s 攻击 -> %s" % [_char_label(chara), _char_label(target)], "Attack")
+	# 行动次数消耗由 perform_attack 内部统一处理（优先额外、无额外才占基础，call_local 两端同步）
 	chara.perform_attack(target.get_path())
-	# 确保行动次数消耗（perform_attack 内部可能因 multiplayer 判断跳过）
-	if not GlobalGameData.character_attack_used.get(chara.name, false):
-		var extra = chara._get_extra_attacks() if chara.has_method("_get_extra_attacks") else 0
-		if extra > 0:
-			chara._consume_extra_attack()
-		else:
-			GlobalGameData.character_attack_used[chara.name] = true
-			GlobalGameData.character_attack_used_num += 1
 
 
 # 执行技能：支持 CELL 型技能（构造临时 marker 定位，与 _server_execute_skill 同构）
 func _execute_skill(chara: Node, target: Node, cell: Vector2i = Vector2i(-1, -1)):
+	# 离场（M1DorG 蔚蓝）角色不可被操作
+	if chara.has_method("get_current_phase") and chara.get_current_phase() != "Active":
+		return
 	if target != null and (not is_instance_valid(target) or target.hp <= 0):
 		_log("%s 技能目标无效" % _char_label(chara), "Skill")
 		return
@@ -332,6 +334,11 @@ func _execute_skill(chara: Node, target: Node, cell: Vector2i = Vector2i(-1, -1)
 		if not GlobalGameData.character_attack_used.get(chara.name, false):
 			GlobalGameData.character_attack_used[chara.name] = true
 			GlobalGameData.character_attack_used_num += 1
+	# 技能可能改动手牌/能量（あんパン/Anjing），AI 模式本地立即刷新面板
+	if _main and _deck_manager and _energy_system:
+		var pid = SkillEffect.get_character_pid(chara)
+		_main._sync_hand(pid, _deck_manager.get_hand(pid))
+		_main._sync_energy(pid, _energy_system.get_energy(pid))
 
 
 # 执行卡牌：通过 DeckManager 打出（失败记入 skip，本回合不再尝试）
