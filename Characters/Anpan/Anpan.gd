@@ -33,8 +33,11 @@ func use_active_skill(target: Node) -> bool:
 @rpc("any_peer", "call_local", "reliable")
 func perform_attack(target_path: NodePath):
 	super(target_path)
+	# 被动只在服务端执行一次（权威），客户端经广播同步
+	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
+		return
 	var target = get_node_or_null(target_path)
-	if not target:
+	if not target or target.hp <= 0:
 		return
 	if main and main.buff_manager and main.buff_manager.has_method("apply_buff"):
 		main.buff_manager.apply_buff(target, "hot_burn", CharacterData.get_data("anpan")["passive_hot_burn_value"], CharacterData.get_data("anpan")["passive_hot_burn_duration"], self)

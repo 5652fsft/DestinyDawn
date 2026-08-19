@@ -5,9 +5,13 @@ extends Node
 static func execute(card: CardData, target: Node, main: Node) -> bool:
 	if not card or not main:
 		return false
+	var ok = _execute_dispatch(card, target, main)
+	# 魔力共鸣仅在效果实际成功后触发，避免空放/失败叠层
+	if ok:
+		_apply_magic_resonance(card, main)
+	return ok
 
-	_apply_magic_resonance(card, main)
-
+static func _execute_dispatch(card: CardData, target: Node, main: Node) -> bool:
 	match card.effect_type:
 		CardData.EffectType.DAMAGE:
 			if card.id == "card_reckoning":
@@ -65,8 +69,6 @@ static func execute(card: CardData, target: Node, main: Node) -> bool:
 			return _apply_temp_buff(target, "poison", card.effect_value, card.effect_duration)
 		CardData.EffectType.HEAL_OVER_TIME:
 			return _apply_temp_buff(target, "regen", card.effect_value, card.effect_duration)
-		CardData.EffectType.LINEAR_AOE:
-			return _execute_linear_aoe(card, target, main)
 		CardData.EffectType.MARK:
 			return _apply_temp_buff(target, "mark", card.effect_value, card.effect_duration)
 		_:
@@ -111,7 +113,7 @@ static func _execute_ice_shard(card: CardData, target: Node) -> bool:
 	if not target or not target.has_method("take_damage"):
 		return false
 	_rpc_take_damage(target, card.effect_value)
-	_apply_temp_buff(target, "move_debuff", -2, 1)
+	_apply_temp_buff(target, "move_debuff", -card.secondary_value, max(1, card.secondary_duration))
 	var main = _get_main(target)
 	_card_projectile(main, target, "ice_shard")
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("attack_magic", target)
@@ -394,27 +396,30 @@ static func _execute_overload(card: CardData, target: Node, main: Node) -> bool:
 static func _execute_aoe_damage(card: CardData, target: Node, main: Node) -> bool:
 	if not main:
 		return false
-	var is_caster_host = main.current_card_player_id == 1 if "current_card_player_id" in main else true
-	if target:
-		is_caster_host = _is_host_side(target)
+	var is_caster_host = _caster_is_host(main)
 	var dmg = card.effect_value
 	for c in main.get_tree().get_nodes_in_group("characters"):
-		if c.has_method("take_damage") and _is_host_side(c) != is_caster_host:
+		if c.hp > 0 and c.has_method("take_damage") and _is_host_side(c) != is_caster_host:
 			_rpc_take_damage(c, dmg)
 	return true
 
 static func _execute_aoe_heal(card: CardData, target: Node, main: Node) -> bool:
 	if not main:
 		return false
-	var is_caster_host = main.current_card_player_id == 1 if "current_card_player_id" in main else true
-	if target:
-		is_caster_host = _is_host_side(target)
+	var is_caster_host = _caster_is_host(main)
 	var val = card.effect_value
 	for c in main.get_tree().get_nodes_in_group("characters"):
-		if c.has_method("take_damage") and _is_host_side(c) == is_caster_host:
+		if c.hp > 0 and c.has_method("take_damage") and _is_host_side(c) == is_caster_host:
 			_rpc_take_damage(c, -val)
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("heal")
 	return true
+
+# 当前出牌玩家的阵营（current_card_player_id 无效时回退 pid=1）
+static func _caster_is_host(main: Node) -> bool:
+	var caster_pid = main.current_card_player_id if "current_card_player_id" in main else 1
+	if caster_pid <= 0:
+		caster_pid = 1
+	return caster_pid == 1
 
 static func _execute_chain_lightning_new(card: CardData, primary: Node, main: Node) -> bool:
 	if not primary or not main:
@@ -459,34 +464,12 @@ static func _offset_to_cube(cell: Vector2i) -> Vector3i:
 	var y = -x - z
 	return Vector3i(x, y, z)
 
-static func _execute_linear_aoe(card: CardData, target: Node, main: Node) -> bool:
-	if not target or not main:
-		return false
-	var dir = Vector2.RIGHT
-	var max_dist = card.effect_value
-	for c in main.get_tree().get_nodes_in_group("characters"):
-		if c == target:
-			continue
-		dir = (c.global_position - target.global_position).normalized()
-		var to = c.global_position - target.global_position
-		var dot = to.dot(dir)
-		if dot > 0 and dot <= max_dist * HexUtils.HEX_SPACING:
-			var lateral = to.length() - dot
-			if lateral < 80.0:
-				if c.has_method("take_damage_safe"):
-					c.take_damage_safe(card.effect_value)
-				elif c.multiplayer and c.multiplayer.has_multiplayer_peer():
-					c.rpc("take_damage", card.effect_value)
-				else:
-					c.take_damage(card.effect_value)
-	return true
-
 # ==================== 通用工具 ====================
 
 static func _get_characters_in_range(main: Node, center: Node, radius: int) -> Array:
 	var chars: Array = []
 	for c in main.get_tree().get_nodes_in_group("characters"):
-		if c == center:
+		if c == center or c.hp <= 0:
 			continue
 		if center.global_position.distance_to(c.global_position) <= radius * HexUtils.HEX_SPACING:
 			chars.append(c)
@@ -519,7 +502,7 @@ static func _apply_magic_resonance(card: CardData, main: Node):
 		return
 	if not "characters" in main:
 		return
-	var caster_is_host = main.current_card_player_id == 1 if "current_card_player_id" in main else true
+	var caster_is_host = _caster_is_host(main)
 	for c in main.characters:
 		if not c or not c.has_method("get_buffs"):
 			continue
@@ -540,13 +523,22 @@ static func _execute_cleanse(target: Node) -> bool:
 		return false
 	var main = target.get_tree().current_scene if target.get_tree() else null
 	var bm = main.get_node_or_null("BuffManager") if main else null
-	if bm and bm.has_method("cleanse"):
-		return bm.cleanse(target, "all") > 0
+	if bm and bm.has_method("cleanse_harmful"):
+		return bm.cleanse_harmful(target) > 0
+	# 兜底：仅清除减益（无 BuffManager 时的本地路径）
 	if "buffs" in target:
-		target.buffs.clear()
-	if target.multiplayer and target.multiplayer.has_multiplayer_peer():
-		target.rpc("_sync_buffs", {})
-	return true
+		var removed = 0
+		for bid in target.buffs.keys():
+			var data = BuffDatabase.get_buff_data(bid)
+			if data and not data.is_harmful:
+				continue
+			target.buffs.erase(bid)
+			removed += 1
+		if removed > 0:
+			if target.multiplayer and target.multiplayer.has_multiplayer_peer():
+				target.rpc("_sync_buffs", target.buffs.duplicate())
+			return true
+	return false
 
 static func _get_main(node: Node) -> Node:
 	if node and node.get_tree():

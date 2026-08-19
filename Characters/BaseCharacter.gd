@@ -420,11 +420,6 @@ func handle_attack():
 				var enemy_cell = clicked_enemy.grid_layer.local_to_map(clicked_enemy.grid_layer.to_local(clicked_enemy.global_position))
 				if valid_attack_cells.has(enemy_cell):
 					perform_attack_safe(clicked_enemy.get_path())
-					if _get_extra_attacks() > 0:
-						_consume_extra_attack()
-					elif not GlobalGameData.character_attack_used.get(name, false):
-						GlobalGameData.character_attack_used[name] = true
-						GlobalGameData.character_attack_used_num += 1
 					main.unselect_character(self)
 					main.check_attack()
 				else:
@@ -474,7 +469,14 @@ func perform_attack(target_path: NodePath):
 		return
 	if GlobalGameData.character_attack_used.get(name, false) and _get_extra_attacks() <= 0:
 		return
-		
+	
+	# 计数两端同步（call_local）：优先消耗额外行动次数，无额外才占用基础次数
+	if _get_extra_attacks() > 0:
+		_consume_extra_attack()
+	elif not GlobalGameData.character_attack_used.get(name, false):
+		GlobalGameData.character_attack_used[name] = true
+		GlobalGameData.character_attack_used_num += 1
+
 	if main:
 		main.last_attacker = self
 	target.take_damage(effective_attack)
@@ -748,6 +750,7 @@ var effective_attack: int:
 		if buff_manager:
 			base += buff_manager.get_total(self, "attack_buff")
 			base += buff_manager.get_total(self, "attack_debuff")
+			base += buff_manager.get_total(self, "rope")
 			var bt = buff_manager.get_total(self, "bloodthirst")
 			if bt > 0:
 				base += int(attack * bt / 100.0)
@@ -764,17 +767,20 @@ var effective_move_points: int:
 	get:
 		var base = move_points
 		if buff_manager:
-			base -= buff_manager.get_total(self, "move_debuff")
+			# move_debuff 全项目存负值（-2 等），用加法累加才能正确减速
+			base += buff_manager.get_total(self, "move_debuff")
 			base += buff_manager.get_total(self, "extra_move")
 		return max(1, base)
 
-# 对 buff_manager 执行一次计时，应用 DOT/HOT 伤害/治疗
+# 对 buff_manager 执行一次计时，应用 DOT/HOT 伤害/治疗（tick 结算仅服务端，客户端只收广播）
 func process_buffs():
 	if not buff_manager:
 		return
 	var ticks = buff_manager.process(self)
 	if GlobalGameData.is_ai_mode or multiplayer.is_server():
 		buff_manager._sync_and_emit(self)
+	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
+		return
 	# apply DOT/HOT ticks
 	for t in ticks:
 		if t.is_damage:

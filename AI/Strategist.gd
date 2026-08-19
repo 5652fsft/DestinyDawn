@@ -182,20 +182,11 @@ static func simulate_damage(attacker: Node, target: Node, base_dmg: int) -> int:
 	if attacker.character_name == "Zephyr":
 		var z_data = CharacterData.get_data("zephyr")
 		dmg += int((attacker.max_hp - attacker.hp) * z_data["passive_damage_pct"])
-	if attacker.character_name == "Seele" and target.hp >= target.max_hp:
+	if attacker.character_name == "希儿" and target.hp >= target.max_hp:
 		var s_data = CharacterData.get_data("seele")
 		dmg = int(dmg * (1.0 + s_data["passive_full_hp_bonus"]))
-	# 受击者：标记（MARK 类型总值，百分比增伤）
+	# 受击者被动：先于 MARK/防御（与 take_damage 覆写顺序一致）
 	var tbm = target.get("buff_manager")
-	if tbm:
-		var mark_pct = tbm.get_total_by_type(target, BuffData.BuffType.MARK)
-		if mark_pct > 0:
-			dmg = dmg * (100 + mark_pct) / 100
-		# 受击者：防御/易伤
-		var def_val = tbm.get_total(target, "defense_buff")
-		if def_val != 0:
-			dmg = max(1, dmg - def_val)
-	# Zephyr 受击：攀升减伤
 	if target.character_name == "Zephyr":
 		var ascend_val = tbm.get_total(target, "ascend") if tbm else 0
 		if ascend_val > 0:
@@ -204,6 +195,21 @@ static func simulate_damage(attacker: Node, target: Node, base_dmg: int) -> int:
 			var max_stacks = ascend_bd.max_stacks if ascend_bd else 2
 			var reduction = clamp(ascend_val, 0, z_data["skill_buff_value"] * max_stacks)
 			dmg = max(1, dmg * (100 - reduction) / 100)
+	if target.character_name == "布洛妮娅":
+		var b_data = CharacterData.get_data("bronya")
+		var reduction = b_data["passive_reduction"]
+		if target.hp < target.max_hp * b_data["passive_low_hp"]:
+			reduction = b_data["passive_reduction_low"]
+		dmg = int(dmg * (1.0 - reduction))
+	# 受击者：标记（MARK 类型总值，百分比增伤）
+	if tbm:
+		var mark_pct = tbm.get_total_by_type(target, BuffData.BuffType.MARK)
+		if mark_pct > 0:
+			dmg = dmg * (100 + mark_pct) / 100
+		# 受击者：防御/易伤
+		var def_val = tbm.get_total(target, "defense_buff")
+		if def_val != 0:
+			dmg = max(1, dmg - def_val)
 	return int(dmg)
 
 # ==================== 攻击评分 ====================
@@ -403,6 +409,8 @@ static func plan_unit(chara: Node, main: Node) -> Dictionary:
 	var empty = {"actions": [], "value": 0}
 	if not is_instance_valid(chara) or chara.hp <= 0:
 		return empty
+	if chara.has_method("get_current_phase") and chara.get_current_phase() != "Active":
+		return empty  # 离场（M1DorG 蔚蓝）角色不规划行动
 	var skill_plan = AIPlaybook.evaluate_skill(chara, main)
 	# 技能射程过滤：目标超出当前射程时，尝试移动到可覆盖目标的格子（技能与移动不冲突，可组合）
 	var skill_move_cell = Vector2i(-1, -1)
@@ -663,7 +671,7 @@ static func _score_buff_card(card: CardData, target: Node, main: Node) -> int:
 	if target.character_name == "Richardovo":
 		value = 60
 	if card.effect_type == CardData.EffectType.BUFF_ATTACK \
-			and target.character_name in ["Richardovo", "Zephyr", "Seele", "Hamster", "Anjing"]:
+			and target.character_name in ["Richardovo", "Zephyr", "希儿", "芝士仓鼠", "Anjing"]:
 		value += 10
 	return value
 

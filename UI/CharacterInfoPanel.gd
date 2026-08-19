@@ -83,8 +83,25 @@ func refresh():
 	else:
 		attr_lines.append("攻击力: %d" % base_atk)
 
-	attr_lines.append("移动范围: %d" % (current_character.effective_move_points if "effective_move_points" in current_character else current_character.move_points))
-	attr_lines.append("攻击范围: %d" % (current_character.attack_range if "attack_range" in current_character else 1))
+	var base_move = current_character.move_points
+	var eff_move = current_character.effective_move_points if "effective_move_points" in current_character else base_move
+	if eff_move != base_move:
+		var move_diff = eff_move - base_move
+		var move_sign = "+" if move_diff > 0 else ""
+		var move_color = "green" if move_diff > 0 else "red"
+		attr_lines.append("移动范围: %d  [color=%s]%s%d[/color]" % [base_move, move_color, move_sign, move_diff])
+	else:
+		attr_lines.append("移动范围: %d" % base_move)
+
+	var base_range = current_character.attack_range if "attack_range" in current_character else 1
+	var eff_range = current_character.effective_attack_range if "effective_attack_range" in current_character else base_range
+	if eff_range != base_range:
+		var range_diff = eff_range - base_range
+		var range_sign = "+" if range_diff > 0 else ""
+		var range_color = "green" if range_diff > 0 else "red"
+		attr_lines.append("攻击范围: %d  [color=%s]%s%d[/color]" % [base_range, range_color, range_sign, range_diff])
+	else:
+		attr_lines.append("攻击范围: %d" % base_range)
 
 	if "shield" in current_character and current_character.shield > 0:
 		attr_lines.append("护盾: %d" % current_character.shield)
@@ -121,9 +138,9 @@ func _buff_desc(key: String, entry: Dictionary) -> String:
 		"attack_buff":
 			return "[color=#668c66][攻击强化][/color] 攻击力+%d（%d回合）" % [val, dur]
 		"attack_debuff":
-			return "[color=#994d4d][虚弱][/color] 攻击力-%d（%d回合）" % [val, dur]
+			return "[color=#994d4d][虚弱][/color] 攻击力-%d（%d回合）" % [abs(val), dur]
 		"move_debuff":
-			return "[color=#8c6640][迟缓][/color] 移动范围-%d（%d回合）" % [val, dur]
+			return "[color=#8c6640][迟缓][/color] 移动范围-%d（%d回合）" % [abs(val), dur]
 		"defense_buff":
 			var abs_val = abs(val)
 			if val > 0:
@@ -144,8 +161,8 @@ func _buff_desc(key: String, entry: Dictionary) -> String:
 			return "[color=#668066][魔力充盈][/color] 攻击力+%d%%（%d回合）" % [val, dur]
 		"bloodthirst":
 			return "[color=#805959][嗜血成性][/color] 攻击力+%d%%（%d回合）" % [val, dur]
-		"legacy":
-			return "[color=#665588][传承][/color] 攻击力+%d%%（%d回合）" % [val, dur]
+		"rope":
+			return "[color=#665588][拧绳][/color] 攻击力+%d（永久）" % [val]
 		"ascend":
 			return "[color=#668c59][攀升][/color] 受到伤害-%d%%（%d回合）" % [val, dur]
 		"hot_burn":

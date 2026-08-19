@@ -9,7 +9,7 @@ func apply_buff(target: Node, buff_id: String, value: int, duration: int, source
 		return false
 	var list: Array = target.get_buffs(buff_id)
 	var data = BuffDatabase.get_buff_data(buff_id)
-	if data and data.max_stacks > 1 and list.size() >= data.max_stacks:
+	if data and data.max_stacks > 0 and list.size() >= data.max_stacks:
 		return false  # already at max stacks
 
 	var entry = { "value": value, "remaining": duration, "source_path": source.get_path() if source else "" }
@@ -57,6 +57,21 @@ func cleanse(target: Node, category: String = "all") -> int:
 		if category == "all" or (data and _cat_str(data.category) == category):
 			target.buffs.erase(buff_id)
 			removed += 1
+	if removed > 0:
+		_sync_and_emit(target)
+	return removed
+
+# 仅移除减益（is_harmful=true 或无数据兜底），供[净化]使用；增益不受影响
+func cleanse_harmful(target: Node) -> int:
+	if not target or not target.has_method("get_all_buffs"):
+		return 0
+	var removed = 0
+	for buff_id in target.get_all_buffs().keys():
+		var data = BuffDatabase.get_buff_data(buff_id)
+		if data and not data.is_harmful:
+			continue
+		target.buffs.erase(buff_id)
+		removed += 1
 	if removed > 0:
 		_sync_and_emit(target)
 	return removed

@@ -72,6 +72,8 @@ static func get_passive_modifier(character: Node, modifier_key: String, base_val
 static func _bronya_passive(character: Node, modifier_key: String, base_value: int) -> int:
 	if modifier_key != "incoming_damage":
 		return base_value
+	if base_value <= 0:
+		return base_value  # 治疗（负伤害）不受减伤影响
 	var d = CharacterData.get_data("bronya")
 	var reduction = d["passive_reduction"]
 	var label = "铁壁 [%d%%]" % int(reduction * 100)
@@ -128,7 +130,11 @@ static func _seele_active(character: Node, target: Node, main: Node) -> bool:
 	character.play_skill_vfx_safe("seele_blink")
 	character.teleport_safe(world_pos)
 	if target.has_method("take_damage"):
-		var bonus = int(character.effective_attack * CharacterData.get_data("seele")["skill_multiplier"])
+		# 被动[暗影突袭]同样适用于技能伤害：满血目标 +50%
+		if "last_target_hp" in character:
+			character.last_target_hp = target.hp
+			character.last_target_max_hp = target.max_hp
+		var bonus = int(get_passive_modifier(character, "outgoing_damage", character.effective_attack) * CharacterData.get_data("seele")["skill_multiplier"])
 		target.take_damage_safe(bonus)
 		target.play_skill_vfx_safe("seele_strike")
 		var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("seele_skill", target)

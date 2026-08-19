@@ -65,9 +65,9 @@ static func _all_buffs() -> Dictionary:
 	out["magic_flow"] = b
 
 	b = BuffData.new()
-	b.id = "legacy"; b.name = "传承"; b.type = BuffData.BuffType.ATTACK_BUFF
-	b.category = BuffData.Category.SPECIAL; b.is_harmful = false; b.max_stacks = 3
-	out["legacy"] = b
+	b.id = "rope"; b.name = "拧绳"; b.type = BuffData.BuffType.ATTACK_BUFF
+	b.category = BuffData.Category.SPECIAL; b.is_harmful = false; b.max_stacks = 1
+	out["rope"] = b
 
 	b = BuffData.new()
 	b.id = "ascend"; b.name = "攀升"; b.type = BuffData.BuffType.DEFENSE_BUFF

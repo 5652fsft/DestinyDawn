@@ -13,7 +13,7 @@ static func _register_cards():
 		# ========== 费用 1 — 攻击 ==========
 		_create_card("card_ice_shard", "冰晶碎片", CardData.CardType.ATTACK, 1,
 			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标造成8点伤害，施加[迟缓]，效果为移动范围-2，持续1回合",
-			CardData.EffectType.DAMAGE, 8),
+			CardData.EffectType.DAMAGE, 8, 1, 0, 2, 0, 1),
 
 		_create_card("card_siphon", "法力汲取", CardData.CardType.ATTACK, 1,
 			CardData.TargetType.ENEMY_SINGLE, "对敌方单体目标造成6点伤害，并抽1张牌",

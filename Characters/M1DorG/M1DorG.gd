@@ -54,8 +54,16 @@ func _sync_away_state(value: int):
 @rpc("any_peer", "call_local", "reliable")
 func perform_attack(target_path: NodePath):
 	super(target_path)
+	# 与基类守卫一致：目标/阶段/行动次数任一不满足则不触发被动
 	var target = get_node_or_null(target_path)
-	if not target or target.hp <= 0:
+	if not target or not target is CharacterBody2D or target.hp <= 0:
+		return
+	if get_current_phase() != "Active":
+		return
+	if GlobalGameData.character_attack_used.get(name, false) and _get_extra_attacks() <= 0:
+		return
+	# 随机选择只在服务端执行一次（权威），客户端经广播同步
+	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
 		return
 	var bm = main.buff_manager if main else null
 	if not bm:
@@ -88,5 +96,5 @@ func perform_attack(target_path: NodePath):
 	if bm.has_method("remove_buff"):
 		bm.remove_buff(target_ally, remove_bid, 0)
 	var heal = CharacterData.get_data("M1DorG")["passive_heal"]
-	target_ally.take_damage(-heal)
+	target_ally.take_damage_safe(-heal)
 	print("[Passive] %s [Intel工程师] 移除 %s 的 [%s]，恢复 %d 点生命值" % [GlobalGameData.get_char_label(self), GlobalGameData.get_char_label(target_ally), remove_bid, heal])

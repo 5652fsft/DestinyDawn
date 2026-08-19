@@ -29,8 +29,6 @@ var character_attack_used_num: int = 0
 
 # 烟雾系统：格子坐标 → 剩余回合数
 var smoke_cells: Dictionary = {}
-# 凯瑞根死亡标记
-var karrigan_death_flag: bool = false
 # 本回合出牌计数
 var cards_played_this_turn: int = 0
 
@@ -97,7 +95,6 @@ func reset_battle_state():
 	character_attack_used.clear()
 	character_attack_used_num = 0
 	smoke_cells.clear()
-	karrigan_death_flag = false
 	cards_played_this_turn = 0
 	host_team.clear()
 	client_team.clear()

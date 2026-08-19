@@ -29,9 +29,3 @@ func _ready():
 
 func use_active_skill(target: Node) -> bool:
 	return SkillEffect.execute_active(self, active_skill, target, main)
-
-@rpc("any_peer", "call_local", "reliable")
-func take_damage(damage: int):
-	if damage > 0 and hp - damage <= 0:
-		GlobalGameData.karrigan_death_flag = true
-	super(damage)
