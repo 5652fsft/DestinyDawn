@@ -13,7 +13,7 @@ func _char_label(c) -> String:
 	var is_player_side = c.name.begins_with("Host") == GlobalGameData.is_host
 	return ((GlobalGameData.player_name + "/") if is_player_side else (GlobalGameData.opponent_name + "/")) + str(cname)
 
-var _action_queue: Array[Dictionary] = []
+var _queues: Dictionary = {}  # side("host"/"client") -> Array[Dictionary]，同一时刻仅一方有回合
 var _action_timer: float = 0.0
 var _busy: bool = false
 var _current_phase: int = -1
@@ -75,7 +75,8 @@ func stop_camera_tween():
 
 
 func _process(_delta):
-	if not GlobalGameData.is_ai_mode:
+	# 单机：敌方恒由 AI 控制；自动战斗开启时本端方也由 AI 接管（AI 对 AI 观战）
+	if not GlobalGameData.is_ai_mode and not GlobalGameData.auto_battle_self:
 		return
 
 	if GlobalGameData.current_turn_phase != _current_phase:
@@ -86,26 +87,30 @@ func _process(_delta):
 			_focus_on_player_characters()
 		if _current_phase != -1:
 			_log("回合变化: %d -> %d，清理旧队列" % [_current_phase, GlobalGameData.current_turn_phase])
-		_action_queue.clear()
+		for s in _queues:
+			_queues[s].clear()
 		_busy = false
 		_card_skip.clear()
 		_current_phase = GlobalGameData.current_turn_phase
 
-	if not _is_ai_phase():
-		if not _action_queue.is_empty():
-			_action_queue.clear()
-			_busy = false
+	var side = _active_side()
+	if side == "" or not _ai_controls(side):
+		for s in _queues:
+			_queues[s].clear()
+		_busy = false
 		return
 
+	var queue: Array = _queues.get(side, [])
 	if _busy:
 		_action_timer -= _delta
 		if _action_timer <= 0:
-			_execute_current_action()
+			_execute_current_action(side)
 		return
 
-	if _action_queue.is_empty():
-		_plan_and_queue()
-		if _action_queue.is_empty():
+	if queue.is_empty():
+		_plan_and_queue(side)
+		queue = _queues.get(side, [])
+		if queue.is_empty():
 			_log("无待执行动作，结束回合", "EndTurn")
 			_end_phase()
 			return
@@ -113,29 +118,41 @@ func _process(_delta):
 		_action_timer = ACTION_DELAY
 
 
-func _is_ai_phase() -> bool:
-	return _is_ai_turn()
+# 当前回合行动方（"host"/"client"），非行动回合返回 ""
+func _active_side() -> String:
+	match GlobalGameData.current_turn_phase:
+		GlobalGameData.TurnPhase.PLAYER_TURN:
+			return "host" if GlobalGameData.is_host_turn else "client"
+		GlobalGameData.TurnPhase.ENEMY_TURN:
+			return "client" if GlobalGameData.is_host_turn else "host"
+	return ""
 
-func _is_ai_turn() -> bool:
-	# AI 在 AI 自己控制的那一方回合才行动
-	if GlobalGameData.is_host_turn:
-		return GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.ENEMY_TURN
-	else:
-		return GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.PLAYER_TURN
+# 本端所在方
+func _self_side() -> String:
+	return "host" if GlobalGameData.is_host else "client"
+
+# 该方是否由 AI 控制：单机敌方恒真；自动战斗开启时本端方为真
+func _ai_controls(side: String) -> bool:
+	if GlobalGameData.is_ai_mode and side == "client":
+		return true
+	return GlobalGameData.auto_battle_self and side == _self_side()
 
 
 # ==================== 决策规划（Strategist + Playbook） ====================
 
 # 回合内动作编排：先出牌（buff/能量联动），再按价值从高到低执行角色单元
-func _plan_and_queue():
-	_action_queue.clear()
+func _plan_and_queue(side: String):
+	var queue: Array = _queues.get(side, [])
+	queue.clear()
+	# 关键：规划前显式设置 AI 控制方（同一进程可控制双方：单机 AI 对 AI）
+	AIStrategist.ai_side = side
 	var ai_chars = AIStrategist.get_ai_alive(_main)
-	_log("规划动作，AI 存活角色: %d" % ai_chars.size(), "Queue")
+	_log("规划动作（%s），AI 存活角色: %d" % [side, ai_chars.size()], "Queue")
 
 	# 1. 卡牌规划（先铺 buff / 回能 / 治疗，与技能能量联动）
 	var card_actions = AIStrategist.plan_cards(_main, _card_skip)
 	for action in card_actions:
-		_action_queue.append(action)
+		queue.append(action)
 		_log("AI 将使用卡牌: %s" % action.get("card_id", "?"), "Queue")
 
 	# 2. 角色单元规划（技能 + 攻击 + 移动组合），按总价值排序
@@ -147,24 +164,26 @@ func _plan_and_queue():
 	units.sort_custom(func(a, b): return a.value > b.value)
 	for u in units:
 		for action in u.actions:
-			_action_queue.append(action)
+			queue.append(action)
 			var desc = action.get("type", "?")
 			_log("AI %s 动作: %s" % [_char_label(action.get("character")), desc], "Queue")
+	_queues[side] = queue
 
 
 # ==================== 动作执行 ====================
 
-func _execute_current_action():
-	if _action_queue.is_empty():
+func _execute_current_action(side: String):
+	var queue: Array = _queues.get(side, [])
+	if queue.is_empty():
 		_busy = false
 		return
 
-	var action = _action_queue.pop_front()
+	var action = queue.pop_front()
 	var chara = action.get("character")
 
 	if chara != null and (not is_instance_valid(chara) or chara.hp <= 0):
 		_log("跳过动作：角色已死亡或无效", "Execute")
-		if _action_queue.is_empty():
+		if queue.is_empty():
 			_busy = false
 			_current_phase = -1
 		else:
@@ -197,9 +216,9 @@ func _execute_current_action():
 
 	var phase_after = GlobalGameData.current_turn_phase
 
-	if _action_queue.is_empty():
+	if queue.is_empty():
 		_busy = false
-		if phase_before == phase_after and _is_ai_phase():
+		if phase_before == phase_after and _ai_controls(side):
 			_end_phase()
 	else:
 		_busy = true
@@ -210,6 +229,10 @@ func _execute_current_action():
 func _execute_move(chara: Node, cell: Vector2i):
 	# 离场（M1DorG 蔚蓝）角色不可被操作
 	if chara.has_method("get_current_phase") and chara.get_current_phase() != "Active":
+		return
+	# 中途接管守卫：玩家本回合已移动过的角色不再移动
+	if GlobalGameData.character_move_used.get(chara.name, false):
+		_log("%s 已移动过，跳过移动" % _char_label(chara), "Move")
 		return
 	var gl = chara.grid_layer
 	if not gl:
@@ -245,6 +268,9 @@ func _execute_move(chara: Node, cell: Vector2i):
 	chara.global_position = world_pos
 	chara.target_world = world_pos
 	chara.velocity = Vector2.ZERO
+	# 联机：显式广播位置（玩家移动由 _finish_move_to_target 的 _sync_position 同步，AI 瞬移需手动）
+	if not GlobalGameData.is_ai_mode:
+		chara.rpc("_sync_position", world_pos)
 	var _am = Engine.get_singleton("AudioManager"); if _am: _am.play_sfx("move", chara)
 	GlobalGameData.character_move_used[chara.name] = true
 	GlobalGameData.character_move_used_num += 1
@@ -298,7 +324,7 @@ func _execute_attack(chara: Node, target: Node):
 		return
 	_log("%s 攻击 -> %s" % [_char_label(chara), _char_label(target)], "Attack")
 	# 行动次数消耗由 perform_attack 内部统一处理（优先额外、无额外才占基础，call_local 两端同步）
-	chara.perform_attack(target.get_path())
+	chara.perform_attack_safe(target.get_path())
 
 
 # 执行技能：支持 CELL 型技能（构造临时 marker 定位，与 _server_execute_skill 同构）
@@ -309,7 +335,33 @@ func _execute_skill(chara: Node, target: Node, cell: Vector2i = Vector2i(-1, -1)
 	if target != null and (not is_instance_valid(target) or target.hp <= 0):
 		_log("%s 技能目标无效" % _char_label(chara), "Skill")
 		return
+	# 中途接管守卫：冷却中 / 行动次数已尽的角色不再释放技能（与 _server_execute_skill 同构）
+	if chara.active_skill and chara.active_skill.current_cooldown > 0:
+		_log("%s 技能冷却中，跳过" % _char_label(chara), "Skill")
+		return
+	if GlobalGameData.character_attack_used.get(chara.name, false):
+		var extra = chara._get_extra_attacks() if chara.has_method("_get_extra_attacks") else 0
+		if extra <= 0:
+			_log("%s 已无行动次数，跳过技能" % _char_label(chara), "Skill")
+			return
 	var skill_target = target
+	var target_desc = "格(%d,%d)" % [cell.x, cell.y] if skill_target == null else _char_label(skill_target)
+	_log("%s 使用技能 -> %s" % [_char_label(chara), target_desc], "Skill")
+
+	# 联机（自动战斗）：rpc 转发服务端权威执行（冷却/行动/范围校验、SkillEffect、广播同步全在服务端）
+	if not GlobalGameData.is_ai_mode:
+		var target_path = ""
+		if skill_target != null and is_instance_valid(skill_target):
+			target_path = str(skill_target.get_path())
+		var cell_pos = Vector2.ZERO
+		if skill_target == null and cell != Vector2i(-1, -1) and chara.active_skill \
+				and chara.active_skill.target_type == BaseSkill.SkillTarget.CELL:
+			var gl = chara.grid_layer
+			cell_pos = gl.to_global(gl.map_to_local(cell))
+		_main.rpc("_server_execute_skill", chara.get_path(), target_path, cell_pos)
+		return
+
+	# 单机（is_ai_mode）：本地执行，构造临时 marker 定位 CELL 型技能
 	var marker: Node = null
 	if skill_target == null and cell != Vector2i(-1, -1) and chara.active_skill \
 			and chara.active_skill.target_type == BaseSkill.SkillTarget.CELL:
@@ -319,8 +371,6 @@ func _execute_skill(chara: Node, target: Node, cell: Vector2i = Vector2i(-1, -1)
 		var gl = chara.grid_layer
 		marker.global_position = gl.to_global(gl.map_to_local(cell))
 		skill_target = marker
-	var target_desc = "格(%d,%d)" % [cell.x, cell.y] if skill_target == null else _char_label(skill_target)
-	_log("%s 使用技能 -> %s" % [_char_label(chara), target_desc], "Skill")
 	var ok = chara.use_active_skill(skill_target)
 	if marker:
 		marker.queue_free()
@@ -348,12 +398,14 @@ func _execute_card(card_id: String, target: Node):
 		_log("卡牌 %s 不存在，跳过" % card_id, "Card")
 		_card_skip[card_id] = true
 		return
-	var hand = _deck_manager.get_hand(AIStrategist.AI_PID)
+	# 手牌/能量按 AI 控制方取（单机玩家开自动时即玩家侧 pid=1）
+	var pid = AIStrategist.get_pid(AIStrategist.ai_side)
+	var hand = _deck_manager.get_hand(pid)
 	if card_id not in hand:
 		_log("[%s] 已不在手牌中，跳过" % card_data.card_name, "Card")
 		_card_skip[card_id] = true
 		return
-	if not _energy_system.can_afford(AIStrategist.AI_PID, card_data.cost):
+	if not _energy_system.can_afford(pid, card_data.cost):
 		_log("能量不足，无法使用 [%s]（需 %d）" % [card_data.card_name, card_data.cost], "Card")
 		_card_skip[card_id] = true
 		return
@@ -370,9 +422,13 @@ func _execute_card(card_id: String, target: Node):
 	if target != null and is_instance_valid(target):
 		target_path = target.get_path()
 	_log("AI 使用 [%s]，目标: %s" % [card_data.card_name, _char_label(target) if target and is_instance_valid(target) else "无"], "Card")
+	# 联机（自动战斗）：rpc 转发服务端权威出牌（服务端校验发送者/能量/手牌/冷却）
+	if not GlobalGameData.is_ai_mode:
+		_main.rpc("_server_play_card", pid, card_id, target_path)
+		return
 	var prev_selected = _main.selected_character
 	_main.selected_character = chara
-	_main._execute_play_card(AIStrategist.AI_PID, card_id, target_path)
+	_main._execute_play_card(pid, card_id, target_path)
 	_main.selected_character = prev_selected
 
 
@@ -381,4 +437,8 @@ func _execute_card(card_id: String, target: Node):
 func _end_phase():
 	_log("AI 结束当前回合，调用 advance_turn_phase", "EndTurn")
 	_main.unselect_character(null, true)
-	_main.advance_turn_phase()
+	if GlobalGameData.is_ai_mode:
+		_main.advance_turn_phase()
+	else:
+		# 联机：rpc 到服务端推进回合（服务端校验当前回合玩家）
+		_main.rpc("advance_turn_phase")

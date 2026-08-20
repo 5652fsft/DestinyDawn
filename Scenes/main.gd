@@ -18,6 +18,7 @@ var is_move_mode: bool = false
 var is_attack_mode: bool = false
 var is_viewing_enemy: bool = false
 var _hand_hidden: bool = false
+var _hand_hidden_before_menu: bool = false
 var _surrender_dialog: Panel = null
 var _battle_over: bool = false
 # 输入锁：回合过渡/投降菜单/战斗结算期间禁止棋盘点击（GUI 遮罩之外的代码级锁）
@@ -45,6 +46,8 @@ var projectile_manager: Node = null
 @onready var skill_panel = $UI/SkillPanel
 @onready var move_button = $UI/MoveButton
 @onready var attack_button = $UI/AttackButton
+@onready var auto_battle_button = $UI/AutoBattleButton
+var _auto_input_locked: bool = false
 @onready var host_player_panel = $UI/HostPlayerPanel
 @onready var client_player_panel = $UI/ClientPlayerPanel
 @onready var toast = $UI/Toast
@@ -76,6 +79,8 @@ var _am:
 		return Engine.get_singleton("AudioManager")
 
 var _waiting_overlay: Control = null
+# 客户端"等待主机"期间的重同步重试（防主机在客户端就绪前发出的一次性 RPC 被丢弃）
+var _client_sync_retry: Timer = null
 
 func _build_team_from_selection():
 	team_roster.clear()
@@ -177,6 +182,11 @@ func _ready():
 			get_tree().create_timer(0.5).timeout.connect(func():
 				_on_client_joined(cid)
 			)
+		# 兜底：若客户端连接早于本场景就绪（peer_connected 已错过、pending_client_id 未设置），
+		# 直接枚举已连接 peer 补处理（_on_client_joined 幂等，防重复）
+		for pid in multiplayer.get_peers():
+			if pid != multiplayer.get_unique_id():
+				_on_client_joined(pid)
 		_show_waiting_overlay()
 		if not multiplayer.has_multiplayer_peer():
 			advance_turn_phase()
@@ -185,6 +195,9 @@ func _ready():
 		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	
 	_setup_action_buttons()
+	# 联机自动战斗：本端开启时也创建 AI 控制器（is_ai_mode 分支已无条件创建）
+	if GlobalGameData.auto_battle_self:
+		_setup_ai_controller()
 
 func _setup_action_buttons():
 	for btn in [move_button, attack_button]:
@@ -195,14 +208,49 @@ func _setup_action_buttons():
 	move_button.pressed.connect(_on_move_pressed)
 	attack_button.pressed.connect(_on_attack_pressed)
 	_setup_mobile_buttons()
+	_setup_auto_battle_button()
+
+# === 自动战斗按钮（双端+单机均显示） ===
+func _setup_auto_battle_button():
+	var btn = auto_battle_button
+	if not btn is Button:
+		return
+	ButtonTheme.apply_icon_small(btn)
+	btn.icon = preload("res://Assets/Icons/gamepad.png")
+	btn.text = ""
+	btn.expand_icon = true
+	btn.tooltip_text = "自动战斗：AI 接管本端操作"
+	btn.pressed.connect(_toggle_auto_battle)
+	btn.show()
+
+func _toggle_auto_battle():
+	GlobalGameData.auto_battle_self = not GlobalGameData.auto_battle_self
+	var on = GlobalGameData.auto_battle_self
+	# 点亮反馈：金色高亮
+	auto_battle_button.modulate = Color(1.5, 1.1, 0.3) if on else Color.WHITE
+	auto_battle_button.tooltip_text = "自动战斗：关闭" if on else "自动战斗：AI 接管本端操作"
+	print("[AutoBattle] 本端自动战斗: %s" % on)
+	if on:
+		# 联机/单机玩家方：开启时确保 AI 控制器存在（_ready 时可能未创建）
+		if not get_node_or_null("AIController"):
+			_setup_ai_controller()
+		# 清理玩家残留操作（选中/选卡/移动/攻击模式），并锁定本端输入
+		_cancel_move_mode()
+		_cancel_attack_mode()
+		if has_method("cancel_targeting"):
+			cancel_targeting()
+		unselect_character(null, true)
+		_auto_input_locked = true
+		_update_action_buttons(selected_character)
+	else:
+		_auto_input_locked = false
+		_update_action_buttons(selected_character)
 
 # === 移动端（Android）补充 UI ===
 func _is_mobile() -> bool:
 	return OS.has_feature("android")
 
 func _setup_mobile_buttons():
-	if not _is_mobile():
-		return
 	var hand_btn = get_node_or_null("UI/HandToggleButton")
 	var menu_btn = get_node_or_null("UI/SurrenderMenuButton")
 	if hand_btn is Button:
@@ -210,14 +258,16 @@ func _setup_mobile_buttons():
 		hand_btn.icon = preload("res://Assets/Icons/hand.png")
 		hand_btn.text = ""
 		hand_btn.expand_icon = true
-		# 移动端图标按钮：仅安卓使用
+		# 手牌按钮：双端显示（与 F 键共用 _toggle_hand），展开时点亮
 		hand_btn.pressed.connect(_toggle_hand)
+		hand_btn.modulate = Color(1.5, 1.1, 0.3) if not _hand_hidden else Color.WHITE
 		hand_btn.show()
 	if menu_btn is Button:
 		ButtonTheme.apply_icon_small(menu_btn)
 		menu_btn.icon = preload("res://Assets/Icons/menu.png")
 		menu_btn.text = ""
 		menu_btn.expand_icon = true
+		# 投降菜单按钮：双端显示（与 ESC 键共用 _toggle_surrender_menu）
 		menu_btn.pressed.connect(_toggle_surrender_menu)
 		menu_btn.show()
 	_apply_safe_area()
@@ -244,15 +294,22 @@ func _apply_safe_area():
 	if host_player_panel is Control:
 		host_player_panel.offset_right -= insets.z
 
-# 移动端功能按钮显隐（投降菜单/结算等全屏界面打开时隐藏，避免悬空叠层；仅安卓生效）
+# 全屏界面（投降菜单/结算等）打开时隐藏辅助按钮，避免悬空叠层。
+# 手牌/投降/自动战斗三按钮双端+单机均显示。
 func _set_mobile_buttons_visible(v: bool):
-	if not _is_mobile():
-		return
-	for btn in [get_node_or_null("UI/HandToggleButton"), get_node_or_null("UI/SurrenderMenuButton")]:
+	for btn in [get_node_or_null("UI/HandToggleButton"),
+			get_node_or_null("UI/SurrenderMenuButton"),
+			get_node_or_null("UI/AutoBattleButton")]:
 		if btn is Control:
 			btn.visible = v
 
 func _update_action_buttons(chara):
+	if _auto_input_locked:
+		move_button.disabled = true
+		attack_button.disabled = true
+		move_button.modulate = Color(1, 1, 1, 0.5)
+		attack_button.modulate = Color(1, 1, 1, 0.5)
+		return
 	if not chara:
 		return
 	var is_active = chara.has_method("get_current_phase") and chara.get_current_phase() == "Active"
@@ -435,6 +492,11 @@ func _sync_opponent_name(name: String):
 	_hide_waiting_overlay()
 	GlobalGameData.opponent_name = name
 	print("[Net] 对方名称: %s" % name)
+	# 同步链路已建立，停止重同步重试
+	if _client_sync_retry:
+		_client_sync_retry.stop()
+		_client_sync_retry.queue_free()
+		_client_sync_retry = null
 	# 刷新玩家面板名称
 	for p in [$UI/HostPlayerPanel, $UI/ClientPlayerPanel]:
 		if p and p.has_method("refresh_name"):
@@ -445,19 +507,45 @@ func _sync_client_peer_id(id: int):
 	GlobalGameData.client_peer_id = id
 	print("[Net] 客户端 peer ID: ", id)
 
+# 客户端"等待主机"期间的周期重同步请求：主机首次同步 RPC 可能因客户端场景未就绪被丢弃，
+# 客户端主动请求后由主机幂等补发（见 _client_request_state）
+func _client_request_sync_tick():
+	if multiplayer.has_multiplayer_peer() and not multiplayer.is_server():
+		rpc_id(1, "_client_request_state")
+
+# 服务端处理：客户端请求重同步（幂等补发关键同步，避免客户端永久卡在"等待主机"）
+@rpc("any_peer", "reliable")
+func _client_request_state():
+	var id = multiplayer.get_remote_sender_id()
+	if not multiplayer.is_server() or id <= 0:
+		return
+	if _joined_clients.has(id):
+		GlobalGameData.client_peer_id = id
+		rpc_id(id, "_sync_client_peer_id", id)
+		rpc_id(id, "_sync_opponent_name", GlobalGameData.player_name)
+		rpc_id(id, "_request_client_setup")
+		# 客户端角色 spawn 只由 _client_send_setup 触发（需先同步 client_team），此处不直接生成
+	else:
+		_on_client_joined(id)
+
 @rpc("any_peer", "reliable")
 func _request_client_setup():
 	rpc_id(1, "_sync_opponent_name", GlobalGameData.player_name)
 	rpc_id(1, "_client_send_setup", GlobalGameData.selected_team, GlobalGameData.selected_deck)
 
 func _spawn_client_characters(id: int):
+	for c in GlobalGameData.client_characters:
+		if is_instance_valid(c):
+			return  # 幂等：重同步补发路径下角色已生成则跳过，防重复生成
 	_build_team_from_selection()
 	for i in range(enemy_roster.size()):
 		_spawn_character(enemy_roster[i].resource_path, "ClientCharacter_%d" % i, id, GlobalGameData.client_birth_point[i])
 		rpc("_spawn_character_remote", enemy_roster[i].resource_path, "ClientCharacter_%d" % i, id, GlobalGameData.client_birth_point[i])
 	print("[Info] 开始游戏")
 	_hide_waiting_overlay()
-	rpc("advance_turn_phase")
+	# 相位非 NONE 表示已开局（重同步重复到达），不再重复推进
+	if GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.NONE:
+		rpc("advance_turn_phase")
 
 func _init_player_card_systems():
 	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
@@ -1013,6 +1101,12 @@ func _sync_energy(player_id: int, value: int):
 
 @rpc("call_local", "reliable")
 func _sync_hand(player_id: int, hand: Array):
+	# 同步手牌数据结构（服务端权威值；客户端据此刷新本地数据，
+	# 供自动战斗等本地逻辑读取；仅显示本端手牌）
+	if deck_manager:
+		var typed: Array[String] = []
+		typed.assign(hand)
+		deck_manager.player_hands[player_id] = typed
 	var my_pid = _my_id()
 	if player_id == my_pid:
 		var typed: Array[String] = []
@@ -1292,17 +1386,23 @@ func draw_for_new_turn():
 		sync_all_card_state()
 
 # === 手牌 ===
+# 统一设置手牌可见性与按钮点亮（静默模式不播音效/不弹提示）
+func _set_hand_visible(show: bool, silent := false):
+	_hand_hidden = not show
+	hand_panel.visible = show
+	var hand_btn = get_node_or_null("UI/HandToggleButton")
+	if hand_btn is Button:
+		hand_btn.modulate = Color(1.5, 1.1, 0.3) if show else Color.WHITE
+	if not silent and _am: _am.play_sfx("deck_select")
+
 func _hide_hand():
-	_hand_hidden = true
-	hand_panel.visible = false
+	_set_hand_visible(false, true)
 
 # 收起/展开手牌（F 键与移动端按钮共用）
 func _toggle_hand():
 	if GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.GAME_OVER:
 		return
-	_hand_hidden = not _hand_hidden
-	hand_panel.visible = not _hand_hidden
-	if _am: _am.play_sfx("deck_select")
+	_set_hand_visible(_hand_hidden)
 	if _hand_hidden:
 		show_toast("卡牌已收起，按 F 恢复" if not _is_mobile() else "卡牌已收起，点击手牌按钮恢复", 2.0)
 	else:
@@ -1322,6 +1422,10 @@ func _toggle_surrender_menu():
 # === 投降 ===
 func _show_surrender_dialog():
 	is_input_locked = true
+	# 记忆打开前手牌状态（ESC/取消按钮关闭共用恢复，避免手牌丢失记忆状态）
+	_hand_hidden_before_menu = _hand_hidden
+	if not _hand_hidden:
+		_hide_hand()
 	if _surrender_dialog:
 		_surrender_dialog.show()
 		character_info_panel.hide()
@@ -1346,6 +1450,9 @@ func _hide_surrender_dialog():
 	is_input_locked = false
 	if not _battle_over:
 		_set_mobile_buttons_visible.call_deferred(true)
+		# 恢复手牌记忆状态（打开时若展开则已隐藏，此处还原；按钮点亮同步）
+		if _hand_hidden != _hand_hidden_before_menu:
+			_set_hand_visible(not _hand_hidden_before_menu, true)
 
 func _confirm_surrender():
 	_hide_surrender_dialog()
@@ -1381,6 +1488,13 @@ func _show_client_waiting():
 	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 		return
 	_waiting_overlay = _make_waiting_overlay("等待主机...")
+	# 防时序竞态：主机首次同步 RPC 可能因客户端场景未就绪被丢弃，周期性请求重同步
+	# （收到 _sync_opponent_name 即链路建立，停止重试）
+	_client_sync_retry = Timer.new()
+	_client_sync_retry.wait_time = 0.5
+	_client_sync_retry.timeout.connect(_client_request_sync_tick)
+	add_child(_client_sync_retry)
+	_client_sync_retry.start()
 
 func _hide_waiting_overlay():
 	if _waiting_overlay:

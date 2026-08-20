@@ -15,25 +15,35 @@ const CARD_KILL_SCORE: int = 220
 const CARD_THRESHOLD: int = 20
 const HAND_LIMIT: int = 5
 
+# AI 当前控制方（"host"/"client"）：由 AIController 规划前显式设置，防止跨对局/跨方串场
+static var ai_side: String = "client"
+
+# AI 控制方对应的玩家 ID：host→1；client→联机 client_peer_id / 单机 2（AI_PID）
+static func get_pid(side: String) -> int:
+	if side == "host":
+		return 1
+	var cid = GlobalGameData.client_peer_id
+	return cid if cid > 0 else AI_PID
+
 # ==================== 查询辅助 ====================
 
 static func get_ai_alive(main: Node) -> Array:
 	var result = []
-	for c in GlobalGameData.client_characters:
+	for c in (GlobalGameData.host_characters if ai_side == "host" else GlobalGameData.client_characters):
 		if is_instance_valid(c) and c.hp > 0:
 			result.append(c)
 	return result
 
 static func get_enemy_alive(main: Node) -> Array:
 	var result = []
-	for c in GlobalGameData.host_characters:
+	for c in (GlobalGameData.client_characters if ai_side == "host" else GlobalGameData.host_characters):
 		if is_instance_valid(c) and c.hp > 0:
 			result.append(c)
 	return result
 
 static func get_ally_alive(main: Node, except: Node = null) -> Array:
 	var result = []
-	for c in GlobalGameData.client_characters:
+	for c in (GlobalGameData.host_characters if ai_side == "host" else GlobalGameData.client_characters):
 		if c == except:
 			continue
 		if is_instance_valid(c) and c.hp > 0:
@@ -47,13 +57,13 @@ static func get_cell(c: Node) -> Vector2i:
 
 static func get_energy(main: Node) -> int:
 	var es = main.get_node_or_null("EnergySystem")
-	return es.get_energy(AI_PID) if es else 0
+	return es.get_energy(get_pid(ai_side)) if es else 0
 
 static func get_energy_of(main: Node, chara: Node) -> int:
 	var es = main.get_node_or_null("EnergySystem")
 	if not es:
 		return 0
-	var pid = chara.owner_pid if chara.get("owner_pid") != null else AI_PID
+	var pid = chara.owner_pid if chara.get("owner_pid") != null else get_pid(ai_side)
 	return es.get_energy(pid)
 
 static func get_max_energy(main: Node) -> int:
@@ -62,7 +72,7 @@ static func get_max_energy(main: Node) -> int:
 
 static func get_hand(main: Node) -> Array:
 	var dm = main.get_node_or_null("DeckManager")
-	return dm.get_hand(AI_PID) if dm else []
+	return dm.get_hand(get_pid(ai_side)) if dm else []
 
 static func get_hand_limit(main: Node) -> int:
 	var dm = main.get_node_or_null("DeckManager")

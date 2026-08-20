@@ -1,12 +1,15 @@
-# 单机人机对战 — 维护指南
+# AI 系统 — 维护指南（单机人机 + 自动战斗）
 
 > 新增角色时必须同步更新 AI 逻辑，否则 AI 无法控制新角色。
 
-## AI 架构总览（v2）
+## AI 架构总览（v2.1，自动战斗）
 
 ```
 AI/AIController.gd     决策调度 + 动作执行（时序、校验、烟格、防循环）
+├── 双队列 _queues[side]：单机敌方=client，联机双方=host/client，自动战斗只动本端（_active_side()）
 ├── AI/Strategist.gd   通用评估器（静态纯函数：查询/伤害模拟/评分/规划）
+│   ├── ai_side 静态变量：每次规划前由 AIController 显式设置（防跨方规划串队）
+│   ├── get_pid(side)  方→peer id（host=服务端、client=client_peer_id、单机=2）
 │   ├── plan_unit()    单元规划：技能 + 攻击 + 移动的组合
 │   ├── plan_cards()   出牌规划（能量预算、分数贪心）
 │   └── find_best_smoke_cell()  karrigan 放烟选址
@@ -15,6 +18,15 @@ AI/AIController.gd     决策调度 + 动作执行（时序、校验、烟格、
 ```
 
 依赖方向：`AIController → Strategist → Playbook`（Playbook 不依赖 Strategist 的规划层，只复用其查询函数）。
+
+## 自动战斗（AI 接管本端操作）
+
+- 开启：右上角自动战斗按钮（双端+单机显示，金色点亮）或 `GlobalGameData.auto_battle_self = true`；开启即锁定本端输入并清理玩家残留操作（选中/选卡/移动/攻击模式），关闭恢复
+- 单机：`is_ai_mode=true` 时双方均由 AI 接管（AI 对 AI 观战）；若仅本端开启，AI 只接管玩家方（`_ai_controls(side)` 判定）
+- 联机：本端开启 → 本端角色由 AI 控制，对端由玩家或其对端 AI 控制；AIController 在 `_active_side() == _self_side()` 时行动（非本端回合等待，不会跑串）
+- 执行链路与玩家同源：移动走 `_execute_move`（守卫 `character_move_used`，联机显式 `_sync_position` 广播）、攻击 `perform_attack_safe`、技能 `_server_execute_skill`（守卫冷却/行动次数）、出牌 `_server_play_card`（pid=`get_pid(side)`）、回合推进 `advance_turn_phase`
+- 关自动立即清空未执行队列；相位变化时清队列防遗留
+- 机制细节与验证记录见 `docs/13-auto-battle.md`
 
 ## AI 决策流程
 

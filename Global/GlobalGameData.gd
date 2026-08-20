@@ -3,6 +3,8 @@ extends Node
 # 当前玩家是否为主机（单人模式/AI 默认为 true）
 var is_host = false
 var is_ai_mode: bool = false
+# 本端自动战斗开关（单机=玩家方；联机=本端方；本端变量，无需网络同步）
+var auto_battle_self: bool = false
 
 enum TurnPhase {
 	NONE,
@@ -88,6 +90,7 @@ func reset_battle_state():
 	current_turn_phase = TurnPhase.NONE
 	turn_has_been_drawn = false
 	is_host_turn = true
+	auto_battle_self = false
 	host_characters.clear()
 	client_characters.clear()
 	character_move_used.clear()

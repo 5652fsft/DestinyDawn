@@ -7,6 +7,7 @@
 | C | `Scenes/main.gd` | 目标选择/高亮逻辑（如需新目标类型） |
 | D | `Cards/CardData.gd` | 添加枚举值（如需新类型） |
 | E | `Menus/DeckBuilder.gd` | 更新 `TYPE_NAMES`（如需新卡牌类型） |
+| F | `AI/` | 卡牌 AI 控制 |
 
 ---
 
@@ -75,6 +76,7 @@ _create_card("card_new_id", "显示名称", CardData.CardType.ATTACK, 2,
 
 `CardData.gd` 的 `enum TargetType` 添加值，`main.gd` 的 `_is_valid_target()` 和 `highlight_targets()` 添加处理逻辑。
 
+
 ## 检查清单
 
 - [ ] `CardDatabase.gd`: `_create_card()` 调用
@@ -85,20 +87,15 @@ _create_card("card_new_id", "显示名称", CardData.CardType.ATTACK, 2,
 
 ---
 
-## E) 卡面图生成（SD WebUI）
+## E) 卡面图生成
 
 卡面图路径 `Assets/Sprites/Cards/{card_id}.png`（文件名 = 卡牌 id，`CardUIBase._load_card_image` 按此加载）。**必须为透明背景 PNG**（卡面区域下方有白色六边形底纹，透明处透出）。
 
 ### 生成管线（一次配置，可复用）
 
-1. **工具**：SD WebUI（`C:\Users\10932\Documents\5652\sd-webui-aki-v4.10`），模型 `minimax_h3_fl2va_pruned_int8_convrot.safetensors`，API 端口 7860。
-2. **提示词**：34 张卡的 prompt 模板在 `C:\Users\10932\AppData\Local\Temp\opencode\card_prompts.json`（非项目内，重生成可参照）。统一风格 = "动漫角色施展对应魔法/元素 + 深色背景 + 居中构图"；负面词禁 text/watermark/logo/multiple characters/complex background。
-3. **生成参数**：1024×576，steps 28，cfg 5.5，sampler `dpmpp_2m`。
-4. **抠图（透明化）**：模型输出 RGB（无 alpha），用 rembg 批处理：
-   - venv: `sd-webui-aki-v4.10\venv\Scripts\python.exe`（已装 rembg[cpu]）
-   - 抠图模型 `bria-rmbg-2.0.onnx` 放 `C:\Users\10932\.u2net\`（国内网络从 hf-mirror 下载 RMBG-1.4/2.0 的 `onnx/model.onnx`）
-   - 批处理脚本模式：`new_session('bria-rmbg')` + `remove(img, session=s)`
-5. **替换**：透明 PNG 覆盖 `Assets/Sprites/Cards/{id}.png`，Godot 自动重新导入（运行时会重建 `.import` 缓存）。
+ComfyUI 生成与抠图
+
+## F) 卡牌 AI 控制
 
 ### 注意
 

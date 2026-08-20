@@ -20,5 +20,10 @@
 | `04-creating-ui.md` | 按钮/面板/字体规范 |
 | `05-rpc-conventions.md` | RPC 模式/AI 模式短路规则 |
 | `06-data-format-reference.md` | 角色/Buff 数据字段速查 |
-| `08-ai-mode.md` | AI 策略分支注册 |
-| `09-audio-system.md` | 音效添加与调用 |
+| `07-git-conventions.md` | Git 提交/分支规范 |
+| `08-ai-mode.md` | AI 策略分支注册 / 自动战斗 |
+| `09-audio-system.md` | 音效添加与调整 |
+| `10-android-port.md` | 安卓端适配（触控/安全区） |
+| `11-save-and-update.md` | 本地保存 / 自动更新 / 发布流程 |
+| `12-v174-fix-plan.md` | v1.7.4→1.7.5 修复记录（含联机结算） |
+| `13-auto-battle.md` | 自动战斗机制（AI 接管本端） |

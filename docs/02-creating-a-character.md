@@ -9,6 +9,8 @@
 | D | `Assets/Sprites/Standee/` | 添加立绘 |
 | E | `Scenes/main.gd` | 注册 PackedScene + 编队 map |
 | F | `Skills/SkillEffect.gd` | 实现技能逻辑 |
+| G | `AI/` | 实现 AI 控制 |
+| H | `Effects/`等 | 角色音效与特效 |
 
 ---
 
@@ -87,11 +89,11 @@ CharacterBody2D (input_pickable=true, script=NewChar.gd)
 
 ---
 
-## G) 角色音效
+## G) AI 控制
 
 ---
 
-## H) 角色特效
+## H) 角色音效与特效
 
 ---
 
