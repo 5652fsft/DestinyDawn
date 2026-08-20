@@ -1,6 +1,6 @@
 # v1.7.4 修复计划（执行依据，防止上下文丢失）
 
-> 状态：**实现完成，待发布** | 目标版本：1.7.4 | 本文档为 1.7.4 的逐文件改动清单与验证方式。
+> 状态：**实现完成，待发布（版本升至 1.7.5）** | 目标版本：1.7.5 | 本文档为 1.7.4→1.7.5 的逐文件改动清单与验证方式。
 > 完成后此文档保留为发布记录，可归档。
 
 ## 实现进度与验证结果（2026-08-19）
@@ -20,6 +20,27 @@
   - 顺带修复：`Strategist.simulate_damage` 希儿被动判定 `"Seele"` 与 `character_name=="希儿"` 不匹配 → AI 模拟伤害低估希儿（已改为"希儿"）；`Strategist.gd:674` BUFF_ATTACK 评分列表同样改为正确角色名（`"希儿"/"芝士仓鼠"`，Richardovo/Zephyr/Anjing 原名有效）。
   - 验证：临时测试 autoload 36 项断言全部 PASS（rope 发放/幂等/永久、双方独立发放、karrigan 死亡保留、银狼 range=7、芝士仓鼠完整攻击序列、普通单次、move_debuff、max_stacks、净化保留增益、铁壁 80、simulate 100、希儿 1.5x=27、流萤重置、灼烧单次），零 SCRIPT ERROR。
 - ⏳ 待办：真机联机对局验证（含 karrigan 开局 [拧绳] 双端一致、银狼 7 格远程、移动范围 ± 红绿显示）、杀软误报观察、安装替换全链路、安卓图标实机观察。
+- ✅ **三轮追加（2026-08-20，联机结算 + move_debuff）**：
+  - 根因调研：`rpc()` 与 `rpc_id(0)` 为同一代码路径（node.cpp `rpc` → `rpcp(0,...)`），服务端 `rpc_id(0)` 即广播——原"rpc_id(0) 不广播"假设作废。结算链路完全依赖服务端：死亡 → `unregister_character` → `check_victory`（服务端专属）→ rpc advance → GAME_OVER 广播 → 客户端结算。当**最后一击未在服务端登记**（karrigan 掉血 bug：客户端普攻经 `perform_attack` 双端各自执行，服务端副本被 `perform_attack` 守卫拦截 → 服务端不掉血）时，GAME_OVER 永不广播 → 客户端卡死。move_debuff 根因：`show_move_range` 用 `move_points` 而非 `effective_move_points` → 高亮与实际移动（`valid_move_cells`）均无视 debuff。
+  - 修复 1（结算兜底）：`unregister_character` 的 `check_victory()` 双端执行；服务端/AI 维持原 rpc 流程，客户端本地置 `GAME_OVER` + `show_battle_result()`（`_battle_over` 守卫幂等，服务端迟到广播自动跳过）。battle_stats 三处累加（heal/damage/death）移出服务端门控，客户端本地结算统计完整。
+  - 修复 2（move_debuff）：`BaseCharacter.gd:234` `show_move_range` 改用 `effective_move_points`（面板 CharacterInfoPanel 与 AI Strategist 本已正确）。
+  - 验证：临时 test autoload 16 项断言全 PASS（effective_move_points==base-2、可达格 91→59 单调递减丢失 32 格、全灭→GAME_OVER、client_kills 统计、_sync_turn_phase 链路、客户端视角胜负、幂等），零 SCRIPT ERROR。数据 91-32=59 自洽。
+  - **已知待办（karrigan 掉血 bug，用户搁置后续修）**：客户端普攻服务端 karrigan 有概率不掉血（快结束/服务端仅剩 karrigan 时更易触发，可能非 karrigan 特有）。根因收敛：`perform_attack`（BaseCharacter.gd:463-471）服务端副本被守卫（target_path 解析失败/hp<=0/相位非 Active/行动次数）拦截；普攻伤害无强制同步（`_sync_hp` 仅死亡/治疗分支广播）。下一步：临时日志定位服务端被哪个守卫拦截。
+  - ✅ **四轮追加（2026-08-20，服务端对齐结算）**：
+    - 用户实测反馈：客户端胜利时客户端已能及时弹结算，但**服务端仍卡在回合中不结算**。根因：服务端结算依赖自身登记最后一击（`unregister_character` → 服务端 `check_victory`），当最后一击因 karrigan bug 未在服务端登记时，服务端 `check_victory` 恒 false → 永不广播 GAME_OVER → 服务端卡死。
+    - 修复：客户端本地结算（`unregister_character` else 分支）时 `rpc_id(1, "_client_settled", host_win)` 通知服务端；服务端新增 `_client_settled(host_win)`：校验发送者（0=本地/OfflinePeer 或 client_peer_id），将败方角色全部 hp=0 并从列表移除，然后走标准 `advance_turn_phase` 结算（幂等，`_battle_over` 已置则忽略）。
+    - **环境事实修正**：Godot 4.7 的 `multiplayer.has_multiplayer_peer()` 在无外部 peer 时仍返回 **true**（默认 `OfflineMultiplayerPeer`）；本地直调 RPC 函数 `get_remote_sender_id()` 返回 0。全项目现有 `has_multiplayer_peer()` 守卫在此环境下等价走 rpc 分支（call_local 本地执行），行为不变。
+    - 验证：临时 test autoload 11 项断言全 PASS（`_client_settled(true/false)` 对齐+结算、败方全灭并移除、重复通知幂等、`_battle_over` 后忽略、相位 GAME_OVER），零 SCRIPT ERROR。**待人工验证**：双端局域网重打"客户端普攻杀光服务端"场景，确认双端同时弹结算。
+  - ✅ **五轮追加（2026-08-20，`_client_settled` 败方语义修正）**：
+    - 用户实测：客户端胜利时**服务端也错误显示胜利**。根因：`_client_settled` 的败方取反（`host_win`=host 队是否有存活，host 全灭时应清 **host** 队，原代码清了 **client** 队 → 服务端 check_victory 误判"服务端胜利"）。教训：此前测试断言"传入方被清空"，与实现错得一致，未验证语义。
+    - 修复：`loser_side = client_characters if host_win else host_characters`（host 存活→败方 client；host 全灭→败方 host）。
+    - 验证：重写断言按语义验证（host_win=true → client 队移除且 host 保留；host_win=false → host 队全灭移除），12 项全 PASS，零 SCRIPT ERROR。
+  - ✅ **六轮追加（2026-08-20，服务端拦截实证排查 + 移除双兜底）**：
+    - 目标：实证"客户端普攻服务端角色有概率不掉血"（服务端 perform_attack 守卫拦截）根因。搭建真实 ENet 双进程自动对局探针（临时 autoload `net_auto.gd` + main_scene 临时指向 scene.tscn，已还原）：`--probe=host`（服务端）/`--probe=client`（客户端），客户端每回合打牌/放技能/普攻/结束回合，服务端同构，对局结束自动退出。
+    - **探针结论**：35 轮真实对局（普攻、host 攻击、卡牌、技能全覆盖）全部一致——零守卫拦截、零双端分歧、双端正确结算。静态审查亦确认攻击链路双端对称（call_local 同一守卫+计数）、状态同步全走可靠 rpc。原始"不掉血"场景无法在本地复现，触发条件指向真实网络环境竞态。
+    - **决策（用户确认）**：移除双兜底（客户端本地结算 else 分支 + `_client_settled` 函数），回归纯服务端权威结算单一路径。验证：移除后探针 5 轮回归全绿（sa=ca、零 REJECT、双端正常结算）。
+    - AttackDebug 诊断日志（SEREVR/CLIENT ACCEPT/REJECT/counted/unregister）**保留**（联机攻击时低频打印，供线上排查）。
+    - 版本号升 1.7.5（UpdateManager + export_presets.cfg 同步），待用户双端实测后推送发布。
 
 ## 0. 决策汇总（用户已确认）
 
@@ -217,9 +238,9 @@
 
 | 文件 | 改动 | 状态 |
 |---|---|---|
-| `Global/UpdateManager.gd:5` | `VERSION = "1.7.4"` | ✅ |
-| `export_presets.cfg:15,86` | 两个预设 export_path 改 `DestinyDawn-v1.7.4.exe/.apk` | ✅ |
-| `export_presets.cfg` | 版本信息字段：file_version=1.7.4.0、product_version=1.7.4、file_description、copyright、trademarks；Android version/name=1.7.4 | ✅ |
+| `Global/UpdateManager.gd:5` | `VERSION = "1.7.5"` | ✅ |
+| `export_presets.cfg:15,86` | 两个预设 export_path 改 `DestinyDawn-v1.7.5.exe/.apk` | ✅ |
+| `export_presets.cfg` | 版本信息字段：file_version=1.7.5.0、product_version=1.7.5.0、file_description、copyright、trademarks；Android version/name=1.7.5 | ✅ |
 | `docs/11-save-and-update.md` | 安装器新机制（tasklist 等待/重试/install.log/缺包提示） | ✅ |
 | `docs/12-v174-fix-plan.md` | 本文档随实现同步更新 | ✅ |
 | `docs/05-rpc-conventions.md` | 服务端校验补充说明（advance_turn_phase 发送者校验、技能冷却校验） | ✅ |

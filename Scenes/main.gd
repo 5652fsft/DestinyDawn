@@ -479,19 +479,24 @@ func register_character(chara: CharacterBody2D):
 
 func unregister_character(chara: CharacterBody2D):
 	if _battle_over:
+		if multiplayer.is_server():
+			print("[AttackDebug] unregister skip battle_over char=", chara.name)
 		return
 	characters.erase(chara)
 	GlobalGameData.host_characters.erase(chara)
 	GlobalGameData.client_characters.erase(chara)
+	if multiplayer.is_server():
+		print("[AttackDebug] unregister char=", chara.name, " host_remaining=", _count_alive(GlobalGameData.host_characters), " client_remaining=", _count_alive(GlobalGameData.client_characters))
 	if selected_character == chara:
 		if highlight_layer:
 			highlight_layer.clear()
-	if (GlobalGameData.is_ai_mode or multiplayer.is_server()) and check_victory():
-		if multiplayer.has_multiplayer_peer():
-			rpc("advance_turn_phase")
-		else:
-			advance_turn_phase()
-			
+	if check_victory():
+		if GlobalGameData.is_ai_mode or multiplayer.is_server():
+			if multiplayer.has_multiplayer_peer():
+				rpc("advance_turn_phase")
+			else:
+				advance_turn_phase()
+
 func select_character(chara: CharacterBody2D, enemy_view: bool = false):
 	if chara.hp <= 0:
 		return
@@ -1638,6 +1643,13 @@ func check_attack() -> void:
 		print("[Phase] 所有角色行动次数已耗尽，点击结束回合")
 		if toast and toast.has_method("show_message"):
 			toast.show_message("所有角色行动次数已耗尽，点击结束回合", 2.0)
+
+func _count_alive(side) -> int:
+	var n = 0
+	for c in side:
+		if c.hp > 0:
+			n += 1
+	return n
 
 func check_victory() -> bool:
 	if not GlobalGameData.turn_has_been_drawn:

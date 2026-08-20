@@ -231,7 +231,7 @@ func show_move_range():
 		print("[Warn] 起始格不可通行")
 		return
 
-	valid_move_cells = HexUtils.get_reachable_cells(grid_layer, start_cell, move_points,
+	valid_move_cells = HexUtils.get_reachable_cells(grid_layer, start_cell, effective_move_points,
 		func(c: Vector2i) -> bool: return main.is_cell_occupied(c, self),
 		func(c: Vector2i) -> int: return get_move_cost(c))
 
@@ -461,25 +461,44 @@ func sync_extra_attacks_safe(value: int):
 func perform_attack(target_path: NodePath):
 	var target = get_node_or_null(target_path)
 	if not target or not target is CharacterBody2D:
+		if multiplayer.is_server():
+			print("[AttackDebug] SERVER REJECT target_null path=", target_path, " attacker=", name)
 		return
 	if target.hp <= 0:
+		if multiplayer.is_server():
+			print("[AttackDebug] SERVER REJECT target_dead attacker=", name, " target=", target.name, " target_hp=", target.hp)
 		return
 	
 	if get_current_phase() != "Active":
+		if multiplayer.is_server():
+			print("[AttackDebug] SERVER REJECT phase attacker=", name, " phase=", get_current_phase(), " turn_phase=", GlobalGameData.current_turn_phase, " is_host_turn=", GlobalGameData.is_host_turn, " is_host=", GlobalGameData.is_host, " target=", target_path)
 		return
 	if GlobalGameData.character_attack_used.get(name, false) and _get_extra_attacks() <= 0:
+		if multiplayer.is_server():
+			print("[AttackDebug] SERVER REJECT action attacker=", name, " attack_used=", GlobalGameData.character_attack_used.get(name, false), " extra=", _get_extra_attacks())
+		else:
+			print("[AttackDebug] CLIENT REJECT action attacker=", name, " attack_used=", GlobalGameData.character_attack_used.get(name, false), " extra=", _get_extra_attacks())
 		return
+	if multiplayer.is_server():
+		print("[AttackDebug] SERVER ACCEPT attacker=", name, " target=", target.name, " target_hp=", target.hp, " phase=", get_current_phase())
+	else:
+		print("[AttackDebug] CLIENT ACCEPT attacker=", name, " target=", target.name, " attack_used=", GlobalGameData.character_attack_used.get(name, false), " extra=", _get_extra_attacks())
 	
-	# 计数两端同步（call_local）：优先消耗额外行动次数，无额外才占用基础次数
+	if main:
+		main.last_attacker = self
+	target.take_damage(effective_attack)
+	# 计数（守卫通过后）：优先消耗额外行动次数，无额外才占用基础次数
+	# 放在伤害结算之后：若在 take_damage 前 consume，_sync_extra_attacks 广播会先于 perform_attack 到达对端，
+	# 服务端执行 perform_attack 时 _extra_attacks 已被清零 → 行动次数守卫误拦截 → 服务端不掉血
 	if _get_extra_attacks() > 0:
 		_consume_extra_attack()
 	elif not GlobalGameData.character_attack_used.get(name, false):
 		GlobalGameData.character_attack_used[name] = true
 		GlobalGameData.character_attack_used_num += 1
-
-	if main:
-		main.last_attacker = self
-	target.take_damage(effective_attack)
+	if multiplayer.is_server():
+		print("[AttackDebug] SERVER counted attacker=", name, " attack_used=", GlobalGameData.character_attack_used.get(name, false), " extra=", _get_extra_attacks())
+	else:
+		print("[AttackDebug] CLIENT counted attacker=", name, " attack_used=", GlobalGameData.character_attack_used.get(name, false), " extra=", _get_extra_attacks())
 	print("[Combat] %s → %s 造成 %d 点伤害" % [GlobalGameData.get_char_label(self), GlobalGameData.get_char_label(target), effective_attack])
 	
 	# 同步动画（所有客户端）
@@ -681,9 +700,9 @@ func take_damage(damage: int):
 		hp = min(max_hp, hp - damage)
 		_spawn_float(-damage, true)
 		if _am: _am.play_sfx("heal", self)
+		var key = "host_healing_done" if is_host else "client_healing_done"
+		GlobalGameData.battle_stats[key] += -damage
 		if GlobalGameData.is_ai_mode or multiplayer.is_server():
-			var key = "host_healing_done" if is_host else "client_healing_done"
-			GlobalGameData.battle_stats[key] += -damage
 			print("[Combat] %s 恢复 %d 点 HP [%d/%d]" % [GlobalGameData.get_char_label(self), -damage, hp, max_hp])
 		if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 			rpc_id(0, "_sync_hp", hp)
@@ -716,9 +735,9 @@ func take_damage(damage: int):
 	hp = max(0, hp - damage)
 	_spawn_float(damage)
 	_shake_camera(3.0)
+	var key = "host_damage_dealt" if not is_host else "client_damage_dealt"
+	GlobalGameData.battle_stats[key] += damage
 	if GlobalGameData.is_ai_mode or multiplayer.is_server():
-		var key = "host_damage_dealt" if not is_host else "client_damage_dealt"
-		GlobalGameData.battle_stats[key] += damage
 		print("[Combat] %s 受到 %d 点伤害，剩余 HP: %d" % [GlobalGameData.get_char_label(self), damage, hp])
 	if hp <= 0:
 		if not visible:
@@ -727,9 +746,9 @@ func take_damage(damage: int):
 		hide()
 		collision_layer = 0
 		_play_death_effect()
+		var killer_key = "client_kills" if is_host else "host_kills"
+		GlobalGameData.battle_stats[killer_key] += 1
 		if GlobalGameData.is_ai_mode or multiplayer.is_server():
-			var killer_key = "client_kills" if is_host else "host_kills"
-			GlobalGameData.battle_stats[killer_key] += 1
 			print("[Combat] %s 阵亡！" % GlobalGameData.get_char_label(self))
 		main.unregister_character(self)
 	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():

@@ -1,8 +1,8 @@
-extends Node
+﻿extends Node
 # 自动更新：GitHub Release 检查 + 流式下载 + 安装（Windows 用 bat 延迟替换）
 # VERSION 为游戏内唯一版本来源，发布时同步修改 export_presets.cfg 路径。
 
-const VERSION = "1.7.4"
+const VERSION = "1.7.5"
 const REPO = "5652fsft/DestinyDawn"
 const API_URL = "https://api.github.com/repos/%s/releases/latest" % REPO
 
