@@ -31,11 +31,13 @@ if ($hasMount) {
     [System.IO.File]::WriteAllText($proj, $content)
     Write-Host "[mount] uncommented"
 } else {
+    # comment line was lost (Godot editor/export rewrites project.godot and drops unknown comments):
+    # insert the explanatory comment + the ACTIVE mount line
     $anchor = "[autoload]" + $nl + $nl
-    $ins = $anchor + "; LAN test probe (tests/NetTest.gd). Uncomment next line to mount:" + $nl + $commentLine + $nl
+    $ins = $anchor + "; LAN test probe (tests/NetTest.gd). Uncomment next line to mount:" + $nl + $mountLine + $nl
     $content = $content.Replace($anchor, $ins)
     [System.IO.File]::WriteAllText($proj, $content)
-    Write-Host "[mount] inserted"
+    Write-Host "[mount] inserted + mounted"
 }
 
 $checkLines = ([System.IO.File]::ReadAllText($proj)) -split "`r?`n"

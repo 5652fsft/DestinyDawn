@@ -27,6 +27,8 @@ buses/default_bus_layout="uid://dpvo0w48xjncy"
 
 [autoload]
 
+; LAN test probe (tests/NetTest.gd). Uncomment next line to mount:
+; NetTest="*res://tests/NetTest.gd"
 GlobalGameData="*res://Global/GlobalGameData.gd"
 SaveManager="*res://Global/SaveManager.gd"
 UpdateManager="*res://Global/UpdateManager.gd"

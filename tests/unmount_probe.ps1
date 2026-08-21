@@ -19,12 +19,22 @@ if ($editors) {
 $content = [System.IO.File]::ReadAllText($proj)
 $mountLine = 'NetTest="*res://tests/NetTest.gd"'
 $commentLine = '; NetTest="*res://tests/NetTest.gd"'
+$nl = if ($content.Contains("`r`n")) { "`r`n" } else { "`n" }
 $lines = $content -split "`r?`n"
 $hasMount = $lines -contains $mountLine
 $hasComment = $lines -contains $commentLine
 
 if (-not $hasMount) {
-    Write-Host "[unmount] already unmounted"
+    if ($hasComment) {
+        Write-Host "[unmount] already unmounted"
+    } else {
+        # comment line was lost (Godot editor/export rewrites project.godot): restore it
+        $anchor = "[autoload]" + $nl + $nl
+        $ins = $anchor + "; LAN test probe (tests/NetTest.gd). Uncomment next line to mount:" + $nl + $commentLine + $nl
+        $content = $content.Replace($anchor, $ins)
+        [System.IO.File]::WriteAllText($proj, $content)
+        Write-Host "[unmount] comment restored"
+    }
 } else {
     $content = $content.Replace($mountLine, $commentLine)
     [System.IO.File]::WriteAllText($proj, $content)

@@ -52,8 +52,8 @@ var _auto_input_locked: bool = false
 @onready var client_player_panel = $UI/ClientPlayerPanel
 @onready var toast = $UI/Toast
 
-const CHARACTER_BRONYA = preload("res://Characters/Bronya/Bronya.tscn")
-const CHARACTER_SEELE = preload("res://Characters/Seele/Seele.tscn")
+const CHARACTER_BRONYA = preload("res://Characters/Bronya/bronya.tscn")
+const CHARACTER_SEELE = preload("res://Characters/Seele/seele.tscn")
 const CHARACTER_ELAINA = preload("res://Characters/Elaina/Elaina.tscn")
 const CHARACTER_FIREFLY = preload("res://Characters/Firefly/Firefly.tscn")
 const CHARACTER_SILVERWOLF = preload("res://Characters/SilverWolf/SilverWolf.tscn")
