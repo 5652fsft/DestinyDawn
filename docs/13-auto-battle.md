@@ -1,7 +1,7 @@
 # 自动战斗功能规划（docs/13）
 
-> 状态：**规划已落盘，待用户确认问题后实施** | 目标版本：1.7.5（与联机结算修复同版本发布）
-> 本文件为自动战斗功能的完整方案与待确认问题，防止上下文丢失。
+> 状态：**已实施并随 v1.7.5 发布（2026-08-20）** | 目标版本：1.7.5（与联机结算修复同版本发布）
+> 本文件为自动战斗功能的完整方案与问题确认记录，防止上下文丢失。
 
 ## 0. 需求背景
 
@@ -131,7 +131,7 @@ _ai_controls(side) -> bool:
 - 手牌会被 AI 使用（消耗本端能量）——预期行为。
 - AI 对 AI 观战时镜头沿用现有"玩家回合聚焦"逻辑（单机玩家=host 方）。
 
-## 7. 实施结果（2026-08-20 完成，待用户实测）
+## 7. 实施结果（2026-08-20 完成，已随 v1.7.5 发布）
 
 已按顺序完成全部 7 步：GlobalGameData 开关 → Strategist 参数化 → AIController 双队列+执行层 → UI 按钮/图标 → 单机回归 → 联机探针 AI 对 AI → 文档+提交。
 
@@ -173,4 +173,4 @@ _ai_controls(side) -> bool:
 
 ### 7.6 提交
 
-待用户实测 1.7.5（含自动战斗）通过后，与版本号一并提交发布。本次改动文件：AI/AIController.gd、AI/Strategist.gd、Global/GlobalGameData.gd、Scenes/main.gd、Scenes/scene.tscn、Assets/Icons/gamepad.png（新增）、docs/13-auto-battle.md（新增）。
+已随 v1.7.5 提交并发布（2026-08-20，GitHub Release）。本次改动文件：AI/AIController.gd、AI/Strategist.gd、Global/GlobalGameData.gd、Scenes/main.gd、Scenes/scene.tscn、Assets/Icons/gamepad.png（新增）、docs/13-auto-battle.md（新增）。
