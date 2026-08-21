@@ -1,4 +1,4 @@
-﻿extends Control
+extends Control
 
 # --- 联机状态 ---
 var _lobby_active: bool = false
@@ -283,6 +283,8 @@ func _on_host_pressed():
 
 	multiplayer.multiplayer_peer = peer
 	GlobalGameData.is_host = true
+	# 联机入口显式退出 AI 模式（防单机残留状态串入联机对局）
+	GlobalGameData.is_ai_mode = false
 
 	# 连接信号（等待玩家加入）
 	multiplayer.peer_connected.connect(_on_peer_connected)
@@ -610,6 +612,8 @@ func _on_connect_to_room(quick_ip: String = ""):
 
 	multiplayer.multiplayer_peer = peer
 	GlobalGameData.is_host = false
+	# 联机入口显式退出 AI 模式（防单机残留状态串入联机对局）
+	GlobalGameData.is_ai_mode = false
 	print("[Join] peer 已设置，等待 connected_to_server 信号...")
 
 	# 断开旧信号（防止重复）

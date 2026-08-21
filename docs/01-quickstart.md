@@ -27,3 +27,4 @@
 | `11-save-and-update.md` | 本地保存 / 自动更新 / 发布流程 |
 | `12-v174-fix-plan.md` | v1.7.4→1.7.5 修复记录（含联机结算） |
 | `13-auto-battle.md` | 自动战斗机制（AI 接管本端） |
+| `14-mp-sync-investigation.md` | 联机开局同步排查报告 + ready 阶段实施记录 + 扩展实战测试 |

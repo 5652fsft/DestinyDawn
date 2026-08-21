@@ -133,6 +133,10 @@ func _setup_ai_controller():
 	_log("AI 控制器已创建并添加到场景", "Mode")
 
 func _ready():
+	# 防御：已挂 ENet peer 却残留 AI 模式（如其他入口漏重置），强制回到联机流程
+	if multiplayer.multiplayer_peer is ENetMultiplayerPeer and GlobalGameData.is_ai_mode:
+		print("[Net] 警告：联机状态下残留 is_ai_mode=true，已强制关闭")
+		GlobalGameData.is_ai_mode = false
 	BackgroundSingleton.enter_battle()
 	GlobalGameData.reset_battle_state()
 	GlobalGameData.load_defaults_if_empty()
@@ -405,23 +409,126 @@ func _spawn_character(scene_path: String, char_name: String, authority: int, pos
 	chara.position = pos
 	Characters.add_child(chara)
 
-@rpc("any_peer", "reliable")
-func _spawn_character_remote(scene_path: String, char_name: String, authority: int, pos: Vector2):
-	_spawn_character(scene_path, char_name, authority, pos)
-
 # 联机编队/卡组同步
 @rpc("any_peer", "reliable")
 func _sync_host_setup(team_ids: Array, deck_ids: Array):
 	GlobalGameData.host_team = team_ids
 	GlobalGameData.selected_deck = deck_ids
 
+# ==================== ready 阶段（开局同步） ====================
+# 流程：客户端 _client_send_setup → 主机构建完整初始快照（双方角色定义）
+#      → 广播 _sync_initial_snapshot → 双端按快照生成角色（幂等）
+#      → 客户端回执 _client_ready → 主机全部就绪（或 5s 超时兜底）后开局
+# 快照重发幂等：延迟进场的客户端经 _client_request_state 重同步补全角色（覆盖根因 B）
+
+# 客户端就绪回执表（pid -> bool）
+var _battle_ready_clients: Dictionary = {}
+# ready 超时兜底已启动标记（防重复计时器）
+var _battle_ready_timer_started: bool = false
+
 @rpc("any_peer", "reliable")
 func _client_send_setup(team_ids: Array, deck_ids: Array):
 	var sender_id = multiplayer.get_remote_sender_id()
+	if not multiplayer.is_server() or sender_id <= 0:
+		return
 	GlobalGameData.client_team = team_ids
 	if deck_manager and not deck_ids.is_empty() and GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.NONE:
 		deck_manager.init_player(sender_id, deck_ids)
-	call_deferred("_spawn_client_characters", sender_id)
+	_build_team_from_selection()
+	var snap = _build_initial_snapshot(sender_id)
+	# 主机本地生成（幂等：已存在同名角色则跳过）
+	_spawn_characters_from_snapshot(snap)
+	# 广播快照给客户端（含主机角色与客户端角色，一次到位）
+	rpc("_sync_initial_snapshot", snap.host, snap.client)
+	_hide_waiting_overlay()
+	print("[Net] 已广播初始快照（host=%d client=%d）" % [snap.host.size(), snap.client.size()])
+	_start_ready_timeout()
+
+# 构建开局快照：双方角色定义（场景路径/名字/owner_pid/出生点）
+func _build_initial_snapshot(cid: int) -> Dictionary:
+	var snap = {"host": [], "client": []}
+	var host_id = multiplayer.get_unique_id() if multiplayer.has_multiplayer_peer() else 1
+	for i in range(team_roster.size()):
+		snap.host.append({
+			"scene": team_roster[i].resource_path,
+			"name": "HostCharacter_%d" % i,
+			"pid": host_id,
+			"pos": GlobalGameData.host_birth_point[i],
+		})
+	for i in range(enemy_roster.size()):
+		snap.client.append({
+			"scene": enemy_roster[i].resource_path,
+			"name": "ClientCharacter_%d" % i,
+			"pid": cid,
+			"pos": GlobalGameData.client_birth_point[i],
+		})
+	return snap
+
+# 按快照生成角色（幂等：同名角色已存在则跳过，快照重发安全）
+func _spawn_characters_from_snapshot(snap: Dictionary) -> void:
+	var existing := {}
+	for c in characters:
+		existing[c.name] = true
+	for entry in snap.get("host", []) + snap.get("client", []):
+		if existing.has(entry.name):
+			continue
+		_spawn_character(entry.scene, entry.name, entry.pid, entry.pos)
+		existing[entry.name] = true
+
+# 客户端：接收初始快照，生成全部角色后回执就绪
+@rpc("any_peer", "reliable")
+func _sync_initial_snapshot(host_chars: Array, client_chars: Array):
+	if multiplayer.is_server():
+		return
+	_spawn_characters_from_snapshot({"host": host_chars, "client": client_chars})
+	if multiplayer.has_multiplayer_peer():
+		rpc_id(1, "_client_ready")
+		print("[Net] 客户端已按快照生成角色并回执 ready")
+
+# 客户端就绪回执（服务端权威处理）
+@rpc("any_peer", "reliable")
+func _client_ready():
+	var id = multiplayer.get_remote_sender_id()
+	if not multiplayer.is_server() or id <= 0:
+		return
+	_battle_ready_clients[id] = true
+	print("[Net] 客户端 %d 就绪" % id)
+	_try_start_battle()
+
+# 开局栅栏：全部已加入客户端就绪后推进回合
+func _try_start_battle():
+	if not multiplayer.is_server():
+		return
+	for pid in multiplayer.get_peers():
+		if not _battle_ready_clients.has(pid):
+			return
+	if GlobalGameData.current_turn_phase != GlobalGameData.TurnPhase.NONE:
+		return
+	print("[Net] 全部客户端就绪，开局")
+	advance_turn_phase()
+
+# ready 超时兜底：客户端异常（快照丢失/回执丢失）时 5 秒后仍开局，避免卡死
+func _start_ready_timeout():
+	if _battle_ready_timer_started:
+		return
+	_battle_ready_timer_started = true
+	get_tree().create_timer(5.0).timeout.connect(func():
+		if not _battle_over and GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.NONE:
+			print("[Net] ready 等待超时，兜底开局")
+			advance_turn_phase()
+	)
+
+# setup 等待超时：客户端连接后迟迟不响应 _client_send_setup（卡在加载/异常）
+# 时 30s 后按"客户端未就绪"结算，避免主机无限等待（移动端极端加载慢也不会误伤）
+func _start_setup_timeout():
+	get_tree().create_timer(30.0).timeout.connect(func():
+		if _battle_over or GlobalGameData.current_turn_phase != GlobalGameData.TurnPhase.NONE:
+			return
+		if multiplayer.get_peers().is_empty():
+			return
+		print("[Net] setup 等待超时（客户端未上报编队），按投降结算")
+		show_battle_result(true, false)
+	)
 
 func _init_buff_manager():
 	var bm = Node.new()
@@ -463,10 +570,11 @@ func _on_client_joined(id: int):
 	_build_team_from_selection()
 	_build_deck_from_selection()
 	_init_player_card_systems()
-	for i in range(team_roster.size()):
-		rpc_id(id, "_spawn_character_remote", team_roster[i].resource_path, "HostCharacter_%d" % i, multiplayer.get_unique_id(), GlobalGameData.host_birth_point[i])
+	# 角色生成统一走 ready 阶段快照（_client_send_setup → _sync_initial_snapshot），此处不再逐条广播
+	# 客户端迟迟不响应编队上报（卡在加载/异常）时 30s 后按未就绪结算，避免无限等待
+	_start_setup_timeout()
 
-# 断连处理：服务端按投降结算；客户端提示并返回主菜单，避免对局卡死
+# 断连处理：任意一方掉线均按对方投降结算（服务端与客户端对称）
 func _on_peer_disconnected(id: int):
 	if _battle_over:
 		return
@@ -481,11 +589,14 @@ func _on_peer_disconnected(id: int):
 				c.collision_layer = 0
 		show_battle_result(true, false)
 	else:
-		print("[Net] 服务端断开连接")
-		show_toast("连接已断开，返回主菜单", 2.0)
-		get_tree().create_timer(1.5).timeout.connect(func():
-			get_tree().change_scene_to_file("res://Menus/MainMenu.tscn")
-		)
+		# 客户端视角：主机断线 → 判定主机投降，本端获胜结算（与主机判客户端投降对称）
+		print("[Net] 服务端断开连接，判定其投降")
+		for c in GlobalGameData.host_characters.duplicate():
+			if is_instance_valid(c):
+				c.hp = 0
+				c.hide()
+				c.collision_layer = 0
+		show_battle_result(true, true)
 
 @rpc("any_peer", "reliable")
 func _sync_opponent_name(name: String):
@@ -524,7 +635,8 @@ func _client_request_state():
 		rpc_id(id, "_sync_client_peer_id", id)
 		rpc_id(id, "_sync_opponent_name", GlobalGameData.player_name)
 		rpc_id(id, "_request_client_setup")
-		# 客户端角色 spawn 只由 _client_send_setup 触发（需先同步 client_team），此处不直接生成
+		# 客户端会再次 _client_send_setup → 主机幂等重发初始快照，
+		# 延迟进场的客户端可补全全部角色（含主机角色），覆盖"首次同步 RPC 丢失"竞态
 	else:
 		_on_client_joined(id)
 
@@ -532,20 +644,6 @@ func _client_request_state():
 func _request_client_setup():
 	rpc_id(1, "_sync_opponent_name", GlobalGameData.player_name)
 	rpc_id(1, "_client_send_setup", GlobalGameData.selected_team, GlobalGameData.selected_deck)
-
-func _spawn_client_characters(id: int):
-	for c in GlobalGameData.client_characters:
-		if is_instance_valid(c):
-			return  # 幂等：重同步补发路径下角色已生成则跳过，防重复生成
-	_build_team_from_selection()
-	for i in range(enemy_roster.size()):
-		_spawn_character(enemy_roster[i].resource_path, "ClientCharacter_%d" % i, id, GlobalGameData.client_birth_point[i])
-		rpc("_spawn_character_remote", enemy_roster[i].resource_path, "ClientCharacter_%d" % i, id, GlobalGameData.client_birth_point[i])
-	print("[Info] 开始游戏")
-	_hide_waiting_overlay()
-	# 相位非 NONE 表示已开局（重同步重复到达），不再重复推进
-	if GlobalGameData.current_turn_phase == GlobalGameData.TurnPhase.NONE:
-		rpc("advance_turn_phase")
 
 func _init_player_card_systems():
 	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
@@ -1534,7 +1632,9 @@ func show_battle_result(from_surrender: bool = false, surrendering_is_host: bool
 	var i_win
 	if from_surrender:
 		i_win = GlobalGameData.is_host != surrendering_is_host
-		print("[Phase] 投降，胜利方: %s" % ("服务端" if i_win else "客户端"))
+		# 胜利方绝对语义（修正：原写法在客户端视角打印反了，仅日志误导，结算不受影响）
+		var host_won = i_win == GlobalGameData.is_host
+		print("[Phase] 投降，胜利方: %s" % ("服务端" if host_won else "客户端"))
 	else:
 		var is_host_win = GlobalGameData.host_characters.any(func(c): return c.hp > 0)
 		i_win = is_host_win if GlobalGameData.is_host else not is_host_win

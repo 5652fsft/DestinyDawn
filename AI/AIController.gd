@@ -207,6 +207,13 @@ func _execute_current_action(side: String):
 		"attack":
 			_pan_to(chara)
 			_execute_attack(chara, action.target)
+			# 额外行动次数未用完（技能/击杀被动等）→ 动态补一个攻击动作（实时重选目标），
+			# 否则队列耗尽即结束回合，额外次数被浪费
+			if is_instance_valid(chara) and chara.hp > 0 and _has_attack_left(chara):
+				var next_target = _pick_attack_target(chara)
+				if next_target:
+					queue.push_front({"type": "attack", "character": chara, "target": next_target})
+					_log("%s 仍有行动次数，追加攻击" % _char_label(chara), "Attack")
 		"skill":
 			_pan_to(chara)
 			_execute_skill(chara, action.target, action.get("cell", Vector2i(-1, -1)))
@@ -433,6 +440,38 @@ func _execute_card(card_id: String, target: Node):
 
 
 # ==================== 辅助函数 ====================
+
+# 角色是否仍有攻击次数：基础次数未用，或额外行动次数 > 0
+func _has_attack_left(chara: Node) -> bool:
+	if not is_instance_valid(chara) or chara.hp <= 0:
+		return false
+	if chara.has_method("get_current_phase") and chara.get_current_phase() != "Active":
+		return false
+	if GlobalGameData.character_attack_used.get(chara.name, false):
+		var extra = chara._get_extra_attacks() if chara.has_method("_get_extra_attacks") else 0
+		return extra > 0
+	return true
+
+# 当前格射程内选择攻击目标（hp+护盾最高者；射程外/无目标返回 null，保证补攻击收敛不循环）
+func _pick_attack_target(chara: Node) -> Node:
+	var c_cell = chara.get_current_cell()
+	if c_cell == Vector2i(-1, -1):
+		return null
+	var best: Node = null
+	var best_val := -999
+	for e in AIStrategist.get_enemy_alive(_main):
+		if not is_instance_valid(e) or e.hp <= 0:
+			continue
+		var e_cell = e.get_current_cell()
+		if e_cell == Vector2i(-1, -1):
+			continue
+		if HexUtils.hex_distance(c_cell, e_cell) > chara.attack_range:
+			continue
+		var val = e.hp + (e.shield if "shield" in e else 0)
+		if val > best_val:
+			best_val = val
+			best = e
+	return best
 
 func _end_phase():
 	_log("AI 结束当前回合，调用 advance_turn_phase", "EndTurn")

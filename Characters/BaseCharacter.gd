@@ -692,7 +692,13 @@ func _play_death_effect():
 
 @rpc("any_peer", "call_local", "reliable")
 # 受击：计算标记/防御/护盾减免，同步 HP 和护盾，记录战斗统计
+# 伤害应用仅在服务端执行（客户端只收 _sync_hp/_sync_shield 广播）：
+# 原实现三端各自应用伤害，攻击端本地先掉血、服务端守卫拦截时未应用且不广播
+# → 双端 HP/死亡判定/结算分裂（后程低血量时更易触发，含"双端都胜利"）。
+# 客户端保留动画/计数预测，HP 以服务端广播为准。
 func take_damage(damage: int):
+	if not GlobalGameData.is_ai_mode and not multiplayer.is_server():
+		return
 	if hp <= 0:
 		return
 	var is_host = name.begins_with("Host")
@@ -704,6 +710,7 @@ func take_damage(damage: int):
 		GlobalGameData.battle_stats[key] += -damage
 		if GlobalGameData.is_ai_mode or multiplayer.is_server():
 			print("[Combat] %s 恢复 %d 点 HP [%d/%d]" % [GlobalGameData.get_char_label(self), -damage, hp, max_hp])
+		_broadcast_damage_fx(-damage, 1)
 		if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 			rpc_id(0, "_sync_hp", hp)
 		return
@@ -731,10 +738,12 @@ func take_damage(damage: int):
 		if _am: _am.play_sfx("shield", self)
 		if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 			print("[Combat] %s 护盾吸收 %d 点伤害，剩余护盾: %d" % [GlobalGameData.get_char_label(self), absorbed, shield])
+		_broadcast_damage_fx(absorbed, 2)
 	
 	hp = max(0, hp - damage)
 	_spawn_float(damage)
 	_shake_camera(3.0)
+	_broadcast_damage_fx(damage, 0)
 	var key = "host_damage_dealt" if not is_host else "client_damage_dealt"
 	GlobalGameData.battle_stats[key] += damage
 	if GlobalGameData.is_ai_mode or multiplayer.is_server():
@@ -746,6 +755,7 @@ func take_damage(damage: int):
 		hide()
 		collision_layer = 0
 		_play_death_effect()
+		_broadcast_death_fx()
 		var killer_key = "client_kills" if is_host else "host_kills"
 		GlobalGameData.battle_stats[killer_key] += 1
 		if GlobalGameData.is_ai_mode or multiplayer.is_server():
@@ -754,6 +764,40 @@ func take_damage(damage: int):
 	if multiplayer.has_multiplayer_peer() and multiplayer.is_server():
 		rpc_id(0, "_sync_hp", hp)
 		rpc_id(0, "_sync_shield", shield)
+
+# 联机时广播伤害/治疗/护盾表现（服务端本地已执行，客户端补飘字/音效/震屏）
+func _broadcast_damage_fx(amount: int, kind: int):
+	if not GlobalGameData.is_ai_mode and multiplayer.has_multiplayer_peer() and not multiplayer.get_peers().is_empty():
+		rpc("_play_damage_fx", amount, kind)
+
+# 联机时广播死亡表现（客户端补死亡特效；隐藏由 _sync_hp 广播处理）
+func _broadcast_death_fx():
+	if not GlobalGameData.is_ai_mode and multiplayer.has_multiplayer_peer() and not multiplayer.get_peers().is_empty():
+		rpc("_play_death_fx")
+
+# 伤害/治疗/护盾表现（客户端执行；服务端本地已执行，故跳过）
+@rpc("any_peer", "reliable")
+func _play_damage_fx(amount: int, kind: int):
+	if multiplayer.is_server():
+		return
+	match kind:
+		0:
+			_spawn_float(amount)
+			_shake_camera(3.0)
+		1:
+			_spawn_float(amount, true)
+			if _am: _am.play_sfx("heal", self)
+		2:
+			_spawn_float(amount, false, true)
+			if _am: _am.play_sfx("shield", self)
+
+# 死亡表现（客户端执行：爆炸/阵亡飘字/幽灵淡出/死亡音效）
+@rpc("any_peer", "reliable")
+func _play_death_fx():
+	if multiplayer.is_server():
+		return
+	_play_death_effect()
+	if _am: _am.play_sfx("death", self)
 
 @rpc("any_peer", "call_local", "reliable")
 func _sync_hp(new_hp: int):

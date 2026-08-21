@@ -63,12 +63,14 @@ play_vfx_preset_safe("hit")   # 同上
 
 客户端从不主动修改游戏状态。`_sync_hand` 只发送给手牌持有者。
 
-**客户端"等待主机"防竞态（v1.7.5）**：主机在客户端场景就绪前发出的一次性同步 RPC（`_sync_client_peer_id`/`_sync_opponent_name`/`_request_client_setup`）会被丢弃（目标节点不存在）→ 客户端永久等待。防护：
+**客户端"等待主机"防竞态（v1.7.5 起，v1.7.6 升级为 ready 阶段）**：主机在客户端场景就绪前发出的一次性同步 RPC（`_sync_client_peer_id`/`_sync_opponent_name`/`_request_client_setup`）会被丢弃（目标节点不存在）→ 客户端永久等待。防护：
 
 - 客户端 `_show_client_waiting` 启动 0.5s 周期 `rpc_id(1, "_client_request_state")`，收到 `_sync_opponent_name`（链路建立）后停止
-- 服务端 `_client_request_state`（`any_peer`）幂等补发：`_joined_clients` 已含则该 id 重发关键同步（不直接 spawn 客户端角色，需等 `_client_send_setup` 先同步 client_team）；未含则走 `_on_client_joined`
+- 服务端 `_client_request_state`（`any_peer`）幂等补发：`_joined_clients` 已含则该 id 重发关键同步（客户端再次 `_client_send_setup` → 主机幂等重发初始快照，延迟进场客户端可补全全部角色）；未含则走 `_on_client_joined`
 - 主机 `_ready` 用 `multiplayer.get_peers()` 兜底补处理已连接但 `peer_connected` 信号错过的客户端（`_on_client_joined` 幂等）
-- `_spawn_client_characters` 角色存在幂等 + 相位非 NONE 不再重复 `advance_turn_phase`（防重同步重复开局）
+- **ready 阶段（v1.7.6）**：角色生成统一走初始快照 `_sync_initial_snapshot`（按角色名集合幂等），客户端生成完毕回执 `_client_ready`，主机全部就绪（或 5s 超时兜底）才 `advance_turn_phase`；快照重发安全，不再需要 `_spawn_client_characters` 的旁路幂等守卫
+
+**断连结算（v1.7.6 起对称）**：任意一方掉线均按对方投降结算——客户端掉线 → 主机判其投降（服务端胜）；主机掉线 → 客户端判其投降（客户端胜）。双端 `_on_peer_disconnected` 分支同构（先清败方角色 hp 再 `show_battle_result`）。投降结算不广播（本地 `_battle_over` 幂等，迟到广播自动跳过）。
 
 **AI 联机执行（自动战斗，见 docs/13）**：AI 动作走与玩家相同的服务端权威链路——攻击 `perform_attack_safe`、技能 `_server_execute_skill`（CELL 型转世界坐标）、出牌 `_server_play_card`（pid 用 `AIStrategist.get_pid(side)`）、回合推进 `advance_turn_phase`（服务端校验当前回合玩家）。AI 移动直接瞬移，**必须显式 `chara.rpc("_sync_position", world_pos)`**（玩家移动由 `_finish_move_to_target` 自动同步，AI 不走该流程）。
 
@@ -83,7 +85,11 @@ play_vfx_preset_safe("hit")   # 同上
 | `_server_execute_skill(character_path, target_path, cell_pos)` | `any_peer, call_local` | Client → Server | 技能执行入口，仅服务端生效；CELL 技能在服务端建临时 marker 定位 |
 | `_sync_skill_state(character_path, cooldown, attack_consumed, skill_name)` | `call_local` | Server → All | 广播冷却/行动点/UI 刷新，全端执行 |
 | `_sync_skill_failed(reason)` | `call_local` | Server → Client | 服务端校验失败提示（服务端跳过，避免重复 toast） |
-| `_client_request_state()` | `any_peer, reliable` | Client → Server | 客户端"等待主机"期间的周期重同步请求；服务端幂等补发关键同步 |
+| `_client_request_state()` | `any_peer, reliable` | Client → Server | 客户端"等待主机"期间的周期重同步请求；服务端幂等补发关键同步（触发快照重发） |
+| `_sync_initial_snapshot(host_chars, client_chars)` | `any_peer, reliable` | Server → Client | ready 阶段完整初始快照（双方角色场景/名字/pid/出生点）；客户端按快照生成（幂等）并回执 `_client_ready` |
+| `_client_ready()` | `any_peer, reliable` | Client → Server | 客户端角色生成完毕回执；服务端全部就绪（或 5s 超时）后开局 |
 | `_sync_position(pos)` | `any_peer, call_local, reliable` | 任何端 | 角色位置同步（BaseCharacter）；AI 瞬移移动显式调用 |
+| `_play_damage_fx(amount, kind)` | `any_peer, reliable` | Server → Client | 伤害表现广播：0=伤害飘字+震屏 / 1=治疗飘字+音效 / 2=护盾飘字+音效（服务端应用伤害后广播；服务端本地已执行故跳过） |
+| `_play_death_fx()` | `any_peer, reliable` | Server → Client | 死亡表现广播：死亡特效（爆炸/阵亡飘字/幽灵淡出）+音效（隐藏由 `_sync_hp` 处理） |
 
 角色归属 pid 在生成时由 `main._spawn_character` 记录到 `BaseCharacter.owner_pid`（Host=1，联机 Client=其 peer id，AI 敌方=`client_peer_id`），统一用 `SkillEffect.get_character_pid()` 读取，**不假设 pid == 2**。角色名仅表身份（`HostCharacter_{i}` / `ClientCharacter_{i}`），不再内嵌 pid。
