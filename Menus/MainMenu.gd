@@ -237,6 +237,8 @@ func _on_solo_pressed():
 	GlobalGameData.load_defaults_if_empty()
 	GlobalGameData.is_host = true
 	GlobalGameData.is_ai_mode = true
+	# 单机敌方 pid 固定为 AI_PID(2)（防联机后单机时 client_peer_id 残留导致敌方 0 能量/AI 不出牌）
+	GlobalGameData.client_peer_id = 2
 	GlobalGameData.opponent_name = "电脑玩家" + GlobalGameData.random_nickname()
 	BackgroundSingleton.enter_battle()
 	get_tree().change_scene_to_file("res://Scenes/scene.tscn")

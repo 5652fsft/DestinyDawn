@@ -91,6 +91,9 @@ func reset_battle_state():
 	turn_has_been_drawn = false
 	is_host_turn = true
 	auto_battle_self = false
+	# 敌方 pid 重置为 AI_PID(2)：防"联机后单机"时 client_peer_id 残留（真实 peer id）导致
+	# 单机敌方角色/能量/卡组 pid 不一致（AI 0 能量不出牌）；联机流程会在 _on_client_joined 覆盖
+	client_peer_id = 2
 	host_characters.clear()
 	client_characters.clear()
 	character_move_used.clear()
